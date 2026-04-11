@@ -3,6 +3,7 @@
 import { useCart } from "@/context/cart-context";
 import { Navbar } from "@/components/navbar";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";

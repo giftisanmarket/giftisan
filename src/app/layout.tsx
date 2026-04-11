@@ -21,10 +21,38 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Giftisan | Premium Artisanal Marketplace",
-  description: "Discover unique handcrafted treasures, vintage finds, and personalized keepsakes from global artisans.",
+  title: {
+    default: "Giftisan | Premium Artisanal Marketplace",
+    template: "%s | Giftisan"
+  },
+  description: "Discover unique handcrafted treasures, vintage finds, and personalized keepsakes from global artisans. Elevate every gift-giving moment.",
+  keywords: ["handcrafted", "artisanal", "vintage", "personalized gifts", "handmade jewelry", "bespoke stationery"],
+  authors: [{ name: "Giftisan Artisans" }],
+  creator: "Giftisan",
   icons: {
     icon: "/icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://giftisan.com",
+    siteName: "Giftisan",
+    title: "Giftisan | Premium Artisanal Marketplace",
+    description: "Discover unique handcrafted treasures from global artisans.",
+    images: [
+      {
+        url: "/hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Giftisan Marketplace - Handcrafted Treasures",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Giftisan | Premium Artisanal Marketplace",
+    description: "Discover unique handcrafted treasures from global artisans.",
+    images: ["/hero.png"],
   },
 };
 

@@ -44,6 +44,7 @@ export function Navbar() {
   }, []);
 
   return (
+    <>
     <nav className="sticky top-0 z-50 w-full glass border-b border-primary/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
         {/* Logo */}
@@ -54,6 +55,7 @@ export function Navbar() {
               alt="Giftisan Logo"
               fill
               className="object-cover"
+              sizes="40px"
             />
           </div>
           <span className="text-2xl font-heading font-black text-primary tracking-tighter">
@@ -106,7 +108,7 @@ export function Navbar() {
                       className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
                     >
                       <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
-                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" />
+                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
@@ -160,7 +162,7 @@ export function Navbar() {
               </span>
             )}
           </button>
-          <button 
+          <button
             onClick={() => setIsMenuOpen(true)}
             className="md:hidden p-2 text-charcoal/70 hover:text-primary transition-colors"
           >
@@ -168,66 +170,6 @@ export function Navbar() {
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      <div className={cn(
-        "fixed inset-0 bg-charcoal/60 backdrop-blur-md z-[60] md:hidden transition-all duration-500",
-        isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      )}>
-        <div className={cn(
-          "absolute right-0 top-0 h-full w-[80%] max-w-sm bg-cream shadow-2xl transition-transform duration-500 flex flex-col",
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        )}>
-          <div className="p-6 border-b border-primary/10 flex justify-between items-center">
-            <span className="font-heading font-black text-primary text-xl">Menu</span>
-            <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
-              <X className="w-6 h-6 text-primary" />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 space-y-8">
-            {/* Mobile Search */}
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Find a Treasure</p>
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search gifts..."
-                  className="w-full h-12 pl-12 pr-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
-              </form>
-            </div>
-
-            {/* Mobile Categories */}
-            <div className="space-y-4">
-              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Collections</p>
-              <div className="grid grid-cols-1 gap-2">
-                {[
-                  "Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"
-                ].map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/category/${cat.toLowerCase().replace(/ & /g, "-")}`}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors"
-                  >
-                    {cat}
-                    <span className="text-accent">→</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 border-t border-primary/10 bg-primary/5">
-            <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
-          </div>
-        </div>
-      </div>
-
       {/* Categories Bar - Desktop */}
       <div className="hidden md:block border-t border-primary/5 py-3">
         <div className="container mx-auto px-4 flex justify-between">
@@ -245,5 +187,65 @@ export function Navbar() {
         </div>
       </div>
     </nav>
+
+    {/* Mobile Menu Overlay */}
+    <div className={cn(
+      "fixed inset-0 bg-charcoal/60 backdrop-blur-md z-[60] md:hidden transition-all duration-500",
+      isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+    )}>
+      <div className={cn(
+        "absolute right-0 top-0 h-[100dvh] w-[80%] max-w-sm bg-cream shadow-2xl transition-transform duration-500 flex flex-col",
+        isMenuOpen ? "translate-x-0" : "translate-x-full"
+      )}>
+        <div className="p-6 border-b border-primary/10 flex justify-between items-center">
+          <span className="font-heading font-black text-primary text-xl">Menu</span>
+          <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
+            <X className="w-6 h-6 text-primary" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Mobile Search */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Find a Treasure</p>
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search gifts..."
+                className="w-full h-12 pl-12 pr-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
+              />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
+            </form>
+          </div>
+
+          {/* Mobile Categories */}
+          <div className="space-y-4">
+            <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Collections</p>
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                "Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"
+              ].map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/category/${cat.toLowerCase().replace(/ & /g, "-")}`}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors"
+                >
+                  {cat}
+                  <span className="text-accent">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-primary/10 bg-primary/5">
+          <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
+        </div>
+      </div>
+    </div>
+    </>
   );
 }

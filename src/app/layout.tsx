@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
 import { FavoritesProvider } from "@/context/favorites-context";
 import { CartDrawer } from "@/components/cart-drawer";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -66,6 +67,20 @@ export default function RootLayout({
       lang="en"
     >
       <body className={`${inter.variable} ${outfit.variable} ${ebGaramond.variable} font-sans text-charcoal antialiased selection:bg-accent/20`}>
+        {/* Google Analytics */}
+        <Script 
+          src="https://www.googletagmanager.com/gtag/js?id=G-WBXF1TE58B" 
+          strategy="afterInteractive" 
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-WBXF1TE58B');
+          `}
+        </Script>
         <FavoritesProvider>
           <CartProvider>
             {children}

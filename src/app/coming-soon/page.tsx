@@ -12,9 +12,9 @@ export default function GlobalComingSoonPage() {
     <main className="min-h-screen bg-cream flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-5xl">
         <ComingSoon 
-          title="The Guild is Preparing for Launch" 
-          description="Giftisan is currently being handcrafted by our global collective of artisans and makers. We're refining every detail to ensure your experience is nothing short of extraordinary."
-          featureName="Grand Opening Soon"
+          title="The Marketplace for Master Makers is Arriving" 
+          description="We're currently building the world's premier platform for independent artisans. Soon, you'll be able to discover and support a global collective of creators through our curated marketplace."
+          featureName="Platform Launch"
         />
       </div>
     </main>

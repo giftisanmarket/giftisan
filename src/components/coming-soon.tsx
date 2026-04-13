@@ -11,8 +11,8 @@ interface ComingSoonProps {
 }
 
 export function ComingSoon({ 
-  title = "Something beautiful is blooming", 
-  description = "Our artisans are currently handcrafting this feature. It'll be worth the wait.",
+  title = "Curating the Collection", 
+  description = "Our team is currently onboarding independent master makers for this category. The finest treasures are worth the wait.",
   featureName = "Coming Soon"
 }: ComingSoonProps) {
   return (

@@ -14,9 +14,9 @@ export default async function StudioSettingsPage() {
       <Navbar />
       <div className="container mx-auto px-4 pt-40 pb-20">
         <ComingSoon 
-          title="Refining Your Digital Workshop" 
-          description="We're building advanced studio management tools. Soon you'll be able to customize your storefront appearance, manage payouts, and set your crafting schedule."
-          featureName="Studio Settings"
+          title="Empowering Your Digital Studio" 
+          description="We're currently building advanced tools to help you manage your shop, view analytics, and connect with patrons more effectively. Reach out to the support team for manual updates in the meantime."
+          featureName="Studio Management"
         />
       </div>
     </main>

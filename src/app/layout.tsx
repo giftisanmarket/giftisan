@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   description: "Discover unique handcrafted treasures, vintage finds, and personalized keepsakes from global artisans. Elevate every gift-giving moment.",
   keywords: ["handcrafted", "artisanal", "vintage", "personalized gifts", "handmade jewelry", "bespoke stationery"],
-  authors: [{ name: "Giftisan Artisans" }],
+  authors: [{ name: "Giftisan Team" }],
   creator: "Giftisan",
   icons: {
     icon: "/icon.png",

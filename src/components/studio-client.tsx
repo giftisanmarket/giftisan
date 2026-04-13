@@ -234,7 +234,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
-                        <Link href={`/products/${p.id}`} className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl">
+                        <Link href={`/products/${p.slug || p.id}`} className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl">
                           <ArrowUpRight className="w-5 h-5" />
                         </Link>
                       </div>

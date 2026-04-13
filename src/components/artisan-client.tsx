@@ -229,7 +229,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.1 }}
             >
-              <Link href={`/products/${product.id}`} className="group block">
+              <Link href={`/products/${product.slug || product.id}`} className="group block">
                 <div className="relative aspect-square rounded-[3rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
                   <BespokeImage src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" sizes="(max-width: 768px) 100vw, 33vw" />
                   {product.badge && (

@@ -162,7 +162,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                               <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                             </div>
                             <div className="flex-1">
-                              <Link href={`/products/${item.product.id}`} className="font-heading font-bold text-primary hover:text-accent transition-colors flex items-center gap-2 group">
+                              <Link href={`/products/${item.product.slug || item.product.id}`} className="font-heading font-bold text-primary hover:text-accent transition-colors flex items-center gap-2 group">
                                 {item.product.name}
                                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all" />
                               </Link>

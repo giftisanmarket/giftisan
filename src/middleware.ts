@@ -2,9 +2,26 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // For now, we allow all requests to proceed.
-  // We can add auth protection here later if needed.
-  return NextResponse.next();
+  const { pathname } = request.nextUrl;
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+
+  // If maintenance mode is not on, proceed as normal
+  if (!isMaintenanceMode) {
+    return NextResponse.next();
+  }
+
+  // Allow access to coming-soon page and static assets
+  if (
+    pathname === '/coming-soon' ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.includes('.') // for favicon, icon.png, etc.
+  ) {
+    return NextResponse.next();
+  }
+
+  // Redirect everything else to coming-soon
+  return NextResponse.redirect(new URL('/coming-soon', request.url));
 }
 
 export const config = {

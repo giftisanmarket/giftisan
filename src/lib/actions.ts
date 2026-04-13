@@ -385,3 +385,18 @@ export async function updateOrderItemStatus(itemId: string, status: string) {
     return { error: "Failed to update item status" };
   }
 }
+
+export async function subscribeToNewsletter(email: string) {
+  try {
+    const subscriber = await prisma.newsletterSubscriber.create({
+      data: { email }
+    });
+    return { success: true, data: subscriber };
+  } catch (error: any) {
+    console.error("Newsletter subscription error:", error);
+    if (error.code === 'P2002') {
+      return { success: false, error: 'You are already subscribed!' };
+    }
+    return { success: false, error: error.message || 'Something went wrong.' };
+  }
+}

@@ -400,3 +400,14 @@ export async function subscribeToNewsletter(email: string) {
     return { success: false, error: error.message || 'Something went wrong.' };
   }
 }
+
+export async function getSubscribers() {
+  try {
+    return await prisma.newsletterSubscriber.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+  } catch (error) {
+    console.error("Fetch subscribers error:", error);
+    return [];
+  }
+}

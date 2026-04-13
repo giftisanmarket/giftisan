@@ -10,9 +10,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow access to coming-soon page and static assets
+  // Allow access to coming-soon page, admin, and static assets
   if (
     pathname === '/coming-soon' ||
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.includes('.') // for favicon, icon.png, etc.

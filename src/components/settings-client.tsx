@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { User, Camera, Save, ArrowLeft, Check } from "lucide-react";
 import { updateUser } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -12,10 +12,27 @@ import { motion, AnimatePresence } from "framer-motion";
 export function SettingsClient({ user }: { user: any }) {
   const router = useRouter();
   const { update } = useSession();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(user.name || "");
   const [image, setImage] = useState(user.image || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +87,10 @@ export function SettingsClient({ user }: { user: any }) {
       <div className="grid md:grid-cols-12 gap-12">
         <div className="md:col-span-4 space-y-8">
            <div className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-primary/5 border border-primary/5 flex flex-col items-center text-center">
-              <div className="relative w-40 h-40 mb-6 group">
+              <div 
+                className="relative w-40 h-40 mb-6 group cursor-pointer"
+                onClick={handleImageClick}
+              >
                 <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all" />
                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
                   <Image 
@@ -80,7 +100,7 @@ export function SettingsClient({ user }: { user: any }) {
                     className="object-cover"
                   />
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer">
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full">
                   <Camera className="w-8 h-8 text-white" />
                 </div>
               </div>
@@ -123,18 +143,10 @@ export function SettingsClient({ user }: { user: any }) {
                   <label className="cursor-pointer group relative">
                     <input 
                       type="file" 
+                      ref={fileInputRef}
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setImage(reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
+                      onChange={handleFileChange}
                     />
                     <div className="h-16 px-8 bg-accent text-white font-bold rounded-2xl flex items-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20">
                       <Camera className="w-5 h-5" />

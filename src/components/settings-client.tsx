@@ -38,7 +38,11 @@ export function SettingsClient({ user }: { user: any }) {
     e.preventDefault();
     setIsSaving(true);
     
-    const res = await updateUser(user.id, { name, image });
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("image", image);
+
+    const res = await updateUser(user.id, formData);
     
     if (res.success) {
       await update({ name, image }); // Force NextAuth to refresh its session data

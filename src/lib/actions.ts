@@ -663,11 +663,14 @@ export async function getInbox(userId: string) {
   }
 }
 
-export async function updateUser(userId: string, data: { name?: string, image?: string }) {
+export async function updateUser(userId: string, formData: FormData) {
   try {
+    const name = formData.get("name") as string;
+    const image = formData.get("image") as string;
+
     const user = await prisma.user.update({
       where: { id: userId },
-      data
+      data: { name, image }
     });
     return { success: true, user };
   } catch (error) {

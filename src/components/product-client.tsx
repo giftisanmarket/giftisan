@@ -63,13 +63,13 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   };
 
   return (
-    <main className="min-h-screen bg-cream pb-20">
+    <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8 md:py-16">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 min-w-0">
           {/* Image Gallery */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -118,11 +118,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-col">
-            <div className="flex justify-between items-start">
-              <div>
+          <div className="flex flex-col min-w-0">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1 min-w-0">
                 <p className="text-accent font-bold tracking-widest uppercase text-sm mb-2">{product.category}</p>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4 leading-tight">
+                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4 leading-tight break-words">
                   {product.name}
                 </h1>
                 <div className="flex items-center gap-2 mb-6">
@@ -134,7 +134,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   <span className="text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} Reviews)</span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0">
                 <button 
                   onClick={handleShare}
                   className="p-3 border border-primary/10 rounded-full hover:bg-white transition-all text-primary group"
@@ -162,7 +162,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               </div>
             </div>
 
-            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 pl-6 py-2">
+            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 pl-6 py-2 break-words">
               {product.description}
             </p>
 

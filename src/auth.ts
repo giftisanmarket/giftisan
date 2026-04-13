@@ -57,6 +57,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.role && session.user) {
         session.user.role = token.role as any;
       }
+      
+      // Safety: Never allow massive images in the session object to prevent RSC serialization crashes
+      if (session.user.image && session.user.image.length > 300000) {
+        session.user.image = null;
+      }
+      
       return session;
     },
     async jwt({ token, user }) {

@@ -339,7 +339,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       <span>Operating out of {product.artisan.location}</span>
                     </div>
                     <Link 
-                      href={`/artisans/${product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                      href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                       className="inline-flex items-center gap-2 px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all"
                     >
                       Visit the Studio Gallery
@@ -459,7 +459,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               {relatedProducts.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/products/${p.id}`}
+                  href={`/products/${p.slug || p.id}`}
                   className="group cursor-pointer block"
                 >
                   <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">

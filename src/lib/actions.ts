@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { slugify } from "@/lib/utils";
 
 export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
   const { name, email, password } = formData;
@@ -331,10 +332,12 @@ export async function getAllArtisans() {
 
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
+    const slug = data.studioName ? `${slugify(data.studioName)}-${userId.slice(-4)}` : null;
     const updated = await prisma.artisanProfile.update({
       where: { userId },
       data: {
         studioName: data.studioName,
+        slug,
         bio: data.bio,
         location: data.location,
         avatar: data.avatar
@@ -363,10 +366,12 @@ export async function updateArtisanProfile(userId: string, data: any) {
 
 export async function createProduct(artisanId: string, data: any) {
   try {
+    const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
     const product = await prisma.product.create({
       data: {
         artisanId,
         name: data.name,
+        slug,
         description: data.description,
         price: parseFloat(data.price),
         category: data.category,
@@ -469,10 +474,12 @@ export async function updateProduct(productId: string, data: any) {
     if (isNaN(rawPrice)) return { error: "Invalid price format" };
     if (isNaN(rawStock)) return { error: "Invalid stock number" };
 
+    const slug = `${slugify(data.name)}-${productId.slice(-4)}`;
     const product = await prisma.product.update({
       where: { id: productId },
       data: {
         name: data.name,
+        slug,
         description: data.description,
         price: rawPrice,
         category: data.category,

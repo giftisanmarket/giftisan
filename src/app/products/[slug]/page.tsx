@@ -4,13 +4,18 @@ import { ProductClient } from "@/components/product-client";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const { slug } = await params;
+  const product = await prisma.product.findFirst({
+    where: {
+      OR: [
+        { id: slug },
+        { slug: slug }
+      ]
+    },
   });
   
   if (!product) return { title: "Product Not Found" };
@@ -34,10 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const { id } = await params;
+  const { slug } = await params;
   
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const product = await prisma.product.findFirst({
+    where: {
+      OR: [
+        { id: slug },
+        { slug: slug }
+      ]
+    },
     include: {
       artisan: {
         include: {

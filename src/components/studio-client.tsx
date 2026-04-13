@@ -16,7 +16,9 @@ import {
   Package,
   Clock,
   CheckCircle,
-  Truck
+  Truck,
+  Phone,
+  Mail
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -336,8 +338,14 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                                   {item.order.shippingCountry}
                                 </p>
                                 <div className="pt-2 flex flex-wrap gap-4">
-                                  <span className="text-[10px] font-bold text-accent">📞 {item.order.clientPhone || "N/A"}</span>
-                                  <span className="text-[10px] font-bold text-accent">✉️ {item.order.clientEmail || item.order.user.email}</span>
+                                  <span className="text-[10px] font-bold text-accent flex items-center gap-1.5">
+                                    <Phone className="w-3 h-3" /> 
+                                    {item.order.clientPhone || "N/A"}
+                                  </span>
+                                  <span className="text-[10px] font-bold text-accent flex items-center gap-1.5">
+                                    <Mail className="w-3 h-3" /> 
+                                    {item.order.clientEmail || item.order.user.email}
+                                  </span>
                                 </div>
                               </div>
                             </motion.div>

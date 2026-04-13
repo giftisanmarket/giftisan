@@ -54,7 +54,7 @@ export default function HomeClient({ products, artisans, categoryCounts }: HomeC
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
+              href={`/products/${product.slug || product.id}`}
               className="group cursor-pointer block"
             >
               <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
@@ -204,7 +204,7 @@ export default function HomeClient({ products, artisans, categoryCounts }: HomeC
                 transition={{ delay: idx * 0.1 }}
                 className="flex-shrink-0 w-80 snap-center"
               >
-                <Link href={`/artisans/${artisan.user.name.toLowerCase().replace(/ /g, "-")}`} className="group block h-full">
+                <Link href={`/artisans/${artisan.slug || artisan.user.name.toLowerCase().replace(/ /g, "-")}`} className="group block h-full">
                   <div className="bg-cream rounded-[3rem] p-8 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 h-full flex flex-col">
                     <div className="relative w-24 h-24 mb-6">
                       <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />

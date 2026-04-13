@@ -87,7 +87,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                 transition={{ delay: idx * 0.05 }}
               >
                 <Link
-                  href={`/products/${product.id}`}
+                  href={`/products/${product.slug || product.id}`}
                   className="group block"
                 >
                   <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">

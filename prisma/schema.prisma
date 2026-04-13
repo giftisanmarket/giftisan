@@ -102,6 +102,7 @@ model ArtisanProfile {
   location  String?
   avatar    String?
   studioName String?
+  slug       String?  @unique
   isVerified Boolean  @default(false)
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -117,6 +118,7 @@ model ArtisanProfile {
 model Product {
   id             String   @id @default(cuid())
   name           String
+  slug           String?  @unique
   description    String   @db.Text
   price          Float
   images         String[]

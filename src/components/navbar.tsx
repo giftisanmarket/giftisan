@@ -120,7 +120,7 @@ export function Navbar() {
                   searchResults.map((p) => (
                     <Link
                       key={p.id}
-                      href={`/products/${p.id}`}
+                      href={`/products/${p.slug}`}
                       onClick={() => setShowResults(false)}
                       className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
                     >

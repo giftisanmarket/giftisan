@@ -17,10 +17,22 @@ interface SearchClientProps {
 export function SearchClient({ query, initialProducts }: SearchClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high">("newest");
+  const [showSortOptions, setShowSortOptions] = useState(false);
 
-  const filteredProducts = showVerifiedOnly 
-    ? initialProducts.filter(p => p.artisan.isVerified) 
-    : initialProducts;
+  const filteredProducts = initialProducts
+    .filter(p => !showVerifiedOnly || p.artisan.isVerified)
+    .sort((a, b) => {
+      if (sortBy === "price-low") return a.price - b.price;
+      if (sortBy === "price-high") return b.price - a.price;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  const sortOptions = [
+    { label: "Newest Arrivals", value: "newest" },
+    { label: "Price: Low to High", value: "price-low" },
+    { label: "Price: High to Low", value: "price-high" }
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -33,7 +45,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
           <p className="text-charcoal/60 text-sm font-medium mt-1">Found {filteredProducts.length} treasures match your criteria</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative">
           <button 
             onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
             className={cn(
@@ -45,9 +57,43 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
           >
             <CheckCircle2 className="w-4 h-4" /> Verified Only
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-primary/10 rounded-full text-sm font-bold text-primary hover:bg-primary/5 transition-all">
-            <ArrowUpDown className="w-4 h-4" /> Sort
-          </button>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setShowSortOptions(!showSortOptions)}
+              className="flex items-center gap-2 px-6 py-3 bg-white border border-primary/10 rounded-full text-sm font-bold text-primary hover:bg-primary/5 transition-all"
+            >
+              <ArrowUpDown className="w-4 h-4" /> 
+              {sortOptions.find(o => o.value === sortBy)?.label}
+            </button>
+
+            <AnimatePresence>
+              {showSortOptions && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
+                >
+                  {sortOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value as any);
+                        setShowSortOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all",
+                        sortBy === option.value ? "bg-primary/5 text-primary" : "text-charcoal/60 hover:bg-cream hover:text-primary"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -81,7 +127,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: idx * 0.05 }}
               >
-                <Link href={`/products/${p.id}`} className="group block">
+                <Link href={`/products/${p.slug || p.id}`} className="group block">
                   <div className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
                     <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                     <button

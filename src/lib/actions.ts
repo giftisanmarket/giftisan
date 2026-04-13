@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
 
 export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
   const { name, email, password } = formData;
@@ -409,5 +410,18 @@ export async function getSubscribers() {
   } catch (error) {
     console.error("Fetch subscribers error:", error);
     return [];
+  }
+}
+
+export async function deleteSubscriber(id: string) {
+  try {
+    await prisma.newsletterSubscriber.delete({
+      where: { id }
+    });
+    revalidatePath("/admin/subscribers");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete subscriber error:", error);
+    return { error: "Failed to remove subscriber" };
   }
 }

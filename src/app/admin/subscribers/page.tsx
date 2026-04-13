@@ -2,6 +2,7 @@ import { getSubscribers } from "@/lib/actions";
 import { Mail, Clock, ShieldCheck } from "lucide-react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import ExportSubscribersButton from "@/components/admin/export-subscribers-button";
 
 export const metadata = {
   title: "Admin | Newsletter Subscribers",
@@ -15,7 +16,11 @@ export default async function AdminSubscribersPage() {
     redirect("/");
   }
 
-  const subscribers = await getSubscribers();
+  const rawSubscribers = await getSubscribers();
+  const subscribers = rawSubscribers.map(sub => ({
+    ...sub,
+    createdAt: sub.createdAt instanceof Date ? sub.createdAt.toISOString() : sub.createdAt
+  }));
 
   return (
     <div className="min-h-screen bg-cream p-8 font-sans">
@@ -31,11 +36,12 @@ export default async function AdminSubscribersPage() {
               Newsletter <span className="serif italic text-accent font-normal underline decoration-accent/30 underline-offset-8">Subscribers</span>
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-4">
-            <div className="bg-white px-6 py-3 rounded-2xl border border-primary/10 shadow-sm">
+            <ExportSubscribersButton subscribers={subscribers} />
+            <div className="bg-white px-6 py-[14px] rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center">
               <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest mb-1">Total Interest</p>
-              <p className="text-2xl font-black text-primary">{subscribers.length}</p>
+              <p className="text-2xl font-black text-primary leading-none">{subscribers.length}</p>
             </div>
           </div>
         </div>
@@ -99,7 +105,7 @@ export default async function AdminSubscribersPage() {
             </table>
           </div>
         </div>
-        
+
         {/* Footer info */}
         <p className="mt-8 text-center text-primary/30 text-[10px] font-bold uppercase tracking-[0.3em]">
           Giftisan Internal Administration • Secure Data View

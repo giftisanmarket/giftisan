@@ -173,7 +173,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1"
               >
                 <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-cream group-hover:scale-105 transition-transform">
-                  <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill sizes="64px" />
+                  <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" sizes="64px" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1">

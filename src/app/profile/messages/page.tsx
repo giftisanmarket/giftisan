@@ -1,14 +1,15 @@
 import { auth } from "@/auth";
-import { getInbox } from "@/lib/actions";
+import { getInbox, getArtisanData } from "@/lib/actions";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { MessagesClient } from "@/components/messages-client";
 
 export default async function MessagesPage() {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session?.user?.id) redirect("/login");
 
-  const initialMessages = await getInbox(session.user.id);
+  const artisan = await getArtisanData(session.user.id as string);
+  const initialMessages = await getInbox(session.user.id as string);
 
   return (
     <main className="min-h-screen bg-cream font-sans">

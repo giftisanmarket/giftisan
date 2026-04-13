@@ -19,14 +19,14 @@ export default async function ProfilePage() {
 
   // Fetch fresh user data from database to ensure updates are reflected
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id }
+    where: { id: session.user.id as string }
   });
 
   if (!user) {
     redirect("/login");
   }
 
-  const orders = await getUserOrders(session.user.id);
+  const orders = await getUserOrders(session.user.id as string);
 
   return <ProfileClient user={user} orders={orders} />;
 }

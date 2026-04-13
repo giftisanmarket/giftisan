@@ -10,7 +10,7 @@ export default async function StudioSettingsPage() {
     redirect("/");
   }
 
-  const artisan = await getArtisanData(session.user.id);
+  const artisan = await getArtisanData(session.user.id as string);
   if (!artisan) redirect("/studio");
 
   return (

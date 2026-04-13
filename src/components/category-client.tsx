@@ -4,7 +4,6 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, SlidersHorizontal, ArrowLeft } from "lucide-react";
-import { ComingSoon } from "@/components/coming-soon";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
@@ -66,11 +65,18 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
       {/* Grid */}
       <section className="py-12 container mx-auto px-4">
         {initialProducts.length === 0 ? (
-          <ComingSoon
-            title={`No ${categoryName} treasures yet`}
-            description={`Our master makers are currently busy in their workshops crafting new pieces for the ${categoryName} collection. Join the notify list to be first to see them.`}
-            featureName="Curating Collection"
-          />
+          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
+            <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary/20">
+              <SlidersHorizontal className="w-10 h-10" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-3xl font-heading font-bold text-primary">No {categoryName} treasures yet</h2>
+              <p className="text-charcoal/60 max-w-md mx-auto font-medium leading-relaxed">
+                Our master makers are currently busy in their workshops crafting new pieces for the {categoryName} collection. 
+                Please check back soon for fresh arrivals.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {initialProducts.map((product, idx) => (

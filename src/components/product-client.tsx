@@ -30,7 +30,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
     setIsSubmitting(true);
     const res = await addReview({
       productId: product.id,
-      userId: session.user.id,
+      userId: session.user.id as string,
       rating: newReview.rating,
       comment: newReview.comment
     });

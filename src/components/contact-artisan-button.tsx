@@ -31,7 +31,7 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
     if (!message.trim()) return;
 
     setIsLoading(true);
-    const res = await sendMessage(session.user.id, artisanUserId, message, productId);
+    const res = await sendMessage(session.user.id as string, artisanUserId, message, productId);
     if (res.success) {
       setSent(true);
       setMessage("");

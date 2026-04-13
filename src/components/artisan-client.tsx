@@ -34,7 +34,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
 
   useEffect(() => {
     if (session?.user?.id) {
-      checkFollowStatus(artisan.id, session.user.id).then(setIsFollowing);
+      checkFollowStatus(artisan.id, session.user.id as string).then(setIsFollowing);
     }
   }, [session, artisan.id]);
 
@@ -42,7 +42,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
     if (!session?.user?.id) return alert("Please sign in to follow artisans");
     
     setIsPending(true);
-    const res = await toggleFollowAction(artisan.id, session.user.id);
+    const res = await toggleFollowAction(artisan.id, session.user.id as string);
     
     if (res.success) {
       setIsFollowing(res.action === "followed");

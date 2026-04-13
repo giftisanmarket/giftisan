@@ -41,5 +41,20 @@ export default async function Home() {
     })
   );
 
-  return <HomeClient products={products} artisans={artisans} categoryCounts={categoryCounts} />;
+  // Sanitize data to prevent serialization crashes from oversized images in the DB
+  const sanitizedProducts = products.map(p => ({
+    ...p,
+    images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+    artisan: {
+      ...p.artisan,
+      avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar
+    }
+  }));
+
+  const sanitizedArtisans = artisans.map(a => ({
+    ...a,
+    avatar: (a.avatar?.length || 0) > 300000 ? "" : a.avatar
+  }));
+
+  return <HomeClient products={sanitizedProducts} artisans={sanitizedArtisans} categoryCounts={categoryCounts} />;
 }

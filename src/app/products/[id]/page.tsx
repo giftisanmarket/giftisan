@@ -69,5 +69,24 @@ export default async function ProductPage({ params }: Props) {
     take: 3
   });
 
-  return <ProductClient product={product as any} relatedProducts={relatedProducts} />;
+  // Sanitize data to prevent serialization crashes
+  const sanitizedProduct = {
+    ...product,
+    images: Array.isArray(product.images) ? product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+    artisan: {
+      ...product.artisan,
+      avatar: (product.artisan.avatar?.length || 0) > 300000 ? "" : product.artisan.avatar
+    }
+  };
+
+  const sanitizedRelated = relatedProducts.map(p => ({
+    ...p,
+    images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+    artisan: {
+      ...p.artisan,
+      avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar
+    }
+  }));
+
+  return <ProductClient product={sanitizedProduct as any} relatedProducts={sanitizedRelated} />;
 }

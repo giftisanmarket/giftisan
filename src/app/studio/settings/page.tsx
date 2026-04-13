@@ -13,10 +13,16 @@ export default async function StudioSettingsPage() {
   const artisan = await getArtisanData(session.user.id as string);
   if (!artisan) redirect("/studio");
 
-  // Sanitize artisan to prevent serialization loops or oversized strings
+  // Aggressively sanitize artisan to prevent serialization crashes from deep nesting (products/reviews)
   const sanitizedArtisan = {
-    ...artisan,
+    userId: artisan.userId,
+    studioName: artisan.studioName,
+    bio: artisan.bio,
+    location: artisan.location,
     avatar: (artisan.avatar?.length || 0) > 300000 ? null : artisan.avatar,
+    user: {
+      email: artisan.user.email
+    }
   };
 
   return (

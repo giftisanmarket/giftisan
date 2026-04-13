@@ -106,7 +106,15 @@ export async function searchProducts(query: string) {
       take: 10
     });
 
-    return products;
+    return products.map(p => ({
+      ...p,
+      images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+      artisan: {
+        ...p.artisan,
+        avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar,
+        user: { name: p.artisan.user?.name }
+      }
+    }));
   } catch (error) {
     console.error("Search error:", error);
     return [];
@@ -192,7 +200,15 @@ export async function getUserFavorites(userId: string) {
         }
       }
     });
-    return favorites.map(f => f.product);
+    return favorites.map(f => ({
+      ...f.product,
+      images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+      artisan: {
+        ...f.product.artisan,
+        avatar: (f.product.artisan.avatar?.length || 0) > 300000 ? "" : f.product.artisan.avatar,
+        user: { name: f.product.artisan.user?.name }
+      }
+    }));
   } catch (error) {
     console.error("Get favorites error:", error);
     return [];
@@ -329,9 +345,16 @@ export async function updateArtisanProfile(userId: string, data: any) {
     revalidatePath("/studio/settings");
     revalidatePath("/");
     revalidatePath("/artisans");
-    revalidatePath("/categories");
-
-    return { success: true, artisan: updated };
+    return { 
+      success: true, 
+      artisan: {
+        id: updated.id,
+        studioName: updated.studioName,
+        bio: updated.bio,
+        location: updated.location,
+        avatar: updated.avatar
+      } 
+    };
   } catch (error) {
     console.error("Update artisan error:", error);
     return { error: "Failed to update studio profile" };
@@ -672,7 +695,14 @@ export async function updateUser(userId: string, formData: FormData) {
       where: { id: userId },
       data: { name, image }
     });
-    return { success: true, user };
+    return { 
+      success: true, 
+      user: {
+        id: user.id,
+        name: user.name,
+        image: user.image
+      } 
+    };
   } catch (error) {
     console.error("Update user error:", error);
     return { error: "Failed to update profile" };

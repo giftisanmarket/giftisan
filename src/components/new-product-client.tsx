@@ -211,7 +211,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
               <ImageIcon className="w-6 h-6 text-accent" />
               <h2 className="text-2xl font-heading font-bold text-primary">Visual Gallery</h2>
             </div>
-            <p className="text-sm text-charcoal/40 italic">Provide URLs to your high-resolution photographs.</p>
+            <p className="text-sm text-charcoal/40 italic">Upload high-resolution photographs of your treasure.</p>
 
             <div className="grid md:grid-cols-3 gap-6">
               {formData.images.map((img, idx) => (
@@ -243,21 +243,20 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                       </div>
                     </label>
                   </div>
-                  <input 
-                    type="text" 
-                    value={img.startsWith('data:') ? 'Local Image uploaded' : img}
-                    readOnly
-                    className="w-full h-10 px-4 text-xs bg-white border border-primary/10 rounded-xl font-bold text-primary/40 shadow-sm"
-                  />
-                  {img && (
-                    <button 
-                      type="button"
-                      onClick={() => handleImageChange(idx, "")}
-                      className="text-[9px] font-black uppercase text-red-400 hover:text-red-500 ml-2"
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-primary/20">
+                      {idx === 0 ? "Main Cover" : `Angle ${idx + 1}`}
+                    </span>
+                    {img && (
+                      <button 
+                        type="button"
+                        onClick={() => handleImageChange(idx, "")}
+                        className="text-[9px] font-black uppercase text-red-400 hover:text-red-500"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

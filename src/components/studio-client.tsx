@@ -21,7 +21,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { updateOrderItemStatus } from "@/lib/actions";
+import { updateOrderItemStatus, deleteProduct } from "@/lib/actions";
+import { Trash2 } from "lucide-react";
+import { EditProductModal } from "@/components/edit-product-modal";
+
 
 interface StudioClientProps {
   artisan: any;
@@ -32,6 +35,23 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
   const [activeTab, setActiveTab] = useState<"inventory" | "sales">("inventory");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleDelete = async (productId: string) => {
+    if (!confirm("Are you sure you want to remove this treasure from your studio? This action cannot be undone.")) return;
+    
+    setIsDeleting(productId);
+    const res = await deleteProduct(productId);
+    
+    if (res.success) {
+      window.location.reload();
+    } else {
+      alert(res.error || "Failed to delete product");
+      setIsDeleting(null);
+    }
+  };
 
   const products = artisan.products || [];
   const totalFavorites = products.reduce((acc: number, p: any) => acc + (p.favoritedBy?.length || 0), 0);
@@ -149,8 +169,21 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                     <div className="relative aspect-square overflow-hidden">
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
                       <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                        <button className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl">
+                        <button 
+                          onClick={() => {
+                            setSelectedProductForEdit(p);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
+                        >
                           <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(p.id)}
+                          disabled={isDeleting === p.id}
+                          className="w-12 h-12 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl disabled:opacity-50"
+                        >
+                          <Trash2 className="w-5 h-5" />
                         </button>
                         <Link href={`/products/${p.id}`} className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl">
                           <ArrowUpRight className="w-5 h-5" />
@@ -160,9 +193,14 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                     <div className="p-8">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-xl font-heading font-bold text-primary">{p.name}</h3>
-                        <button className="text-charcoal/30 hover:text-primary transition-colors">
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight",
+                            (p.stock || 0) > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          )}>
+                            {(p.stock || 0)} in stock
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-2xl font-heading font-bold text-accent">${p.price}.00</p>
@@ -302,6 +340,17 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
           </div>
         )}
       </div>
+
+      {selectedProductForEdit && (
+        <EditProductModal 
+          product={selectedProductForEdit} 
+          isOpen={isEditModalOpen} 
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedProductForEdit(null);
+          }} 
+        />
+      )}
     </main>
   );
 }

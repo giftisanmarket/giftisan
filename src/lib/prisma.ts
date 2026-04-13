@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Use environment variable with hardcoded fallback for debug stability
-const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_Vk1WClEjyQN8@ep-sweet-bread-amgrccvn-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require";
+const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_Vk1WClEjyQN8@ep-sweet-bread-amgrccvn-pooler.c-5.us-east-1.aws.neon.tech/neondb?uselibpqcompat=true&sslmode=require";
 
 const pool = new Pool({ 
   connectionString,

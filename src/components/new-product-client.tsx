@@ -35,7 +35,8 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
     category: "Ceramics",
     images: ["", "", ""],
     canPersonalize: false,
-    badge: ""
+    badge: "",
+    stock: "1"
   });
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -215,20 +216,48 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
             <div className="grid md:grid-cols-3 gap-6">
               {formData.images.map((img, idx) => (
                 <div key={idx} className="space-y-4">
-                  <div className="relative aspect-square rounded-2xl bg-cream/50 flex items-center justify-center overflow-hidden border border-dashed border-primary/20">
-                    {img && img.startsWith("http") ? (
+                  <div className="relative aspect-square rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
+                    {img ? (
                       <Image src={img} alt="Preview" fill className="object-cover" />
                     ) : (
                       <Upload className="w-8 h-8 text-primary/10" />
                     )}
+                    <label className="absolute inset-0 z-10 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              handleImageChange(idx, reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <div className="px-4 py-2 bg-white text-primary text-[10px] font-black uppercase rounded-full shadow-lg">
+                        {img ? "Change" : "Upload"}
+                      </div>
+                    </label>
                   </div>
                   <input 
-                    type="url" 
-                    value={img}
-                    onChange={(e) => handleImageChange(idx, e.target.value)}
-                    placeholder={idx === 0 ? "Main Image URL *" : "Additional URL"}
-                    className="w-full h-10 px-4 text-xs bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                    type="text" 
+                    value={img.startsWith('data:') ? 'Local Image uploaded' : img}
+                    readOnly
+                    className="w-full h-10 px-4 text-xs bg-white border border-primary/10 rounded-xl font-bold text-primary/40 shadow-sm"
                   />
+                  {img && (
+                    <button 
+                      type="button"
+                      onClick={() => handleImageChange(idx, "")}
+                      className="text-[9px] font-black uppercase text-red-400 hover:text-red-500 ml-2"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -265,6 +294,17 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                   value={formData.badge}
                   onChange={(e) => setFormData({...formData, badge: e.target.value})}
                   placeholder="e.g. Best Seller, New Arrival"
+                  className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Initial Stock</label>
+                <input 
+                  type="number" 
+                  value={formData.stock}
+                  onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                  placeholder="e.g. 10"
                   className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                 />
               </div>

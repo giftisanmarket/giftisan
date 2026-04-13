@@ -3,8 +3,9 @@
 import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Heart, Search, SlidersHorizontal, ArrowUpDown, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,11 @@ interface SearchClientProps {
 
 export function SearchClient({ query, initialProducts }: SearchClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+
+  const filteredProducts = showVerifiedOnly 
+    ? initialProducts.filter(p => p.artisan.isVerified) 
+    : initialProducts;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -24,12 +30,20 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-primary flex items-center gap-3">
             Results for <span className="text-accent italic serif brightness-90">"{query}"</span>
           </h1>
-          <p className="text-charcoal/60 text-sm font-medium mt-1">Found {initialProducts.length} treasures match your criteria</p>
+          <p className="text-charcoal/60 text-sm font-medium mt-1">Found {filteredProducts.length} treasures match your criteria</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-primary/10 rounded-full text-sm font-bold text-primary hover:bg-primary/5 transition-all">
-            <SlidersHorizontal className="w-4 h-4" /> Filters
+          <button 
+            onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+            className={cn(
+              "flex items-center gap-2 px-6 py-3 border rounded-full text-sm font-bold transition-all",
+              showVerifiedOnly 
+                ? "bg-accent text-white border-accent shadow-lg shadow-accent/20" 
+                : "bg-white border-primary/10 text-primary hover:bg-primary/5"
+            )}
+          >
+            <CheckCircle2 className="w-4 h-4" /> Verified Only
           </button>
           <button className="flex items-center gap-2 px-6 py-3 bg-white border border-primary/10 rounded-full text-sm font-bold text-primary hover:bg-primary/5 transition-all">
             <ArrowUpDown className="w-4 h-4" /> Sort
@@ -58,8 +72,8 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          <AnimatePresence>
-            {initialProducts.map((p, idx) => (
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((p, idx) => (
               <motion.div
                 key={p.id}
                 layout
@@ -87,9 +101,12 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                     </button>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">
-                      {p.artisan.user?.name || p.artisan.studioName}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">
+                        {p.artisan.user?.name || p.artisan.studioName}
+                      </p>
+                      {p.artisan.isVerified && <CheckCircle2 className="w-2.5 h-2.5 text-accent" />}
+                    </div>
                     <h3 className="text-xl font-heading font-bold text-primary leading-tight group-hover:text-accent transition-colors">{p.name}</h3>
                     <p className="text-lg font-bold text-primary">${p.price}.00</p>
                   </div>

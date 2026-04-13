@@ -23,28 +23,23 @@ export default async function AdminSubscribersPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-cream p-8 font-sans">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div>
-            <div className="flex items-center gap-2 text-primary opacity-60 mb-2">
-              <ShieldCheck className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-widest">Admin Dashboard</span>
-            </div>
-            <h1 className="text-4xl font-heading font-black text-primary tracking-tighter">
-              Newsletter <span className="serif italic text-accent font-normal underline decoration-accent/30 underline-offset-8">Subscribers</span>
-            </h1>
-          </div>
+    <div className="space-y-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-heading font-black text-primary tracking-tighter">
+            Newsletter <span className="serif italic text-accent font-normal underline decoration-accent/30 underline-offset-8">Subscribers</span>
+          </h1>
+          <p className="text-charcoal/40 font-medium mt-2">Manage your community mailing list.</p>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <ExportSubscribersButton subscribers={subscribers} />
-            <div className="bg-white px-6 py-[14px] rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center">
-              <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest mb-1">Total Interest</p>
-              <p className="text-2xl font-black text-primary leading-none">{subscribers.length}</p>
-            </div>
+        <div className="flex items-center gap-4">
+          <ExportSubscribersButton subscribers={subscribers} />
+          <div className="bg-white px-6 py-[14px] rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center">
+            <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest mb-1">Total Interest</p>
+            <p className="text-2xl font-black text-primary leading-none">{subscribers.length}</p>
           </div>
         </div>
+      </div>
 
         {/* Content */}
         <div className="bg-white rounded-3xl border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
@@ -111,6 +106,5 @@ export default async function AdminSubscribersPage() {
           Giftisan Internal Administration • Secure Data View
         </p>
       </div>
-    </div>
   );
 }

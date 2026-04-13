@@ -223,6 +223,18 @@ export async function createOrder(userId: string, totalAmount: number, items: an
       }
     });
 
+    // Decrement stock for each item
+    for (const item of items) {
+      await prisma.product.update({
+        where: { id: item.id },
+        data: {
+          stock: {
+            decrement: item.quantity
+          }
+        }
+      });
+    }
+
     return { success: true, orderId: order.id };
   } catch (error) {
     console.error("Order creation error:", error);
@@ -312,6 +324,13 @@ export async function updateArtisanProfile(userId: string, data: any) {
         avatar: data.avatar
       }
     });
+    
+    revalidatePath("/studio");
+    revalidatePath("/studio/settings");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    revalidatePath("/categories");
+
     return { success: true, artisan: updated };
   } catch (error) {
     console.error("Update artisan error:", error);
@@ -331,9 +350,16 @@ export async function createProduct(artisanId: string, data: any) {
         images: data.images,
         canPersonalize: data.canPersonalize || false,
         badge: data.badge || null,
+        stock: parseInt(data.stock) || 1,
         tags: [],
       }
     });
+    
+    revalidatePath("/studio");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    revalidatePath("/categories");
+
     return { success: true, product };
   } catch (error) {
     console.error("Create product error:", error);
@@ -409,5 +435,301 @@ export async function getSubscribers() {
   } catch (error) {
     console.error("Fetch subscribers error:", error);
     return [];
+  }
+}
+
+export async function updateProduct(productId: string, data: any) {
+  try {
+    const rawPrice = typeof data.price === 'string' ? parseFloat(data.price) : data.price;
+    const rawStock = typeof data.stock === 'string' ? parseInt(data.stock) : data.stock;
+
+    if (isNaN(rawPrice)) return { error: "Invalid price format" };
+    if (isNaN(rawStock)) return { error: "Invalid stock number" };
+
+    const product = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name: data.name,
+        description: data.description,
+        price: rawPrice,
+        category: data.category,
+        images: Array.isArray(data.images) ? data.images : [],
+        canPersonalize: !!data.canPersonalize,
+        badge: data.badge || null,
+        stock: rawStock,
+      }
+    });
+    
+    revalidatePath(`/products/${productId}`);
+    revalidatePath("/studio");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    revalidatePath("/categories");
+
+    return { success: true, product };
+  } catch (error: any) {
+    console.error("Update product error:", error);
+    return { error: error.message || "Failed to update treasure" };
+  }
+}
+
+export async function deleteProduct(productId: string) {
+  try {
+    await prisma.product.delete({
+      where: { id: productId }
+    });
+    
+    revalidatePath("/studio");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    revalidatePath("/categories");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete product error:", error);
+    return { error: "Failed to remove treasure" };
+  }
+}
+
+export async function promoteToArtisan(userId: string, studioData: any) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: "ARTISAN" }
+    });
+
+    await prisma.artisanProfile.create({
+      data: {
+        userId,
+        studioName: studioData.studioName,
+        bio: studioData.bio,
+        location: studioData.location || "Global Studio",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
+      }
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Promote to artisan error:", error);
+    return { error: "Failed to become an artisan" };
+  }
+}
+
+export async function addReview(data: { productId: string, userId: string, rating: number, comment: string }) {
+  try {
+    const review = await prisma.review.create({
+      data: {
+        productId: data.productId,
+        userId: data.userId,
+        rating: data.rating,
+        comment: data.comment,
+      },
+      include: {
+        user: true
+      }
+    });
+    return { success: true, review };
+  } catch (error) {
+    console.error("Add review error:", error);
+    return { error: "Failed to post your review" };
+  }
+}
+
+export async function getAdminStats() {
+  try {
+    const [userCount, productCount, orderCount, totalRevenue] = await Promise.all([
+      prisma.user.count(),
+      prisma.product.count(),
+      prisma.order.count(),
+      prisma.order.aggregate({
+        _sum: {
+          totalAmount: true
+        }
+      })
+    ]);
+
+    return {
+      userCount,
+      productCount,
+      orderCount,
+      revenue: totalRevenue._sum.totalAmount || 0
+    };
+  } catch (error) {
+    console.error("Admin stats error:", error);
+    return { userCount: 0, productCount: 0, orderCount: 0, revenue: 0 };
+  }
+}
+
+export async function getAllUsers() {
+  try {
+    return await prisma.user.findMany({
+      include: {
+        artisanProfile: true,
+        orders: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  } catch (error) {
+    console.error("Get all users error:", error);
+    return [];
+  }
+}
+
+export async function getAllOrders() {
+  try {
+    return await prisma.order.findMany({
+      include: {
+        user: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  } catch (error) {
+    console.error("Get all orders error:", error);
+    return [];
+  }
+}
+
+export async function deleteUser(userId: string) {
+  try {
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return { error: "Failed to delete user" };
+  }
+}
+
+export async function toggleArtisanVerification(artisanId: string, status: boolean) {
+  try {
+    await prisma.artisanProfile.update({
+      where: { id: artisanId },
+      data: { isVerified: status }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Toggle verification error:", error);
+    return { error: "Failed to update verification status" };
+  }
+}
+
+export async function sendMessage(senderId: string, receiverId: string, content: string, productId?: string) {
+  try {
+    const message = await prisma.message.create({
+      data: {
+        senderId,
+        receiverId,
+        content,
+        productId
+      },
+      include: {
+        sender: true,
+        receiver: true,
+        product: true
+      }
+    });
+    return { success: true, message };
+  } catch (error: any) {
+    console.error("Send message error:", error);
+    return { error: error.message || "Failed to send message" };
+  }
+}
+
+export async function getInbox(userId: string) {
+  try {
+    return await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      },
+      include: {
+        sender: true,
+        receiver: true,
+        product: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  } catch (error) {
+    console.error("Get inbox error:", error);
+    return [];
+  }
+}
+
+export async function updateUser(userId: string, data: { name?: string, image?: string }) {
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data
+    });
+    return { success: true, user };
+  } catch (error) {
+    console.error("Update user error:", error);
+    return { error: "Failed to update profile" };
+  }
+}
+import { revalidatePath } from "next/cache";
+
+export async function toggleFollowAction(artisanId: string, userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { following: true }
+    });
+
+    if (!user) return { error: "User not found" };
+
+    const isFollowing = user.following.some(a => a.id === artisanId);
+
+    if (isFollowing) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          following: {
+            disconnect: { id: artisanId }
+          }
+        }
+      });
+      revalidatePath(`/artisans`);
+      return { success: true, action: "unfollowed" };
+    } else {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          following: {
+            connect: { id: artisanId }
+          }
+        }
+      });
+      revalidatePath(`/artisans`);
+      return { success: true, action: "followed" };
+    }
+  } catch (error: any) {
+    console.error("Toggle follow error:", error);
+    return { error: `Follow failed: ${error.message || "Unknown Error"}` };
+  }
+}
+
+export async function checkFollowStatus(artisanId: string, userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { 
+        following: {
+          where: { id: artisanId }
+        }
+      }
+    });
+
+    return !!user?.following.length;
+  } catch (error) {
+    return false;
   }
 }

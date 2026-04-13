@@ -59,15 +59,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async jwt({ token }) {
-      if (!token.sub) return token;
-      
-      const user = await prisma.user.findUnique({
-        where: { id: token.sub }
-      });
-      
+    async jwt({ token, user }) {
+      // On initial login, add the role to the token
       if (user) {
         token.role = user.role;
+      }
+
+      // ⚠️ CRITICAL: Scrub the image data out of the token to prevent 431 errors
+      // Profile pictures are loaded directly from the DB on the Profile page instead.
+      if (token.picture) delete token.picture;
+      
+      if (!token.sub) return token;
+      
+      // Fetch latest role and name, but avoid fetching the large image blob
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.sub },
+        select: { role: true, name: true } 
+      });
+      
+      if (dbUser) {
+        token.role = dbUser.role;
+        token.name = dbUser.name;
       }
       return token;
     }

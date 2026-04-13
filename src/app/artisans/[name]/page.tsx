@@ -14,7 +14,11 @@ async function getArtisanBySlug(slug: string) {
     include: {
       artisanProfile: {
         include: {
-          products: true,
+          products: {
+            include: {
+              reviews: true
+            }
+          },
           user: true
         }
       }

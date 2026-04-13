@@ -1,0 +1,235 @@
+"use client";
+
+import { useState } from "react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check } from "lucide-react";
+import { updateArtisanProfile } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+
+export function StudioSettingsClient({ artisan }: { artisan: any }) {
+  const router = useRouter();
+  const { update } = useSession();
+  const [studioName, setStudioName] = useState(artisan.studioName || "");
+  const [bio, setBio] = useState(artisan.bio || "");
+  const [location, setLocation] = useState(artisan.location || "");
+  const [avatar, setAvatar] = useState(artisan.avatar || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const [activeSettingsTab, setActiveSettingsTab] = useState("Studio Profile");
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    const res = await updateArtisanProfile(artisan.userId, { 
+      studioName, 
+      bio, 
+      location, 
+      avatar 
+    });
+    
+    if (res.success) {
+      // Sync names if applicable
+      await update({ image: avatar }); 
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      router.refresh();
+    } else {
+      alert("Failed to update studio");
+    }
+    setIsSaving(false);
+  };
+
+  const navItems = [
+    { icon: User, label: "Studio Profile" },
+    { icon: Palette, label: "Brand Styling" },
+    { icon: Bell, label: "Orders & News" },
+    { icon: Shield, label: "Verification" },
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-6">
+          <Link href="/studio" className="inline-flex items-center gap-2 text-primary/40 hover:text-primary transition-colors text-xs font-black uppercase tracking-widest group">
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Back to Studio
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] w-fit">
+              Artisan Portal
+            </div>
+          </div>
+          <h1 className="text-5xl font-heading font-bold text-primary italic serif">Studio <span className="not-italic">Settings</span></h1>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            className="fixed bottom-10 right-10 z-[200] px-10 py-5 bg-white text-green-600 rounded-[2rem] font-bold flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-green-50 backdrop-blur-xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
+               <Check className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-black uppercase tracking-widest leading-none">Studio Updated</p>
+              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">Your branding is now live.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid md:grid-cols-[240px_1fr] gap-12">
+        <nav className="flex flex-col gap-2">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => setActiveSettingsTab(item.label)}
+              className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all ${
+                activeSettingsTab === item.label
+                  ? "bg-primary text-white shadow-xl shadow-primary/20" 
+                  : "text-charcoal/40 hover:bg-primary/5 hover:text-primary"
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="min-h-[600px]">
+          <AnimatePresence mode="wait">
+            {activeSettingsTab === "Studio Profile" ? (
+              <motion.form 
+                key="profile"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                onSubmit={handleSave} 
+                className="bg-white p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-2xl space-y-10"
+              >
+                <div className="space-y-8">
+                  <div className="flex items-center gap-6">
+                    <div className="relative group">
+                      <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                        <Image 
+                          src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`} 
+                          alt="" fill className="object-cover" 
+                        />
+                      </div>
+                      <label className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setAvatar(reader.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <Camera className="w-6 h-6 text-white" />
+                      </label>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-heading font-bold text-primary">{studioName || "Your Studio"}</h3>
+                      <p className="text-charcoal/40 font-bold text-[10px] uppercase tracking-widest">Studio Avatar</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-8 pt-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Name</label>
+                      <input 
+                        type="text" 
+                        value={studioName || ""}
+                        onChange={(e) => setStudioName(e.target.value)}
+                        className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                        placeholder="Your Studio Name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Artisan Bio</label>
+                      <textarea 
+                        value={bio || ""}
+                        onChange={(e) => setBio(e.target.value)}
+                        className="w-full h-32 p-8 rounded-[2rem] bg-cream/30 border border-primary/5 transition-all font-medium text-primary focus:outline-none focus:border-accent resize-none placeholder:text-primary/40"
+                        placeholder="Tell your story..."
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Location</label>
+                        <input 
+                          type="text" 
+                          value={location || ""}
+                          onChange={(e) => setLocation(e.target.value)}
+                          className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                          placeholder="e.g. Cairo, Egypt"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Primary Email</label>
+                        <div className="w-full h-16 px-8 flex items-center rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden">
+                          <span className="truncate w-full">{artisan.user.email}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-primary/5 flex justify-end">
+                  <button 
+                    type="submit"
+                    disabled={isSaving}
+                    className="px-12 h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {isSaving ? "Syncing Studio..." : "Save Studio Branding"}
+                    <Save className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.form>
+            ) : (
+              <motion.div 
+                key="coming-soon"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white p-20 rounded-[3rem] border border-primary/5 shadow-2xl flex flex-col items-center justify-center text-center space-y-6"
+              >
+                <div className="w-24 h-24 bg-cream rounded-3xl flex items-center justify-center text-primary/20">
+                  {activeSettingsTab === "Brand Styling" && <Palette className="w-12 h-12" />}
+                  {activeSettingsTab === "Orders & News" && <Bell className="w-12 h-12" />}
+                  {activeSettingsTab === "Verification" && <Shield className="w-12 h-12" />}
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-heading font-bold text-primary">Coming Soon</h3>
+                  <p className="text-charcoal/40 max-w-sm">We're building premium {activeSettingsTab.toLowerCase()} tools to help you grow your artisan brand.</p>
+                </div>
+                <button 
+                  onClick={() => setActiveSettingsTab("Studio Profile")}
+                  className="px-8 h-12 bg-primary/5 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-all"
+                >
+                  Back to Profile
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}

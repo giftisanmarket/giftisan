@@ -1,0 +1,173 @@
+"use client";
+
+import { useState } from "react";
+import { Navbar } from "@/components/navbar";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { promoteToArtisan } from "@/lib/actions";
+import { motion } from "framer-motion";
+import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export default function BecomeArtisanPage() {
+  const { data: session, update } = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    studioName: "",
+    bio: "",
+    location: "",
+  });
+
+  if (!session) {
+    return (
+      <main className="min-h-screen bg-cream">
+        <Navbar />
+        <div className="container mx-auto px-4 py-32 text-center">
+          <h1 className="text-4xl font-heading font-bold text-primary mb-6">Join our Artisan Circle</h1>
+          <p className="text-charcoal/60 mb-8 max-w-md mx-auto">You must be signed in to open your studio and share your treasures with the world.</p>
+          <button 
+            onClick={() => router.push("/login?callbackUrl=/become-artisan")}
+            className="px-10 h-14 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20"
+          >
+            Sign In to Continue
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (session.user.role === "ARTISAN") {
+    router.push("/studio");
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    if (!formData.studioName || !formData.bio) {
+      setError("Please provide a name for your studio and a brief bio.");
+      setIsLoading(false);
+      return;
+    }
+
+    const res = await promoteToArtisan(session.user.id as string, formData);
+
+    if (res.success) {
+      // Force session update so the role reflects in the UI
+      await update({
+        ...session,
+        user: {
+          ...session.user,
+          role: "ARTISAN"
+        }
+      });
+      router.push("/studio");
+      router.refresh();
+    } else {
+      setError(res.error || "Something went wrong.");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-cream pb-20">
+      <Navbar />
+
+      <div className="container mx-auto px-4 pt-32 max-w-4xl">
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-xs font-black uppercase tracking-widest mb-6"
+          >
+            <Sparkles className="w-3 h-3" />
+            Empowering Craftsmanship
+          </motion.div>
+          <h1 className="text-5xl md:text-6xl font-heading font-bold text-primary mb-6">Open Your <span className="serif italic font-normal text-accent">Studio</span></h1>
+          <p className="text-charcoal/40 max-w-xl mx-auto text-lg leading-relaxed">
+            Join a global community of master artisans. Share your story, sell your handcrafted treasures, and connect with collectors who value true craftsmanship.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Form */}
+          <div className="lg:col-span-12">
+            <motion.form 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onSubmit={handleSubmit}
+              className="bg-white rounded-[3rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8"
+            >
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                    <Store className="w-3 h-3" /> Studio Name *
+                  </label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.studioName}
+                    onChange={(e) => setFormData({...formData, studioName: e.target.value})}
+                    placeholder="e.g. The Midnight Potter, Artisan Glassworks"
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                    <MapPin className="w-3 h-3" /> Location
+                  </label>
+                  <input 
+                    type="text" 
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    placeholder="e.g. Kyoto, Japan / London, UK"
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                    <AlignLeft className="w-3 h-3" /> Your Story (Bio) *
+                  </label>
+                  <textarea 
+                    required
+                    value={formData.bio}
+                    onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                    placeholder="Tell our community about your craft, your inspiration, and your journey..."
+                    className="w-full h-40 p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 text-red-500 rounded-xl text-center text-sm font-bold animate-pulse">
+                  {error}
+                </div>
+              )}
+
+              <div className="pt-8 flex flex-col items-center gap-6">
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-lg"
+                >
+                  {isLoading ? "Preparing Your Studio..." : "Launch My Studio"}
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <div className="flex items-center gap-2 text-xs text-charcoal/40">
+                  <ShieldCheck className="w-4 h-4 text-accent" />
+                  No fees to join. Start listing treasures instantly.
+                </div>
+              </div>
+            </motion.form>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

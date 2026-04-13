@@ -3,18 +3,30 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import Link from "next/link";
-import { Heart, ArrowRight } from "lucide-react";
+import { 
+  Heart, ArrowRight, CheckCircle2, 
+  Leaf, Trophy, Palette, 
+  Gem, PencilLine, Radio, 
+  Scissors, Hammer, Shapes,
+  Sparkles, ShoppingBag
+} from "lucide-react";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 
+interface CategoryCount {
+  name: string;
+  count: number;
+}
+
 interface HomeClientProps {
   products: any[];
   artisans: any[];
+  categoryCounts: CategoryCount[];
 }
 
-export default function HomeClient({ products, artisans }: HomeClientProps) {
+export default function HomeClient({ products, artisans, categoryCounts }: HomeClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
 
   return (
@@ -94,7 +106,7 @@ export default function HomeClient({ products, artisans }: HomeClientProps) {
             <p className="text-charcoal/60 mt-2">Find the perfect gift for every personality</p>
           </div>
           <Link 
-            href="#categories" 
+            href="/categories" 
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
             View All Categories
@@ -103,23 +115,38 @@ export default function HomeClient({ products, artisans }: HomeClientProps) {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {[
-            { name: "Ceramics", icon: "🍶" },
-            { name: "Jewelry", icon: "💍" },
-            { name: "Stationery", icon: "🖋️" },
-            { name: "Vintage", icon: "📻" },
-            { name: "Textiles", icon: "🧵" },
-            { name: "Woodwork", icon: "🪵" },
-          ].map((cat) => (
-            <Link
-              key={cat.name}
-              href={`/category/${cat.name.toLowerCase()}`}
-              className="group cursor-pointer aspect-square bg-white border border-primary/5 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/5 transition-all"
-            >
-              <div className="text-4xl group-hover:scale-110 transition-transform">{cat.icon}</div>
-              <span className="font-heading font-medium text-charcoal/80">{cat.name}</span>
-            </Link>
-          ))}
+          {categoryCounts.slice(0, 6).map((cat) => {
+            const icons: Record<string, any> = {
+              "Ceramics": Shapes,
+              "Jewelry": Gem,
+              "Stationery": PencilLine,
+              "Vintage": Radio,
+              "Textiles": Scissors,
+              "Woodwork": Hammer,
+              "Wedding": Heart,
+              "Personalized": Sparkles,
+              "Art & Collectibles": ShoppingBag,
+            };
+            const Icon = icons[cat.name] || ShoppingBag;
+
+            return (
+              <Link
+                key={cat.name}
+                href={`/category/${cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`}
+                className="group cursor-pointer aspect-square bg-white border border-primary/5 rounded-3xl p-6 flex flex-col items-center justify-center gap-3 hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                  <Icon className="w-7 h-7" />
+                </div>
+                <div className="text-center">
+                  <span className="block font-heading font-bold text-primary text-sm tracking-tight">{cat.name}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/30 group-hover:text-accent transition-colors">
+                    {cat.count} Items
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -130,23 +157,25 @@ export default function HomeClient({ products, artisans }: HomeClientProps) {
             {
               title: "Direct from Artisans",
               desc: "Support independent creators globally. Every purchase goes directly to the artist behind the work.",
-              icon: "🎨"
+              icon: Palette
             },
             {
               title: "Curated Excellence",
               desc: "Every item is vetted for quality and originality. We only feature the best in handmade crafts.",
-              icon: "🏆"
+              icon: Trophy
             },
             {
               title: "Sustainable Gifting",
               desc: "Eco-friendly packaging and ethical sourcing. Beautiful gifts that don't cost the earth.",
-              icon: "🌿"
+              icon: Leaf
             },
           ].map((item) => (
             <div key={item.title} className="text-center md:text-left space-y-4">
-              <div className="text-3xl">{item.icon}</div>
+              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-accent shadow-sm mx-auto md:mx-0">
+                <item.icon className="w-6 h-6" />
+              </div>
               <h3 className="font-heading font-bold text-primary text-xl">{item.title}</h3>
-              <p className="text-charcoal/60 leading-relaxed">{item.desc}</p>
+              <p className="text-charcoal/60 leading-relaxed text-sm">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -184,7 +213,10 @@ export default function HomeClient({ products, artisans }: HomeClientProps) {
                       </div>
                     </div>
                     
-                    <h3 className="text-2xl font-heading font-bold text-primary mb-1">{artisan.user.name}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-2xl font-heading font-bold text-primary">{artisan.user.name}</h3>
+                      {artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent" />}
+                    </div>
                     <p className="text-xs text-accent font-black uppercase tracking-[0.2em] mb-4">{artisan.location}</p>
                     <p className="text-charcoal/60 text-sm leading-relaxed mb-8 flex-1 italic group-hover:text-charcoal transition-colors">
                       "{artisan.bio}"

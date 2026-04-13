@@ -12,7 +12,8 @@ import {
   Calendar,
   CreditCard,
   Heart,
-  ExternalLink
+  ExternalLink,
+  ShieldCheck
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { signOut } from "next-auth/react";
@@ -51,13 +52,28 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                 <p className="text-charcoal/40 text-sm font-medium mb-8">{user.email}</p>
                 
                 <div className="w-full flex flex-col gap-2">
-                  <button className="flex items-center justify-between w-full p-4 bg-primary/5 rounded-2xl text-primary font-bold hover:bg-primary hover:text-white transition-all group">
+                  <Link 
+                    href="/profile/settings" 
+                    className="flex items-center justify-between w-full p-4 bg-primary/5 rounded-2xl text-primary font-bold hover:bg-primary hover:text-white transition-all group"
+                  >
                     <div className="flex items-center gap-3">
                       <Settings className="w-5 h-5 opacity-40 group-hover:opacity-100" />
                       <span>Account Settings</span>
                     </div>
                     <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
-                  </button>
+                  </Link>
+                  {user.role === "ADMIN" && (
+                    <Link 
+                      href="/admin"
+                      className="flex items-center justify-between w-full p-4 bg-accent/5 rounded-2xl text-accent font-bold hover:bg-accent hover:text-white transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ShieldCheck className="w-5 h-5 opacity-40 group-hover:opacity-100" />
+                        <span>Admin Dashboard</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                    </Link>
+                  )}
                   <button 
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="flex items-center justify-between w-full p-4 bg-red-50 rounded-2xl text-red-500 font-bold hover:bg-red-500 hover:text-white transition-all group"
@@ -110,7 +126,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                     </div>
                     <h3 className="text-2xl font-heading font-bold text-primary mb-2">No treasures yet...</h3>
                     <p className="text-charcoal/40 max-w-xs mx-auto mb-8">Your journey with our artisans hasn't started yet. Let's find your first piece.</p>
-                    <Link href="/" className="inline-block px-10 h-14 bg-primary text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-primary/20">
+                    <Link href="/" className="inline-flex items-center justify-center px-10 h-14 bg-primary text-white font-bold rounded-full shadow-lg shadow-primary/20 transition-all hover:bg-primary-light hover:-translate-y-0.5 active:translate-y-0">
                       Explore the Gallery
                     </Link>
                   </div>

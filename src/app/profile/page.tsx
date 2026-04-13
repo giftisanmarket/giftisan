@@ -3,6 +3,7 @@ import { getUserOrders } from "@/lib/actions";
 import { ProfileClient } from "@/components/profile-client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Your Profile",
@@ -12,11 +13,20 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/login?callbackUrl=/profile");
   }
 
-  const orders = await getUserOrders(session.user.id as string);
+  // Fetch fresh user data from database to ensure updates are reflected
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id }
+  });
 
-  return <ProfileClient user={session.user} orders={orders} />;
+  if (!user) {
+    redirect("/login");
+  }
+
+  const orders = await getUserOrders(session.user.id);
+
+  return <ProfileClient user={user} orders={orders} />;
 }

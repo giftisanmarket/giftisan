@@ -21,5 +21,25 @@ export default async function Home() {
     take: 5
   });
 
-  return <HomeClient products={products} artisans={artisans} />;
+  // Fetch real counts for the home page category grid
+  const categoryNames = [
+    "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles", 
+    "Woodwork", "Wedding", "Personalized", "Art & Collectibles"
+  ];
+
+  const categoryCounts = await Promise.all(
+    categoryNames.map(async (name) => {
+      const count = await prisma.product.count({
+        where: { 
+          category: { 
+            equals: name, 
+            mode: 'insensitive' 
+          } 
+        }
+      });
+      return { name, count };
+    })
+  );
+
+  return <HomeClient products={products} artisans={artisans} categoryCounts={categoryCounts} />;
 }

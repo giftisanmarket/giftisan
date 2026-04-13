@@ -23,19 +23,16 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     const loadFavorites = async () => {
       // 1. Load from localStorage as baseline
       const savedFavorites = localStorage.getItem("giftisan-favorites");
-      let localFavorites: Product[] = [];
       if (savedFavorites) {
-        localFavorites = JSON.parse(savedFavorites);
-        setFavorites(localFavorites);
+        setFavorites(JSON.parse(savedFavorites));
       }
 
-      // 2. If logged in, prioritize DB favorites
+      // 2. If logged in, prioritize DB favorites (including empty list)
       if (session?.user?.id) {
         const dbFavorites = await getUserFavorites(session.user.id);
-        if (dbFavorites.length > 0) {
-          setFavorites(dbFavorites as any);
-          localStorage.setItem("giftisan-favorites", JSON.stringify(dbFavorites));
-        }
+        const mappedDbFavorites = dbFavorites as any;
+        setFavorites(mappedDbFavorites);
+        localStorage.setItem("giftisan-favorites", JSON.stringify(mappedDbFavorites));
       }
     };
 
@@ -44,9 +41,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   // Save to localStorage whenever favorites change
   useEffect(() => {
-    if (favorites.length > 0) {
-      localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
-    }
+    localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
   }, [favorites]);
 
   const toggleFavorite = async (product: any) => {

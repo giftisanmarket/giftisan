@@ -33,9 +33,31 @@ model User {
   orders        Order[]
   favorites     Favorite[]
   reviews       Review[]
+  
+  // Messaging
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  // Following System
+  following     ArtisanProfile[] @relation("UserFollowsArtisan")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  senderId    String
+  receiverId  String
+  productId   String?
+  
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+  read        Boolean  @default(false)
 }
 
 model Account {
@@ -80,10 +102,14 @@ model ArtisanProfile {
   location  String?
   avatar    String?
   studioName String?
+  isVerified Boolean  @default(false)
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
   
+  // Following System
+  followers User[]     @relation("UserFollowsArtisan")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -98,6 +124,7 @@ model Product {
   tags           String[]
   canPersonalize Boolean  @default(false)
   badge          String?
+  stock          Int      @default(1)
   
   artisanId      String
   artisan        ArtisanProfile @relation(fields: [artisanId], references: [id], onDelete: Cascade)
@@ -105,6 +132,7 @@ model Product {
   reviews        Review[]
   orderItems     OrderItem[]
   favoritedBy    Favorite[]
+  messages       Message[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

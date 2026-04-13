@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
@@ -174,47 +174,83 @@ export function Navbar() {
               </span>
             )}
           </Link>
+          {session && (
+            <Link href="/profile/messages" className="relative p-2 text-charcoal/60 hover:text-primary transition-colors">
+              <MessageSquare className="w-6 h-6" />
+            </Link>
+          )}
           {session ? (
-            <div className="flex items-center gap-2 group">
-              <Link 
-                href="/profile"
-                className="hidden lg:block text-xs font-bold text-primary/40 uppercase tracking-widest truncate max-w-[100px] hover:text-accent transition-colors"
-                title="View Profile"
-              >
-                {session.user?.name}
-              </Link>
-              <div className="flex items-center gap-1">
-                {session.user?.role === "ARTISAN" && (
-                  <Link 
-                    href="/studio"
-                    className={cn(
-                      "hidden lg:block text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md transition-all",
-                      pathname === "/studio" ? "bg-accent text-white" : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
-                    )}
-                  >
-                    Studio
-                  </Link>
-                )}
+            <div className="flex items-center gap-3">
+              {/* Contextual Action Badge (Studio or Sell) */}
+              {session.user?.role === "ARTISAN" ? (
+                <Link 
+                  href="/studio"
+                  className={cn(
+                    "hidden lg:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm",
+                    pathname === "/studio" 
+                      ? "bg-primary text-white" 
+                      : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
+                  )}
+                >
+                  <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", pathname === "/studio" ? "bg-white" : "bg-accent")} />
+                  Studio
+                </Link>
+              ) : (
+                <Link 
+                  href="/become-artisan"
+                  className="hidden lg:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10"
+                >
+                  Sell
+                </Link>
+              )}
+
+              {/* Consolidated Profile Hub */}
+              <div className="flex items-center gap-2 border-l border-primary/10 pl-3">
                 <Link 
                   href="/profile"
-                  className="p-2 text-primary hover:text-accent transition-colors relative"
-                  title="Your Profile"
+                  className="group flex items-center gap-3 pl-1 pr-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5"
                 >
-                  <User className="w-6 h-6 fill-primary/5" />
-                  <div className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full border border-white" />
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
+                    {session.user?.image ? (
+                      <Image 
+                        src={session.user.image} 
+                        alt={session.user.name || "User"} 
+                        fill 
+                        className="object-cover"
+                        sizes="32px"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-cream flex items-center justify-center">
+                        <User className="w-4 h-4 text-primary/40" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  
+                  <div className="hidden lg:block">
+                    <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">Account</p>
+                    <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
+                      {session.user?.name?.split(' ')[0]}
+                    </p>
+                  </div>
                 </Link>
+
                 <button 
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="p-2 text-charcoal/30 hover:text-red-500 transition-colors"
+                  className="p-2 text-charcoal/30 hover:text-red-500 transition-colors group"
                   title="Sign Out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             </div>
           ) : (
-            <Link href="/login" className="p-2 text-charcoal/60 hover:text-primary transition-colors">
-              <User className="w-6 h-6" />
+            <Link 
+              href="/login" 
+              className="group flex items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm"
+            >
+              <User className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-widest">Sign In</span>
             </Link>
           )}
           <button

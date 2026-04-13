@@ -2,11 +2,26 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
 
-  // If maintenance mode is not on, proceed as normal
-  if (!isMaintenanceMode) {
+  // Check for developer bypass (cookie or ?dev=true)
+  const isDevBypass = request.cookies.get('dev_bypass')?.value === 'active' || searchParams.get('dev') === 'true';
+
+  // If developer bypass is active, and they used the query param, set the cookie
+  if (searchParams.get('dev') === 'true') {
+    const response = NextResponse.next();
+    response.cookies.set('dev_bypass', 'active', { 
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
+    return response;
+  }
+
+  // If maintenance mode is not on, or developer bypass is active, proceed as normal
+  if (!isMaintenanceMode || isDevBypass) {
     return NextResponse.next();
   }
 

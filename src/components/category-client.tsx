@@ -31,8 +31,8 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl"
           >
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm font-bold uppercase tracking-widest mb-8 transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -66,7 +66,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
       {/* Grid */}
       <section className="py-12 container mx-auto px-4">
         {initialProducts.length === 0 ? (
-          <ComingSoon 
+          <ComingSoon
             title={`No ${categoryName} treasures yet`}
             description={`Our master makers are currently busy in their workshops crafting new pieces for the ${categoryName} collection. Join the notify list to be first to see them.`}
             featureName="Curating Collection"

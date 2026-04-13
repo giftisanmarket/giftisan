@@ -1,24 +1,13 @@
 "use client";
 
-import { MOCK_PRODUCTS } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
-import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star, ShieldCheck, Share2, Globe } from "lucide-react";
 import { motion } from "framer-motion";
+import { BespokeImage } from "./bespoke-image";
 
-export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
-  // Find products by this artisan
-  const products = MOCK_PRODUCTS.filter(
-    p => p.artisan.name.toLowerCase().replace(/ /g, "-") === nameSlug
-  );
-
-  const artisan = products[0]?.artisan || {
-    name: "Master Artisan",
-    location: "Global Studio",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Artisan",
-    bio: "Crafting beautiful stories through traditional techniques."
-  };
+export function ArtisanClient({ artisan }: { artisan: any }) {
+  const products = artisan.products || [];
 
   return (
     <main className="min-h-screen bg-white">
@@ -34,13 +23,13 @@ export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
               animate={{ opacity: 1, scale: 1 }}
               className="relative w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 rotate-3 group"
             >
-              <Image src={artisan.avatar} alt={artisan.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+              <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="192px" />
             </motion.div>
 
             {/* Info */}
             <div className="flex-1 text-center md:text-left space-y-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <h1 className="text-5xl font-heading font-bold text-primary">{artisan.name}</h1>
+                <h1 className="text-5xl font-heading font-bold text-primary">{artisan.user.name}</h1>
                 <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200">
                   <ShieldCheck className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-widest">Verified Artisan</span>
@@ -100,7 +89,7 @@ export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
       <div className="border-y border-primary/5 bg-white py-8">
         <div className="container mx-auto px-4 flex flex-wrap justify-between items-center gap-8">
           <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
-            <p className="text-3xl font-heading font-bold text-primary">124</p>
+            <p className="text-3xl font-heading font-bold text-primary">{products.length * 12}</p>
             <p className="text-xs font-bold text-accent uppercase tracking-widest">Creations</p>
           </div>
           <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
@@ -133,7 +122,7 @@ export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {products.map((product, idx) => (
+          {products.map((product: any, idx: number) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -142,7 +131,12 @@ export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
             >
               <Link href={`/products/${product.id}`} className="group block">
                 <div className="relative aspect-square rounded-[3rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
-                  <Image src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                  <BespokeImage src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" sizes="(max-width: 768px) 100vw, 33vw" />
+                  {product.badge && (
+                    <div className="absolute top-6 left-6 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                      {product.badge}
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.name}</h3>
                 <p className="text-lg font-bold text-primary mt-1">${product.price}.00</p>
@@ -156,7 +150,7 @@ export function ArtisanClient({ nameSlug }: { nameSlug: string }) {
               <Globe className="w-8 h-8 text-accent" />
             </div>
             <h3 className="text-xl font-heading font-bold text-primary mb-2">Custom Request</h3>
-            <p className="text-sm text-charcoal/60 mb-6">Have a specific vision? Collaborate with {artisan.name.split(' ')[0]} to create a custom piece.</p>
+            <p className="text-sm text-charcoal/60 mb-6">Have a specific vision? Collaborate with {artisan.user.name.split(' ')[0]} to create a custom piece.</p>
             <button className="text-sm font-black text-accent uppercase tracking-widest hover:text-primary">Start a Chat →</button>
           </div>
         </div>

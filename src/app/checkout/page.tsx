@@ -7,15 +7,55 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
+import { createOrder } from "@/lib/actions";
+import { useState } from "react";
 
 export default function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
+  const { data: session } = useSession();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const handlePurchase = () => {
-    // In a real app, we would process payment here
-    clearCart();
-    router.push("/checkout/success");
+  const [shippingData, setShippingData] = useState({
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    zip: "",
+    country: "United Kingdom",
+    phone: "",
+    email: session?.user?.email || ""
+  });
+
+  const handlePurchase = async () => {
+    if (!session?.user?.id) {
+      setError("Please sign in to complete your purchase.");
+      router.push("/login?callbackUrl=/checkout");
+      return;
+    }
+
+    if (!shippingData.address || !shippingData.city || !shippingData.zip) {
+      setError("Please fill in all shipping details.");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError("");
+
+    const res = await createOrder(session.user.id, totalPrice, cart, {
+      ...shippingData,
+      address: `${shippingData.firstName} ${shippingData.lastName}\n${shippingData.address}`
+    });
+
+    if (res.success) {
+      clearCart();
+      router.push("/checkout/success");
+    } else {
+      setError(res.error || "An error occurred during checkout.");
+      setIsProcessing(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -52,26 +92,66 @@ export default function CheckoutPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-primary uppercase tracking-widest">First Name</label>
-                    <input type="text" placeholder="e.g. Jane" className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Jane" 
+                      value={shippingData.firstName}
+                      onChange={(e) => setShippingData({...shippingData, firstName: e.target.value})}
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-black text-primary uppercase tracking-widest">Last Name</label>
-                    <input type="text" placeholder="e.g. Doe" className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Doe" 
+                      value={shippingData.lastName}
+                      onChange={(e) => setShippingData({...shippingData, lastName: e.target.value})}
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-primary uppercase tracking-widest">Shipping Address</label>
-                  <input type="text" placeholder="Street address and apartment number" className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" />
+                  <input 
+                    type="text" 
+                    placeholder="Street address and apartment number" 
+                    value={shippingData.address}
+                    onChange={(e) => setShippingData({...shippingData, address: e.target.value})}
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                  />
                 </div>
                 <div className="grid md:grid-cols-3 gap-6">
                   <div className="space-y-2 lg:col-span-2">
                     <label className="text-xs font-black text-primary uppercase tracking-widest">City</label>
-                    <input type="text" placeholder="London" className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" />
+                    <input 
+                      type="text" 
+                      placeholder="London" 
+                      value={shippingData.city}
+                      onChange={(e) => setShippingData({...shippingData, city: e.target.value})}
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-black text-primary uppercase tracking-widest">Postal Code</label>
-                    <input type="text" placeholder="E1 6AN" className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" />
+                    <input 
+                      type="text" 
+                      placeholder="E1 6AN" 
+                      value={shippingData.zip}
+                      onChange={(e) => setShippingData({...shippingData, zip: e.target.value})}
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                    />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-primary uppercase tracking-widest">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    placeholder="+44 7700 900000" 
+                    value={shippingData.phone}
+                    onChange={(e) => setShippingData({...shippingData, phone: e.target.value})}
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                  />
                 </div>
               </form>
             </section>
@@ -158,11 +238,18 @@ export default function CheckoutPage() {
 
               <button 
                 onClick={handlePurchase}
-                className="w-full h-16 bg-white text-primary font-bold rounded-full mt-10 hover:bg-cream transition-all flex items-center justify-center shadow-xl text-lg group"
+                disabled={isProcessing}
+                className="w-full h-16 bg-white text-primary font-bold rounded-full mt-10 hover:bg-cream transition-all flex items-center justify-center shadow-xl text-lg group disabled:opacity-50"
               >
-                Complete Purchase
+                {isProcessing ? "Processing..." : "Complete Purchase"}
                 <CheckCircle2 className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
+
+              {error && (
+                <p className="mt-4 text-sm font-bold text-accent-light text-center animate-pulse">
+                  {error}
+                </p>
+              )}
 
               <div className="mt-8 flex flex-col gap-4">
                 <div className="flex items-center gap-3 text-xs text-white/60">

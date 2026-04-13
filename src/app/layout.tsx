@@ -57,20 +57,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html
       lang="en"
+      suppressHydrationWarning
     >
-      <body className={`${inter.variable} ${outfit.variable} ${ebGaramond.variable} font-sans text-charcoal antialiased selection:bg-accent/20`}>
+      <body
+        className={`${inter.variable} ${outfit.variable} ${ebGaramond.variable} font-sans text-charcoal bg-white antialiased selection:bg-accent/20`}
+        suppressHydrationWarning
+      >
         {/* Google Analytics */}
-        <Script 
-          src="https://www.googletagmanager.com/gtag/js?id=G-WBXF1TE58B" 
-          strategy="afterInteractive" 
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-WBXF1TE58B"
+          strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
@@ -81,12 +89,14 @@ export default function RootLayout({
             gtag('config', 'G-WBXF1TE58B');
           `}
         </Script>
-        <FavoritesProvider>
-          <CartProvider>
-            {children}
-            <CartDrawer />
-          </CartProvider>
-        </FavoritesProvider>
+        <SessionProvider session={session} key={session?.user?.id || "guest"}>
+          <FavoritesProvider>
+            <CartProvider>
+              {children}
+              <CartDrawer />
+            </CartProvider>
+          </FavoritesProvider>
+        </SessionProvider>
       </body>
     </html>
   );

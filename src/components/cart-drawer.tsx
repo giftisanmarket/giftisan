@@ -5,6 +5,7 @@ import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { BespokeImage } from "./bespoke-image";
 
 export function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice } = useCart();
@@ -60,7 +61,7 @@ export function CartDrawer() {
                 cart.map((item) => (
                   <div key={item.id + (item.personalization || "")} className="flex gap-4 group">
                     <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white border border-primary/5">
-                      <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
+                      <BespokeImage src={item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between">

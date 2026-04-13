@@ -1,15 +1,18 @@
-import { MOCK_PRODUCTS } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { ProductClient } from "@/components/product-client";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const product = MOCK_PRODUCTS.find(p => p.id === id);
+  const product = await prisma.product.findUnique({
+    where: { id },
+  });
+  
   if (!product) return { title: "Product Not Found" };
 
   return {
@@ -32,11 +35,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
-  const product = MOCK_PRODUCTS.find(p => p.id === id);
+  
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      artisan: {
+        include: {
+          user: true
+        }
+      },
+      reviews: {
+        include: {
+          user: true
+        }
+      }
+    }
+  });
   
   if (!product) {
     notFound();
   }
 
-  return <ProductClient product={product} />;
+  const relatedProducts = await prisma.product.findMany({
+    where: { 
+      category: product.category, 
+      id: { not: product.id } 
+    },
+    include: { 
+      artisan: { 
+        include: { user: true } 
+      } 
+    },
+    take: 3
+  });
+
+  return <ProductClient product={product as any} relatedProducts={relatedProducts} />;
 }

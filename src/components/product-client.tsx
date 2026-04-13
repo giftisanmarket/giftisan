@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Heart, Share2, Star, Truck, ShieldCheck, Clock } from "lucide-react";
@@ -9,9 +8,9 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
-import { Product } from "@/lib/data";
+import { BespokeImage } from "./bespoke-image";
 
-export function ProductClient({ product }: { product: Product }) {
+export function ProductClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -30,11 +29,13 @@ export function ProductClient({ product }: { product: Product }) {
               animate={{ opacity: 1, y: 0 }}
               className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-white"
             >
-              <Image
+              <BespokeImage
                 src={product.images[selectedImage]}
                 alt={product.name}
                 fill
                 className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
               />
               
               {/* Refined Live Preview - Bottom Anchored */}
@@ -57,14 +58,14 @@ export function ProductClient({ product }: { product: Product }) {
             </motion.div>
 
             <div className="flex gap-4">
-              {product.images.map((img, idx) => (
+              {product.images.map((img: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
                   className={`relative w-24 aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImage === idx ? "border-primary shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />
                 </button>
               ))}
             </div>
@@ -84,7 +85,7 @@ export function ProductClient({ product }: { product: Product }) {
                       <Star key={s} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <span className="text-sm text-charcoal/40 font-medium">(24 Reviews)</span>
+                  <span className="text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} Reviews)</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -104,15 +105,15 @@ export function ProductClient({ product }: { product: Product }) {
 
             {/* Artisan Quick Bio */}
             <Link
-              href={`/artisans/${product.artisan.name.toLowerCase().replace(/ /g, "-")}`}
+              href={`/artisans/${product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
               className="flex items-center gap-4 p-6 bg-white rounded-3xl mb-8 border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all group"
             >
               <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-cream group-hover:scale-105 transition-transform">
-                <Image src={product.artisan.avatar} alt={product.artisan.name} fill />
+                <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill sizes="64px" />
               </div>
               <div>
                 <p className="text-xs font-bold text-accent uppercase tracking-tighter">Handcrafted by</p>
-                <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.artisan.name}</h3>
+                <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.artisan.user.name}</h3>
                 <p className="text-sm text-charcoal/60">{product.artisan.location}</p>
               </div>
             </Link>
@@ -184,24 +185,72 @@ export function ProductClient({ product }: { product: Product }) {
           </div>
           <div className="grid md:grid-cols-2 gap-16">
             <div className="prose prose-stone leading-relaxed text-charcoal/70">
-              <h3 className="text-xl font-heading font-bold text-primary mb-4">The Story Behind the Rose</h3>
+              <h3 className="text-xl font-heading font-bold text-primary mb-4">The Story Behind the Treasure</h3>
               <p>
-                Inspired by the morning fog over the Cotswolds, Elena Ross spent six months perfecting the "Rose Sand" glaze. Every vase is marked with her signature seal at the base, ensuring you own a genuine piece of artisanal history.
+                Handcrafted by {product.artisan.user.name} in {product.artisan.location}, this {product.name} represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience.
               </p>
               <ul className="mt-8 space-y-4 list-disc pl-5">
-                <li>Material: Locally sourced stoneware clay</li>
-                <li>Glaze: Semi-organic mineral pigments</li>
-                <li>Dimensions: 20cm Height x 12cm Diameter</li>
+                <li>Category: {product.category}</li>
+                <li>Handcrafted by: {product.artisan.user.name}</li>
+                <li>Personalization: {product.canPersonalize ? "Available" : "Not available"}</li>
                 <li>Each item is one-of-a-kind</li>
               </ul>
             </div>
             <div className="relative aspect-video rounded-3xl overflow-hidden bg-primary/5 flex items-center justify-center">
               <p className="text-primary italic font-serif text-xl border border-primary/20 p-8 rounded-full border-dashed">
-                Crafting Video Placeholder
+                Studio View: {product.artisan.studioName}
               </p>
             </div>
           </div>
         </section>
+        
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-32 pt-24 border-t border-primary/10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+              <div>
+                <h2 className="text-3xl font-heading font-bold text-primary italic serif">You May Also Like</h2>
+                <p className="text-charcoal/60 mt-2">More handcrafted treasures from the {product.category} collection.</p>
+              </div>
+              <Link href={`/category/${product.category.toLowerCase()}`} className="text-primary font-bold hover:underline decoration-accent decoration-2 underline-offset-4">
+                Shop Entire Collection
+              </Link>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {relatedProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/products/${p.id}`}
+                  className="group cursor-pointer block"
+                >
+                  <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
+                    <BespokeImage
+                      src={p.images[0]}
+                      alt={p.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    {p.badge && (
+                      <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                        {p.badge}
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 p-3 rounded-full bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                      <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
+                    </div>
+                  </div>
+                  <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{p.artisan.user.name}</p>
+                  <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
+                    {p.name}
+                  </h3>
+                  <p className="font-heading font-bold text-primary mt-2">${p.price}.00</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

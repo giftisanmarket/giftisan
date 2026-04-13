@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/lib/data";
+import { useSession } from "next-auth/react";
+import { toggleFavoriteAction, getUserFavorites } from "@/lib/actions";
 
 interface FavoritesContextType {
   favorites: Product[];
-  toggleFavorite: (product: Product) => void;
+  toggleFavorite: (product: any) => Promise<void>;
   isFavorite: (productId: string) => boolean;
   totalFavorites: number;
 }
@@ -13,22 +15,42 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
   const [favorites, setFavorites] = useState<Product[]>([]);
 
-  // Load from localStorage
+  // Load from localStorage on mount, then sync with DB if logged in
   useEffect(() => {
-    const savedFavorites = localStorage.getItem("giftisan-favorites");
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
-    }
-  }, []);
+    const loadFavorites = async () => {
+      // 1. Load from localStorage as baseline
+      const savedFavorites = localStorage.getItem("giftisan-favorites");
+      let localFavorites: Product[] = [];
+      if (savedFavorites) {
+        localFavorites = JSON.parse(savedFavorites);
+        setFavorites(localFavorites);
+      }
 
-  // Save to localStorage
+      // 2. If logged in, prioritize DB favorites
+      if (session?.user?.id) {
+        const dbFavorites = await getUserFavorites(session.user.id);
+        if (dbFavorites.length > 0) {
+          setFavorites(dbFavorites as any);
+          localStorage.setItem("giftisan-favorites", JSON.stringify(dbFavorites));
+        }
+      }
+    };
+
+    loadFavorites();
+  }, [session?.user?.id]);
+
+  // Save to localStorage whenever favorites change
   useEffect(() => {
-    localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
+    if (favorites.length > 0) {
+      localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
+    }
   }, [favorites]);
 
-  const toggleFavorite = (product: Product) => {
+  const toggleFavorite = async (product: any) => {
+    // Optimistic update
     setFavorites((prev) => {
       const exists = prev.find((p) => p.id === product.id);
       if (exists) {
@@ -36,6 +58,19 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, product];
     });
+
+    // DB sync if logged in
+    if (session?.user?.id) {
+      const res = await toggleFavoriteAction(product.id, session.user.id);
+      if (res.error) {
+        // Rollback on error
+        console.error(res.error);
+        const savedFavorites = localStorage.getItem("giftisan-favorites");
+        if (savedFavorites) {
+          setFavorites(JSON.parse(savedFavorites));
+        }
+      }
+    }
   };
 
   const isFavorite = (productId: string) => {

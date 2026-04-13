@@ -19,6 +19,7 @@ export interface Product {
     comment: string;
     date: string;
   }[];
+  badge?: "New Arrival" | "Limited Edition" | "Bestseller";
 }
 
 export const MOCK_PRODUCTS: Product[] = [
@@ -26,6 +27,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: "hand-thrown-ceramic-vase",
     name: "Ceramic Vase in Rose",
     price: 85,
+    badge: "Limited Edition",
     description: "Each vase is uniquely shaped by hand on a traditional potter's wheel. The subtle rose glaze is achieved through a double-firing process, creating a textured, matte finish that feels as good as it looks. Perfect for dried flowers or as a standalone sculptural piece.",
     artisan: {
       name: "Elena Ross",
@@ -50,6 +52,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: "luxury-linen-journal",
     name: "Linen-Bound Journal",
     price: 42,
+    badge: "New Arrival",
     description: "A handcrafted journal bound in premium deep green linen. Features archival-quality 120gsm paper, perfect for fountain pens and sketches. Each book is hand-sewn for lay-flat writing.",
     artisan: {
       name: "Marcus Thorne",
@@ -67,6 +70,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: "gold-minimal-earrings",
     name: "18k Minimal Earrings",
     price: 120,
+    badge: "Bestseller",
     description: "Solid 18k gold earrings with a brushed satin finish. Designed for everyday elegance, these lightweight pieces are handcrafted to last a lifetime.",
     artisan: {
       name: "Sia Jewelry",

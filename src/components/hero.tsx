@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { BespokeImage } from "./bespoke-image";
 import { motion } from "framer-motion";
 
 export function Hero() {
@@ -44,12 +44,13 @@ export function Hero() {
           className="relative"
         >
           <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
-            <Image
+            <BespokeImage
               src="/hero.png"
               alt="Artisanal Gifts"
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
           

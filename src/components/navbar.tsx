@@ -1,23 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { MOCK_PRODUCTS } from "@/lib/data";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import { useSession, signOut } from "next-auth/react";
+import { searchProducts } from "@/lib/actions";
 
 export function Navbar() {
+  const { data: session } = useSession();
   const { setIsCartOpen, totalItems } = useCart();
   const { totalFavorites } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,11 +32,21 @@ export function Navbar() {
     }
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.artisan.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ).slice(0, 5);
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        const results = await searchProducts(searchQuery);
+        setSearchResults(results);
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -95,12 +110,14 @@ export function Navbar() {
             <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
                 <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">Gifts for You</span>
-                <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">{filteredProducts.length} items found</span>
+                <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
+                  {isSearching ? "Searching..." : `${searchResults.length} items found`}
+                </span>
               </div>
 
               <div className="max-h-[400px] overflow-y-auto">
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map((p) => (
+                {searchResults.length > 0 ? (
+                  searchResults.map((p) => (
                     <Link
                       key={p.id}
                       href={`/products/${p.id}`}
@@ -115,21 +132,30 @@ export function Navbar() {
                           <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
                           <span className="text-sm font-bold text-primary">${p.price}</span>
                         </div>
-                        <p className="text-xs text-charcoal/40 font-medium">{p.artisan.name} • {p.category}</p>
+                        <p className="text-xs text-charcoal/40 font-medium">
+                          {p.artisan.user?.name || p.artisan.studioName} • {p.category}
+                        </p>
                       </div>
                     </Link>
                   ))
-                ) : (
+                ) : !isSearching ? (
                   <div className="p-8 text-center space-y-2">
                     <p className="text-charcoal/40 font-medium italic">"Nothing matches your search yet..."</p>
                     <p className="text-[10px] text-accent font-bold uppercase tracking-widest">Try "Vase" or "Gold"</p>
                   </div>
+                ) : (
+                  <div className="p-8 text-center text-charcoal/40 animate-pulse">
+                    Scanning the workshop...
+                  </div>
                 )}
               </div>
 
-              {filteredProducts.length > 0 && (
+              {searchResults.length > 0 && (
                 <div className="p-3 bg-primary/5 text-center">
-                  <button className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors">
+                  <button 
+                    onClick={handleSearch}
+                    className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
+                  >
                     See All Results →
                   </button>
                 </div>
@@ -148,9 +174,49 @@ export function Navbar() {
               </span>
             )}
           </Link>
-          <button className="p-2 text-charcoal/60 hover:text-primary transition-colors">
-            <User className="w-6 h-6" />
-          </button>
+          {session ? (
+            <div className="flex items-center gap-2 group">
+              <Link 
+                href="/profile"
+                className="hidden lg:block text-xs font-bold text-primary/40 uppercase tracking-widest truncate max-w-[100px] hover:text-accent transition-colors"
+                title="View Profile"
+              >
+                {session.user?.name}
+              </Link>
+              <div className="flex items-center gap-1">
+                {session.user?.role === "ARTISAN" && (
+                  <Link 
+                    href="/studio"
+                    className={cn(
+                      "hidden lg:block text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md transition-all",
+                      pathname === "/studio" ? "bg-accent text-white" : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
+                    )}
+                  >
+                    Studio
+                  </Link>
+                )}
+                <Link 
+                  href="/profile"
+                  className="p-2 text-primary hover:text-accent transition-colors relative"
+                  title="Your Profile"
+                >
+                  <User className="w-6 h-6 fill-primary/5" />
+                  <div className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full border border-white" />
+                </Link>
+                <button 
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="p-2 text-charcoal/30 hover:text-red-500 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link href="/login" className="p-2 text-charcoal/60 hover:text-primary transition-colors">
+              <User className="w-6 h-6" />
+            </Link>
+          )}
           <button
             onClick={() => setIsCartOpen(true)}
             className="p-2 text-charcoal/70 hover:text-primary transition-colors relative"
@@ -241,7 +307,14 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="p-6 border-t border-primary/10 bg-primary/5">
+        <div className="p-6 border-t border-primary/10 bg-primary/5 space-y-4">
+          <Link 
+            href="/signup" 
+            onClick={() => setIsMenuOpen(false)}
+            className="w-full h-12 bg-primary text-white font-bold rounded-xl flex items-center justify-center shadow-lg"
+          >
+            Join the Circle
+          </Link>
           <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
         </div>
       </div>

@@ -35,21 +35,23 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
   const [activeTab, setActiveTab] = useState<"inventory" | "sales">("inventory");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const handleDelete = async (productId: string) => {
-    if (!confirm("Are you sure you want to remove this treasure from your studio? This action cannot be undone.")) return;
+  const handleDelete = async () => {
+    if (!productToDelete) return;
     
-    setIsDeleting(productId);
-    const res = await deleteProduct(productId);
+    setIsDeleting(productToDelete);
+    const res = await deleteProduct(productToDelete);
     
     if (res.success) {
       window.location.reload();
     } else {
       alert(res.error || "Failed to delete product");
       setIsDeleting(null);
+      setProductToDelete(null);
     }
   };
 
@@ -60,6 +62,51 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
   return (
     <main className="min-h-screen bg-cream">
       <Navbar />
+
+      <AnimatePresence>
+        {productToDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setProductToDelete(null)}
+              className="absolute inset-0 bg-primary/40 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white rounded-[3rem] p-10 md:p-12 max-w-lg w-full shadow-2xl border border-primary/5 text-center space-y-8"
+            >
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
+                <Trash2 className="w-10 h-10" />
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-3xl font-heading font-bold text-primary">Remove Treasure?</h3>
+                <p className="text-charcoal/40 text-sm leading-relaxed">
+                  Are you sure you want to remove this piece from your studio? This action is permanent and your client reviews for this item will be lost.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <button 
+                  onClick={() => setProductToDelete(null)}
+                  className="flex-1 h-14 bg-cream/50 text-primary font-bold rounded-full hover:bg-cream transition-all"
+                >
+                  Keep it
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  disabled={isDeleting !== null}
+                  className="flex-1 h-14 bg-red-500 text-white font-bold rounded-full hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
+                >
+                  {isDeleting ? "Removing..." : "Yes, Remove"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="container mx-auto px-4 pt-32 pb-20">
         {/* Studio Header */}
@@ -179,7 +226,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                           <Edit2 className="w-5 h-5" />
                         </button>
                         <button 
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => setProductToDelete(p.id)}
                           disabled={isDeleting === p.id}
                           className="w-12 h-12 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl disabled:opacity-50"
                         >

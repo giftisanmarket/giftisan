@@ -35,11 +35,12 @@ import { EditProductModal } from "@/components/edit-product-modal";
 interface StudioClientProps {
   artisan: any;
   sales: any[];
+  reviews: any[];
 }
 
-export function StudioClient({ artisan, sales }: StudioClientProps) {
+export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"inventory" | "sales">("inventory");
+  const [activeTab, setActiveTab] = useState<"inventory" | "sales" | "reviews">("inventory");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -198,6 +199,15 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
               </span>
             )}
           </button>
+          <button 
+            onClick={() => setActiveTab("reviews")}
+            className={cn(
+              "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2",
+              activeTab === "reviews" ? "bg-primary text-white" : "bg-white text-primary border border-primary/5"
+            )}
+          >
+            <Star className="w-4 h-4" /> Studio Community
+          </button>
         </div>
 
         {activeTab === "inventory" ? (
@@ -280,8 +290,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
               )}
             </div>
           </div>
-        ) : (
-          /* Sales & Fulfillment Section */
+        ) : activeTab === 'sales' ? (
           <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-charcoal">
             <div className="mb-12">
               <h2 className="text-4xl font-heading font-bold text-primary">Sales & <span className="serif italic font-normal text-accent">Fulfillment</span></h2>
@@ -462,7 +471,65 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
               )}
             </div>
           </div>
-        )}
+        ) : activeTab === "reviews" ? (
+          <div className="space-y-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {reviews.length === 0 ? (
+                <div className="col-span-full py-20 px-10 text-center bg-white rounded-[3rem] border border-primary/5">
+                  <div className="w-16 h-16 bg-cream rounded-full flex items-center justify-center mx-auto mb-6 text-accent">
+                    <Star className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-2xl font-heading font-bold text-primary mb-2">No Reviews Yet</h3>
+                  <p className="text-charcoal/40 max-w-xs mx-auto">Treasures are being shipped! Reviews will appear here once your collectors share their joy.</p>
+                </div>
+              ) : (
+                reviews.map((review) => (
+                  <motion.div 
+                    layout
+                    key={review.id}
+                    className="bg-white p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all"
+                  >
+                    <div>
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-cream shrink-0">
+                            <Image src={review.user.image || "/icon.png"} alt="" width={40} height={40} className="object-cover" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-primary">{review.user.name}</p>
+                            <p className="text-[10px] text-charcoal/30 font-black uppercase tracking-widest">{new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={cn("w-3 h-3", i < review.rating ? "fill-accent text-accent" : "text-primary/10")} 
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-charcoal/60 text-sm leading-relaxed italic mb-8 italic">"{review.comment}"</p>
+                    </div>
+                    
+                    <Link 
+                      href={`/products/${review.product.slug || review.product.id}`}
+                      className="mt-auto pt-6 border-t border-primary/5 flex items-center gap-4 group/p"
+                    >
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-cream border border-primary/5 shadow-sm shrink-0">
+                        <Image src={review.product.images[0]} alt="" fill className="object-cover" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-primary/40 font-black uppercase tracking-widest mb-0.5 group-hover/p:text-accent transition-colors">Reviewed Item</p>
+                        <p className="font-bold text-xs text-primary group-hover/p:underline underline-offset-4 decoration-accent/30 leading-snug">{review.product.name}</p>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {selectedProductForEdit && (
@@ -553,6 +620,18 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                 </div>
               </div>
 
+              {selectedItem.order.orderNotes && (
+                <div className="mt-10 p-6 bg-accent/5 rounded-[2rem] border border-accent/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full" />
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-accent">Order Notes from Client</h3>
+                  </div>
+                  <p className="text-sm italic text-charcoal/60 leading-relaxed">
+                    "{selectedItem.order.orderNotes}"
+                  </p>
+                </div>
+              )}
+
               <div className="pt-10 flex flex-col md:flex-row items-center gap-6">
                 <Link 
                   href={`/profile/messages?userId=${selectedItem.order.userId}`}
@@ -612,6 +691,13 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              {shippingItem.order.orderNotes && (
+                <div className="p-5 bg-accent/5 rounded-2xl border border-accent/10">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-accent mb-2">Client Notes</p>
+                  <p className="text-xs italic text-charcoal/60 leading-relaxed">"{shippingItem.order.orderNotes}"</p>
+                </div>
+              )}
 
               <div className="space-y-5">
                 <div className="space-y-2">

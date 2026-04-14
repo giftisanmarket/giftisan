@@ -230,6 +230,7 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         shippingCountry: shippingData?.country,
         clientPhone: shippingData?.phone,
         clientEmail: shippingData?.email,
+        orderNotes: shippingData?.orderNotes,
         items: {
           create: items.map(item => ({
             productId: item.id,
@@ -333,18 +334,30 @@ export async function getAllArtisans() {
 
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
-    const slug = data.studioName ? `${slugify(data.studioName)}-${userId.slice(-4)}` : null;
-    const updated = await prisma.artisanProfile.update({
+    const slug = data.studioName 
+      ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
+      : null;
+
+    const artisanData = {
+      studioName: data.studioName,
+      slug,
+      bio: data.bio,
+      location: data.location,
+      avatar: data.avatar,
+      instagram: data.instagram,
+      website: data.website,
+      pinterest: data.pinterest,
+      tiktok: data.tiktok,
+      facebook: data.facebook
+    };
+
+    const updated = await prisma.artisanProfile.upsert({
       where: { userId },
-      data: {
-        studioName: data.studioName,
-        slug,
-        bio: data.bio,
-        location: data.location,
-        avatar: data.avatar,
-        instagram: data.instagram,
-        website: data.website
-      }
+      create: {
+        userId,
+        ...artisanData
+      },
+      update: artisanData
     });
     
     revalidatePath("/studio");
@@ -428,6 +441,30 @@ export async function getArtisanSales(artisanId: string) {
     return sales;
   } catch (error) {
     console.error("Fetch sales error:", error);
+    return [];
+  }
+}
+
+export async function getArtisanReviews(artisanId: string) {
+  try {
+    const reviews = await prisma.review.findMany({
+      where: {
+        product: {
+          artisanId: artisanId
+        }
+      },
+      include: {
+        user: true,
+        product: true
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return reviews;
+  } catch (error) {
+    console.error("Fetch artisan reviews error:", error);
     return [];
   }
 }

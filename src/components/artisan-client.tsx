@@ -2,6 +2,7 @@
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { MapPin, Star, ShieldCheck, Share2, Globe, Check } from "lucide-react";
+import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "./bespoke-image";
 import { useState, useEffect } from "react";
@@ -161,19 +162,17 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     rel="noopener noreferrer"
                     className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
                   >
-                    <svg 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      className="w-5 h-5 text-primary"
-                    >
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
+                    <FaInstagram className="w-5 h-5 text-primary" />
+                  </a>
+                )}
+                {artisan.tiktok && (
+                  <a 
+                    href={`https://tiktok.com/@${artisan.tiktok}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
+                  >
+                    <FaTiktok className="w-5 h-5 text-primary" />
                   </a>
                 )}
                 {artisan.website && (
@@ -183,7 +182,27 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     rel="noopener noreferrer"
                     className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
                   >
-                    <Globe className="w-5 h-5 text-primary" />
+                    <FaGlobe className="w-5 h-5 text-primary" />
+                  </a>
+                )}
+                {artisan.facebook && (
+                  <a 
+                    href={`https://facebook.com/${artisan.facebook}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
+                  >
+                    <FaFacebook className="w-5 h-5 text-primary" />
+                  </a>
+                )}
+                {artisan.pinterest && (
+                  <a 
+                    href={`https://pinterest.com/${artisan.pinterest}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
+                  >
+                    <FaPinterestP className="w-5 h-5 text-primary" />
                   </a>
                 )}
                 <button 
@@ -261,14 +280,17 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
           ))}
           
           {/* Custom Request Card */}
-          <div className="aspect-square rounded-[3rem] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-8 text-center bg-cream/20 group hover:border-accent/40 transition-colors cursor-pointer">
+          <Link 
+            href={`/profile/messages?userId=${artisan.userId}`}
+            className="aspect-square rounded-[3rem] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-8 text-center bg-cream/20 group hover:border-accent/40 transition-all cursor-pointer"
+          >
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
               <Globe className="w-8 h-8 text-accent" />
             </div>
             <h3 className="text-xl font-heading font-bold text-primary mb-2">Custom Request</h3>
             <p className="text-sm text-charcoal/60 mb-6">Have a specific vision? Collaborate with {artisan.user.name.split(' ')[0]} to create a custom piece.</p>
-            <button className="text-sm font-black text-accent uppercase tracking-widest hover:text-primary">Start a Chat →</button>
-          </div>
+            <div className="text-sm font-black text-accent uppercase tracking-widest group-hover:text-primary transition-colors">Start a Chat →</div>
+          </Link>
         </div>
       </section>
 

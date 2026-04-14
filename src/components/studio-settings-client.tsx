@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle } from "lucide-react";
+import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
 import { updateArtisanProfile } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -18,6 +19,9 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const [avatar, setAvatar] = useState(artisan.avatar || "");
   const [instagram, setInstagram] = useState(artisan.instagram || "");
   const [website, setWebsite] = useState(artisan.website || "");
+  const [pinterest, setPinterest] = useState(artisan.pinterest || "");
+  const [tiktok, setTiktok] = useState(artisan.tiktok || "");
+  const [facebook, setFacebook] = useState(artisan.facebook || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
@@ -34,7 +38,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       location, 
       avatar,
       instagram,
-      website 
+      website,
+      pinterest,
+      tiktok,
+      facebook 
     });
     
     if (res.success) {
@@ -174,13 +181,16 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   <div className="grid grid-cols-1 gap-8 pt-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Name</label>
-                      <input 
-                        type="text" 
-                        value={studioName || ""}
-                        onChange={(e) => setStudioName(e.target.value)}
-                        className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                        placeholder="Your Studio Name"
-                      />
+                      <div className="relative">
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><User className="w-4 h-4" /></span>
+                        <input 
+                          type="text" 
+                          value={studioName || ""}
+                          onChange={(e) => setStudioName(e.target.value)}
+                          className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                          placeholder="Your Studio Name"
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -196,17 +206,21 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                     <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Location</label>
-                        <input 
-                          type="text" 
-                          value={location || ""}
-                          onChange={(e) => setLocation(e.target.value)}
-                          className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                          placeholder="e.g. Cairo, Egypt"
-                        />
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaLocationDot className="w-4 h-4" /></span>
+                          <input 
+                            type="text" 
+                            value={location || ""}
+                            onChange={(e) => setLocation(e.target.value)}
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="e.g. Cairo, Egypt"
+                          />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Primary Email</label>
-                        <div className="w-full h-16 px-8 flex items-center rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden">
+                        <div className="w-full h-16 pl-12 pr-8 flex items-center rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
                           <span className="truncate w-full">{artisan.user.email}</span>
                         </div>
                       </div>
@@ -216,25 +230,73 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Instagram Username</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold">@</span>
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
                           <input 
                             type="text" 
                             value={instagram || ""}
                             onChange={(e) => setInstagram(e.target.value)}
-                            className="w-full h-16 pl-10 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
                             placeholder="your.handle"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Portfolio / Website</label>
-                        <input 
-                          type="url" 
-                          value={website || ""}
-                          onChange={(e) => setWebsite(e.target.value)}
-                          className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                          placeholder="https://yourpage.com"
-                        />
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
+                          <input 
+                            type="url" 
+                            value={website || ""}
+                            onChange={(e) => setWebsite(e.target.value)}
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="https://yourpage.com"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 pt-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">TikTok Handle</label>
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
+                          <input 
+                            type="text" 
+                            value={tiktok || ""}
+                            onChange={(e) => setTiktok(e.target.value)}
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="your.tiktok"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Facebook Profile</label>
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
+                          <input 
+                            type="text" 
+                            value={facebook || ""}
+                            onChange={(e) => setFacebook(e.target.value)}
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="your.facebook"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Pinterest Username</label>
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
+                          <input 
+                            type="text" 
+                            value={pinterest || ""}
+                            onChange={(e) => setPinterest(e.target.value)}
+                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="your.pinterest"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

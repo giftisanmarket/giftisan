@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getArtisanData, getArtisanSales } from "@/lib/actions";
+import { getArtisanData, getArtisanSales, getArtisanReviews } from "@/lib/actions";
 import { StudioClient } from "@/components/studio-client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
@@ -29,7 +29,10 @@ export default async function StudioPage() {
     redirect("/profile");
   }
 
-  const sales = await getArtisanSales(artisan.id);
+  const [sales, reviews] = await Promise.all([
+    getArtisanSales(artisan.id),
+    getArtisanReviews(artisan.id)
+  ]);
 
-  return <StudioClient artisan={artisan} sales={sales} />;
+  return <StudioClient artisan={artisan} sales={sales} reviews={reviews} />;
 }

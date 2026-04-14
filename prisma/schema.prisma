@@ -100,12 +100,15 @@ model ArtisanProfile {
   userId    String   @unique
   bio       String?  @db.Text
   location  String?
-  avatar    String?
+  avatar    String?  @db.Text
   studioName String?
   slug       String?  @unique
   isVerified Boolean  @default(false)
   instagram  String?
   website    String?
+  pinterest  String?
+  tiktok     String?
+  facebook   String?
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
@@ -178,6 +181,7 @@ model Order {
   shippingCountry String?
   clientPhone     String?
   clientEmail     String?
+  orderNotes      String?   @db.Text
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   items       OrderItem[]

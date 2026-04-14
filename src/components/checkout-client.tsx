@@ -26,7 +26,8 @@ export function CheckoutClient() {
     zip: "",
     country: "United Kingdom",
     phone: "",
-    email: session?.user?.email || ""
+    email: session?.user?.email || "",
+    orderNotes: ""
   });
 
   const handlePurchase = async () => {
@@ -143,15 +144,31 @@ export function CheckoutClient() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-primary uppercase tracking-widest">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder="+44 7700 900000" 
-                    value={shippingData.phone}
-                    onChange={(e) => setShippingData({...shippingData, phone: e.target.value})}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
-                  />
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-primary uppercase tracking-widest">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      placeholder="+44 7700 900000" 
+                      value={shippingData.phone}
+                      onChange={(e) => setShippingData({...shippingData, phone: e.target.value})}
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
+                    />
+                  </div>
+                  <div className="space-y-2 lg:col-span-2">
+                    <label className="text-xs font-black text-primary uppercase tracking-widest">Special Instructions (Optional)</label>
+                    <textarea 
+                      placeholder="e.g. Gift message, special handling, or delivery instructions..." 
+                      rows={3}
+                      value={shippingData.orderNotes}
+                      onChange={(e) => setShippingData({...shippingData, orderNotes: e.target.value})}
+                      className="w-full p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 min-h-[120px] resize-none" 
+                    />
+                    <p className="text-[10px] text-charcoal/30 flex items-center gap-2">
+                      <span className="w-1 h-1 bg-accent rounded-full" />
+                      Tell the artisan anything they need to know for this order.
+                    </p>
+                  </div>
                 </div>
               </form>
             </section>

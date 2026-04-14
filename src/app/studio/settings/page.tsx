@@ -19,9 +19,12 @@ export default async function StudioSettingsPage() {
     studioName: artisan.studioName,
     bio: artisan.bio,
     location: artisan.location,
-    avatar: (artisan.avatar?.length || 0) > 300000 ? null : artisan.avatar,
+    avatar: artisan.avatar,
     instagram: artisan.instagram,
     website: artisan.website,
+    pinterest: artisan.pinterest,
+    tiktok: artisan.tiktok,
+    facebook: artisan.facebook,
     user: {
       email: artisan.user.email
     }

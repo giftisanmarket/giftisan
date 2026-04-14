@@ -338,26 +338,38 @@ export async function updateArtisanProfile(userId: string, data: any) {
       ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
       : null;
 
-    const artisanData = {
-      studioName: data.studioName,
-      slug,
-      bio: data.bio,
-      location: data.location,
-      avatar: data.avatar,
-      instagram: data.instagram,
-      website: data.website,
-      pinterest: data.pinterest,
-      tiktok: data.tiktok,
-      facebook: data.facebook
-    };
 
     const updated = await prisma.artisanProfile.upsert({
       where: { userId },
       create: {
         userId,
-        ...artisanData
+        studioName: data.studioName || null,
+        slug,
+        bio: data.bio || null,
+        location: data.location || null,
+        avatar: data.avatar || null,
+        instagram: data.instagram || null,
+        website: data.website || null,
+        pinterest: data.pinterest || null,
+        tiktok: data.tiktok || null,
+        facebook: data.facebook || null,
+        brandColor: data.brandColor || "#da7b5a",
+        bannerImage: data.bannerImage || null
       },
-      update: artisanData
+      update: {
+        studioName: data.studioName || null,
+        slug,
+        bio: data.bio || null,
+        location: data.location || null,
+        avatar: data.avatar || null,
+        instagram: data.instagram || null,
+        website: data.website || null,
+        pinterest: data.pinterest || null,
+        tiktok: data.tiktok || null,
+        facebook: data.facebook || null,
+        brandColor: data.brandColor || "#da7b5a",
+        bannerImage: data.bannerImage || null
+      }
     });
     
     revalidatePath("/studio");
@@ -818,5 +830,38 @@ export async function checkFollowStatus(artisanId: string, userId: string) {
     return !!user?.following.length;
   } catch (error) {
     return false;
+  }
+}
+
+export async function getUnreadMessageCount(userId: string) {
+  try {
+    const unreadCount = await prisma.message.count({
+      where: {
+        receiverId: userId,
+        read: false
+      }
+    });
+    return unreadCount;
+  } catch (error) {
+    return 0;
+  }
+}
+
+export async function markMessagesAsRead(userId: string, senderId: string) {
+  try {
+    await prisma.message.updateMany({
+      where: {
+        receiverId: userId,
+        senderId: senderId,
+        read: false
+      },
+      data: {
+        read: true
+      }
+    });
+    revalidatePath("/profile/messages");
+    return { success: true };
+  } catch (error) {
+    return { success: false };
   }
 }

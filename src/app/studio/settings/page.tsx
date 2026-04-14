@@ -25,6 +25,8 @@ export default async function StudioSettingsPage() {
     pinterest: artisan.pinterest,
     tiktok: artisan.tiktok,
     facebook: artisan.facebook,
+    brandColor: artisan.brandColor,
+    bannerImage: artisan.bannerImage,
     user: {
       email: artisan.user.email
     }

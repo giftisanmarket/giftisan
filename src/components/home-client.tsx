@@ -24,15 +24,16 @@ interface HomeClientProps {
   products: any[];
   artisans: any[];
   categoryCounts: CategoryCount[];
+  artisanCount: number;
 }
 
-export default function HomeClient({ products, artisans, categoryCounts }: HomeClientProps) {
+export default function HomeClient({ products, artisans, categoryCounts, artisanCount }: HomeClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
 
   return (
     <main className="min-h-screen bg-cream">
       <Navbar />
-      <Hero />
+      <Hero artisanCount={artisanCount} />
 
       {/* Featured Treasures */}
       <section className="py-20 container mx-auto px-4">
@@ -87,7 +88,7 @@ export default function HomeClient({ products, artisans, categoryCounts }: HomeC
                 </button>
               </div>
               <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">
-                {product.artisan.user.name || product.artisan.studioName}
+                {product.artisan.studioName || product.artisan.user.name}
               </p>
               <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                 {product.name}
@@ -195,7 +196,7 @@ export default function HomeClient({ products, artisans, categoryCounts }: HomeC
         </div>
 
         <div className="relative">
-          <div className="flex gap-8 px-4 overflow-x-auto pb-8 snap-x no-scrollbar">
+          <div className="flex gap-8 px-4 pt-4 overflow-x-auto pb-8 snap-x no-scrollbar">
             {artisans.map((artisan, idx) => (
               <motion.div 
                 key={artisan.id}
@@ -214,7 +215,7 @@ export default function HomeClient({ products, artisans, categoryCounts }: HomeC
                     </div>
                     
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-2xl font-heading font-bold text-primary">{artisan.user.name}</h3>
+                      <h3 className="text-2xl font-heading font-bold text-primary">{artisan.studioName || artisan.user.name}</h3>
                       {artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent" />}
                     </div>
                     <p className="text-xs text-accent font-black uppercase tracking-[0.2em] mb-4">{artisan.location}</p>

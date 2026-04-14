@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { MessageSquare, Send, User, Package, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { sendMessage } from "@/lib/actions";
+import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
+import { useNotifications } from "./notification-provider";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
@@ -20,7 +21,19 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
   const [messages, setMessages] = useState(initialMessages);
   const [reply, setReply] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const { refreshUnreadCount } = useNotifications();
   const searchParams = useSearchParams();
+
+  // Poll for new messages every 10 seconds
+  useEffect(() => {
+    if (!userId) return;
+    const interval = setInterval(async () => {
+      const freshMessages = await getInbox(userId);
+      setMessages(freshMessages);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
   const targetUserId = searchParams.get("userId");
 
   // Group messages into threads
@@ -66,6 +79,17 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
   const activeMessages = activeThread ? [...activeThread.messages].sort((a: any, b: any) => 
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   ) : [];
+
+  // Mark as read when thread is opened
+  useEffect(() => {
+    if (activeThread && userId) {
+      const markAsRead = async () => {
+        await markMessagesAsRead(userId, activeThread.partner.id);
+        refreshUnreadCount();
+      };
+      markAsRead();
+    }
+  }, [activeThread, userId, refreshUnreadCount]);
 
   const handleReply = async () => {
     if (!reply.trim() || !activeThread) return;

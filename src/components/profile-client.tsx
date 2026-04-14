@@ -179,11 +179,11 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                             </div>
                               </div>
                               <Link 
-                                href={`/artisans/${item.product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                                href={`/artisans/${item.product.artisan.slug || item.product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                                 className="hidden xl:flex flex-col items-end group shrink-0"
                               >
                               <p className="text-[9px] font-black uppercase tracking-widest text-primary/20">Artisan Studio</p>
-                              <p className="text-xs font-bold text-primary group-hover:text-accent transition-colors">{item.product.artisan.user.name}</p>
+                              <p className="text-xs font-bold text-primary group-hover:text-accent transition-colors">{item.product.artisan.studioName || item.product.artisan.user.name}</p>
                             </Link>
 
                             <div className="flex justify-between md:flex-col items-center md:items-end gap-3 flex-1 md:flex-none">

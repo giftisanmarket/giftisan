@@ -62,6 +62,7 @@ export const metadata: Metadata = {
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "react-hot-toast";
+import { NotificationProvider } from "@/components/notification-provider";
 
 export default async function RootLayout({
   children,
@@ -94,12 +95,14 @@ export default async function RootLayout({
           `}
         </Script>
         <SessionProvider session={session} key={session?.user?.id || "guest"}>
-          <FavoritesProvider>
-            <CartProvider>
-              {children}
-              <CartDrawer />
-            </CartProvider>
-          </FavoritesProvider>
+          <NotificationProvider>
+            <FavoritesProvider>
+              <CartProvider>
+                {children}
+                <CartDrawer />
+              </CartProvider>
+            </FavoritesProvider>
+          </NotificationProvider>
         </SessionProvider>
       </body>
     </html>

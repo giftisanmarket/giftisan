@@ -15,7 +15,9 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [filter, setFilter] = useState<'available' | 'soldout'>('available');
   const products = artisan.products || [];
+  const displayName = artisan.studioName || artisan.user.name;
   
   // Real Data Calculations
   const allReviews = products.flatMap((p: any) => p.reviews || []);
@@ -57,8 +59,8 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${artisan.user.name} | Giftisan Studio`,
-      text: `Check out the incredible handcrafted work of ${artisan.user.name} on Giftisan.`,
+      title: `${displayName} | Giftisan Studio`,
+      text: `Check out the incredible handcrafted work of ${displayName} on Giftisan.`,
       url: window.location.href,
     };
 
@@ -74,8 +76,19 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
     }
   };
 
+  const filteredProducts = products.filter((p: any) => 
+    filter === 'available' ? p.stock > 0 : p.stock === 0
+  );
+
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white" style={{ '--brand-color': artisan.brandColor || '#da7b5a' } as any}>
+      <style jsx global>{`
+        .text-brand { color: var(--brand-color) !important; }
+        .bg-brand { background-color: var(--brand-color) !important; }
+        .border-brand { border-color: var(--brand-color) !important; }
+        .fill-brand { fill: var(--brand-color) !important; }
+        .shadow-brand { --tw-shadow-color: var(--brand-color); }
+      `}</style>
       <Navbar />
 
       <AnimatePresence>
@@ -91,14 +104,20 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             </div>
             <div>
               <p className="text-sm font-black uppercase tracking-widest leading-none">Following Studio</p>
-              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">You'll get updates from {artisan.user.name}.</p>
+              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">You'll get updates from {displayName}.</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
       
       {/* Profile Header */}
-      <section className="pt-32 pb-20 bg-cream relative overflow-hidden">
+      <section className="pt-32 pb-20 bg-cream relative overflow-hidden min-h-[400px] flex items-end">
+        {artisan.bannerImage && (
+          <div className="absolute inset-0 z-0">
+            <BespokeImage src={artisan.bannerImage} alt="" fill className="object-cover opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/80 to-transparent" />
+          </div>
+        )}
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
             {/* Avatar */}
@@ -107,13 +126,13 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
               animate={{ opacity: 1, scale: 1 }}
               className="relative w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group"
             >
-              <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="192px" />
+              <BespokeImage src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="192px" />
             </motion.div>
 
             {/* Info */}
             <div className="flex-1 text-center md:text-left space-y-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <h1 className="text-5xl font-heading font-bold text-primary">{artisan.user.name}</h1>
+                <h1 className="text-5xl font-heading font-bold text-primary">{displayName}</h1>
                 {artisan.isVerified && (
                   <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200 shrink-0">
                     <ShieldCheck className="w-4 h-4" />
@@ -124,11 +143,11 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
 
               <div className="flex items-center justify-center md:justify-start gap-6 text-charcoal/60">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-accent" />
+                  <MapPin className="w-4 h-4 text-brand" />
                   <span className="text-sm font-medium">{artisan.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-accent fill-accent" />
+                  <Star className="w-4 h-4 text-brand fill-brand" />
                   <span className="text-sm font-bold text-primary">{avgRating} ({totalSales} Sales)</span>
                 </div>
               </div>
@@ -209,7 +228,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                   onClick={handleShare}
                   className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors group"
                 >
-                  <Share2 className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                  <Share2 className="w-5 h-5 text-primary group-hover:text-brand transition-colors" />
                 </button>
               </div>
             </div>
@@ -225,19 +244,19 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
         <div className="container mx-auto px-4 flex flex-wrap justify-between items-center gap-8">
           <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
             <p className="text-3xl font-heading font-bold text-primary">{products.length}</p>
-            <p className="text-xs font-bold text-accent uppercase tracking-widest">Creations</p>
+            <p className="text-xs font-bold text-brand uppercase tracking-widest">Creations</p>
           </div>
           <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
             <p className="text-3xl font-heading font-bold text-primary">{(followersCount / 1000).toFixed(1)}k</p>
-            <p className="text-xs font-bold text-accent uppercase tracking-widest">Followers</p>
+            <p className="text-xs font-bold text-brand uppercase tracking-widest">Followers</p>
           </div>
           <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
             <p className="text-3xl font-heading font-bold text-primary">{yearsExp}</p>
-            <p className="text-xs font-bold text-accent uppercase tracking-widest">Years Experience</p>
+            <p className="text-xs font-bold text-brand uppercase tracking-widest">Years Experience</p>
           </div>
           <div className="flex-1 min-w-[150px] text-center last:border-0">
             <p className="text-3xl font-heading font-bold text-primary">{feedbackScore}%</p>
-            <p className="text-xs font-bold text-accent uppercase tracking-widest">Positive Feedback</p>
+            <p className="text-xs font-bold text-brand uppercase tracking-widest">Positive Feedback</p>
           </div>
         </div>
       </div>
@@ -250,14 +269,31 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             <p className="text-charcoal/60 mt-2">Currently available works and one-of-a-kind treasures.</p>
           </div>
           <div className="flex gap-4">
-            <button className="text-sm font-bold text-primary hover:underline">Available Now</button>
+            <button 
+              onClick={() => setFilter('available')}
+              className={cn(
+                "text-sm font-bold transition-all",
+                filter === 'available' ? "text-primary border-b-2 border-brand" : "text-charcoal/40 hover:text-primary"
+              )}
+            >
+              Available Now
+            </button>
             <span className="text-primary/20">|</span>
-            <button className="text-sm font-bold text-charcoal/40 hover:text-primary">Sold Out</button>
+            <button 
+              onClick={() => setFilter('soldout')}
+              className={cn(
+                "text-sm font-bold transition-all",
+                filter === 'soldout' ? "text-primary border-b-2 border-brand" : "text-charcoal/40 hover:text-primary"
+              )}
+            >
+              Sold Out
+            </button>
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {products.map((product: any, idx: number) => (
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product: any, idx: number) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -273,11 +309,16 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     </div>
                   )}
                 </div>
-                <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.name}</h3>
-                <p className="text-lg font-bold text-primary mt-1">${product.price}.00</p>
+                <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-brand transition-colors">{product.name}</h3>
+                <p className="text-lg font-bold text-brand mt-1">${product.price}.00</p>
               </Link>
             </motion.div>
-          ))}
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center bg-cream/20 rounded-[3rem] border-2 border-dashed border-primary/5">
+              <p className="text-charcoal/40 font-bold uppercase tracking-widest text-sm">No {filter === 'available' ? 'available' : 'sold out'} treasures yet</p>
+            </div>
+          )}
           
           {/* Custom Request Card */}
           <Link 
@@ -285,11 +326,11 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             className="aspect-square rounded-[3rem] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-8 text-center bg-cream/20 group hover:border-accent/40 transition-all cursor-pointer"
           >
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform">
-              <Globe className="w-8 h-8 text-accent" />
+              <Globe className="w-8 h-8 text-brand" />
             </div>
             <h3 className="text-xl font-heading font-bold text-primary mb-2">Custom Request</h3>
-            <p className="text-sm text-charcoal/60 mb-6">Have a specific vision? Collaborate with {artisan.user.name.split(' ')[0]} to create a custom piece.</p>
-            <div className="text-sm font-black text-accent uppercase tracking-widest group-hover:text-primary transition-colors">Start a Chat →</div>
+            <p className="text-sm text-charcoal/60 mb-6">Have a specific vision? Collaborate with {displayName.split(' ')[0]} to create a custom piece.</p>
+            <div className="text-sm font-black text-brand uppercase tracking-widest group-hover:text-primary transition-colors">Start a Chat →</div>
           </Link>
         </div>
       </section>

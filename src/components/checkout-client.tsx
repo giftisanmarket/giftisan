@@ -26,8 +26,7 @@ export function CheckoutClient() {
     zip: "",
     country: "United Kingdom",
     phone: "",
-    email: session?.user?.email || "",
-    orderNotes: ""
+    email: session?.user?.email || ""
   });
 
   const handlePurchase = async () => {
@@ -66,7 +65,7 @@ export function CheckoutClient() {
         <div className="container mx-auto px-4 py-32 text-center space-y-6">
           <h1 className="text-4xl font-heading font-bold text-primary">Your cart is empty</h1>
           <p className="text-charcoal/60">Add some artisanal treasures to begin your checkout journey.</p>
-          <Link href="/" className="inline-block px-8 h-14 bg-primary text-white font-bold rounded-full flex items-center justify-center mx-auto w-fit">
+          <Link href="/" className="px-8 h-14 bg-primary text-white font-bold rounded-full flex items-center justify-center mx-auto w-fit leading-none">
             Continue Shopping
           </Link>
         </div>
@@ -145,7 +144,7 @@ export function CheckoutClient() {
                   </div>
                 </div>
                 <div className="grid md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
+                  <div className="space-y-2 lg:col-span-1">
                     <label className="text-xs font-black text-primary uppercase tracking-widest">Phone Number</label>
                     <input 
                       type="tel" 
@@ -155,20 +154,13 @@ export function CheckoutClient() {
                       className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
                     />
                   </div>
-                  <div className="space-y-2 lg:col-span-2">
-                    <label className="text-xs font-black text-primary uppercase tracking-widest">Special Instructions (Optional)</label>
-                    <textarea 
-                      placeholder="e.g. Gift message, special handling, or delivery instructions..." 
-                      rows={3}
-                      value={shippingData.orderNotes}
-                      onChange={(e) => setShippingData({...shippingData, orderNotes: e.target.value})}
-                      className="w-full p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 min-h-[120px] resize-none" 
-                    />
-                    <p className="text-[10px] text-charcoal/30 flex items-center gap-2">
-                      <span className="w-1 h-1 bg-accent rounded-full" />
-                      Tell the artisan anything they need to know for this order.
-                    </p>
-                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-primary/5">
+                  <p className="text-[10px] text-charcoal/30 flex items-center gap-2">
+                    <span className="w-1 h-1 bg-accent rounded-full" />
+                    Our artisans will begin crafting your treasure as soon as the order is confirmed.
+                  </p>
                 </div>
               </form>
             </section>

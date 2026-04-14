@@ -21,7 +21,10 @@ async function getArtisanBySlug(slug: string) {
     }
   });
 
-  if (artisanBySlug) return { artisanProfile: artisanBySlug, name: artisanBySlug.user.name };
+  if (artisanBySlug) return { 
+    artisanProfile: artisanBySlug, 
+    name: artisanBySlug.studioName || artisanBySlug.user.name 
+  };
 
   // Fallback: match by name (old behavior)
   const users = await prisma.user.findMany({
@@ -41,7 +44,10 @@ async function getArtisanBySlug(slug: string) {
   });
 
   const matchingUser = users.find(u => u.name?.toLowerCase().replace(/ /g, "-") === slug);
-  return matchingUser ? { artisanProfile: matchingUser.artisanProfile, name: matchingUser.name } : null;
+  return matchingUser ? { 
+    artisanProfile: matchingUser.artisanProfile, 
+    name: matchingUser.artisanProfile?.studioName || matchingUser.name 
+  } : null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

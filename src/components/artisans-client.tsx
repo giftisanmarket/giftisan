@@ -41,7 +41,7 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
               transition={{ delay: idx * 0.1 }}
             >
               <Link 
-                href={`/artisans/${artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                href={`/artisans/${artisan.slug || artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                 className="group block h-full"
               >
                 <div className="bg-white rounded-[3rem] p-10 border border-primary/5 shadow-2xl shadow-primary/5 transition-all hover:shadow-accent/10 hover:-translate-y-2 h-full flex flex-col relative overflow-hidden">
@@ -49,7 +49,7 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
                     <div className="relative w-28 h-28 mb-8">
                       <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                       <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
-                        <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover" />
+                        <BespokeImage src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                       </div>
                     </div>
                     

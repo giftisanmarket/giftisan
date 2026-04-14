@@ -46,7 +46,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const handleShare = async () => {
     const shareData = {
       title: `${product.name} | Giftisan treasure`,
-      text: `I found this incredible '${product.name}' by ${product.artisan.user.name} on Giftisan. Check it out!`,
+      text: `I found this incredible '${product.name}' by ${product.artisan.studioName || product.artisan.user.name} on Giftisan. Check it out!`,
       url: window.location.href,
     };
 
@@ -151,7 +151,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             {/* Artisan Quick Bio */}
             <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 group">
               <Link
-                href={`/artisans/${product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                 className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1"
               >
                 <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-cream group-hover:scale-105 transition-transform">
@@ -162,7 +162,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                     <p className="text-xs font-bold text-accent uppercase tracking-tighter">Handcrafted by</p>
                     {product.artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent" />}
                   </div>
-                  <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.artisan.user.name}</h3>
+                  <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.artisan.studioName || product.artisan.user.name}</h3>
                   <p className="text-sm text-charcoal/60">{product.artisan.location}</p>
                 </div>
               </Link>
@@ -170,7 +170,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               <div className="px-6 md:px-0">
                 <ContactArtisanButton
                   artisanId={product.artisan.id}
-                  artisanName={product.artisan.user.name}
+                  artisanName={product.artisan.studioName || product.artisan.user.name}
                   productId={product.id}
                   productName={product.name}
                   artisanUserId={product.artisan.user.id}
@@ -287,20 +287,54 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 <div className="prose prose-stone leading-relaxed text-charcoal/70">
                   <h3 className="text-xl font-heading font-bold text-primary mb-4">The Story Behind the Treasure</h3>
                   <p>
-                    Handcrafted by {product.artisan.user.name} in {product.artisan.location}, this {product.name} represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience.
+                    Handcrafted by {product.artisan.studioName || product.artisan.user.name} in {product.artisan.location}, this {product.name} represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience.
                   </p>
                   <ul className="mt-8 space-y-4 list-disc pl-5">
                     <li>Category: {product.category}</li>
-                    <li>Handcrafted by: {product.artisan.user.name}</li>
+                    <li>Handcrafted by: {product.artisan.studioName || product.artisan.user.name}</li>
                     <li>Personalization: {product.canPersonalize ? "Available" : "Not available"}</li>
                     <li>Stock Status: {product.stock > 0 ? "In Stock" : "Limited Edition / Sold Out"}</li>
                     <li>Eco-friendly packaging included</li>
                   </ul>
                 </div>
-                <div className="relative aspect-video rounded-3xl overflow-hidden bg-primary/5 flex items-center justify-center">
-                  <p className="text-primary italic font-serif text-xl border border-primary/20 p-8 rounded-full border-dashed">
-                    Studio View: {product.artisan.studioName}
-                  </p>
+                <div className="relative aspect-video rounded-3xl overflow-hidden group">
+                  {product.artisan.bannerImage ? (
+                    <BespokeImage 
+                      src={product.artisan.bannerImage} 
+                      alt="" 
+                      fill 
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110" 
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-primary/5" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/30 to-transparent" />
+                  
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-xl">
+                        <BespokeImage src={product.artisan.avatar} alt="" fill className="object-cover" />
+                      </div>
+                      <div className="text-white">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-accent-light mb-0.5">The Studio</p>
+                        <h4 className="font-heading font-bold text-lg leading-none">{product.artisan.studioName || product.artisan.user.name}</h4>
+                      </div>
+                    </div>
+                    
+                    <Link 
+                      href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                      className="px-6 h-10 bg-white text-primary text-[10px] font-black uppercase tracking-widest rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
+                    >
+                      Visit Studio
+                    </Link>
+                  </div>
+                  
+                  {/* Decorative badge */}
+                  <div className="absolute top-6 right-6">
+                    <div className="glass px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-primary bg-white/40 backdrop-blur-md border border-white/40">
+                      Studio Hub
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -309,12 +343,12 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               <div className="max-w-4xl">
                 <div className="flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
                   <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl shrink-0">
-                    <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" />
+                    <BespokeImage src={product.artisan.avatar} alt={product.artisan.studioName || product.artisan.user.name} fill className="object-cover" />
                   </div>
                   <div className="space-y-6">
                     <div>
                       <div className="flex items-center gap-2 justify-center md:justify-start">
-                        <h3 className="text-3xl font-heading font-bold text-primary mb-2">{product.artisan.user.name}</h3>
+                        <h3 className="text-3xl font-heading font-bold text-primary mb-2">{product.artisan.studioName || product.artisan.user.name}</h3>
                         {product.artisan.isVerified && <CheckCircle2 className="w-6 h-6 text-accent" />}
                       </div>
                       <p className="text-accent font-black uppercase tracking-widest text-sm">{product.artisan.studioName}</p>
@@ -467,7 +501,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
                     </div>
                   </div>
-                  <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{p.artisan.user.name}</p>
+                  <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{p.artisan.studioName || p.artisan.user.name}</p>
                   <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                     {p.name}
                   </h3>

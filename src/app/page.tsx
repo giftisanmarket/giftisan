@@ -27,6 +27,8 @@ export default async function Home() {
     take: 5
   });
 
+  const artisanCount = await prisma.artisanProfile.count();
+
   // Fetch real counts for the home page category grid
   const categoryNames = [
     "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles", 
@@ -62,5 +64,5 @@ export default async function Home() {
     avatar: (a.avatar?.length || 0) > 300000 ? "" : a.avatar
   }));
 
-  return <HomeClient products={sanitizedProducts} artisans={sanitizedArtisans} categoryCounts={categoryCounts} />;
+  return <HomeClient products={sanitizedProducts} artisans={sanitizedArtisans} categoryCounts={categoryCounts} artisanCount={artisanCount} />;
 }

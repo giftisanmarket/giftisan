@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-export function Hero() {
+export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
   return (
     <section className="relative w-full overflow-hidden bg-cream py-16 md:py-24">
       <div className="container mx-auto px-4 grid md:grid-cols-2 items-center gap-12">
@@ -53,9 +53,10 @@ export function Hero() {
           <div className="flex flex-wrap gap-6 pt-2">
             <Link href="/artisans" className="text-xs font-bold text-charcoal/40 hover:text-accent transition-all flex items-center gap-2 group">
               <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              Join 1,200+ Master Artisans
+              Join {artisanCount > 0 ? `${artisanCount}+` : ""} Master Artisans
             </Link>
           </div>
+
         </motion.div>
 
         <motion.div 

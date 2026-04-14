@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
+import { useNotifications } from "./notification-provider";
 import { useFavorites } from "@/context/favorites-context";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -15,6 +16,7 @@ export function Navbar() {
   const { data: session } = useSession();
   const { setIsCartOpen, totalItems } = useCart();
   const { totalFavorites } = useFavorites();
+  const { unreadCount } = useNotifications();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -177,6 +179,11 @@ export function Navbar() {
           {session && (
             <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors">
               <MessageSquare className="w-6 h-6" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           )}
           {session ? (

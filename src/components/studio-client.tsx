@@ -133,7 +133,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
-                <Image src={artisan.avatar} alt={artisan.user.name} fill className="object-cover" />
+                <Image src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
               </div>
               <div>
                 <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">Master Studio</p>
@@ -533,14 +533,16 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
       </div>
 
       {selectedProductForEdit && (
-        <EditProductModal 
-          product={selectedProductForEdit} 
-          isOpen={isEditModalOpen} 
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedProductForEdit(null);
-          }} 
-        />
+        <div className="no-print">
+          <EditProductModal 
+            product={selectedProductForEdit} 
+            isOpen={isEditModalOpen} 
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedProductForEdit(null);
+            }} 
+          />
+        </div>
       )}
     </main>
 
@@ -559,7 +561,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden print-isolated"
+            className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden no-print"
           >
             <div className="p-12 md:p-16 space-y-10">
               <div className="flex items-center justify-between">
@@ -674,7 +676,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden p-10 md:p-12"
+            className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden p-10 md:p-12 no-print"
           >
             <div className="space-y-8">
               <div className="flex items-center justify-between">
@@ -761,7 +763,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
 
     {/* Hidden Printable Area */}
     {itemToPrint && (
-      <div className="hidden print:block print-isolated p-10 bg-white">
+      <div className="hidden print:flex print:flex-col print-isolated p-10 bg-white min-h-[25cm]">
         <div className="flex items-center justify-between border-b pb-8 mb-8">
           <div>
             <h1 className="text-3xl font-heading font-bold text-primary">GIFTISAN</h1>
@@ -786,7 +788,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           </div>
           <div className="text-right">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">From</h3>
-            <p className="font-bold text-primary">{artisan.studioName}</p>
+            <p className="font-bold text-primary">{artisan.studioName || artisan.user.name}</p>
             <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
               {artisan.location || "Egypt"}<br />
               {artisan.user.email}
@@ -811,7 +813,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           </tbody>
         </table>
 
-        <div className="text-center pt-8 border-t border-primary/5">
+        <div className="mt-auto text-center pt-8 border-t border-primary/5">
           <p className="text-xs italic font-serif text-primary/60">"Thank you for supporting handcrafted excellence."</p>
           <p className="text-[8px] uppercase font-black tracking-[0.2em] text-accent mt-4">giftisan.com</p>
         </div>

@@ -59,6 +59,12 @@ h6 {
   font-family: var(--font-serif);
 }
 
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
 /* Custom Utilities */
 .glass {
   background: rgba(255, 255, 255, 0.7);
@@ -77,18 +83,25 @@ h6 {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Professional Print Styles for Packing Slips */
 @media print {
+
   /* Hide whole app by default */
   body {
     background: white !important;
   }
-  
-  main, footer, nav, button, .no-print {
+
+  main,
+  footer,
+  nav,
+  button,
+  .no-print {
     display: none !important;
   }
 
@@ -101,7 +114,7 @@ h6 {
     left: 0 !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 2cm !important;
     box-shadow: none !important;
     border: none !important;
   }
@@ -121,7 +134,11 @@ h6 {
     position: relative !important;
     z-index: auto !important;
     inset: auto !important;
-    padding: 0 !important;
+    padding: 2cm !important;
+  }
+
+  @page {
+    margin: 0;
   }
 
   .backdrop-blur-xl {

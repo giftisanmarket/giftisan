@@ -109,6 +109,8 @@ model ArtisanProfile {
   pinterest  String?
   tiktok     String?
   facebook   String?
+  brandColor String?  @default("#da7b5a")
+  bannerImage String? @db.Text
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]

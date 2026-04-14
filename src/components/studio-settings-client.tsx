@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function StudioSettingsClient({ artisan }: { artisan: any }) {
@@ -22,6 +23,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const [pinterest, setPinterest] = useState(artisan.pinterest || "");
   const [tiktok, setTiktok] = useState(artisan.tiktok || "");
   const [facebook, setFacebook] = useState(artisan.facebook || "");
+  const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
+  const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
@@ -41,7 +44,9 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       website,
       pinterest,
       tiktok,
-      facebook 
+      facebook,
+      brandColor,
+      bannerImage
     });
     
     if (res.success) {
@@ -137,7 +142,118 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
         <div className="min-h-[600px]">
           <AnimatePresence mode="wait">
-            {activeSettingsTab === "Studio Profile" ? (
+            {activeSettingsTab === "Brand Styling" ? (
+              <motion.form 
+                key="branding"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                onSubmit={handleSave} 
+                className="bg-white p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-2xl space-y-10"
+              >
+                <div className="space-y-12">
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
+                    <p className="text-charcoal/40 text-sm">Choose a primary brand color that will be used for buttons, icons, and accents on your studio profile.</p>
+                    
+                    <div className="flex flex-wrap gap-4">
+                      {["#da7b5a", "#1a4332", "#4a90e2", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"].map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setBrandColor(color)}
+                          className={cn(
+                            "w-16 h-16 rounded-2xl transition-all border-4 relative overflow-hidden",
+                            brandColor === color ? "border-primary scale-110 shadow-lg" : "border-transparent hover:scale-105"
+                          )}
+                          style={{ backgroundColor: color }}
+                        >
+                          {brandColor === color && <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white"><Check className="w-8 h-8" /></div>}
+                        </button>
+                      ))}
+                      <div className="relative group">
+                        <input 
+                          type="color" 
+                          value={brandColor}
+                          onChange={(e) => setBrandColor(e.target.value)}
+                          className="w-16 h-16 rounded-2xl border-4 border-transparent bg-cream/30 cursor-pointer overflow-hidden p-0"
+                        />
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-[8px] font-black uppercase tracking-widest text-primary/40">Custom</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-heading font-bold text-primary">Studio <span className="serif italic">Banner</span></h3>
+                    <p className="text-charcoal/40 text-sm">Upload a premium banner that reflects your craft. This will be displayed at the top of your public gallery.</p>
+                    
+                    <div 
+                      className="relative w-full h-48 rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden"
+                    >
+                      {bannerImage ? (
+                        <>
+                          <Image src={bannerImage} alt="Banner" fill className="object-cover" />
+                          <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             <Camera className="w-8 h-8 text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary/20 mb-3 group-hover:scale-110 transition-transform">
+                            <Camera className="w-6 h-6" />
+                          </div>
+                          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">Select Banner Image</p>
+                        </>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setBannerImage(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </div>
+                    {bannerImage && (
+                      <button 
+                        type="button"
+                        onClick={() => setBannerImage("")}
+                        className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:underline"
+                      >
+                        Remove Banner
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="p-8 bg-cream/30 rounded-[2rem] border border-primary/5 space-y-4">
+                    <h4 className="font-bold text-primary flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
+                      Live Preview Theme
+                    </h4>
+                    <div className="flex gap-2">
+                       <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button Style</div>
+                       <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline Style</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-primary/5 flex justify-end">
+                  <button 
+                    type="submit"
+                    disabled={isSaving}
+                    className="px-12 h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {isSaving ? "Syncing Branding..." : "Save Branding Vision"}
+                    <Save className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.form>
+            ) : activeSettingsTab === "Studio Profile" ? (
               <motion.form 
                 key="profile"
                 initial={{ opacity: 0, y: 10 }}

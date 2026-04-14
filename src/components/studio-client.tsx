@@ -22,7 +22,11 @@ import {
   Phone,
   Mail,
   X,
-  Trash2
+  Trash2,
+  MousePointer2,
+  Percent,
+  Sparkles,
+  Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -81,6 +85,10 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   const totalFavorites = products.reduce((acc: number, p: any) => acc + (p.favoritedBy?.length || 0), 0);
   const totalReviews = products.reduce((acc: number, p: any) => acc + (p.reviews?.length || 0), 0);
   const totalRevenue = sales.reduce((acc, sale) => acc + (sale.price * sale.quantity), 0);
+  const totalViews = products.reduce((acc: number, p: any) => acc + (p.views || 0), 0);
+  const conversionRate = totalViews > 0 
+    ? Math.min(100, (sales.length / totalViews) * 100).toFixed(1) 
+    : "0.0";
 
   return (
     <>
@@ -159,66 +167,142 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
         </div>
 
         <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
-          <button 
-            onClick={() => setActiveTab("overview")}
-            className={cn(
-              "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2",
-              activeTab === "overview" ? "bg-primary text-white" : "bg-white text-primary border border-primary/5"
-            )}
-          >
-            <BarChart3 className="w-4 h-4" /> Overview
-          </button>
-          <button 
-            onClick={() => setActiveTab("inventory")}
-            className={cn(
-              "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2",
-              activeTab === "inventory" ? "bg-primary text-white" : "bg-white text-primary border border-primary/5"
-            )}
-          >
-            <ShoppingBag className="w-4 h-4" /> Inventory
-          </button>
-          <button 
-            onClick={() => setActiveTab("sales")}
-            className={cn(
-              "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative",
-              activeTab === "sales" ? "bg-primary text-white" : "bg-white text-primary border border-primary/5"
-            )}
-          >
-            <Package className="w-4 h-4" /> Sales
-            {sales.filter(s => s.status === "PENDING").length > 0 && (
-              <span className="absolute -top-2 -right-2 w-7 h-7 bg-accent text-white text-xs flex items-center justify-center rounded-full border-2 border-white shadow-2xl animate-bounce z-50">
-                {sales.filter(s => s.status === "PENDING").length}
+          {(
+            [
+              { id: "overview", label: "Overview", icon: BarChart3 },
+              { id: "inventory", label: "Inventory", icon: ShoppingBag },
+              { id: "sales", label: "Sales", icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+              { id: "reviews", label: "Community", icon: Star },
+            ] as { id: "overview" | "inventory" | "sales" | "reviews"; label: string; icon: any; badge?: number }[]
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group",
+                activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
+              )}
+            >
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeTabPill"
+                  className="absolute inset-0 bg-primary rounded-full"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-white" : "text-accent")} />
+                {tab.label}
+                {tab.badge ? (
+                  <span className={cn(
+                    "ml-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px]",
+                    activeTab === tab.id ? "bg-white text-primary" : "bg-accent text-white shadow-lg shadow-accent/20"
+                  )}>
+                    {tab.badge}
+                  </span>
+                ) : null}
               </span>
-            )}
-          </button>
-          <button 
-            onClick={() => setActiveTab("reviews")}
-            className={cn(
-              "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2",
-              activeTab === "reviews" ? "bg-primary text-white" : "bg-white text-primary border border-primary/5"
-            )}
-          >
-            <Star className="w-4 h-4" /> Community
-          </button>
+            </button>
+          ))}
         </div>
 
-        {activeTab === "overview" && (
-          <div className="space-y-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="relative z-10"
+          >
+            {activeTab === "overview" && (
+              <div className="space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { label: "Active Treasures", value: products.length, icon: ShoppingBag, color: "bg-blue-500" },
+                { label: "Total Impressions", value: totalViews.toLocaleString(), icon: MousePointer2, color: "bg-purple-500" },
                 { label: "Community Loves", value: totalFavorites, icon: Heart, color: "bg-red-500" },
-                { label: "Global Reviews", value: totalReviews, icon: Star, color: "bg-yellow-500" },
+                { 
+                  label: "Conversion Rate", 
+                  value: `${conversionRate}%`, 
+                  icon: Percent, 
+                  color: "bg-indigo-500",
+                  tooltip: "The percentage of visitors who converted into collectors. A healthy rate is between 2% and 5%."
+                },
                 { label: "Studio Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: BarChart3, color: "bg-green-500" },
               ].map((stat, i) => (
                 <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
                   <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6", stat.color)}>
                     <stat.icon className="w-6 h-6" />
                   </div>
-                  <p className="text-xs font-black text-primary/40 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <div className="flex items-center gap-2 mb-1 group relative">
+                    <p className="text-xs font-black text-primary/40 uppercase tracking-widest">{stat.label}</p>
+                    {stat.tooltip && (
+                      <>
+                        <Info className="w-3 h-3 text-primary/20 cursor-help" />
+                        <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl leading-relaxed">
+                          {stat.tooltip}
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <p className="text-3xl font-heading font-bold text-primary">{stat.value}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Pro Insights */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-primary text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest mb-6">
+                    <Sparkles className="w-3 h-3" />
+                    Most Desired Treasure
+                  </div>
+                  {(() => {
+                    const topViewed = [...products].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+                    if (!topViewed) return <p className="text-white/40 italic">Gallery currently empty...</p>;
+                    return (
+                      <div className="flex items-center gap-6">
+                        <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                          <BespokeImage src={topViewed.images[0]} alt="" fill className="object-cover" />
+                        </div>
+                        <div>
+                          <h4 className="text-2xl font-heading font-bold mb-1">{topViewed.name}</h4>
+                          <p className="text-white/40 text-sm font-medium">Accumulated {topViewed.views || 0} global impressions</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+              </div>
+
+              <div className="bg-white p-10 rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest mb-6">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Best-Selling Piece
+                </div>
+                {(() => {
+                  const topSold = [...products].sort((a, b) => {
+                    const aSales = sales.filter(s => s.productId === a.id).length;
+                    const bSales = sales.filter(s => s.productId === b.id).length;
+                    return bSales - aSales;
+                  })[0];
+                  if (!topSold) return <p className="text-charcoal/30 italic">Waiting for the first sale...</p>;
+                  const soldCount = sales.filter(s => s.productId === topSold.id).length;
+                  return (
+                    <div className="flex items-center gap-6">
+                      <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-primary/5 shrink-0">
+                        <BespokeImage src={topSold.images[0]} alt="" fill className="object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-heading font-bold text-primary mb-1">{topSold.name}</h4>
+                        <p className="text-charcoal/40 text-sm font-medium">{soldCount} units traveling to collectors</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
 
             <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
@@ -237,7 +321,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           </div>
         )}
 
-        {activeTab === "inventory" ? (
+        {activeTab === "inventory" && (
           /* Inventory Section */
           <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
@@ -267,7 +351,11 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                 </div>
               ) : (
                 products.map((p: any) => (
-                  <div key={p.id} className="group relative bg-cream/30 rounded-[2.5rem] border border-primary/5 overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all">
+                  <motion.div 
+                    layout
+                    key={p.id} 
+                    className="group relative bg-cream/30 rounded-[2.5rem] border border-primary/5 overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal"
+                  >
                     <div className="relative aspect-square overflow-hidden">
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
                       <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
@@ -312,12 +400,14 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               )}
             </div>
           </div>
-        ) : activeTab === 'sales' ? (
+        )}
+
+        {activeTab === "sales" && (
           <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-charcoal">
             <div className="mb-12">
               <h2 className="text-4xl font-heading font-bold text-primary">Sales & <span className="serif italic font-normal text-accent">Fulfillment</span></h2>
@@ -498,7 +588,9 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
               )}
             </div>
           </div>
-        ) : activeTab === "reviews" ? (
+        )}
+
+        {activeTab === "reviews" && (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {reviews.length === 0 ? (
@@ -572,8 +664,10 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
               )}
             </div>
           </div>
-        ) : null}
-      </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
 
       {selectedProductForEdit && (
         <div className="no-print">

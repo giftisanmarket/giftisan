@@ -278,6 +278,20 @@ export async function getUserFavorites(userId: string) {
 
 export async function createOrder(userId: string, totalAmount: number, items: any[], shippingData?: any) {
   try {
+    // 🛡️ Final Inventory Guard: Verify stock for all items before processing
+    for (const item of items) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.id },
+        select: { stock: true, name: true }
+      });
+
+      if (!product || product.stock < item.quantity) {
+        return { 
+          error: `The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.` 
+        };
+      }
+    }
+
     const order = await prisma.order.create({
       data: {
         userId,
@@ -1024,6 +1038,19 @@ export async function markMessagesAsRead(userId: string, senderId: string) {
     revalidatePath("/profile/messages");
     return { success: true };
   } catch (error) {
+    return { success: false };
+  }
+}
+
+export async function trackProductView(productId: string) {
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { views: { increment: 1 } }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to track view:", error);
     return { success: false };
   }
 }

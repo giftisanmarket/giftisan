@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Heart, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function FavoritesPage() {
   const { favorites, toggleFavorite } = useFavorites();
@@ -69,10 +70,22 @@ export default function FavoritesPage() {
                     <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
                       <button 
                         onClick={() => addToCart(product)}
-                        className="flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 group"
+                        disabled={(product.stock || 0) <= 0}
+                        className={cn(
+                          "flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 group",
+                          (product.stock || 0) > 0 
+                            ? "hover:bg-primary-light shadow-primary/20" 
+                            : "opacity-40 grayscale !cursor-not-allowed pointer-events-auto"
+                        )}
                       >
-                        <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        Move to Cart
+                        {(product.stock || 0) > 0 ? (
+                          <>
+                            <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Move to Cart
+                          </>
+                        ) : (
+                          "Sold Out"
+                        )}
                       </button>
                       <button 
                         onClick={() => toggleFavorite(product)}

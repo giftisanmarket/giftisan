@@ -13,6 +13,7 @@ export interface Product {
   category: string;
   tags: string[];
   canPersonalize?: boolean;
+  stock?: number;
   reviews: {
     user: string;
     rating: number;

@@ -5,12 +5,12 @@ import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
 import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
 import { ContactArtisanButton } from "@/components/contact-artisan-button";
-import { addReview } from "@/lib/actions";
+import { addReview, trackProductView } from "@/lib/actions";
 import { useSession } from "next-auth/react";
 import { BespokeImage } from "./bespoke-image";
 import Image from "next/image";
@@ -27,6 +27,10 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [reviewImages, setReviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  useEffect(() => {
+    trackProductView(product.id);
+  }, [product.id]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -255,7 +259,12 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 <button
                   onClick={() => addToCart(product, personalization)}
                   disabled={(product.stock || 0) <= 0}
-                  className="flex-1 h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:bg-charcoal/20 disabled:shadow-none disabled:cursor-not-allowed"
+                  className={cn(
+                    "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3",
+                    (product.stock || 0) > 0 
+                      ? "hover:bg-primary-light shadow-primary/20" 
+                      : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
+                  )}
                 >
                   {(product.stock || 0) > 0 ? `Add to Cart — $${product.price}` : "Out of Stock"}
                 </button>
@@ -276,9 +285,15 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   addToCart(product, personalization, true);
                   window.location.href = "/checkout";
                 }}
-                className="w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-3 transition-all active:scale-95"
+                disabled={(product.stock || 0) <= 0}
+                className={cn(
+                  "w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 transition-all active:scale-95",
+                  (product.stock || 0) > 0 
+                  ? "hover:bg-primary/5" 
+                  : "opacity-30 grayscale !cursor-not-allowed pointer-events-auto"
+                )}
               >
-                Buy It Now
+                {(product.stock || 0) > 0 ? "Buy It Now" : "Currently Unavailable"}
               </button>
             </div>
 

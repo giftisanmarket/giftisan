@@ -6,9 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "./bespoke-image";
+import { cn } from "@/lib/utils";
 
 export function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const hasUnavailableItems = cart.some(item => (item.stock || 0) <= 0);
 
   return (
     <AnimatePresence>
@@ -66,7 +68,12 @@ export function CartDrawer() {
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between">
                         <h3 className="font-heading font-bold text-primary leading-tight line-clamp-1">{item.name}</h3>
-                        <p className="font-bold text-primary">${item.price * item.quantity}</p>
+                        <div className="text-right">
+                          <p className="font-bold text-primary">${item.price * item.quantity}</p>
+                          {(item.stock || 0) <= 0 && (
+                            <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">Sold Out</span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-accent font-bold uppercase tracking-widest">{item.artisan.name}</p>
                       {item.personalization && (
@@ -115,11 +122,22 @@ export function CartDrawer() {
                 </div>
                 <p className="text-xs text-charcoal/40 text-center">Shipping & taxes calculated at checkout</p>
                 <Link 
-                  href="/checkout"
-                  onClick={() => setIsCartOpen(false)}
-                  className="w-full h-14 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center"
+                  href={hasUnavailableItems ? "#" : "/checkout"}
+                  onClick={(e) => {
+                    if (hasUnavailableItems) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setIsCartOpen(false);
+                  }}
+                  className={cn(
+                    "w-full h-14 font-bold rounded-full transition-all shadow-xl flex items-center justify-center",
+                    hasUnavailableItems 
+                      ? "bg-charcoal/10 text-charcoal/40 !cursor-not-allowed shadow-none pointer-events-auto" 
+                      : "bg-primary text-white hover:bg-primary-light shadow-primary/20"
+                  )}
                 >
-                  Proceed to Checkout
+                  {hasUnavailableItems ? "Please Review Sold Out Items" : "Proceed to Checkout"}
                 </Link>
               </div>
             )}

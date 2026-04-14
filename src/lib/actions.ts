@@ -709,14 +709,19 @@ export async function toggleArtisanVerification(artisanId: string, status: boole
   }
 }
 
-export async function sendMessage(senderId: string, receiverId: string, content: string, productId?: string) {
+export async function sendMessage(senderId: string, receiverId: string, content: string, productId?: string, attachment?: string) {
+  if (!senderId || !receiverId) {
+    return { error: "Missing sender or receiver ID" };
+  }
+
   try {
     const message = await prisma.message.create({
       data: {
         senderId,
         receiverId,
-        content,
-        productId
+        content: content || "",
+        productId: productId || null,
+        attachment: attachment || null
       },
       include: {
         sender: true,
@@ -726,7 +731,10 @@ export async function sendMessage(senderId: string, receiverId: string, content:
     });
     return { success: true, message };
   } catch (error: any) {
-    console.error("Send message error:", error);
+    console.error("CRITICAL Send message error:", error.code, error.message || error);
+    if (error.code === 'P2003') {
+      return { error: "Could not send message: one of the users or the product no longer exists." };
+    }
     return { error: error.message || "Failed to send message" };
   }
 }
@@ -745,7 +753,8 @@ export async function getInbox(userId: string) {
         receiver: true,
         product: true
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 100
     });
   } catch (error) {
     console.error("Get inbox error:", error);

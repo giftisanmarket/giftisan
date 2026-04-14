@@ -346,12 +346,14 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                     <BespokeImage src={product.artisan.avatar} alt={product.artisan.studioName || product.artisan.user.name} fill className="object-cover" />
                   </div>
                   <div className="space-y-6">
-                    <div>
-                      <div className="flex items-center gap-2 justify-center md:justify-start">
-                        <h3 className="text-3xl font-heading font-bold text-primary mb-2">{product.artisan.studioName || product.artisan.user.name}</h3>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3 justify-center md:justify-start">
+                        <h3 className="text-4xl font-heading font-bold text-primary leading-tight">{product.artisan.studioName || product.artisan.user.name}</h3>
                         {product.artisan.isVerified && <CheckCircle2 className="w-6 h-6 text-accent" />}
                       </div>
-                      <p className="text-accent font-black uppercase tracking-widest text-sm">{product.artisan.studioName}</p>
+                      <p className="text-accent font-black uppercase tracking-[0.2em] text-[10px]">
+                        Master Artisan: {product.artisan.user.name}
+                      </p>
                     </div>
                     <p className="text-lg text-charcoal/70 italic leading-relaxed">
                       "{product.artisan.bio}"

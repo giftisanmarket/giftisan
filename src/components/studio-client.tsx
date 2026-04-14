@@ -175,7 +175,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
         </div>
 
         {/* Tab Switching */}
-        <div className="flex gap-4 mb-8 overflow-x-auto pb-4 scrollbar-hide whitespace-nowrap">
+        <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
           <button 
             onClick={() => setActiveTab("inventory")}
             className={cn(
@@ -194,7 +194,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           >
             <Package className="w-4 h-4" /> Sales & Fulfillment
             {sales.filter(s => s.status === "PENDING").length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] flex items-center justify-center rounded-full border-2 border-cream animate-bounce">
+              <span className="absolute -top-2 -right-2 w-7 h-7 bg-accent text-white text-xs flex items-center justify-center rounded-full border-2 border-white shadow-2xl animate-bounce z-50">
                 {sales.filter(s => s.status === "PENDING").length}
               </span>
             )}

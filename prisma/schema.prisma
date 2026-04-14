@@ -58,6 +58,7 @@ model Message {
 
   createdAt   DateTime @default(now())
   read        Boolean  @default(false)
+  attachment  String?  @db.Text
 }
 
 model Account {

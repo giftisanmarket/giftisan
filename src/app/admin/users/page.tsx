@@ -38,8 +38,13 @@ export default async function AdminUsersPage() {
               <tr key={user.id} className="hover:bg-cream/30 transition-colors group">
                 <td className="px-8 py-6">
                   <div className="flex items-center gap-4">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary/5 shadow-sm">
-                      <Image src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} alt={user.name} fill className="object-cover" />
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary/5 shadow-sm bg-cream">
+                      <Image 
+                        src={user.artisanProfile?.avatar || user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                        alt={user.name} 
+                        fill 
+                        className="object-cover" 
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-primary">{user.name}</p>
@@ -64,8 +69,12 @@ export default async function AdminUsersPage() {
                         <Store className="w-4 h-4 text-accent" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-primary group-hover/studio:text-accent transition-colors">{user.artisanProfile.studioName}</p>
-                        <p className="text-[10px] text-charcoal/40 italic mb-2">{user.artisanProfile.location}</p>
+                        <p className="text-xs font-bold text-primary group-hover/studio:text-accent transition-colors">
+                          {user.artisanProfile.studioName || `${user.name}'s Studio`}
+                        </p>
+                        <p className="text-[10px] text-charcoal/40 italic mb-2">
+                          {user.artisanProfile.location || "Global Studio"}
+                        </p>
                         <VerifyArtisanButton artisanId={user.artisanProfile.id} currentStatus={user.artisanProfile.isVerified} />
                       </div>
                     </div>

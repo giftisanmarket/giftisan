@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail } from "@/lib/mail";
+import { generateVerificationToken } from "@/lib/tokens";
 
 export async function uploadImage(base64Data: string) {
   try {
@@ -71,6 +73,10 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
       });
     }
 
+    // Generate verification token and send email
+    const verificationToken = await generateVerificationToken(email);
+    await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
+
     return { success: true };
   } catch (error) {
     console.error("Signup error:", error);
@@ -95,6 +101,9 @@ export async function login(formData: any) {
     return { success: true };
   } catch (error) {
     if (error instanceof AuthError) {
+      if (error.cause?.err?.message === "UNVERIFIED_EMAIL") {
+        return { error: "Please verify your email address before logging in. Check your inbox for a link!" };
+      }
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials." };
@@ -104,6 +113,30 @@ export async function login(formData: any) {
     }
     // For manual client-side handling, we don't want to throw the redirect here
     return { error: "An unexpected error occurred." };
+  }
+}
+
+export async function resendVerificationEmailAction(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      return { error: "User not found." };
+    }
+
+    if (user.emailVerified) {
+      return { error: "Email is already verified." };
+    }
+
+    const verificationToken = await generateVerificationToken(email);
+    await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    return { error: "Failed to resend verification email." };
   }
 }
 
@@ -278,6 +311,50 @@ export async function createOrder(userId: string, totalAmount: number, items: an
           }
         }
       });
+    }
+
+    // Send notification emails to artisans (asynchronously)
+    try {
+      const orderWithArtisans = await prisma.order.findUnique({
+        where: { id: order.id },
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  artisan: {
+                    include: {
+                      user: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (orderWithArtisans) {
+        // Collect unique artisans
+        const artisans = new Map();
+        orderWithArtisans.items.forEach(item => {
+          const artisan = item.product.artisan;
+          if (artisan.user.email) {
+            artisans.set(artisan.user.email, {
+              name: artisan.user.name || artisan.studioName,
+              email: artisan.user.email
+            });
+          }
+        });
+
+        // Send emails
+        artisans.forEach(artisan => {
+          sendOrderNotification(artisan.email, artisan.name, order.id, totalAmount)
+            .catch(err => console.error(`Failed to send order notification to ${artisan.email}:`, err));
+        });
+      }
+    } catch (err) {
+      console.error("Failed to process order notification emails:", err);
     }
 
     return { success: true, orderId: order.id };
@@ -768,6 +845,16 @@ export async function sendMessage(senderId: string, receiverId: string, content:
         product: true
       }
     });
+
+    // Send notification email to receiver (asynchronously)
+    if (message.receiver.email) {
+      sendMessageNotification(
+        message.receiver.email, 
+        message.receiver.name || "Artisan", 
+        message.sender.name || "A customer"
+      ).catch(err => console.error("Failed to send message notification:", err));
+    }
+
     return { success: true, message };
   } catch (error: any) {
     console.error("CRITICAL Send message error:", error.code, error.message || error);

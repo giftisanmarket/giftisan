@@ -6,6 +6,32 @@ import { signIn } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
+import cloudinary from "@/lib/cloudinary";
+
+export async function uploadImage(base64Data: string) {
+  try {
+    if (base64Data.startsWith('http')) {
+      return { success: true, url: base64Data };
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(base64Data, {
+      folder: "giftisan",
+    });
+    return { success: true, url: uploadResponse.secure_url };
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    return { success: false, error: "Failed to upload image" };
+  }
+}
+
+async function processImage(imageSource: string | null | undefined): Promise<string | null> {
+  if (!imageSource) return null;
+  if (imageSource.startsWith('data:image')) {
+    const res = await uploadImage(imageSource);
+    if (res.success && res.url) return res.url;
+  }
+  return imageSource;
+}
 
 export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
   const { name, email, password } = formData;
@@ -339,6 +365,9 @@ export async function updateArtisanProfile(userId: string, data: any) {
       : null;
 
 
+    const avatarUrl = await processImage(data.avatar);
+    const bannerUrl = await processImage(data.bannerImage);
+
     const updated = await prisma.artisanProfile.upsert({
       where: { userId },
       create: {
@@ -347,28 +376,28 @@ export async function updateArtisanProfile(userId: string, data: any) {
         slug,
         bio: data.bio || null,
         location: data.location || null,
-        avatar: data.avatar || null,
+        avatar: avatarUrl || null,
         instagram: data.instagram || null,
         website: data.website || null,
         pinterest: data.pinterest || null,
         tiktok: data.tiktok || null,
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
-        bannerImage: data.bannerImage || null
+        bannerImage: bannerUrl || null
       },
       update: {
         studioName: data.studioName || null,
         slug,
         bio: data.bio || null,
         location: data.location || null,
-        avatar: data.avatar || null,
+        avatar: avatarUrl || null,
         instagram: data.instagram || null,
         website: data.website || null,
         pinterest: data.pinterest || null,
         tiktok: data.tiktok || null,
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
-        bannerImage: data.bannerImage || null
+        bannerImage: bannerUrl || null
       }
     });
     
@@ -399,6 +428,11 @@ export async function updateArtisanProfile(userId: string, data: any) {
 export async function createProduct(artisanId: string, data: any) {
   try {
     const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
+    const uploadedImages = await Promise.all(
+      (data.images || []).map((img: string) => processImage(img))
+    );
+    const finalImages = uploadedImages.filter(img => img !== null) as string[];
+
     const product = await prisma.product.create({
       data: {
         artisanId,
@@ -407,7 +441,7 @@ export async function createProduct(artisanId: string, data: any) {
         description: data.description,
         price: parseFloat(data.price),
         category: data.category,
-        images: data.images,
+        images: finalImages,
         canPersonalize: data.canPersonalize || false,
         badge: data.badge || null,
         stock: parseInt(data.stock) || 1,
@@ -534,7 +568,11 @@ export async function updateProduct(productId: string, data: any) {
     if (isNaN(rawPrice)) return { error: "Invalid price format" };
     if (isNaN(rawStock)) return { error: "Invalid stock number" };
 
-    const slug = `${slugify(data.name)}-${productId.slice(-4)}`;
+    const uploadedImages = await Promise.all(
+      (data.images || []).map((img: string) => processImage(img))
+    );
+    const finalImages = uploadedImages.filter(img => img !== null) as string[];
+
     const product = await prisma.product.update({
       where: { id: productId },
       data: {
@@ -543,7 +581,7 @@ export async function updateProduct(productId: string, data: any) {
         description: data.description,
         price: rawPrice,
         category: data.category,
-        images: Array.isArray(data.images) ? data.images : [],
+        images: finalImages,
         canPersonalize: !!data.canPersonalize,
         badge: data.badge || null,
         stock: rawStock,
@@ -715,13 +753,15 @@ export async function sendMessage(senderId: string, receiverId: string, content:
   }
 
   try {
+    const attachmentUrl = await processImage(attachment);
+
     const message = await prisma.message.create({
       data: {
         senderId,
         receiverId,
         content: content || "",
         productId: productId || null,
-        attachment: attachment || null
+        attachment: attachmentUrl
       },
       include: {
         sender: true,

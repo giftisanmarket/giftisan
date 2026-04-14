@@ -57,7 +57,7 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
     if (targetUserId) {
       const threadToSelect = threads.find((t: any) => t.partner.id === targetUserId);
       if (threadToSelect) {
-        setSelectedThreadKey(threadToSelect.key);
+        setSelectedThreadKey((threadToSelect as any).key);
       }
     }
   }, [targetUserId, threads]);

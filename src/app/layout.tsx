@@ -57,7 +57,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  },
 };
 
 import { SessionProvider } from "next-auth/react";

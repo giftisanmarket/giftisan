@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, User, Lock, ArrowRight } from "lucide-react";
+import { ArrowLeft, User, Lock, ArrowRight, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { login } from "@/lib/actions";
@@ -15,7 +15,10 @@ export function LoginClient() {
   const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  
   const signupSuccess = searchParams.get("signup") === "success";
+  const emailVerified = searchParams.get("success") === "EmailVerified";
+  const loginError = searchParams.get("error");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +31,6 @@ export function LoginClient() {
       setError(res.error);
       setIsLoading(false);
     } else if (res?.success) {
-      // Deep refresh using window.location to force a 
-      // full cache purge and session synchronization
       window.location.href = "/";
     }
   };
@@ -84,17 +85,28 @@ export function LoginClient() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {signupSuccess && (
-              <div className="p-4 bg-green-50 border border-green-100 rounded-2xl">
+              <div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-green-600 flex-shrink-0" />
                 <p className="text-sm font-bold text-green-700 italic">
-                  ✨ Welcome to the Circle! Your studio is ready. Please sign in.
+                  Welcome to the Circle! Your studio is ready. Please sign in.
                 </p>
               </div>
             )}
 
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
+            {emailVerified && (
+              <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
+                <p className="text-sm font-bold text-primary italic">
+                  Email verified! Your account is now fully active.
+                </p>
+              </div>
+            )}
+
+            {(error || loginError) && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                 <p className="text-sm font-bold text-red-500 italic">
-                  {error}
+                  {error || loginError}
                 </p>
               </div>
             )}

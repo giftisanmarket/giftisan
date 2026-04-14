@@ -86,9 +86,17 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
     e.target.value = "";
   };
 
+  interface Thread {
+    key: string;
+    partner: any;
+    product: any;
+    messages: any[];
+    lastMessage: any;
+  }
+
   // Memoize threads to prevent infinite loops and unnecessary re-renders
-  const threads = useMemo(() => {
-    const threadsMap = messages.reduce((acc: any, m) => {
+  const threads = useMemo<Thread[]>(() => {
+    const threadsMap = (messages || []).reduce((acc: Record<string, Thread>, m) => {
       const partnerId = m.senderId === userId ? m.receiverId : m.senderId;
       const threadKey = `${[userId, partnerId].sort().join("-")}-${m.productId || "general"}`;
       
@@ -108,7 +116,7 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
       return acc;
     }, {});
 
-    return Object.values(threadsMap).sort((a: any, b: any) => 
+    return Object.values(threadsMap).sort((a: Thread, b: Thread) => 
       new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
     );
   }, [messages, userId]);

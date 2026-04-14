@@ -577,7 +577,6 @@ export async function updateProduct(productId: string, data: any) {
       where: { id: productId },
       data: {
         name: data.name,
-        slug,
         description: data.description,
         price: rawPrice,
         category: data.category,

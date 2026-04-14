@@ -2,6 +2,15 @@ import { searchProducts } from "@/lib/actions";
 import { Navbar } from "@/components/navbar";
 import { SearchClient } from "@/components/search-client";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { q } = await searchParams;
+  return {
+    title: q ? `Search results for "${q}"` : "Search Treasures",
+    description: "Find the perfect handcrafted gift or artisanal treasure across our global marketplace.",
+  };
+}
 
 interface Props {
   searchParams: Promise<{ q?: string }>;

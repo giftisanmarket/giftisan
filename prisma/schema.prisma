@@ -104,6 +104,8 @@ model ArtisanProfile {
   studioName String?
   slug       String?  @unique
   isVerified Boolean  @default(false)
+  instagram  String?
+  website    String?
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
@@ -192,6 +194,8 @@ model OrderItem {
   price     Float
   personalization String?
   status    String  @default("PENDING")
+  trackingNumber String?
+  carrier   String?
 
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)

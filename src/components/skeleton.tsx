@@ -1,17 +1,16 @@
 import { cn } from "@/lib/utils";
 
-interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SkeletonProps {
   className?: string;
 }
 
-export function Skeleton({ className, ...props }: SkeletonProps) {
+export function Skeleton({ className }: SkeletonProps) {
   return (
-    <div
+    <div 
       className={cn(
-        "relative overflow-hidden rounded-md bg-primary/[0.03] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent",
+        "animate-pulse bg-primary/5 rounded-2xl", 
         className
-      )}
-      {...props}
+      )} 
     />
   );
 }

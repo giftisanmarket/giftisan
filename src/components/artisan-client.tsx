@@ -104,7 +104,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 rotate-3 group"
+              className="relative w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group"
             >
               <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="192px" />
             </motion.div>
@@ -113,10 +113,12 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             <div className="flex-1 text-center md:text-left space-y-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <h1 className="text-5xl font-heading font-bold text-primary">{artisan.user.name}</h1>
-                <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Verified Artisan</span>
-                </div>
+                {artisan.isVerified && (
+                  <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200 shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Verified Artisan</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-center md:justify-start gap-6 text-charcoal/60">
@@ -152,24 +154,38 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     </>
                   ) : isPending ? "Wait..." : "Follow Studio"}
                 </button>
-                <button className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors">
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    className="w-5 h-5 text-primary"
+                {artisan.instagram && (
+                  <a 
+                    href={`https://instagram.com/${artisan.instagram}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
                   >
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </button>
-                <button className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors">
-                  <Globe className="w-5 h-5 text-primary" />
-                </button>
+                    <svg 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      className="w-5 h-5 text-primary"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </a>
+                )}
+                {artisan.website && (
+                  <a 
+                    href={artisan.website.startsWith('http') ? artisan.website : `https://${artisan.website}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors"
+                  >
+                    <Globe className="w-5 h-5 text-primary" />
+                  </a>
+                )}
                 <button 
                   onClick={handleShare}
                   className="p-3 border border-primary/10 rounded-full hover:bg-primary/5 transition-colors group"

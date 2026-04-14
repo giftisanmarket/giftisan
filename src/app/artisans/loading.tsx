@@ -3,6 +3,15 @@ import { Skeleton } from "@/components/skeleton";
 export default function ArtisansLoading() {
   return (
     <div className="min-h-screen bg-cream pb-24">
+      {/* Navbar Skeleton */}
+      <div className="h-20 border-b border-primary/5 px-4 flex items-center justify-between container mx-auto">
+        <Skeleton className="w-32 h-10 rounded-lg" />
+        <div className="flex gap-4">
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <Skeleton className="w-10 h-10 rounded-full" />
+        </div>
+      </div>
+
       {/* Header Skeleton */}
       <div className="py-24 bg-white border-b border-primary/5">
         <div className="container mx-auto px-4 text-center space-y-4">

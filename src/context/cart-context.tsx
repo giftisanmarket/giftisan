@@ -10,7 +10,7 @@ interface CartItem extends Product {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, personalization?: string) => void;
+  addToCart: (product: Product, personalization?: string, skipOpen?: boolean) => void;
   removeFromCart: (productId: string, personalization?: string) => void;
   updateQuantity: (productId: string, quantity: number, personalization?: string) => void;
   totalItems: number;
@@ -39,7 +39,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('giftisan-cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product, personalization?: string) => {
+  const addToCart = (product: Product, personalization?: string, skipOpen = false) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (item) => item.id === product.id && item.personalization === personalization
@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prevCart, { ...product, quantity: 1, personalization }];
     });
-    setIsCartOpen(true);
+    if (!skipOpen) setIsCartOpen(true);
   };
 
   const removeFromCart = (productId: string, personalization?: string) => {

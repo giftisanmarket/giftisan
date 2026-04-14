@@ -13,7 +13,9 @@ import {
   CreditCard,
   Heart,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Truck,
+  MessageCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { signOut } from "next-auth/react";
@@ -157,7 +159,8 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
 
                       <div className="p-8 space-y-6">
                         {order.items.map((item: any) => (
-                          <div key={item.id} className="flex gap-6 items-center">
+                          <div key={item.id} className="border-b last:border-0 border-primary/5 pb-8 last:pb-0">
+                            <div className="flex gap-6 items-center">
                             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-inner bg-cream">
                               <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                             </div>
@@ -182,15 +185,42 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                               <p className="text-xs font-bold text-primary group-hover:text-accent transition-colors">{item.product.artisan.user.name}</p>
                             </Link>
 
-                            <div className={cn(
-                              "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0",
-                              item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
-                              item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                              "bg-green-50 text-green-600 border-green-200"
-                            )}>
-                              {item.status}
+                            <div className="flex flex-col items-end gap-3">
+                              <div className={cn(
+                                "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0",
+                                item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                                item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                                "bg-green-50 text-green-600 border-green-200"
+                              )}>
+                                {item.status}
+                              </div>
+                              <Link 
+                                href={`/profile/messages?userId=${item.product.artisan.userId}`}
+                                className="flex items-center gap-2 text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                Contact Artisan
+                              </Link>
                             </div>
                           </div>
+                          {item.status === "SHIPPED" && item.trackingNumber && (
+                            <div className="mt-4 p-5 bg-primary/5 rounded-[2rem] border border-primary/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-accent shadow-sm">
+                                  <Truck className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40 leading-none mb-1">Package in Transit</p>
+                                  <p className="text-sm font-bold text-primary">{item.carrier}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col md:items-end">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/20 leading-none mb-1">Tracking ID</p>
+                                <p className="text-sm font-mono font-bold text-primary">{item.trackingNumber}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         ))}
                       </div>
                     </motion.div>

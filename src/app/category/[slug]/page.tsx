@@ -16,6 +16,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${categoryName} | Giftisan`,
       description: `Premium handcrafted ${slug} from independent artisans.`,
+      images: ["/hero.png"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${categoryName} Treasures | Giftisan`,
+      description: `Discover unique ${slug} from our master artisans.`,
+      images: ["/hero.png"],
     }
   };
 }

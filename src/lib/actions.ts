@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
+import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 
@@ -340,7 +341,9 @@ export async function updateArtisanProfile(userId: string, data: any) {
         slug,
         bio: data.bio,
         location: data.location,
-        avatar: data.avatar
+        avatar: data.avatar,
+        instagram: data.instagram,
+        website: data.website
       }
     });
     
@@ -358,9 +361,13 @@ export async function updateArtisanProfile(userId: string, data: any) {
         avatar: updated.avatar
       } 
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Update artisan error:", error);
-    return { error: "Failed to update studio profile" };
+    // Return specific message for unique constraint (slug/studioName)
+    if (error.code === 'P2002') {
+      return { error: "This Studio Name is already taken. Please try another one." };
+    }
+    return { error: error.message || "Failed to update studio profile" };
   }
 }
 
@@ -425,18 +432,22 @@ export async function getArtisanSales(artisanId: string) {
   }
 }
 
-export async function updateOrderItemStatus(itemId: string, status: string) {
+export async function updateOrderItemStatus(itemId: string, status: string, trackingNumber?: string, carrier?: string) {
   try {
     await prisma.orderItem.update({
       where: { id: itemId },
       data: {
-        status: status
+        status: status,
+        trackingNumber: trackingNumber || undefined,
+        carrier: carrier || undefined,
       }
     });
+    
+    revalidatePath("/studio");
     return { success: true };
-  } catch (error) {
-    console.error("Update status error:", error);
-    return { error: "Failed to update item status" };
+  } catch (error: any) {
+    console.error("CRITICAL Update status error:", error.message || error);
+    return { error: `Failed to update item status: ${error.message || "Unknown error"}` };
   }
 }
 
@@ -715,7 +726,6 @@ export async function updateUser(userId: string, formData: FormData) {
     return { error: "Failed to update profile" };
   }
 }
-import { revalidatePath } from "next/cache";
 
 export async function toggleFollowAction(artisanId: string, userId: string) {
   try {

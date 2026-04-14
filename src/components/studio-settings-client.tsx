@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check } from "lucide-react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle } from "lucide-react";
 import { updateArtisanProfile } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -16,8 +16,11 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const [bio, setBio] = useState(artisan.bio || "");
   const [location, setLocation] = useState(artisan.location || "");
   const [avatar, setAvatar] = useState(artisan.avatar || "");
+  const [instagram, setInstagram] = useState(artisan.instagram || "");
+  const [website, setWebsite] = useState(artisan.website || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorStatus, setErrorStatus] = useState<string | null>(null);
 
   const [activeSettingsTab, setActiveSettingsTab] = useState("Studio Profile");
 
@@ -29,7 +32,9 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       studioName, 
       bio, 
       location, 
-      avatar 
+      avatar,
+      instagram,
+      website 
     });
     
     if (res.success) {
@@ -39,7 +44,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       setTimeout(() => setShowSuccess(false), 3000);
       router.refresh();
     } else {
-      alert("Failed to update studio");
+      setErrorStatus(res.error || "Failed to update studio");
+      setTimeout(() => setErrorStatus(null), 4000);
     }
     setIsSaving(false);
   };
@@ -82,6 +88,23 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             <div>
               <p className="text-sm font-black uppercase tracking-widest leading-none">Studio Updated</p>
               <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">Your branding is now live.</p>
+            </div>
+          </motion.div>
+        )}
+
+        {errorStatus && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            className="fixed bottom-10 right-10 z-[200] px-10 py-5 bg-white text-red-600 rounded-[2rem] font-bold flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-red-50 backdrop-blur-xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg">
+               <AlertCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-black uppercase tracking-widest leading-none">Update Failed</p>
+              <p className="text-[10px] text-red-600/60 mt-1 uppercase font-bold max-w-xs">{errorStatus}</p>
             </div>
           </motion.div>
         )}
@@ -186,6 +209,32 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <div className="w-full h-16 px-8 flex items-center rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden">
                           <span className="truncate w-full">{artisan.user.email}</span>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 pt-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Instagram Username</label>
+                        <div className="relative">
+                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold">@</span>
+                          <input 
+                            type="text" 
+                            value={instagram || ""}
+                            onChange={(e) => setInstagram(e.target.value)}
+                            className="w-full h-16 pl-10 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder="your.handle"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Portfolio / Website</label>
+                        <input 
+                          type="url" 
+                          value={website || ""}
+                          onChange={(e) => setWebsite(e.target.value)}
+                          className="w-full h-16 px-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                          placeholder="https://yourpage.com"
+                        />
                       </div>
                     </div>
                   </div>

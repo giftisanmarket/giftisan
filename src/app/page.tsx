@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import HomeClient from "@/components/home-client";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Giftisan | Home of Handcrafted Treasures",
+  description: "Explore a curated collection of artisanal gifts, bespoke jewelry, and unique handcrafted items from the world's most talented creators.",
+};
 
 export default async function Home() {
   const products = await prisma.product.findMany({

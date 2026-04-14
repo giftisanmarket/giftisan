@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
@@ -26,7 +26,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!session?.user?.id) return;
-    
+
     setIsSubmitting(true);
     const res = await addReview({
       productId: product.id,
@@ -83,24 +83,6 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
-              
-              {/* Refined Live Preview - Bottom Anchored */}
-              {product.canPersonalize && personalization && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute bottom-6 left-6 right-6 pointer-events-none"
-                >
-                  <div className="bg-primary/90 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10 shadow-2xl flex items-center justify-between gap-4">
-                    <div className="shrink-0">
-                      <p className="text-[9px] text-accent font-black uppercase tracking-widest">Live Preview</p>
-                    </div>
-                    <p className="serif italic text-lg text-white line-clamp-1 flex-1 text-right">
-                      {personalization}
-                    </p>
-                  </div>
-                </motion.div>
-              )}
             </motion.div>
 
             <div className="flex gap-4">
@@ -135,7 +117,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button 
+                <button
                   onClick={handleShare}
                   className="p-3 border border-primary/10 rounded-full hover:bg-white transition-all text-primary group"
                 >
@@ -168,7 +150,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
             {/* Artisan Quick Bio */}
             <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 group">
-              <Link 
+              <Link
                 href={`/artisans/${product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                 className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1"
               >
@@ -184,11 +166,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   <p className="text-sm text-charcoal/60">{product.artisan.location}</p>
                 </div>
               </Link>
-              
+
               <div className="px-6 md:px-0">
-                <ContactArtisanButton 
-                  artisanId={product.artisan.id} 
-                  artisanName={product.artisan.user.name} 
+                <ContactArtisanButton
+                  artisanId={product.artisan.id}
+                  artisanName={product.artisan.user.name}
                   productId={product.id}
                   productName={product.name}
                   artisanUserId={product.artisan.user.id}
@@ -199,7 +181,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             {product.canPersonalize && (
               <div className="bg-white/50 border border-primary/10 rounded-2xl p-6 mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xl">✨</span>
+                  <Sparkles className="w-5 h-5 text-accent" />
                   <h3 className="font-heading font-bold text-primary">Personalize Your Treasure</h3>
                 </div>
                 <p className="text-xs text-charcoal/50 mb-4">Our artisans will hand-emboss your text onto this piece.</p>
@@ -233,7 +215,13 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   <Heart className={cn("w-6 h-6", isFavorite(product.id) && "fill-current")} />
                 </button>
               </div>
-              <button className="w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-3">
+              <button 
+                onClick={() => {
+                  addToCart(product, personalization, true);
+                  window.location.href = "/checkout";
+                }}
+                className="w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-3 transition-all active:scale-95"
+              >
                 Buy It Now
               </button>
             </div>
@@ -258,7 +246,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
         {/* Deep Detail Tabs */}
         <section className="mt-24">
           <div className="border-b border-primary/10 flex gap-8 mb-12 overflow-x-auto whitespace-nowrap scrollbar-hide">
-            <button 
+            <button
               onClick={() => setActiveTab("details")}
               className={cn(
                 "pb-4 font-bold transition-all border-b-2",
@@ -267,7 +255,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             >
               Details
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("artisan")}
               className={cn(
                 "pb-4 font-bold transition-all border-b-2",
@@ -276,7 +264,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             >
               Artisan Story
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("reviews")}
               className={cn(
                 "pb-4 font-bold transition-all border-b-2",
@@ -287,7 +275,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             </button>
           </div>
 
-          <motion.div 
+          <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -310,7 +298,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   </ul>
                 </div>
                 <div className="relative aspect-video rounded-3xl overflow-hidden bg-primary/5 flex items-center justify-center">
-                   <p className="text-primary italic font-serif text-xl border border-primary/20 p-8 rounded-full border-dashed">
+                  <p className="text-primary italic font-serif text-xl border border-primary/20 p-8 rounded-full border-dashed">
                     Studio View: {product.artisan.studioName}
                   </p>
                 </div>
@@ -338,7 +326,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       <MapPin className="w-4 h-4" />
                       <span>Operating out of {product.artisan.location}</span>
                     </div>
-                    <Link 
+                    <Link
                       href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                       className="inline-flex items-center gap-2 px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all"
                     >
@@ -399,11 +387,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                                 onClick={() => setNewReview({ ...newReview, rating: star })}
                                 className="group"
                               >
-                                <Star 
+                                <Star
                                   className={cn(
                                     "w-6 h-6 transition-all",
                                     newReview.rating >= star ? "fill-accent text-accent scale-110" : "text-primary/10 group-hover:text-accent/30"
-                                  )} 
+                                  )}
                                 />
                               </button>
                             ))}
@@ -411,7 +399,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                         </div>
                         <div className="space-y-2">
                           <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Your Experience</label>
-                          <textarea 
+                          <textarea
                             required
                             value={newReview.comment}
                             onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
@@ -419,7 +407,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                             className="w-full h-32 p-4 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all text-sm font-bold text-primary placeholder:text-primary/40 resize-none shadow-inner"
                           />
                         </div>
-                        <button 
+                        <button
                           type="submit"
                           disabled={isSubmitting}
                           className="w-full h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
@@ -441,7 +429,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             )}
           </motion.div>
         </section>
-        
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="mt-32 pt-24 border-t border-primary/10">

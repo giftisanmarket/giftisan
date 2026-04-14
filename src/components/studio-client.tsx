@@ -3,6 +3,7 @@
 import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Plus, 
   BarChart3, 
@@ -16,15 +17,18 @@ import {
   Package,
   Clock,
   CheckCircle,
+  CheckCircle2,
   Truck,
   Phone,
-  Mail
+  Mail,
+  X,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { updateOrderItemStatus, deleteProduct } from "@/lib/actions";
-import { Trash2 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
 
 
@@ -34,6 +38,7 @@ interface StudioClientProps {
 }
 
 export function StudioClient({ artisan, sales }: StudioClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"inventory" | "sales">("inventory");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -41,6 +46,12 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [itemToPrint, setItemToPrint] = useState<any | null>(null);
+  const [shippingItem, setShippingItem] = useState<any | null>(null);
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [carrier, setCarrier] = useState("");
 
   const handleDelete = async () => {
     if (!productToDelete) return;
@@ -49,7 +60,9 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
     const res = await deleteProduct(productToDelete);
     
     if (res.success) {
-      window.location.reload();
+      router.refresh();
+      setProductToDelete(null);
+      setIsDeleting(null);
     } else {
       alert(res.error || "Failed to delete product");
       setIsDeleting(null);
@@ -61,8 +74,11 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
   const totalFavorites = products.reduce((acc: number, p: any) => acc + (p.favoritedBy?.length || 0), 0);
   const totalReviews = products.reduce((acc: number, p: any) => acc + (p.reviews?.length || 0), 0);
 
+  const totalRevenue = sales.reduce((acc, sale) => acc + (sale.price * sale.quantity), 0);
+
   return (
-    <main className="min-h-screen bg-cream">
+    <>
+      <main className="min-h-screen bg-cream">
       <Navbar />
 
       <AnimatePresence>
@@ -93,16 +109,16 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button 
                   onClick={() => setProductToDelete(null)}
-                  className="flex-1 h-14 bg-cream/50 text-primary font-bold rounded-full hover:bg-cream transition-all"
+                  className="flex-1 h-14 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
                 >
-                  Keep it
+                  Keep It
                 </button>
                 <button 
+                  disabled={isDeleting === productToDelete}
                   onClick={handleDelete}
-                  disabled={isDeleting !== null}
-                  className="flex-1 h-14 bg-red-500 text-white font-bold rounded-full hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
+                  className="flex-1 h-14 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
                 >
-                  {isDeleting ? "Removing..." : "Yes, Remove"}
+                  {isDeleting === productToDelete ? "Removing..." : "Delete Permanently"}
                 </button>
               </div>
             </motion.div>
@@ -112,7 +128,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
 
       <div className="container mx-auto px-4 pt-32 pb-20">
         {/* Studio Header */}
-        <div className="bg-primary text-white rounded-[3rem] p-8 md:p-16 mb-12 shadow-2xl shadow-primary/20 relative overflow-hidden">
+        <div className="relative bg-primary text-white rounded-[3rem] p-8 md:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
@@ -145,7 +161,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
             { label: "Active Treasures", value: products.length, icon: ShoppingBag, color: "bg-blue-500" },
             { label: "Community Loves", value: totalFavorites, icon: Heart, color: "bg-red-500" },
             { label: "Global Reviews", value: totalReviews, icon: Star, color: "bg-yellow-500" },
-            { label: "Studio Reach", value: "Global", icon: BarChart3, color: "bg-green-500" },
+            { label: "Studio Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: BarChart3, color: "bg-green-500" },
           ].map((stat, i) => (
             <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
               <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6", stat.color)}>
@@ -244,7 +260,7 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                         <h3 className="text-xl font-heading font-bold text-primary">{p.name}</h3>
                         <div className="flex items-center gap-1">
                           <span className={cn(
-                            "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight",
+                            "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap",
                             (p.stock || 0) > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                           )}>
                             {(p.stock || 0)} in stock
@@ -360,14 +376,12 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                         {item.status === "PENDING" && (
                           <button 
                             disabled={isUpdating === item.id}
-                            onClick={async () => {
-                              setIsUpdating(item.id);
-                              await updateOrderItemStatus(item.id, "SHIPPED");
-                              window.location.reload();
+                            onClick={() => {
+                              setShippingItem(item);
                             }}
-                            className="px-6 h-10 bg-primary text-white text-xs font-bold rounded-full hover:bg-primary-light transition-all flex items-center gap-2"
+                            className="px-6 h-10 bg-primary text-white text-xs font-bold rounded-full hover:bg-primary-light transition-all font-bold"
                           >
-                            {isUpdating === item.id ? "Updating..." : "Mark as Shipped"}
+                            Mark as Shipped
                           </button>
                         )}
                         {item.status === "SHIPPED" && (
@@ -376,16 +390,71 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
                             onClick={async () => {
                               setIsUpdating(item.id);
                               await updateOrderItemStatus(item.id, "DELIVERED");
-                              window.location.reload();
+                              router.refresh();
+                              setIsUpdating(null);
                             }}
                             className="px-6 h-10 bg-green-500 text-white text-xs font-bold rounded-full hover:bg-green-600 transition-all font-bold"
                           >
                             {isUpdating === item.id ? "Updating..." : "Mark as Delivered"}
                           </button>
                         )}
-                        <button className="w-10 h-10 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors">
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
+                        <div className="relative">
+                          <button 
+                            onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                            className={cn(
+                              "w-10 h-10 rounded-full border flex items-center justify-center transition-all",
+                              openMenuId === item.id ? "bg-primary text-white border-primary" : "border-primary/5 text-primary/40 hover:text-primary hover:border-primary/20"
+                            )}
+                          >
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+
+                          <AnimatePresence>
+                            {openMenuId === item.id && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                  className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-2xl border border-primary/5 p-2 z-50 overflow-hidden"
+                                >
+                                  <Link 
+                                    href={`/profile/messages?userId=${item.order.userId}`}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
+                                  >
+                                    <Mail className="w-4 h-4 text-accent" />
+                                    Contact Buyer
+                                  </Link>
+                                  <button 
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      setSelectedItem(item);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
+                                  >
+                                    <BarChart3 className="w-4 h-4 text-accent" />
+                                    Full Order Details
+                                  </button>
+                                  <button 
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      setItemToPrint(item);
+                                      setTimeout(() => {
+                                        window.print();
+                                        setItemToPrint(null);
+                                      }, 100);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
+                                  >
+                                    <Package className="w-4 h-4 text-accent" />
+                                    Print Packing Slip
+                                  </button>
+                                </motion.div>
+                              </>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -407,5 +476,261 @@ export function StudioClient({ artisan, sales }: StudioClientProps) {
         />
       )}
     </main>
+
+    {/* Order Details Modal */}
+    <AnimatePresence>
+      {selectedItem && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedItem(null)}
+            className="absolute inset-0 bg-primary/20 backdrop-blur-xl" 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden print-isolated"
+          >
+            <div className="p-12 md:p-16 space-y-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                    Sale Receipt #{selectedItem.orderId.slice(-6).toUpperCase()}
+                  </div>
+                  <h2 className="text-4xl font-heading font-bold text-primary">Order <span className="serif italic">Details</span></h2>
+                </div>
+                <button 
+                  onClick={() => setSelectedItem(null)}
+                  className="w-12 h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-12 pt-4">
+                <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Item Information</h3>
+                  <div className="flex gap-4">
+                    <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm">
+                      <Image src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-primary leading-tight">{selectedItem.product.name}</p>
+                      <p className="text-sm text-charcoal/60 mt-1 font-medium">Qty: {selectedItem.quantity}</p>
+                      <p className="text-lg font-heading font-bold mt-2 text-accent">${selectedItem.price.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
+                    <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/5">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-primary/40 mb-1">Shipment Tracking</p>
+                      <p className="text-xs font-bold text-primary flex items-center gap-2">
+                        <Truck className="w-3 h-3 text-accent" />
+                        {selectedItem.carrier}: {selectedItem.trackingNumber}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Buyer Details</h3>
+                  <div>
+                    <p className="font-bold text-primary">{selectedItem.order.user.name}</p>
+                    <p className="text-charcoal/60 text-sm font-medium mt-1">{selectedItem.order.user.email}</p>
+                    {selectedItem.order.clientPhone && (
+                      <p className="text-accent text-sm font-bold mt-2">{selectedItem.order.clientPhone}</p>
+                    )}
+                    <div className="mt-6 pt-6 border-t border-primary/5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">Shipping To</p>
+                      <p className="text-sm text-charcoal/60 leading-relaxed font-medium">
+                        {selectedItem.order.shippingAddress}<br />
+                        {selectedItem.order.shippingCity}, {selectedItem.order.shippingZip}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-10 flex flex-col md:flex-row items-center gap-6">
+                <Link 
+                  href={`/profile/messages?userId=${selectedItem.order.userId}`}
+                  className="w-full h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20"
+                >
+                  <Mail className="w-5 h-5" />
+                  Message Customer
+                </Link>
+                <button 
+                  onClick={() => {
+                    setItemToPrint(selectedItem);
+                    setTimeout(() => {
+                      window.print();
+                      setItemToPrint(null);
+                    }, 100);
+                  }}
+                  className="w-full md:w-fit px-10 h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
+                >
+                  Print Summary
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+
+    {/* Shipping Modal */}
+    <AnimatePresence>
+      {shippingItem && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShippingItem(null)}
+            className="absolute inset-0 bg-primary/20 backdrop-blur-xl" 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden p-10 md:p-12"
+          >
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                    Fulfillment Status
+                  </div>
+                  <h2 className="text-3xl font-heading font-bold text-primary">Ship <span className="serif italic">Item</span></h2>
+                </div>
+                <button 
+                  onClick={() => setShippingItem(null)}
+                  className="w-10 h-10 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Shipment Carrier</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Aramex, DHL, FedEx"
+                    value={carrier}
+                    onChange={(e) => setCarrier(e.target.value)}
+                    className="w-full h-14 px-6 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent transition-all font-bold text-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Tracking Number</label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter tracking ID..."
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    className="w-full h-14 px-6 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent transition-all font-bold text-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 space-y-3">
+                <button 
+                  onClick={async () => {
+                    setIsUpdating(shippingItem.id);
+                    const res = await updateOrderItemStatus(shippingItem.id, "SHIPPED", trackingNumber, carrier);
+                    if (res.success) {
+                      toast.success("Shipment data saved & buyer notified!", {
+                        icon: <div className="p-1 bg-green-500 rounded-full text-white"><CheckCircle2 className="w-4 h-4" /></div>,
+                        style: { borderRadius: '20px', background: '#1a4332', color: '#fff' }
+                      });
+                      setShippingItem(null);
+                      setTrackingNumber("");
+                      setCarrier("");
+                      router.refresh();
+                    } else {
+                      toast.error("Failed to update status");
+                    }
+                    setIsUpdating(null);
+                  }}
+                  disabled={!carrier || !trackingNumber || isUpdating === shippingItem.id}
+                  className="w-full h-16 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-light transition-all flex items-center justify-center disabled:opacity-50"
+                >
+                  {isUpdating === shippingItem.id ? "Updating..." : "Confirm & Mark as Shipped"}
+                </button>
+                <button 
+                  onClick={() => setShippingItem(null)}
+                  className="w-full h-16 text-primary/40 font-bold hover:text-primary transition-colors"
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+
+    {/* Hidden Printable Area */}
+    {itemToPrint && (
+      <div className="hidden print:block print-isolated p-10 bg-white">
+        <div className="flex items-center justify-between border-b pb-8 mb-8">
+          <div>
+            <h1 className="text-3xl font-heading font-bold text-primary">GIFTISAN</h1>
+            <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">Official Packing Slip</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(-6).toUpperCase()}</p>
+            <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-12 mb-12">
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">Ship To</h3>
+            <p className="font-bold text-primary">{itemToPrint.order.user.name}</p>
+            <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
+              {itemToPrint.order.shippingAddress}<br />
+              {itemToPrint.order.shippingCity}, {itemToPrint.order.shippingZip}<br />
+              {itemToPrint.order.shippingCountry || "Egypt"}<br />
+              {itemToPrint.order.clientPhone && <span className="font-bold text-primary">{itemToPrint.order.clientPhone}</span>}
+            </p>
+          </div>
+          <div className="text-right">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">From</h3>
+            <p className="font-bold text-primary">{artisan.studioName}</p>
+            <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
+              {artisan.location || "Egypt"}<br />
+              {artisan.user.email}
+            </p>
+          </div>
+        </div>
+
+        <table className="w-full mb-12">
+          <thead>
+            <tr className="border-b text-left">
+              <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40">Item</th>
+              <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-center">Qty</th>
+              <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-right">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b">
+              <td className="py-6 font-bold text-primary">{itemToPrint.product.name}</td>
+              <td className="py-6 text-center font-bold text-charcoal/60">{itemToPrint.quantity}</td>
+              <td className="py-6 text-right font-bold text-primary">${itemToPrint.price.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="text-center pt-8 border-t border-primary/5">
+          <p className="text-xs italic font-serif text-primary/60">"Thank you for supporting handcrafted excellence."</p>
+          <p className="text-[8px] uppercase font-black tracking-[0.2em] text-accent mt-4">giftisan.com</p>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { MessageSquare, Send, User, Package, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage } from "@/lib/actions";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
-export function MessagesClient({ initialMessages, userId }: { initialMessages: any[], userId: string }) {
+export function MessagesClient(props: { initialMessages: any[], userId: string }) {
+  return (
+    <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">Loading Inbox...</div>}>
+      <MessagesContent {...props} />
+    </Suspense>
+  );
+}
+
+function MessagesContent({ initialMessages, userId }: { initialMessages: any[], userId: string }) {
   const [messages, setMessages] = useState(initialMessages);
   const [reply, setReply] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const searchParams = useSearchParams();
+  const targetUserId = searchParams.get("userId");
 
   // Group messages into threads
   const threadsMap = messages.reduce((acc: any, m) => {
@@ -41,6 +52,15 @@ export function MessagesClient({ initialMessages, userId }: { initialMessages: a
   const [selectedThreadKey, setSelectedThreadKey] = useState<string | null>(
     threads.length > 0 ? (threads[0] as any).key : null
   );
+
+  useEffect(() => {
+    if (targetUserId) {
+      const threadToSelect = threads.find((t: any) => t.partner.id === targetUserId);
+      if (threadToSelect) {
+        setSelectedThreadKey(threadToSelect.key);
+      }
+    }
+  }, [targetUserId, threads]);
 
   const activeThread: any = threads.find((t: any) => t.key === selectedThreadKey);
   const activeMessages = activeThread ? [...activeThread.messages].sort((a: any, b: any) => 

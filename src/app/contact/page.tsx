@@ -1,5 +1,11 @@
 import { Navbar } from "@/components/navbar";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us | Get in Touch with Giftisan",
+  description: "Have a question about a handcrafted piece or looking to join our artisan community? Reach out to the Giftisan team today.",
+};
 
 export default function ContactPage() {
   return (

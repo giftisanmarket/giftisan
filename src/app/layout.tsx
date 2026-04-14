@@ -22,6 +22,7 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://giftisan.com"),
   title: {
     default: "Giftisan | Premium Artisanal Marketplace",
     template: "%s | Giftisan"
@@ -32,6 +33,13 @@ export const metadata: Metadata = {
   creator: "Giftisan",
   icons: {
     icon: "/icon.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Giftisan | Premium Artisanal Marketplace",
+    description: "Discover unique handcrafted treasures from global artisans.",
+    images: ["/hero.png"],
+    creator: "@giftisan",
   },
   openGraph: {
     type: "website",
@@ -59,6 +67,7 @@ export const metadata: Metadata = {
 
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import { Toaster } from "react-hot-toast";
 
 export default async function RootLayout({
   children,
@@ -75,6 +84,7 @@ export default async function RootLayout({
         className={`${inter.variable} ${outfit.variable} ${ebGaramond.variable} font-sans text-charcoal bg-white antialiased selection:bg-accent/20`}
         suppressHydrationWarning
       >
+        <Toaster position="bottom-right" />
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-WBXF1TE58B"

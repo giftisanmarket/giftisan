@@ -56,8 +56,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: artisan.bio,
     openGraph: {
       title: `${data.name} | Master Artisan at Giftisan`,
-      description: artisan.bio || "",
-      images: [artisan.avatar || ""],
+      description: artisan.bio || `Explore the handcrafted world of ${data.name}. Discover unique treasures made with passion.`,
+      images: [artisan.avatar || "/hero.png"],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${data.name} | Giftisan Artisan`,
+      description: artisan.bio || `Explore the handcrafted world of ${data.name}.`,
+      images: [artisan.avatar || "/hero.png"],
     }
   };
 }

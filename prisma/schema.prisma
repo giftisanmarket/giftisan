@@ -163,6 +163,7 @@ model Review {
   id        String   @id @default(cuid())
   rating    Int
   comment   String   @db.Text
+  images    String[] // URLs to Cloudinary images
   userId    String
   productId String
   

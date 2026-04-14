@@ -110,3 +110,48 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     return { success: false, error };
   }
 };
+
+export const sendOrderStatusUpdateEmail = async (email: string, name: string, orderId: string, status: string, productName: string) => {
+  const statusColors: Record<string, string> = {
+    'PROCESSING': '#3b82f6',
+    'SHIPPED': '#da7b5a',
+    'DELIVERED': '#10b981',
+    'CANCELLED': '#ef4444'
+  };
+
+  const statusText: Record<string, string> = {
+    'PROCESSING': 'is being prepared',
+    'SHIPPED': 'has been shipped',
+    'DELIVERED': 'has been delivered',
+    'CANCELLED': 'has been cancelled'
+  };
+
+  try {
+    await resend.emails.send({
+      from: 'Giftisan Status <support@giftisan.com>',
+      to: email,
+      subject: `Order Update: Your item ${statusText[status] || 'has a new status'}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h1 style="color: #da7b5a;">Order Update</h1>
+          <p>Hi ${name},</p>
+          <p>We wanted to let you know that your order for <strong>${productName}</strong> has been updated.</p>
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0; border-left: 4px solid ${statusColors[status] || '#1a2c2c'};">
+            <p style="margin: 0; font-size: 14px; text-transform: uppercase; tracking: 1px; color: #666;">Current Status</p>
+            <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: ${statusColors[status] || '#1a2c2c'};">${status}</p>
+          </div>
+          <p><strong>Order ID:</strong> ${orderId}</p>
+          <div style="margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/profile" style="background-color: #1a2c2c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Order Details</a>
+          </div>
+          <p>Thank you for supporting independent artisans!</p>
+          <p>The Giftisan Team</p>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending order status update email:', error);
+    return { success: false, error };
+  }
+};

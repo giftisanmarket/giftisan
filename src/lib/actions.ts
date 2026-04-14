@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail } from "@/lib/mail";
 import { generateVerificationToken } from "@/lib/tokens";
 
 export async function uploadImage(base64Data: string) {
@@ -594,16 +594,36 @@ export async function getArtisanReviews(artisanId: string) {
 
 export async function updateOrderItemStatus(itemId: string, status: string, trackingNumber?: string, carrier?: string) {
   try {
-    await prisma.orderItem.update({
+    const updatedItem = await prisma.orderItem.update({
       where: { id: itemId },
       data: {
         status: status,
         trackingNumber: trackingNumber || undefined,
         carrier: carrier || undefined,
+      },
+      include: {
+        order: {
+          include: {
+            user: true
+          }
+        },
+        product: true
       }
     });
+
+    // Send email notification to the buyer
+    if (updatedItem.order.user.email) {
+      sendOrderStatusUpdateEmail(
+        updatedItem.order.user.email,
+        updatedItem.order.user.name || "Customer",
+        updatedItem.order.id,
+        status,
+        updatedItem.product.name
+      ).catch(err => console.error("Failed to send order status email:", err));
+    }
     
     revalidatePath("/studio");
+    revalidatePath("/profile");
     return { success: true };
   } catch (error: any) {
     console.error("CRITICAL Update status error:", error.message || error);
@@ -719,23 +739,30 @@ export async function promoteToArtisan(userId: string, studioData: any) {
   }
 }
 
-export async function addReview(data: { productId: string, userId: string, rating: number, comment: string }) {
+export async function addReview(data: { productId: string, userId: string, rating: number, comment: string, images?: string[] }) {
   try {
+    const processedImages = await Promise.all(
+      (data.images || []).map(img => processImage(img))
+    );
+
     const review = await prisma.review.create({
       data: {
         productId: data.productId,
         userId: data.userId,
         rating: data.rating,
         comment: data.comment,
+        images: processedImages.filter(Boolean) as string[]
       },
       include: {
         user: true
       }
     });
+    
+    revalidatePath(`/products/${data.productId}`);
     return { success: true, review };
-  } catch (error) {
-    console.error("Add review error:", error);
-    return { error: "Failed to post your review" };
+  } catch (error: any) {
+    console.error("DEBUG Add review error detail:", error);
+    return { error: `Review failed: ${error.message || "Please check your internet and try again."}` };
   }
 }
 
@@ -1000,3 +1027,5 @@ export async function markMessagesAsRead(userId: string, senderId: string) {
     return { success: false };
   }
 }
+
+

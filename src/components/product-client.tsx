@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -12,8 +13,11 @@ import { ContactArtisanButton } from "@/components/contact-artisan-button";
 import { addReview } from "@/lib/actions";
 import { useSession } from "next-auth/react";
 import { BespokeImage } from "./bespoke-image";
+import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 export function ProductClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { data: session } = useSession();
@@ -21,7 +25,48 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const [personalization, setPersonalization] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "artisan" | "reviews">("details");
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new (window as any).Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          const MAX_SIZE = 1000;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setReviewImages(prev => [...prev, compressedDataUrl].slice(0, 4));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,14 +77,23 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
       productId: product.id,
       userId: session.user.id as string,
       rating: newReview.rating,
-      comment: newReview.comment
+      comment: newReview.comment,
+      images: reviewImages
     });
 
     if (res.success) {
-      window.location.reload();
+      toast.success("Discovery shared! Your story is now part of this treasure.", {
+        icon: <Sparkles className="w-5 h-5 text-accent" />,
+      });
+      setNewReview({ rating: 5, comment: "" });
+      setReviewImages([]);
+      router.refresh();
+      setIsSubmitting(false);
     } else {
       setIsSubmitting(false);
-      alert(res.error || "Failed to post review");
+      toast.error(res.error || "Failed to post review", {
+        icon: <X className="w-5 h-5 text-red-500" />,
+      });
     }
   };
 
@@ -55,7 +109,9 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Product link copied to clipboard!");
+        toast.success("Gallery link copied to your clipboard!", {
+          icon: <CheckCircle2 className="w-5 h-5 text-accent" />,
+        });
       }
     } catch (err) {
       console.error("Error sharing:", err);
@@ -280,7 +336,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="min-h-[400px]"
+            className="min-h-[200px]"
           >
             {activeTab === "details" && (
               <div className="grid md:grid-cols-2 gap-16">
@@ -374,7 +430,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             )}
 
             {activeTab === "reviews" && (
-              <div className="grid lg:grid-cols-12 gap-16">
+              <div className="grid lg:grid-cols-12 gap-16 items-start">
                 {/* Review List */}
                 <div className="lg:col-span-7 space-y-8">
                   {product.reviews?.length === 0 ? (
@@ -401,7 +457,16 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                             ))}
                           </div>
                         </div>
-                        <p className="text-charcoal/70 leading-relaxed italic">"{review.comment}"</p>
+                        <p className="text-charcoal/70 leading-relaxed italic mb-4">"{review.comment}"</p>
+                        {review.images && review.images.length > 0 && (
+                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            {review.images.map((img: string, i: number) => (
+                              <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-primary/5 flex-shrink-0">
+                                <BespokeImage src={img} alt="Review" fill className="object-cover" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
@@ -443,12 +508,37 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                             className="w-full h-32 p-4 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all text-sm font-bold text-primary placeholder:text-primary/40 resize-none shadow-inner"
                           />
                         </div>
+                        <div className="space-y-4">
+                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Share a Glimpse (Optional)</label>
+                          <div className="flex flex-wrap gap-3">
+                            {reviewImages.map((img, i) => (
+                              <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden group">
+                                <Image src={img} alt="Preview" fill className="object-cover" />
+                                <button 
+                                  type="button" 
+                                  onClick={() => setReviewImages(prev => prev.filter((_, idx) => idx !== i))}
+                                  className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                            {reviewImages.length < 4 && (
+                              <label className="w-20 h-20 rounded-xl border-2 border-dashed border-primary/10 flex flex-col items-center justify-center cursor-pointer hover:border-accent/40 text-primary/30 hover:text-accent transition-all group bg-cream/20">
+                                <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <span className="text-[8px] font-black uppercase mt-1">Add Photo</span>
+                                <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
+                              </label>
+                            )}
+                          </div>
+                        </div>
+
                         <button
                           type="submit"
                           disabled={isSubmitting}
                           className="w-full h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
                         >
-                          {isSubmitting ? "Posting..." : "Post Review"}
+                          {isSubmitting ? "Posting Discovery..." : "Post Review"}
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </form>
@@ -468,7 +558,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="mt-32 pt-24 border-t border-primary/10">
+          <section className="mt-20 pt-16 border-t border-primary/10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
               <div>
                 <h2 className="text-3xl font-heading font-bold text-primary italic serif">You May Also Like</h2>

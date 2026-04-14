@@ -9,11 +9,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findFirst({
+  let product = await prisma.product.findFirst({
     where: {
       OR: [
-        { id: slug },
-        { slug: slug }
+        { id: { equals: slug, mode: "insensitive" } },
+        { slug: { equals: slug, mode: "insensitive" } }
       ]
     },
     select: {
@@ -25,6 +25,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       slug: true
     }
   });
+
+  // Fallback for metadata too
+  if (!product) {
+    const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
+    product = await prisma.product.findFirst({
+      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        images: true,
+        slug: true
+      }
+    });
+  }
   
   if (!product) return { title: "Product Not Found" };
 
@@ -62,11 +78,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   
-  const product = await prisma.product.findFirst({
+  // Try finding exactly what's in the URL
+  let product = await prisma.product.findFirst({
     where: {
       OR: [
-        { id: slug },
-        { slug: slug }
+        { id: { equals: slug, mode: "insensitive" } },
+        { slug: { equals: slug, mode: "insensitive" } }
       ]
     },
     include: {
@@ -82,6 +99,18 @@ export default async function ProductPage({ params }: Props) {
       }
     }
   });
+
+  // RESILIENCE FALLBACK: If not found, try a hyphenated version
+  if (!product) {
+    const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
+    product = await prisma.product.findFirst({
+      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
+      include: {
+        artisan: { include: { user: true } },
+        reviews: { include: { user: true } }
+      }
+    });
+  }
   
   if (!product) {
     notFound();

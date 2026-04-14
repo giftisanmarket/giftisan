@@ -22,7 +22,7 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://giftisan.com"),
+  metadataBase: new URL("https://www.giftisan.com"),
   title: {
     default: "Giftisan | Premium Artisanal Marketplace",
     template: "%s | Giftisan"
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://giftisan.com",
+    url: "https://www.giftisan.com",
     siteName: "Giftisan",
     title: "Giftisan | Premium Artisanal Marketplace",
     description: "Discover unique handcrafted treasures from global artisans.",

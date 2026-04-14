@@ -16,28 +16,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         { slug: slug }
       ]
     },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      category: true,
+      images: true,
+      slug: true
+    }
   });
   
   if (!product) return { title: "Product Not Found" };
 
+  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `https://www.giftisan.com/api/image/product/${product.id}`;
+  const description = product.description.slice(0, 160);
+  const siteUrl = process.env.NEXTAUTH_URL || "https://www.giftisan.com";
+
   return {
     title: product.name,
-    description: product.description.slice(0, 160),
+    description: description,
     keywords: [product.name, product.category, "Handcrafted", "Giftisan"],
     alternates: {
-      canonical: `/products/${product.slug || product.id}`,
+      canonical: `${siteUrl}/products/${product.slug || product.id}`,
     },
     openGraph: {
       title: `${product.name} | Giftisan`,
-      description: product.description.slice(0, 160),
-      images: [`/api/image/product/${product.id}`],
+      description: description,
+      images: [{
+        url: firstImage,
+        width: 1200,
+        height: 630,
+        alt: product.name
+      }],
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
       title: `${product.name} | Giftisan`,
-      description: product.description.slice(0, 160),
-      images: [`/api/image/product/${product.id}`],
+      description: description,
+      images: [firstImage],
     }
   };
 }

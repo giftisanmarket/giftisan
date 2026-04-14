@@ -59,25 +59,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description = artisan.bio || `Explore the handcrafted world of ${data.name}. Discover unique treasures made with passion.`;
   const keywords = [data.name, artisan.studioName, artisan.location, "Artisan", "Handmade", "Giftisan"].filter(Boolean) as string[];
+  
+  const siteUrl = process.env.NEXTAUTH_URL || "https://www.giftisan.com";
+  const ogImage = artisan.bannerImage || artisan.avatar || `${siteUrl}/api/image/artisan/${artisan.id}`;
 
   return {
     title: `${data.name} Studio`,
     description: description.slice(0, 160),
     keywords,
     alternates: {
-      canonical: `/artisans/${slug}`,
+      canonical: `${siteUrl}/artisans/${slug}`,
     },
     openGraph: {
       title: `${data.name} | Master Artisan at Giftisan`,
       description: description.slice(0, 160),
-      images: [`/api/image/artisan/${artisan.id}`],
+      images: [{
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: `The ${data.name} Studio`
+      }],
       type: "profile",
     },
     twitter: {
       card: "summary_large_image",
       title: `${data.name} | Giftisan Artisan`,
       description: description.slice(0, 160),
-      images: [`/api/image/artisan/${artisan.id}`],
+      images: [ogImage],
     }
   };
 }

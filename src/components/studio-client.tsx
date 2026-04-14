@@ -175,7 +175,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
         </div>
 
         {/* Tab Switching */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-8 overflow-x-auto pb-4 scrollbar-hide whitespace-nowrap">
           <button 
             onClick={() => setActiveTab("inventory")}
             className={cn(

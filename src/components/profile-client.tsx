@@ -36,7 +36,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
           
           {/* Sidebar */}
           <aside className="lg:col-span-4 space-y-8">
-            <div className="bg-white rounded-[3rem] p-8 md:p-10 shadow-2xl shadow-primary/5 border border-primary/5 relative overflow-hidden">
+            <div className="bg-white rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-primary/5 border border-primary/5 relative overflow-hidden">
               <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="relative w-32 h-32 mb-6 group">
                   <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
@@ -140,8 +140,8 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                       animate={{ opacity: 1, y: 0 }}
                       className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 overflow-hidden"
                     >
-                      <div className="p-8 border-b border-primary/5 bg-cream/30 flex flex-wrap justify-between items-center gap-6">
-                        <div className="flex gap-8">
+                    <div className="p-5 md:p-8 border-b border-primary/5 bg-cream/30 flex flex-wrap justify-between items-center gap-6">
+                      <div className="flex flex-wrap gap-4 md:gap-8">
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-1">Order Reference</p>
                             <p className="font-bold text-primary uppercase font-mono">{order.id.slice(0, 8)}</p>
@@ -157,10 +157,10 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                         </div>
                       </div>
 
-                      <div className="p-8 space-y-6">
+                      <div className="p-5 md:p-8 space-y-6">
                         {order.items.map((item: any) => (
                           <div key={item.id} className="border-b last:border-0 border-primary/5 pb-8 last:pb-0">
-                            <div className="flex gap-6 items-center">
+                            <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6 items-center">
                             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-inner bg-cream">
                               <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                             </div>
@@ -177,15 +177,16 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                 </div>
                               )}
                             </div>
-                            <Link 
-                              href={`/artisans/${item.product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
-                              className="hidden md:flex flex-col items-end group"
-                            >
+                              </div>
+                              <Link 
+                                href={`/artisans/${item.product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
+                                className="hidden xl:flex flex-col items-end group shrink-0"
+                              >
                               <p className="text-[9px] font-black uppercase tracking-widest text-primary/20">Artisan Studio</p>
                               <p className="text-xs font-bold text-primary group-hover:text-accent transition-colors">{item.product.artisan.user.name}</p>
                             </Link>
 
-                            <div className="flex flex-col items-end gap-3">
+                            <div className="flex justify-between md:flex-col items-center md:items-end gap-3 flex-1 md:flex-none">
                               <div className={cn(
                                 "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0",
                                 item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
@@ -202,7 +203,6 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                 Contact Artisan
                               </Link>
                             </div>
-                          </div>
                           {item.status === "SHIPPED" && item.trackingNumber && (
                             <div className="mt-4 p-5 bg-primary/5 rounded-[2rem] border border-primary/5 flex flex-col md:flex-row justify-between items-center gap-4">
                               <div className="flex items-center gap-4">
@@ -220,7 +220,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                               </div>
                             </div>
                           )}
-                        </div>
+                          </div>
                         ))}
                       </div>
                     </motion.div>

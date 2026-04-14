@@ -19,7 +19,7 @@ export function Hero() {
             <Sparkles className="w-3 h-3" /> Handpicked for the discerning eye
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-heading font-bold text-primary leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-heading font-bold text-primary leading-[1.1]">
             Elevate Every <br />
             <span className="serif italic font-normal text-accent">Gift-Giving</span> <br />
             Moment
@@ -79,7 +79,7 @@ export function Hero() {
           <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-accent/20 rounded-full blur-3xl -z-10" />
           <div className="absolute -top-6 -right-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-10" />
           
-          <div className="absolute -bottom-8 -right-8 glass p-6 rounded-2xl shadow-xl max-w-[200px] border border-white/50">
+          <div className="absolute bottom-4 right-4 md:-bottom-8 md:-right-8 glass p-6 rounded-2xl shadow-xl max-w-[200px] border border-white/50">
             <p className="text-sm font-medium text-charcoal/80">
               "The quality of the handcrafted journal is better than anything I've found in high-end boutiques."
             </p>

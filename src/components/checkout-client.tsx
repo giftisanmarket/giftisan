@@ -87,7 +87,7 @@ export function CheckoutClient() {
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           {/* Left Column: Checkout Form */}
           <div className="lg:col-span-7 space-y-8">
-            <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5">
+            <section className="bg-white rounded-[2.5rem] px-5 py-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5">
               <h2 className="text-3xl font-heading font-bold text-primary mb-8">Shipping Information</h2>
               <form className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -95,7 +95,7 @@ export function CheckoutClient() {
                     <label className="text-xs font-black text-primary uppercase tracking-widest">First Name</label>
                     <input 
                       type="text" 
-                      placeholder="e.g. Jane" 
+                      placeholder=" Jane" 
                       value={shippingData.firstName}
                       onChange={(e) => setShippingData({...shippingData, firstName: e.target.value})}
                       className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
@@ -105,7 +105,7 @@ export function CheckoutClient() {
                     <label className="text-xs font-black text-primary uppercase tracking-widest">Last Name</label>
                     <input 
                       type="text" 
-                      placeholder="e.g. Doe" 
+                      placeholder=" Doe" 
                       value={shippingData.lastName}
                       onChange={(e) => setShippingData({...shippingData, lastName: e.target.value})}
                       className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
@@ -174,7 +174,7 @@ export function CheckoutClient() {
             </section>
 
             {/* Space for future payment implementation */}
-            <div className="bg-cream/20 border-2 border-dashed border-primary/10 rounded-[2.5rem] p-12 text-center">
+            <div className="bg-cream/20 border-2 border-dashed border-primary/10 rounded-[2.5rem] p-8 md:p-12 text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <ShieldCheck className="w-8 h-8 text-primary/20" />
               </div>
@@ -185,7 +185,7 @@ export function CheckoutClient() {
 
           {/* Right Column: Order Summary */}
           <div className="lg:col-span-5 sticky top-32">
-            <section className="bg-primary text-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-primary/20">
+            <section className="bg-primary text-white rounded-[2.5rem] px-6 py-8 md:p-10 shadow-2xl shadow-primary/20">
               <h2 className="text-2xl font-heading font-bold mb-8">Order Summary</h2>
               
               <div className="space-y-6 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">

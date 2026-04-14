@@ -85,12 +85,12 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               />
             </motion.div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide">
               {product.images.map((img: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`relative w-24 aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImage === idx ? "border-primary shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
+                  className={`relative w-20 md:w-24 aspect-square rounded-xl overflow-hidden border-2 transition-all shrink-0 ${selectedImage === idx ? "border-primary shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                 >
                   <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />

@@ -165,8 +165,8 @@ export function Navbar() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4">
-          <Link href="/favorites" className="p-2 text-charcoal/60 hover:text-primary transition-colors relative">
+        <div className="flex items-center gap-1 md:gap-4">
+          <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative">
             <Heart className="w-6 h-6" />
             {totalFavorites > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
@@ -175,7 +175,7 @@ export function Navbar() {
             )}
           </Link>
           {session && (
-            <Link href="/profile/messages" className="relative p-2 text-charcoal/60 hover:text-primary transition-colors">
+            <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors">
               <MessageSquare className="w-6 h-6" />
             </Link>
           )}
@@ -204,8 +204,8 @@ export function Navbar() {
                 </Link>
               )}
 
-              {/* Consolidated Profile Hub */}
-              <div className="flex items-center gap-2 border-l border-primary/10 pl-3">
+              {/* Consolidated Profile Hub (Desktop only) */}
+              <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 pl-3">
                 <Link 
                   href="/profile"
                   className="group flex items-center gap-3 pl-1 pr-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5"
@@ -227,7 +227,7 @@ export function Navbar() {
                     <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   
-                  <div className="hidden lg:block">
+                  <div>
                     <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">Account</p>
                     <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
                       {session.user?.name?.split(' ')[0]}
@@ -247,7 +247,7 @@ export function Navbar() {
           ) : (
             <Link 
               href="/login" 
-              className="group flex items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm"
+              className="hidden md:flex group items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm"
             >
               <User className="w-4 h-4" />
               <span className="text-xs font-bold uppercase tracking-widest">Sign In</span>
@@ -321,6 +321,69 @@ export function Navbar() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
             </form>
           </div>
+
+          {/* User Specific Links */}
+          {session ? (
+            <div className="space-y-4">
+              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Your Studio Hub</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Link 
+                  href="/profile" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
+                >
+                   <User className="w-5 h-5 text-primary/40 mb-2" />
+                   <span className="text-xs font-bold text-primary uppercase">Profile</span>
+                </Link>
+                <Link 
+                  href="/profile/messages" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
+                >
+                   <MessageSquare className="w-5 h-5 text-primary/40 mb-2" />
+                   <span className="text-xs font-bold text-primary uppercase">Messages</span>
+                </Link>
+                <Link 
+                  href="/favorites" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
+                >
+                   <Heart className="w-5 h-5 text-primary/40 mb-2" />
+                   <span className="text-xs font-bold text-primary uppercase">Favorites</span>
+                </Link>
+                {session.user?.role === "ARTISAN" ? (
+                  <Link 
+                    href="/studio" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/10 text-center"
+                  >
+                     <div className="w-2 h-2 rounded-full bg-accent mb-2" />
+                     <span className="text-xs font-black text-accent uppercase">Studio</span>
+                  </Link>
+                ) : (
+                   <Link 
+                    href="/become-artisan" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-2xl border border-primary text-center"
+                  >
+                     <span className="text-xs font-black uppercase tracking-widest">Sell</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+               <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Join Giftisan</p>
+               <Link 
+                href="/login" 
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold"
+              >
+                Sign In to your account
+                <span className="text-accent">→</span>
+              </Link>
+            </div>
+          )}
 
           {/* Mobile Categories */}
           <div className="space-y-4">

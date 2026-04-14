@@ -137,7 +137,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                 "{artisan.bio}"
               </p>
 
-              <div className="flex items-center justify-center md:justify-start gap-4 pt-4">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 pt-4">
                 <button 
                   onClick={handleFollow}
                   disabled={isPending}

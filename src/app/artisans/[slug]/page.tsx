@@ -57,20 +57,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data || !data.artisanProfile) return { title: "Artisan Not Found" };
   const artisan = data.artisanProfile;
 
+  const description = artisan.bio || `Explore the handcrafted world of ${data.name}. Discover unique treasures made with passion.`;
+  const keywords = [data.name, artisan.studioName, artisan.location, "Artisan", "Handmade", "Giftisan"].filter(Boolean) as string[];
+
   return {
     title: `${data.name} Studio`,
-    description: artisan.bio,
+    description: description.slice(0, 160),
+    keywords,
+    alternates: {
+      canonical: `/artisans/${slug}`,
+    },
     openGraph: {
       title: `${data.name} | Master Artisan at Giftisan`,
-      description: artisan.bio || `Explore the handcrafted world of ${data.name}. Discover unique treasures made with passion.`,
-      images: [artisan.avatar || "/hero.png"],
+      description: description.slice(0, 160),
+      images: [`/api/image/artisan/${artisan.id}`],
       type: "profile",
     },
     twitter: {
       card: "summary_large_image",
       title: `${data.name} | Giftisan Artisan`,
-      description: artisan.bio || `Explore the handcrafted world of ${data.name}.`,
-      images: [artisan.avatar || "/hero.png"],
+      description: description.slice(0, 160),
+      images: [`/api/image/artisan/${artisan.id}`],
     }
   };
 }

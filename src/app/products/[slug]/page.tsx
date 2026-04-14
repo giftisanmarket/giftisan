@@ -22,18 +22,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: product.name,
-    description: product.description,
+    description: product.description.slice(0, 160),
+    keywords: [product.name, product.category, "Handcrafted", "Giftisan"],
+    alternates: {
+      canonical: `/products/${product.slug || product.id}`,
+    },
     openGraph: {
       title: `${product.name} | Giftisan`,
-      description: product.description,
-      images: [product.images[0]],
+      description: product.description.slice(0, 160),
+      images: [`/api/image/product/${product.id}`],
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
       title: `${product.name} | Giftisan`,
-      description: product.description,
-      images: [product.images[0]],
+      description: product.description.slice(0, 160),
+      images: [`/api/image/product/${product.id}`],
     }
   };
 }

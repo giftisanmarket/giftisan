@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X } from "lucide-react";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,13 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [reviewImages, setReviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  const isVideo = (url: string) => {
+    if (!url) return false;
+    return url.includes('video/upload') || url.match(/\.(mp4|webm|ogg|mov|quicktime)/i) || url.startsWith('data:video');
+  };
   
   useEffect(() => {
     trackProductView(product.id);
@@ -133,16 +140,36 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-white"
+              onClick={() => {
+                setLightboxIndex(selectedImage);
+                setIsLightboxOpen(true);
+              }}
+              className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-white cursor-zoom-in group"
             >
-              <BespokeImage
-                src={product.images[selectedImage]}
-                alt={product.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
+              {isVideo(product.images[selectedImage]) ? (
+                <video
+                  src={product.images[selectedImage]}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <BespokeImage
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-end justify-end p-6 opacity-0 group-hover:opacity-100">
+                <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur shadow-xl flex items-center justify-center text-primary translate-y-2 group-hover:translate-y-0 transition-all">
+                   <Camera className="w-6 h-6" />
+                </div>
+              </div>
             </motion.div>
 
             <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide">
@@ -153,7 +180,18 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   className={`relative w-20 md:w-24 aspect-square rounded-xl overflow-hidden border-2 transition-all shrink-0 ${selectedImage === idx ? "border-primary shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                 >
-                  <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />
+                  {isVideo(img) ? (
+                    <div className="relative w-full h-full">
+                      <video src={img} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+                              <Video className="w-4 h-4 text-white" />
+                          </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />
+                  )}
                 </button>
               ))}
             </div>
@@ -619,6 +657,85 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           </section>
         )}
       </div>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsLightboxOpen(false)}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 cursor-pointer"
+          >
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors z-50 p-2"
+            >
+              <X className="w-10 h-10" />
+            </button>
+
+            <div className="relative w-full h-full max-w-6xl flex items-center justify-center">
+               {/* Navigation Arrows */}
+               {product.images.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
+                      }}
+                      className="absolute left-0 md:-left-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                    >
+                      <ArrowRight className="w-8 h-8 rotate-180" />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
+                      }}
+                      className="absolute right-0 md:-right-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                    >
+                      <ArrowRight className="w-8 h-8" />
+                    </button>
+                  </>
+               )}
+
+               <motion.div
+                 key={lightboxIndex}
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                 className="relative w-full h-full flex items-center justify-center"
+               >
+                 {isVideo(product.images[lightboxIndex]) ? (
+                    <video 
+                      src={product.images[lightboxIndex]} 
+                      className="max-h-[85vh] max-w-full rounded-2xl shadow-2xl" 
+                      controls 
+                      autoPlay 
+                      loop
+                    />
+                 ) : (
+                    <div className="relative w-full h-full">
+                      <Image 
+                        src={product.images[lightboxIndex]} 
+                        alt={product.name} 
+                        fill 
+                        className="object-contain" 
+                        priority
+                      />
+                    </div>
+                 )}
+               </motion.div>
+
+               {/* Counter */}
+               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white/40 font-bold tracking-[0.3em] uppercase text-xs">
+                  {lightboxIndex + 1} / {product.images.length}
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

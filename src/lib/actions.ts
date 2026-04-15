@@ -18,17 +18,19 @@ export async function uploadImage(base64Data: string) {
 
     const uploadResponse = await cloudinary.uploader.upload(base64Data, {
       folder: "giftisan",
+      resource_type: "auto", // Essential for videos
     });
     return { success: true, url: uploadResponse.secure_url };
   } catch (error) {
     console.error("Cloudinary upload error:", error);
-    return { success: false, error: "Failed to upload image" };
+    return { success: false, error: "Failed to upload media" };
   }
 }
 
 async function processImage(imageSource: string | null | undefined): Promise<string | null> {
   if (!imageSource) return null;
-  if (imageSource.startsWith('data:image')) {
+  // Upload any data URL (image, video, etc.)
+  if (imageSource.startsWith('data:')) {
     const res = await uploadImage(imageSource);
     if (res.success && res.url) return res.url;
   }
@@ -587,11 +589,27 @@ export async function updateArtisanProfile(userId: string, data: any) {
   }
 }
 
-export async function createProduct(artisanId: string, data: any) {
+export async function createProduct(artisanId: string, formData: FormData) {
   try {
+    const data = {
+      name: formData.get("name") as string,
+      description: formData.get("description") as string,
+      price: formData.get("price") as string,
+      category: formData.get("category") as string,
+      canPersonalize: formData.get("canPersonalize") === "true",
+      badge: formData.get("badge") as string,
+      stock: formData.get("stock") as string,
+    };
+
+    const images: string[] = [];
+    for (let i = 0; i < 10; i++) {
+        const img = formData.get(`image-${i}`);
+        if (img) images.push(img as string);
+    }
+
     const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
     const uploadedImages = await Promise.all(
-      (data.images || []).map((img: string) => processImage(img))
+      images.map((img: string) => processImage(img))
     );
     const finalImages = uploadedImages.filter(img => img !== null) as string[];
 
@@ -604,13 +622,12 @@ export async function createProduct(artisanId: string, data: any) {
         price: parseFloat(data.price),
         category: data.category,
         images: finalImages,
-        canPersonalize: data.canPersonalize || false,
-        badge: data.badge || null,
+        canPersonalize: data.canPersonalize,
+        badge: data.badge,
         stock: parseInt(data.stock) || 1,
-        tags: [],
       }
     });
-    
+
     revalidatePath("/studio");
     revalidatePath("/");
     revalidatePath("/artisans");
@@ -742,40 +759,50 @@ export async function getSubscribers() {
   }
 }
 
-export async function updateProduct(productId: string, data: any) {
+export async function updateProduct(productId: string, formData: FormData) {
   try {
-    const rawPrice = typeof data.price === 'string' ? parseFloat(data.price) : data.price;
-    const rawStock = typeof data.stock === 'string' ? parseInt(data.stock) : data.stock;
+    const data = {
+      name: formData.get("name") as string,
+      description: formData.get("description") as string,
+      price: formData.get("price") as string,
+      category: formData.get("category") as string,
+      canPersonalize: formData.get("canPersonalize") === "true",
+      badge: formData.get("badge") as string,
+      stock: formData.get("stock") as string,
+    };
 
-    if (isNaN(rawPrice)) return { error: "Invalid price format" };
-    if (isNaN(rawStock)) return { error: "Invalid stock number" };
+    const images: string[] = [];
+    for (let i = 0; i < 10; i++) {
+        const img = formData.get(`image-${i}`);
+        if (img) images.push(img as string);
+    }
 
     const uploadedImages = await Promise.all(
-      (data.images || []).map((img: string) => processImage(img))
+      images.map((img: string) => processImage(img))
     );
     const finalImages = uploadedImages.filter(img => img !== null) as string[];
 
-    const product = await prisma.product.update({
+    const updated = await prisma.product.update({
       where: { id: productId },
       data: {
         name: data.name,
         description: data.description,
-        price: rawPrice,
+        price: parseFloat(data.price),
         category: data.category,
         images: finalImages,
-        canPersonalize: !!data.canPersonalize,
+        canPersonalize: data.canPersonalize,
         badge: data.badge || null,
-        stock: rawStock,
+        stock: parseInt(data.stock) || 0,
       }
     });
-    
+
     revalidatePath(`/products/${productId}`);
     revalidatePath("/studio");
     revalidatePath("/");
     revalidatePath("/artisans");
     revalidatePath("/categories");
 
-    return { success: true, product };
+    return { success: true, product: updated };
   } catch (error: any) {
     console.error("Update product error:", error);
     return { error: error.message || "Failed to update treasure" };

@@ -14,7 +14,8 @@ import {
   Type, 
   Image as ImageIcon,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Video
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
@@ -40,6 +41,28 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
   });
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [resolutions, setResolutions] = useState<Record<number, string>>({});
+
+  // Detect resolutions for existing media
+  useEffect(() => {
+    formData.images.forEach((img, idx) => {
+      if (img && !resolutions[idx]) {
+        if (img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i)) {
+          const video = document.createElement('video');
+          video.src = img;
+          video.onloadedmetadata = () => {
+            setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
+          };
+        } else {
+          const i = new (window as any).Image();
+          i.onload = () => {
+            setResolutions(prev => ({ ...prev, [idx]: `${i.width}×${i.height}` }));
+          };
+          i.src = img;
+        }
+      }
+    });
+  }, [formData.images, resolutions]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,10 +96,20 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
       return;
     }
 
-    const res = await createProduct(artisanId, {
-      ...formData,
-      images: formData.images.filter(img => img !== "")
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("description", formData.description);
+    form.append("price", formData.price.trim());
+    form.append("category", formData.category);
+    form.append("canPersonalize", formData.canPersonalize.toString());
+    form.append("badge", formData.badge);
+    form.append("stock", formData.stock.trim());
+    
+    formData.images.forEach((img, i) => {
+      if (img) form.append(`image-${i}`, img);
     });
+
+    const res = await createProduct(artisanId, form);
 
     if (res.success) {
       window.location.href = "/studio";
@@ -209,58 +242,104 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
           <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
             <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
               <ImageIcon className="w-6 h-6 text-accent" />
-              <h2 className="text-2xl font-heading font-bold text-primary">Visual Gallery</h2>
+              <h2 className="text-2xl font-heading font-bold text-primary">Media Gallery</h2>
             </div>
-            <p className="text-sm text-charcoal/40 italic">Upload high-resolution photographs of your treasure.</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <p className="text-sm text-charcoal/40 italic">Showcase your masterpiece with high-res photos and cinematic videos.</p>
+              <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full">
+                 <Sparkles className="w-3 h-3 text-accent" />
+                 <span className="text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | Max: 100MB</span>
+              </div>
+            </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {formData.images.map((img, idx) => (
                 <div key={idx} className="space-y-4">
                   <div className="relative aspect-square rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
                     {img ? (
-                      <Image src={img} alt="Preview" fill className="object-cover" />
+                       img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
+                        <video 
+                          src={img} 
+                          className="w-full h-full object-cover" 
+                          muted 
+                          loop 
+                          onMouseOver={e => e.currentTarget.play()}
+                          onMouseOut={e => e.currentTarget.pause()}
+                        />
+                      ) : (
+                        <Image src={img} alt="Preview" fill className="object-cover" />
+                      )
                     ) : (
-                      <Upload className="w-8 h-8 text-primary/10" />
+                    <div className="flex flex-col items-center gap-2">
+                       <Upload className="w-8 h-8 text-primary/10" />
+                       <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
+                    </div>
                     )}
-                    <label className="absolute inset-0 z-10 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
+
+                    {resolutions[idx] && (
+                      <div className="absolute top-4 left-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-tighter">
+                        {resolutions[idx]}
+                      </div>
+                    )}
+
+                    {img && (img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i)) && (
+                      <div className="absolute top-4 right-4 z-20 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
+                        <Video className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+
+                    <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
                       <input 
                         type="file" 
-                        accept="image/*"
+                        accept="image/*,video/*"
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                              const img = new (window as any).Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                
-                                // Max dimension for product photos (e.g. 1200px)
-                                const MAX_SIZE = 1200;
-                                if (width > height) {
-                                  if (width > MAX_SIZE) {
-                                    height *= MAX_SIZE / width;
-                                    width = MAX_SIZE;
+                              const dataUrl = reader.result as string;
+                              
+                              if (file.type.startsWith('video/')) {
+                                // Handle Video
+                                handleImageChange(idx, dataUrl);
+                                const video = document.createElement('video');
+                                video.src = dataUrl;
+                                video.onloadedmetadata = () => {
+                                  setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
+                                };
+                              } else {
+                                // Handle Image
+                                const img = new (window as any).Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  let width = img.width;
+                                  let height = img.height;
+                                  
+                                  const MAX_SIZE = 1200;
+                                  if (width > height) {
+                                    if (width > MAX_SIZE) {
+                                      height *= MAX_SIZE / width;
+                                      width = MAX_SIZE;
+                                    }
+                                  } else {
+                                    if (height > MAX_SIZE) {
+                                      width *= MAX_SIZE / height;
+                                      height = MAX_SIZE;
+                                    }
                                   }
-                                } else {
-                                  if (height > MAX_SIZE) {
-                                    width *= MAX_SIZE / height;
-                                    height = MAX_SIZE;
-                                  }
-                                }
-                                
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx?.drawImage(img, 0, 0, width, height);
-                                
-                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                                handleImageChange(idx, compressedDataUrl);
-                              };
-                              img.src = reader.result;
+                                  
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  ctx?.drawImage(img, 0, 0, width, height);
+                                  
+                                  const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                  handleImageChange(idx, compressedDataUrl);
+                                  setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
+                                };
+                                img.src = dataUrl;
+                              }
                             };
                             reader.readAsDataURL(file);
                           }

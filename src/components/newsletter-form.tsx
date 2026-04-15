@@ -75,10 +75,7 @@ export function NewsletterForm() {
         {isLoading ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          <>
-            Subscribe
-            <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-          </>
+          "Subscribe"
         )}
       </button>
     </form>

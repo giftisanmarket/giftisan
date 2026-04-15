@@ -30,63 +30,63 @@ export default function SuccessPage() {
         />
       )}
 
-      <div className="container mx-auto px-4 pt-40 pb-20 flex flex-col items-center">
+      <div className="container mx-auto px-6 pt-24 md:pt-40 pb-20 flex flex-col items-center relative z-10">
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, type: "spring" }}
-          className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-primary/20"
+          className="w-20 h-20 md:w-24 md:h-24 bg-primary rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-primary/20"
         >
-          <CheckCircle2 className="w-12 h-12 text-white" />
+          <CheckCircle2 className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-center max-w-2xl px-4"
+          className="text-center max-w-2xl px-2"
         >
-          <h1 className="text-5xl md:text-6xl font-heading font-bold text-primary mb-6">
+          <h1 className="text-4xl md:text-7xl font-heading font-bold text-primary mb-6 tracking-tight leading-tight">
             Your Request is in Good Hands!
           </h1>
-          <p className="text-charcoal/60 text-lg leading-relaxed mb-12">
-            Thank you for supporting our artisan community. Your manual order request has been sent directly to the artisan's studio dashboard. They will review your treasures and contact you shortly to coordinate payment and delivery.
+          <p className="text-charcoal/60 text-base md:text-xl leading-relaxed mb-12 max-w-xl mx-auto">
+            Thank you for supporting our artisan community. Your manual order request has been sent directly to the artisan's studio. They will review your treasures and contact you shortly.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-12 text-left">
-            <div className="bg-white p-6 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 flex items-start gap-4">
-              <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center shrink-0">
-                <Package className="w-6 h-6 text-accent" />
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-12 text-left">
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
+              <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center shrink-0">
+                <Package className="w-7 h-7 text-brand" />
               </div>
               <div>
-                <h3 className="font-bold text-primary">Artisan Preparation</h3>
-                <p className="text-sm text-charcoal/50">Your items are being hand-curated and packed in sustainable luxury wrap.</p>
+                <h3 className="font-bold text-primary text-lg">Artisan Prep</h3>
+                <p className="text-xs md:text-sm text-charcoal/50 leading-relaxed mt-1">Your items are being hand-curated and packed in sustainable luxury wrap.</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0">
-                <MessageSquare className="w-6 h-6 text-primary" />
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
+              <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0">
+                <MessageSquare className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-primary">Artisan Connection</h3>
-                <p className="text-sm text-charcoal/50">Expect a message or call from the artisan soon to finalize the manual billing and shipping details.</p>
+                <h3 className="font-bold text-primary text-lg">Direct Dialogue</h3>
+                <p className="text-xs md:text-sm text-charcoal/50 leading-relaxed mt-1">The artisan will contact you soon to finalize billing and the shipping journey.</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               href="/" 
-              className="h-14 px-10 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 group w-full md:w-auto"
+              className="h-16 px-12 bg-primary text-white font-bold rounded-full hover:bg-brand transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 group w-full sm:w-auto active:scale-95"
             >
-              Continue Exploring
+              Continue Discovery
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
               href="/favorites" 
-              className="h-14 px-10 bg-white border border-primary/10 text-primary font-bold rounded-full hover:bg-primary/5 transition-all w-full md:w-auto flex items-center justify-center"
+              className="h-16 px-12 bg-white border border-primary/10 text-primary font-bold rounded-full hover:bg-primary/5 transition-all w-full sm:w-auto flex items-center justify-center active:scale-95"
             >
-              View Your Favorites
+              View Favorites
             </Link>
           </div>
         </motion.div>

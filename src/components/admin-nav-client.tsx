@@ -3,14 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Mail } from "lucide-react";
+import { 
+  Users, 
+  ShoppingBag, 
+  Package, 
+  LayoutDashboard,
+  Mail,
+  ArrowLeft
+} from "lucide-react";
+
 import Image from "next/image";
 
+const navItems = [
+  { label: "Overview", href: "/admin", icon: LayoutDashboard },
+  { label: "Artisans & Users", href: "/admin/users", icon: Users },
+  { label: "Global Products", href: "/admin/products", icon: ShoppingBag },
+  { label: "Site Orders", href: "/admin/orders", icon: Package },
+  { label: "Subscribers", href: "/admin/subscribers", icon: Mail },
+];
+
 export function AdminNavClient({ 
-  navItems, 
   children 
 }: { 
-  navItems: any[], 
   children: React.ReactNode 
 }) {
   const pathname = usePathname();

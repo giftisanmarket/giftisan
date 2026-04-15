@@ -14,10 +14,34 @@ const getBaseUrl = () => {
 
 const BASE_URL = getBaseUrl();
 
+const PRIMARY_COLOR = "#1a2c2c";
+const ACCENT_COLOR = "#da7b5a";
+const CREAM_BG = "#fcf9f1";
+
+const emailStyles = `
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap');
+    body { font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    .heading { font-family: 'Outfit', sans-serif; }
+  </style>
+`;
+
 const emailHeader = `
-  <div style="text-align: center; margin-bottom: 30px;">
-    <img src="${LOGO_URL}" alt="Giftisan" style="width: 80px; height: 80px; margin-bottom: 10px;">
-    <div style="font-size: 24px; font-weight: bold; color: #1a2c2c; font-family: 'Outfit', sans-serif;">Giftisan</div>
+  ${emailStyles}
+  <div style="text-align: center; padding: 40px 0 30px 0; background-color: ${PRIMARY_COLOR}; border-radius: 24px 24px 0 0;">
+    <img src="${LOGO_URL}" alt="Giftisan" style="width: 64px; height: 64px; margin-bottom: 15px;">
+    <div class="heading" style="font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em;">Giftisan</div>
+    <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; tracking: 0.2em; margin-top: 5px;">Handcrafted Mastery</div>
+  </div>
+`;
+
+const emailFooter = `
+  <div style="text-align: center; padding: 40px 20px; border-top: 1px solid rgba(0,0,0,0.05);">
+    <p style="color: #9ca3af; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Proudly Based in Egypt • Supporting Local Artisans</p>
+    <p style="color: #1a2c2c; font-weight: bold; font-size: 14px;">The Giftisan Team</p>
+    <div style="margin-top: 20px; font-size: 11px; color: #d1d5db;">
+      &copy; 2026 Giftisan. All rights reserved.
+    </div>
   </div>
 `;
 
@@ -30,18 +54,21 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: 'Welcome to Giftisan!',
+      subject: 'Welcome to the Circle | Giftisan',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 16px;">
-          ${emailHeader}
-          <h1 style="color: #da7b5a; text-align: center; font-size: 28px;">Welcome to the Circle, ${name}!</h1>
-          <p style="color: #4b5563; line-height: 1.6; font-size: 16px; text-align: center;">We're so excited to have you join our community of artisans and treasure hunters.</p>
-          <p style="color: #4b5563; line-height: 1.6; font-size: 16px; text-align: center;">Giftisan is a place where craft meets soul. Whether you're here to sell your handmade creations or find that perfect unique gift, you're in the right place.</p>
-          <div style="margin: 40px 0; text-align: center;">
-            <a href="${BASE_URL}" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">Explore the Marketplace</a>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 32px; margin-bottom: 20px; tracking: -0.02em;">Welcome to the Circle, ${name}!</h1>
+              <p style="color: #4b5563; line-height: 1.8; font-size: 17px; margin-bottom: 30px;">We're honored to have you join our community of artisans and treasure hunters. Giftisan is a sanctum where craft meets soul.</p>
+              <div style="margin: 40px 0;">
+                <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Explore the Vault</a>
+              </div>
+              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic;">Happy discovery!</p>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #9ca3af; font-size: 14px; text-align: center; margin-top: 40px; border-top: 1px solid #f3f4f6; pt-20">Happy hunting!</p>
-          <p style="color: #1a2c2c; font-weight: bold; text-align: center;">The Giftisan Team</p>
         </div>
       `,
     });
@@ -61,24 +88,31 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     await resend.emails.send({
       from: SENDER,
       to: artisanEmail,
-      subject: 'You have a new order on Giftisan!',
+      subject: 'New Commission: A treasure has been claimed!',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 16px;">
-          ${emailHeader}
-          <h1 style="color: #da7b5a; text-align: center;">New Order Alert!</h1>
-          <p style="color: #4b5563; font-size: 16px;">Hi ${artisanName},</p>
-          <p style="color: #4b5563; font-size: 16px;">Great news! Someone just purchased a treasure from your studio.</p>
-          <div style="background-color: #f9fafb; padding: 24px; border-radius: 12px; margin: 30px 0; border: 1px solid #f3f4f6;">
-            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Order Reference</p>
-            <p style="margin: 0 0 20px 0; color: #111827; font-size: 18px; font-weight: bold;">${orderId}</p>
-            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Total Amount</p>
-            <p style="margin: 0; color: #da7b5a; font-size: 24px; font-weight: bold;">EGP ${totalAmount.toFixed(2)}</p>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px;">
+              <h1 class="heading" style="color: ${ACCENT_COLOR}; text-align: center; font-size: 32px; margin-bottom: 10px;">New Commission Alert!</h1>
+              <p style="color: #4b5563; font-size: 17px; text-align: center; margin-bottom: 30px;">Hi ${artisanName}, a collector has just claimed a treasure from your studio.</p>
+              
+              <div style="background-color: #f9fafb; padding: 35px; border-radius: 20px; border: 1px solid #f3f4f6; text-align: center;">
+                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Order Reference</p>
+                <p style="margin: 0 0 25px 0; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+                
+                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Total Commission</p>
+                <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 32px; font-weight: bold;">EGP ${totalAmount.toLocaleString()}</p>
+              </div>
+
+              <p style="color: #4b5563; font-size: 16px; margin: 30px 0; text-align: center; line-height: 1.6;">Please log in to your **Studio Dashboard** to view shipping details and begin the fulfillment journey.</p>
+              
+              <div style="text-align: center;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Enter Studio</a>
+              </div>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #4b5563; font-size: 16px;">Please log in to your studio dashboard to view shipping details and start fulfillment.</p>
-          <div style="margin: 30px 0; text-align: center;">
-            <a href="${BASE_URL}/studio" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order in Studio</a>
-          </div>
-          <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
       `,
     });
@@ -98,16 +132,20 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
     await resend.emails.send({
       from: SENDER,
       to: receiverEmail,
-      subject: `New message from ${senderName} on Giftisan`,
+      subject: `New Dialogue from ${senderName} | Giftisan`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 16px;">
-          ${emailHeader}
-          <p style="color: #4b5563; font-size: 16px;">Hi ${receiverName},</p>
-          <p style="color: #4b5563; font-size: 16px; margin-bottom: 30px;"><strong>${senderName}</strong> sent you a new message regarding a treasure.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${BASE_URL}/profile/messages" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Reply to Message</a>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <p style="color: #4b5563; font-size: 17px; margin-bottom: 20px;">Hi ${receiverName},</p>
+              <h2 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 30px;"><strong>${senderName}</strong> has initiated a dialogue regarding a treasure.</h2>
+              <div style="margin: 40px 0;">
+                <a href="${BASE_URL}/profile/messages" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Join Dialogue</a>
+              </div>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
       `,
     });
@@ -133,18 +171,21 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: 'Verify your email for Giftisan',
+      subject: 'Verify your identity | Giftisan',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 20px;">
-          ${emailHeader}
-          <h1 style="color: #da7b5a; text-align: center; font-size: 24px;">Confirm your email address</h1>
-          <p style="color: #4b5563; font-size: 16px; line-height: 1.6; text-align: center;">Thanks for signing up for Giftisan! We're excited to have you join our craftsmanship community. Please verify your email to get started.</p>
-          <div style="margin: 40px 0; text-align: center;">
-            <a href="${confirmLink}" style="background-color: #da7b5a; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(218, 123, 90, 0.2);">Verify Email Address</a>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 20px;">Verify your identity</h1>
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Before you explore the vault or open your studio, we need to verify your connection to the Inner Circle. Please confirm your email address below.</p>
+              <div style="margin: 40px 0;">
+                <a href="${confirmLink}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Confirm Connection</a>
+              </div>
+              <p style="color: #9ca3af; font-size: 12px; font-style: italic;">This link will expire in 24 hours.</p>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #9ca3af; font-size: 14px; text-align: center;">This link will expire in 24 hours.</p>
-          <p style="color: #9ca3af; font-size: 14px; text-align: center;">If you didn't create an account, you can safely ignore this email.</p>
-          <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
       `,
     });
@@ -162,7 +203,7 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
   }
   const statusColors: Record<string, string> = {
     'PROCESSING': '#3b82f6',
-    'SHIPPED': '#da7b5a',
+    'SHIPPED': ACCENT_COLOR,
     'DELIVERED': '#10b981',
     'CANCELLED': '#ef4444'
   };
@@ -178,23 +219,27 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: `Order Update: Your item ${statusText[status] || 'has a new status'}`,
+      subject: `Journey Update: Your treasure ${statusText[status] || 'is evolving'}`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 16px;">
-          ${emailHeader}
-          <h1 style="color: #da7b5a; text-align: center;">Order Update</h1>
-          <p style="color: #4b5563; font-size: 16px;">Hi ${name},</p>
-          <p style="color: #4b5563; font-size: 16px;">We wanted to let you know that your order for <strong>${productName}</strong> has been updated.</p>
-          <div style="background-color: #f9fafb; padding: 30px; border-radius: 20px; text-align: center; margin: 30px 0; border: 1px solid #f3f4f6;">
-            <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; font-weight: bold;">Current Status</p>
-            <p style="margin: 10px 0 0; font-size: 28px; font-weight: bold; color: ${statusColors[status] || '#1a2c2c'};">${status}</p>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 30px;">Journey Update</h1>
+              <p style="color: #4b5563; font-size: 17px; line-height: 1.6;">Hi ${name}, your order for <strong>${productName}</strong> has reached a new milestone.</p>
+              
+              <div style="margin: 40px 0; background-color: #f9fafb; padding: 40px; border-radius: 24px; border: 1px solid #f3f4f6;">
+                <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af;">Current Milestone</p>
+                <p style="margin: 0; font-size: 32px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
+                <p style="margin: 20px 0 0 0; font-size: 13px; font-weight: bold; color: #6b7280; font-family: monospace;">Ref: #${orderId.slice(0, 8)}</p>
+              </div>
+              
+              <div style="margin-top: 40px;">
+                <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Track Journey</a>
+              </div>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #6b7280; font-size: 14px; text-align: center;"><strong>Order ID:</strong> ${orderId}</p>
-          <div style="margin: 40px 0; text-align: center;">
-            <a href="${BASE_URL}/profile" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order Details</a>
-          </div>
-          <p style="color: #4b5563; font-size: 16px; text-align: center; margin-top: 40px;">Thank you for supporting independent artisans!</p>
-          <p style="color: #111827; font-weight: bold; text-align: center;">The Giftisan Team</p>
         </div>
       `,
     });
@@ -220,18 +265,21 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: 'Reset your Giftisan password',
+      subject: 'Security: Access Recovery | Giftisan',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 20px;">
-          ${emailHeader}
-          <h1 style="color: #da7b5a; text-align: center; font-size: 24px;">Reset your password</h1>
-          <p style="color: #4b5563; font-size: 16px; line-height: 1.6; text-align: center;">We received a request to reset the password for your Giftisan account. Click the button below to choose a new password.</p>
-          <div style="margin: 40px 0; text-align: center;">
-            <a href="${resetLink}" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">Reset Password</a>
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 20px;">Access Recovery</h1>
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">We received a request to reclaim the connection to your Giftisan account. Click below to secure your enclave with a new password.</p>
+              <div style="margin: 40px 0;">
+                <a href="${resetLink}" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">Secure My Account</a>
+              </div>
+              <p style="color: #9ca3af; font-size: 12px; font-style: italic;">This recovery link will expire in 60 minutes.</p>
+            </div>
+            ${emailFooter}
           </div>
-          <p style="color: #9ca3af; font-size: 14px; text-align: center;">This link will expire in 1 hour.</p>
-          <p style="color: #9ca3af; font-size: 14px; text-align: center;">If you didn't request a password reset, you can safely ignore this email.</p>
-          <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
       `,
     });

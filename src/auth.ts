@@ -9,6 +9,7 @@ declare module "next-auth" {
 
   interface User {
     role?: string;
+    emailVerified?: Date | null;
   }
 }
 
@@ -46,10 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !user.password) return null;
 
-        if (!user.emailVerified) {
-          // Important: NextAuth v5 handles custom error throwing in authorize
-          throw new Error("UNVERIFIED_EMAIL");
-        }
+        // We allow login without verification, but track it in the session
 
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password as string,
@@ -71,6 +69,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.role && session.user) {
         session.user.role = token.role as any;
       }
+      if (token.emailVerified && session.user) {
+        (session.user as any).emailVerified = token.emailVerified;
+      }
       
       // Safety: Never allow massive images in the session object to prevent RSC serialization crashes
       if (session.user.image && session.user.image.length > 300000) {
@@ -83,6 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // On initial login, add the role to the token
       if (user) {
         token.role = user.role;
+        token.emailVerified = user.emailVerified;
       }
 
       // ⚠️ CRITICAL: Scrub the image data out of the token to prevent 431 errors
@@ -94,12 +96,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Fetch latest role and name, but avoid fetching the large image blob
       const dbUser = await prisma.user.findUnique({
         where: { id: token.sub },
-        select: { role: true, name: true } 
+        select: { role: true, name: true, emailVerified: true } 
       });
       
       if (dbUser) {
         token.role = dbUser.role;
         token.name = dbUser.name;
+        token.emailVerified = dbUser.emailVerified;
       }
       return token;
     }

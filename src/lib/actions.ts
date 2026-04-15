@@ -79,7 +79,18 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
     const verificationToken = await generateVerificationToken(email);
     await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
 
-    return { success: true };
+    // Auto-login the user immediately
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      return { success: true, autoLogin: true };
+    } catch (error) {
+      // If auto-login fails, still return success for signup
+      return { success: true, autoLogin: false };
+    }
   } catch (error) {
     console.error("Signup error:", error);
     return { error: "Something went wrong during registration" };

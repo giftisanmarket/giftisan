@@ -45,5 +45,5 @@ export async function GET(request: NextRequest) {
     where: { token }
   });
 
-  return redirect("/login?success=EmailVerified");
+  return redirect("/?success=EmailVerified");
 }

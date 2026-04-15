@@ -36,7 +36,12 @@ export function SignupClient() {
       if (res.error) {
         setError(res.error);
       } else {
-        router.push("/login?signup=success");
+        if (res.autoLogin) {
+          router.push("/");
+          router.refresh();
+        } else {
+          router.push("/login?signup=success");
+        }
       }
     }
   };

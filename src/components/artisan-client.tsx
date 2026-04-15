@@ -124,17 +124,17 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group"
+              className="relative w-32 h-32 md:w-48 md:h-48 rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group mb-6 md:mb-0"
             >
-              <BespokeImage src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="192px" />
+              <BespokeImage src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-700" sizes="(max-width: 768px) 128px, 192px" />
             </motion.div>
 
             {/* Info */}
             <div className="flex-1 text-center md:text-left space-y-4">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <h1 className="text-5xl font-heading font-bold text-primary">{displayName}</h1>
+                <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">{displayName}</h1>
                 {artisan.isVerified && (
-                  <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200 shrink-0">
+                  <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200 shrink-0 w-fit mx-auto md:mx-0">
                     <ShieldCheck className="w-4 h-4" />
                     <span className="text-xs font-bold uppercase tracking-widest">Verified Artisan</span>
                   </div>
@@ -152,7 +152,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                 </div>
               </div>
 
-              <p className="text-xl text-charcoal/70 leading-relaxed max-w-2xl serif">
+              <p className="text-lg md:text-xl text-charcoal/70 leading-relaxed max-w-2xl serif text-balance">
                 "{artisan.bio}"
               </p>
 
@@ -241,34 +241,34 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
 
       {/* Stats Bar */}
       <div className="border-y border-primary/5 bg-white py-8">
-        <div className="container mx-auto px-4 flex flex-wrap justify-between items-center gap-8">
-          <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
-            <p className="text-3xl font-heading font-bold text-primary">{products.length}</p>
-            <p className="text-xs font-bold text-brand uppercase tracking-widest">Creations</p>
+        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="text-center md:border-r border-primary/5 last:border-0 pb-4 md:pb-0">
+            <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{products.length}</p>
+            <p className="text-[10px] font-bold text-brand uppercase tracking-widest">Creations</p>
           </div>
-          <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
-            <p className="text-3xl font-heading font-bold text-primary">{(followersCount / 1000).toFixed(1)}k</p>
-            <p className="text-xs font-bold text-brand uppercase tracking-widest">Followers</p>
+          <div className="text-center md:border-r border-primary/5 last:border-0 pb-4 md:pb-0">
+            <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{(followersCount / 1000).toFixed(1)}k</p>
+            <p className="text-[10px] font-bold text-brand uppercase tracking-widest">Followers</p>
           </div>
-          <div className="flex-1 min-w-[150px] text-center border-r border-primary/5 last:border-0">
-            <p className="text-3xl font-heading font-bold text-primary">{yearsExp}</p>
-            <p className="text-xs font-bold text-brand uppercase tracking-widest">Years Experience</p>
+          <div className="text-center md:border-r border-primary/5 last:border-0">
+            <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{yearsExp}</p>
+            <p className="text-[10px] font-bold text-brand uppercase tracking-widest">Years Experience</p>
           </div>
-          <div className="flex-1 min-w-[150px] text-center last:border-0">
-            <p className="text-3xl font-heading font-bold text-primary">{feedbackScore}%</p>
-            <p className="text-xs font-bold text-brand uppercase tracking-widest">Positive Feedback</p>
+          <div className="text-center last:border-0">
+            <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{feedbackScore}%</p>
+            <p className="text-[10px] font-bold text-brand uppercase tracking-widest">Positive Feedback</p>
           </div>
         </div>
       </div>
 
       {/* Portfolio Grid */}
       <section className="py-24 container mx-auto px-4">
-        <div className="flex justify-between items-end mb-16">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
           <div>
-            <h2 className="text-4xl font-heading font-bold text-primary">In the Studio</h2>
-            <p className="text-charcoal/60 mt-2">Currently available works and one-of-a-kind treasures.</p>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary">In the Studio</h2>
+            <p className="text-charcoal/60 mt-2 text-sm md:text-base">Currently available works and one-of-a-kind treasures.</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => setFilter('available')}
               className={cn(
@@ -291,7 +291,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: any, idx: number) => (
             <motion.div
@@ -309,8 +309,8 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     </div>
                   )}
                 </div>
-                <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-brand transition-colors">{product.name}</h3>
-                <p className="text-lg font-bold text-brand mt-1">${product.price}.00</p>
+                <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-brand transition-colors break-words line-clamp-2">{product.name}</h3>
+                <p className="text-lg font-bold text-brand mt-1">EGP {product.price}.00</p>
               </Link>
             </motion.div>
             ))
@@ -338,7 +338,7 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
       {/* Footer (Simple) */}
       <footer className="py-12 bg-cream/30 border-t border-primary/5">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">© 2026 Giftisan • Supporting Global Craftsmanship</p>
+          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">© 2026 Giftisan • Proudly Based in Egypt • Supporting Egyptian Craftsmanship</p>
         </div>
       </footer>
     </main>

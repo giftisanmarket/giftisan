@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, useMemo, useRef } from "react";
-import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye } from "lucide-react";
+import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
 import { useNotifications } from "./notification-provider";
@@ -140,6 +140,16 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
   const activeThread: any = useMemo(() => 
     threads.find((t: any) => t.key === selectedThreadKey),
   [threads, selectedThreadKey]);
+  
+  const [isMobileChatView, setIsMobileChatView] = useState(false);
+
+  // Sync mobile view with initial selection or changes
+  useEffect(() => {
+    if (selectedThreadKey && !isMobileChatView && window.innerWidth < 768) {
+      // Don't auto-switch on first mobile load to show list, 
+      // but if they click from some other action we handle it in the onClick
+    }
+  }, [selectedThreadKey]);
 
   const activeMessages = useMemo(() => 
     activeThread ? [...activeThread.messages].sort((a: any, b: any) => 
@@ -190,13 +200,16 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row gap-8 min-h-[75vh]">
+    <div className="max-w-6xl mx-auto px-2 md:px-0">
+      <div className="flex flex-col md:flex-row gap-8 min-h-[80vh] md:min-h-[75vh]">
         {/* Thread List */}
-        <div className="w-full md:w-80 space-y-4">
-          <h1 className="text-3xl font-heading font-bold text-primary mb-8 px-2">Your <span className="serif italic text-accent font-normal">Inbox</span></h1>
+        <div className={cn(
+          "w-full md:w-80 space-y-6",
+          isMobileChatView ? "hidden md:block" : "block"
+        )}>
+          <h1 className="text-3xl font-heading font-bold text-primary px-2">Your <span className="serif italic text-accent font-normal">Inbox</span></h1>
           
-          <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-3 max-h-[70vh] md:max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
             {threads.length === 0 ? (
               <div className="py-12 text-center bg-white rounded-3xl border border-primary/5">
                 <MessageSquare className="w-8 h-8 text-primary/10 mx-auto mb-3" />
@@ -206,7 +219,10 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
               threads.map((t: any) => (
                 <button
                   key={t.key}
-                  onClick={() => setSelectedThreadKey(t.key)}
+                  onClick={() => {
+                    setSelectedThreadKey(t.key);
+                    setIsMobileChatView(true);
+                  }}
                   className={cn(
                     "w-full p-5 rounded-3xl border text-left transition-all group",
                     selectedThreadKey === t.key 
@@ -242,23 +258,32 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-white rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
+        <div className={cn(
+          "flex-1 flex flex-col bg-white rounded-[2.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden",
+          !isMobileChatView ? "hidden md:flex" : "flex"
+        )}>
           {activeThread ? (
             <>
               {/* Header */}
-              <div className="p-6 md:p-8 bg-primary/5 border-b border-primary/5 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white">
+              <div className="p-5 md:p-8 bg-primary/5 border-b border-primary/5 flex items-center justify-between">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <button 
+                    onClick={() => setIsMobileChatView(false)}
+                    className="md:hidden p-2 -ml-2 text-primary hover:bg-primary/5 rounded-full"
+                  >
+                    <ArrowLeft className="w-6 h-6" />
+                  </button>
+                  <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-white">
                     <Image 
                       src={activeThread.partner.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activeThread.partner.name}`} 
                       alt="" fill className="object-cover" 
                     />
                   </div>
-                  <div>
-                    <h2 className="text-xl font-heading font-bold text-primary">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg md:text-xl font-heading font-bold text-primary truncate">
                       {activeThread.partner.name}
                     </h2>
-                    <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none">
+                    <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none truncate">
                       {activeThread.product ? `Inquiry for ${activeThread.product.name}` : "General Conversation"}
                     </p>
                   </div>
@@ -279,7 +304,7 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
               {/* Message History */}
               <div 
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col custom-scrollbar"
+                className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 md:space-y-6 flex flex-col custom-scrollbar bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.02)_1px,transparent_1px)] bg-[size:24px_24px]"
               >
                 {activeMessages.map((m: any) => (
                   <div 
@@ -290,32 +315,32 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
                     )}
                   >
                     <div className={cn(
-                      "p-4 px-6 rounded-[2rem] text-sm font-medium leading-relaxed relative group/msg",
+                      "p-3 md:p-4 px-5 md:px-6 rounded-[1.5rem] md:rounded-[2rem] text-sm font-medium leading-relaxed relative group/msg",
                       m.senderId === userId 
                         ? "bg-primary text-white rounded-tr-none shadow-lg shadow-primary/10" 
                         : "bg-cream/50 text-primary rounded-tl-none border border-primary/5"
                     )}>
                       {m.attachment && (
-                        <div className="mb-3 rounded-2xl overflow-hidden border border-white/20 bg-black/5 min-w-[200px]">
+                        <div className="mb-2 rounded-xl md:rounded-2xl overflow-hidden border border-white/20 bg-black/5 min-w-[180px] md:min-w-[200px]">
                           {m.attachment.startsWith("data:image") ? (
                             <div className="relative w-full aspect-video">
                               <Image src={m.attachment} alt="Attached" fill className="object-cover" unoptimized />
                               <a 
                                 href={m.attachment} 
                                 download="attachment"
-                                className="absolute inset-0 bg-black/40 opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2"
+                                className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2"
                               >
                                 <Eye className="w-5 h-5 text-white" />
                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">View Image</span>
                               </a>
                             </div>
                           ) : (
-                            <div className="p-4 flex items-center gap-3 bg-white/10">
-                              <FileIcon className="w-6 h-6" />
+                            <div className="p-3 md:p-4 flex items-center gap-3 bg-white/10">
+                              <FileIcon className="w-5 h-5 md:w-6 md:h-6" />
                               <a 
                                 href={m.attachment} 
                                 download="document"
-                                className="text-xs font-bold underline"
+                                className="text-xs font-bold underline truncate"
                               >View Document</a>
                             </div>
                           )}
@@ -331,7 +356,7 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
               </div>
 
               {/* Input Area */}
-              <div className="p-6 md:p-8 bg-white border-t border-primary/5 space-y-4">
+              <div className="p-4 md:p-8 bg-white border-t border-primary/5 space-y-3">
                 {/* Attachment Preview */}
                 <AnimatePresence>
                   {attachment && (
@@ -339,13 +364,13 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
+                      className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
                     >
                       {attachment.startsWith("data:image") ? (
                         <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">
-                          <FileIcon className="w-6 h-6 text-accent" />
+                          <FileIcon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
                           <span className="text-[8px] font-black text-accent uppercase tracking-widest">Document</span>
                         </div>
                       )}
@@ -353,13 +378,13 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
                         onClick={() => setAttachment(null)}
                         className="absolute inset-0 bg-accent/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
-                        <X className="w-6 h-6 text-white" />
+                        <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                <div className="relative">
+                
+                <div className="flex flex-col md:relative">
                   <textarea 
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
@@ -370,9 +395,9 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
                       }
                     }}
                     placeholder={`Reply to ${activeThread.partner.name}...`}
-                    className="w-full h-32 p-6 pr-20 bg-cream/30 border border-primary/10 rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none"
+                    className="w-full h-24 md:h-32 p-4 md:p-6 pr-4 md:pr-20 bg-cream/30 border border-primary/10 rounded-[1.25rem] md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
                   />
-                  <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                  <div className="flex md:absolute bottom-4 right-4 items-center justify-end gap-2 md:gap-3">
                     <input 
                       type="file" 
                       id="file-attachment" 
@@ -382,17 +407,17 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
                     />
                     <label 
                       htmlFor="file-attachment"
-                      className="h-12 w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm"
+                      className="h-10 w-10 md:h-12 md:w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm"
                     >
-                      <Paperclip className="w-5 h-5" />
+                      <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
                     </label>
                     <button 
                       onClick={handleReply}
                       disabled={isSending || (!reply.trim() && !attachment)}
-                      className="h-12 px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50"
+                      className="h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm"
                     >
-                      {isSending ? "Sending..." : "Reply"}
-                      <Send className="w-4 h-4" />
+                      {isSending ? "..." : "Reply"}
+                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                   </div>
                 </div>

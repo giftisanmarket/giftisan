@@ -51,7 +51,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {products.map((product) => (
             <Link
               key={product.id}
@@ -93,7 +93,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
               <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                 {product.name}
               </h3>
-              <p className="font-heading font-bold text-primary mt-2">${product.price}.00</p>
+              <p className="font-heading font-bold text-primary mt-2">EGP {product.price}.00</p>
             </Link>
           ))}
         </div>
@@ -277,7 +277,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <span className="text-xl font-heading font-bold text-primary">Giftisan</span>
           </div>
           <p className="text-charcoal/40 text-sm">
-            © 2026 Giftisan Marketplace. All rights reserved. Crafted with care for the global artisan community.
+            © 2026 Giftisan. Proudly Handcrafted in Egypt. All rights reserved.
           </p>
         </div>
       </footer>

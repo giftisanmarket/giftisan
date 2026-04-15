@@ -69,7 +69,7 @@ export function CartDrawer() {
                       <div className="flex justify-between">
                         <h3 className="font-heading font-bold text-primary leading-tight line-clamp-1">{item.name}</h3>
                         <div className="text-right">
-                          <p className="font-bold text-primary">${item.price * item.quantity}</p>
+                          <p className="font-bold text-primary">EGP {item.price * item.quantity}</p>
                           {(item.stock || 0) <= 0 && (
                             <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">Sold Out</span>
                           )}
@@ -118,7 +118,7 @@ export function CartDrawer() {
               <div className="p-6 border-t border-primary/10 bg-white/50 space-y-4">
                 <div className="flex justify-between items-center text-lg">
                   <span className="text-charcoal/60 font-medium">Subtotal</span>
-                  <span className="font-heading font-bold text-primary text-2xl">${totalPrice}.00</span>
+                  <span className="font-heading font-bold text-primary text-2xl">EGP {totalPrice}.00</span>
                 </div>
                 <p className="text-xs text-charcoal/40 text-center">Shipping & taxes calculated at checkout</p>
                 <Link 

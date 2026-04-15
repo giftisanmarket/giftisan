@@ -16,9 +16,10 @@ import { useMemo } from "react";
 
 interface SalesChartProps {
   sales: any[];
+  tickFormatter?: (value: any) => string;
 }
 
-export function SalesChart({ sales }: SalesChartProps) {
+export function SalesChart({ sales, tickFormatter }: SalesChartProps) {
   const chartData = useMemo(() => {
     const last7Days = [...Array(7)].map((_, i) => subDays(new Date(), i)).reverse();
     
@@ -58,7 +59,7 @@ export function SalesChart({ sales }: SalesChartProps) {
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#9ca3af', fontSize: 12 }}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={tickFormatter || ((value) => `EGP ${value}`)}
           />
           <Tooltip 
             contentStyle={{ 

@@ -132,7 +132,7 @@ export function Navbar() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
-                          <span className="text-sm font-bold text-primary">${p.price}</span>
+                          <span className="text-sm font-bold text-primary">EGP {p.price}</span>
                         </div>
                         <p className="text-xs text-charcoal/40 font-medium">
                           {p.artisan.user?.name || p.artisan.studioName} • {p.category}
@@ -414,14 +414,26 @@ export function Navbar() {
         </div>
 
         <div className="p-6 border-t border-primary/10 bg-primary/5 space-y-4">
-          <Link 
-            href="/signup" 
-            onClick={() => setIsMenuOpen(false)}
-            className="w-full h-12 bg-primary text-white font-bold rounded-xl flex items-center justify-center shadow-lg"
-          >
-            Join the Circle
-          </Link>
-          <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
+          {!session ? (
+            <>
+              <Link 
+                href="/signup" 
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full h-12 bg-primary text-white font-bold rounded-xl flex items-center justify-center shadow-lg"
+              >
+                Join the Circle
+              </Link>
+              <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
+            </>
+          ) : (
+            <button 
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="w-full h-12 border border-red-100 bg-red-50/50 text-red-500 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          )}
         </div>
       </div>
     </div>

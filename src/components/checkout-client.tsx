@@ -22,9 +22,9 @@ export function CheckoutClient() {
     firstName: "",
     lastName: "",
     address: "",
-    city: "",
-    zip: "",
-    country: "United Kingdom",
+    city: "Cairo",
+    zip: "11511",
+    country: "Egypt",
     phone: "",
     email: session?.user?.email || ""
   });
@@ -136,7 +136,7 @@ export function CheckoutClient() {
                     <label className="text-xs font-black text-primary uppercase tracking-widest">Postal Code</label>
                     <input 
                       type="text" 
-                      placeholder="E1 6AN" 
+                      placeholder="11511" 
                       value={shippingData.zip}
                       onChange={(e) => setShippingData({...shippingData, zip: e.target.value})}
                       className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20" 
@@ -191,7 +191,7 @@ export function CheckoutClient() {
                         <h4 className="font-heading font-bold text-sm line-clamp-1">{item.name}</h4>
                         <p className="text-white/60 text-xs">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-bold">${item.price * item.quantity}</p>
+                      <p className="font-bold">EGP {item.price * item.quantity}</p>
                     </div>
                     {item.personalization && (
                       <div className="ml-20 mt-1 pl-3 border-l-2 border-accent/30">
@@ -206,19 +206,19 @@ export function CheckoutClient() {
               <div className="space-y-4 pt-6 border-t border-white/10">
                 <div className="flex justify-between text-white/70">
                   <span>Subtotal</span>
-                  <span>${totalPrice}.00</span>
+                  <span>EGP {totalPrice}.00</span>
                 </div>
                 <div className="flex justify-between text-white/70">
-                  <span>Shipping (Artisan Direct)</span>
+                  <span>Shipping (Cairo Direct)</span>
                   <span className="text-accent-light font-bold">FREE</span>
                 </div>
                 <div className="flex justify-between text-white/70">
                   <span>Estimated Tax</span>
-                  <span>$0.00</span>
+                  <span>EGP 0.00</span>
                 </div>
                 <div className="flex justify-between text-xl font-heading font-bold pt-4 border-t border-white/10">
                   <span>Total</span>
-                  <span className="text-3xl">${totalPrice}.00</span>
+                  <span className="text-3xl">EGP {totalPrice}.00</span>
                 </div>
               </div>
 

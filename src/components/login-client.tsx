@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { login } from "@/lib/actions";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FcGoogle } from "react-icons/fc";
+import { signIn as socialSignIn } from "next-auth/react";
 
 export function LoginClient() {
   const [email, setEmail] = useState("");
@@ -62,10 +64,10 @@ export function LoginClient() {
       </div>
 
       {/* Form Side */}
-      <div className="flex flex-col justify-center items-center p-8 md:p-20 relative">
+      <div className="flex flex-col justify-center items-center py-20 px-6 md:p-20 relative overflow-y-auto">
         <Link 
           href="/" 
-          className="absolute top-12 left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group"
+          className="absolute top-12 left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
         >
           <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5">
             <ArrowLeft className="w-4 h-4" />
@@ -76,11 +78,11 @@ export function LoginClient() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md space-y-12"
+          className="w-full max-w-md space-y-10 md:space-y-12 mt-12 md:mt-24"
         >
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">Login to <span className="serif italic font-normal text-accent">Giftisan</span></h1>
-            <p className="text-charcoal/60">Enter your credentials to access your studio or profile.</p>
+            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Login to <span className="serif italic font-normal text-accent">Giftisan</span></h1>
+            <p className="text-sm md:text-base text-charcoal/60">Enter your credentials to access your studio or profile.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -110,6 +112,24 @@ export function LoginClient() {
                 </p>
               </div>
             )}
+
+            <button 
+              type="button"
+              onClick={() => socialSignIn("google", { callbackUrl: "/" })}
+              className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-sm md:text-base"
+            >
+              <FcGoogle className="w-6 h-6" />
+              Sign in with Google
+            </button>
+
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/5"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-black">
+                <span className="bg-cream px-4 text-primary/20 italic serif">Or continue with email</span>
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
@@ -151,14 +171,14 @@ export function LoginClient() {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50"
+              className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
             >
               {isLoading ? "Authenticating..." : "Continue to Circle"}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
 
-          <p className="text-center text-charcoal/40 font-medium">
+          <p className="text-center text-charcoal/40 font-medium mt-8">
             Don't have an account?{" "}
             <Link href="/signup" className="text-accent font-bold hover:underline">Apply to the Circle</Link>
           </p>

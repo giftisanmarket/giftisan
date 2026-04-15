@@ -7,7 +7,7 @@ import { Metadata } from "next";
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q } = await searchParams;
   return {
-    title: q ? `Search results for "${q}"` : "Search Treasures",
+    title: q ? `Search results for "${q}"` : "Explore All Treasures | Giftisan",
     description: "Find the perfect handcrafted gift or artisanal treasure across our global marketplace.",
   };
 }

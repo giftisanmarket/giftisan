@@ -41,7 +41,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
           <p>Great news! Someone just purchased a treasure from your studio.</p>
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p><strong>Order ID:</strong> ${orderId}</p>
-            <p><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
+            <p><strong>Total Amount:</strong> EGP {totalAmount.toFixed(2)}</p>
           </div>
           <p>Please log in to your studio dashboard to view the order details and start fulfillment.</p>
           <div style="margin: 30px 0;">

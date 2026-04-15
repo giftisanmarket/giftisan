@@ -63,7 +63,7 @@ export default function FavoritesPage() {
                       <p className="text-[10px] font-black text-accent uppercase tracking-widest">{product.artisan.name}</p>
                       <h3 className="text-2xl font-heading font-bold text-primary">{product.name}</h3>
                       <p className="text-sm text-charcoal/60 line-clamp-2">{product.description}</p>
-                      <p className="text-2xl font-heading font-bold text-primary pt-2">${product.price}.00</p>
+                      <p className="text-2xl font-heading font-bold text-primary pt-2">EGP {product.price}.00</p>
                     </div>
 
                     {/* Actions */}

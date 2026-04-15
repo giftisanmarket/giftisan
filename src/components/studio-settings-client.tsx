@@ -70,8 +70,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
         <div className="space-y-6">
           <Link href="/studio" className="inline-flex items-center gap-2 text-primary/40 hover:text-primary transition-colors text-xs font-black uppercase tracking-widest group">
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -82,7 +82,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
               Artisan Portal
             </div>
           </div>
-          <h1 className="text-5xl font-heading font-bold text-primary italic serif">Studio <span className="not-italic">Settings</span></h1>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary italic serif leading-tight">Studio <span className="not-italic">Settings</span></h1>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-10 right-10 z-[200] px-10 py-5 bg-white text-green-600 rounded-[2rem] font-bold flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-green-50 backdrop-blur-xl"
+            className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
                <Check className="w-5 h-5" />
@@ -109,7 +109,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-10 right-10 z-[200] px-10 py-5 bg-white text-red-600 rounded-[2rem] font-bold flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-red-50 backdrop-blur-xl"
+            className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-red-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-red-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg">
                <AlertCircle className="w-5 h-5" />
@@ -122,20 +122,20 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         )}
       </AnimatePresence>
 
-      <div className="grid md:grid-cols-[240px_1fr] gap-12">
-        <nav className="flex flex-col gap-2">
+      <div className="grid md:grid-cols-[240px_1fr] gap-8 md:gap-12">
+        <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
           {navItems.map((item) => (
             <button
               key={item.label}
               onClick={() => setActiveSettingsTab(item.label)}
-              className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all ${
+              className={`flex items-center gap-3 px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 ${
                 activeSettingsTab === item.label
                   ? "bg-primary text-white shadow-xl shadow-primary/20" 
-                  : "text-charcoal/40 hover:bg-primary/5 hover:text-primary"
+                  : "text-charcoal/40 hover:bg-primary/5 hover:text-primary bg-white/50 border border-primary/5 md:border-transparent md:bg-transparent"
               }`}
             >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+              <item.icon className={cn("w-5 h-5 transition-transform", activeSettingsTab === item.label ? "scale-110" : "group-hover:scale-110")} />
+              <span className="text-sm md:text-base">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -149,26 +149,26 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onSubmit={handleSave} 
-                className="bg-white p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-2xl space-y-10"
+                className="bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
               >
                 <div className="space-y-12">
                   <div className="space-y-6">
                     <h3 className="text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
                     <p className="text-charcoal/40 text-sm">Choose a primary brand color that will be used for buttons, icons, and accents on your studio profile.</p>
                     
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-3 md:gap-4">
                       {["#da7b5a", "#1a4332", "#4a90e2", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"].map((color) => (
                         <button
                           key={color}
                           type="button"
                           onClick={() => setBrandColor(color)}
                           className={cn(
-                            "w-16 h-16 rounded-2xl transition-all border-4 relative overflow-hidden",
+                            "w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl transition-all border-4 relative overflow-hidden",
                             brandColor === color ? "border-primary scale-110 shadow-lg" : "border-transparent hover:scale-105"
                           )}
                           style={{ backgroundColor: color }}
                         >
-                          {brandColor === color && <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white"><Check className="w-8 h-8" /></div>}
+                          {brandColor === color && <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white"><Check className="w-6 h-6 md:w-8 md:h-8" /></div>}
                         </button>
                       ))}
                       <div className="relative group">
@@ -176,9 +176,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                           type="color" 
                           value={brandColor}
                           onChange={(e) => setBrandColor(e.target.value)}
-                          className="w-16 h-16 rounded-2xl border-4 border-transparent bg-cream/30 cursor-pointer overflow-hidden p-0"
+                          className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-4 border-transparent bg-cream/30 cursor-pointer overflow-hidden p-0"
                         />
-                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-[8px] font-black uppercase tracking-widest text-primary/40">Custom</div>
                       </div>
                     </div>
                   </div>
@@ -188,7 +187,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                     <p className="text-charcoal/40 text-sm">Upload a premium banner that reflects your craft. This will be displayed at the top of your public gallery.</p>
                     
                     <div 
-                      className="relative w-full h-48 rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden"
+                      className="relative w-full h-32 md:h-48 rounded-2xl md:rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden"
                     >
                       {bannerImage ? (
                         <>
@@ -242,13 +241,13 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-primary/5 flex justify-end">
+                <div className="pt-8 border-t border-primary/5 flex">
                   <button 
                     type="submit"
                     disabled={isSaving}
-                    className="px-12 h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
+                    className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-base"
                   >
-                    {isSaving ? "Syncing Branding..." : "Save Branding Vision"}
+                    {isSaving ? "Syncing..." : "Save Branding Vision"}
                     <Save className="w-5 h-5" />
                   </button>
                 </div>
@@ -260,7 +259,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onSubmit={handleSave} 
-                className="bg-white p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-2xl space-y-10"
+                className="bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
               >
                 <div className="space-y-8">
                   <div className="flex items-center gap-6">
@@ -319,7 +318,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                       />
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Location</label>
                         <div className="relative">
@@ -328,14 +327,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                             type="text" 
                             value={location || ""}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-14 md:h-16 pl-12 pr-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
                             placeholder="e.g. Cairo, Egypt"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Primary Email</label>
-                        <div className="w-full h-16 pl-12 pr-8 flex items-center rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative">
+                        <div className="w-full h-14 md:h-16 pl-12 pr-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
                           <span className="truncate w-full">{artisan.user.email}</span>
                         </div>
@@ -418,13 +417,13 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-primary/5 flex justify-end">
+                <div className="pt-8 border-t border-primary/5 flex">
                   <button 
                     type="submit"
                     disabled={isSaving}
-                    className="px-12 h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
+                    className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-base"
                   >
-                    {isSaving ? "Syncing Studio..." : "Save Studio Branding"}
+                    {isSaving ? "Syncing..." : "Save Studio Branding"}
                     <Save className="w-5 h-5" />
                   </button>
                 </div>

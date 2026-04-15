@@ -152,7 +152,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                           </div>
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-1">Total</p>
-                            <p className="font-bold text-primary">${order.totalAmount}.00</p>
+                            <p className="font-bold text-primary">EGP {order.totalAmount}.00</p>
                           </div>
                         </div>
                       </div>
@@ -169,7 +169,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                 {item.product.name}
                                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all" />
                               </Link>
-                              <p className="text-xs text-charcoal/40 font-medium">Qty: {item.quantity} • ${item.price}</p>
+                              <p className="text-xs text-charcoal/40 font-medium">Qty: {item.quantity} • EGP {item.price}</p>
                               {item.personalization && (
                                 <div className="mt-2 text-[10px] italic text-accent flex items-center gap-2">
                                   <span className="w-1 h-1 bg-accent rounded-full" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,12 @@ export default function BecomeArtisanPage() {
     bio: "",
     location: "",
   });
+
+  useEffect(() => {
+    if (session?.user?.role === "ARTISAN") {
+      router.push("/studio");
+    }
+  }, [session, router]);
 
   if (!session) {
     return (
@@ -39,7 +45,6 @@ export default function BecomeArtisanPage() {
   }
 
   if (session.user.role === "ARTISAN") {
-    router.push("/studio");
     return null;
   }
 

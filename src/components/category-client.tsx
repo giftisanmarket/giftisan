@@ -3,10 +3,12 @@
 import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, SlidersHorizontal, ArrowLeft } from "lucide-react";
+import { Heart, SlidersHorizontal, ArrowLeft, ArrowUpDown, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 
 interface CategoryClientProps {
   slug: string;
@@ -15,6 +17,23 @@ interface CategoryClientProps {
 
 export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high">("newest");
+  const [showSortOptions, setShowSortOptions] = useState(false);
+
+  const filteredProducts = initialProducts
+    .filter(p => !showVerifiedOnly || p.artisan.isVerified)
+    .sort((a, b) => {
+      if (sortBy === "price-low") return a.price - b.price;
+      if (sortBy === "price-high") return b.price - a.price;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  const sortOptions = [
+    { label: "Newest Arrivals", value: "newest" },
+    { label: "Price: Low to High", value: "price-low" },
+    { label: "Price: High to Low", value: "price-high" }
+  ];
 
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
 
@@ -50,14 +69,59 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
 
       {/* Toolbar */}
       <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-4">
-        <div className="container mx-auto px-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row gap-4 justify-between items-center">
           <p className="text-sm font-medium text-charcoal/60">
-            Showing <span className="text-primary font-bold">{initialProducts.length}</span> artisanal works
+            Showing <span className="text-primary font-bold">{filteredProducts.length}</span> artisanal works
           </p>
-          <div className="flex gap-4">
-            <button className="flex items-center gap-2 px-6 py-2 border border-primary/10 rounded-full text-sm font-bold text-primary hover:bg-primary/5 transition-colors">
-              <SlidersHorizontal className="w-4 h-4" /> Filter
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+              className={cn(
+                "flex items-center gap-2 px-6 py-2 border rounded-full text-xs font-black uppercase tracking-widest transition-all",
+                showVerifiedOnly 
+                  ? "bg-accent text-white border-accent shadow-lg shadow-accent/20" 
+                  : "bg-white border-primary/10 text-primary hover:bg-primary/5"
+              )}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> Verified
             </button>
+
+            <div className="relative">
+              <button 
+                onClick={() => setShowSortOptions(!showSortOptions)}
+                className="flex items-center gap-2 px-6 py-2 bg-white border border-primary/10 rounded-full text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all shadow-sm"
+              >
+                <ArrowUpDown className="w-3.5 h-3.5" /> 
+                {sortOptions.find(o => o.value === sortBy)?.label}
+              </button>
+
+              <AnimatePresence>
+                {showSortOptions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
+                  >
+                    {sortOptions.map(option => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          setSortBy(option.value as any);
+                          setShowSortOptions(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all",
+                          sortBy === option.value ? "bg-primary/5 text-primary" : "text-charcoal/60 hover:bg-cream hover:text-primary"
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -79,17 +143,19 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {initialProducts.map((product, idx) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <Link
-                  href={`/products/${product.slug || product.id}`}
-                  className="group block"
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product, idx) => (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
                 >
+                  <Link
+                    href={`/products/${product.slug || product.id}`}
+                    className="group block"
+                  >
                   <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
                     <Image
                       src={product.images[0]}
@@ -123,7 +189,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                     <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] leading-none">
                       {product.artisan.user?.name || product.artisan.studioName}
                     </p>
-                    <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight">
+                    <h3 className="text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight break-words line-clamp-2">
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-3">
@@ -135,6 +201,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                 </Link>
               </motion.div>
             ))}
+            </AnimatePresence>
           </div>
         )}
       </section>
@@ -146,10 +213,12 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
           <p className="text-charcoal/60 text-lg leading-relaxed">
             Our artisans thrive on custom commissions. Start a conversation with a master maker to create a piece that tells your unique story.
           </p>
-          <button className="h-16 px-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group">
-            Explore Custom Makers
-            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+          <Link href="/artisans">
+            <button className="h-16 px-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group">
+              Explore Custom Makers
+              <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </Link>
         </div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </section>

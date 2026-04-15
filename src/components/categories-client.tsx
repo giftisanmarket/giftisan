@@ -56,7 +56,7 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
     <main className="min-h-screen bg-cream">
       <Navbar />
       
-      <section className="pt-40 pb-20">
+      <section className="pt-24 md:pt-40 pb-20">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -71,7 +71,7 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((cat, idx) => {
               const Icon = iconMap[cat.name] || ShoppingBag;
               const color = colorMap[cat.name] || "bg-cream";
@@ -89,7 +89,7 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
                     href={`/category/${slug}`}
                     className="group relative block h-full"
                   >
-                    <div className="bg-white rounded-[3rem] p-10 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-accent/10 hover:-translate-y-2 h-full flex flex-col">
+                    <div className="bg-white rounded-[3rem] p-8 md:p-10 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-accent/10 hover:-translate-y-2 h-full flex flex-col">
                       <div className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform duration-500`}>
                         <Icon className="w-8 h-8" />
                       </div>
@@ -122,7 +122,7 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
       <footer className="py-12 bg-cream/30 border-t border-primary/5">
         <div className="container mx-auto px-4 text-center">
           <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">
-            © 2026 Giftisan • Supporting Independent Makers Globally
+            © 2026 Giftisan • Proudly Crafted in Egypt • Supporting Egyptian Makers
           </p>
         </div>
       </footer>

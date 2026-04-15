@@ -188,7 +188,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
             <div className="flex items-center justify-between mb-8">
               <p className="text-3xl font-heading font-bold text-primary">
-                ${product.price}.00
+                EGP {product.price}.00
               </p>
               <div className="flex items-center gap-2">
                 <div className={cn(
@@ -266,7 +266,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
                   )}
                 >
-                  {(product.stock || 0) > 0 ? `Add to Cart — $${product.price}` : "Out of Stock"}
+                  {(product.stock || 0) > 0 ? `Add to Cart — EGP ${product.price}` : "Out of Stock"}
                 </button>
                 <button
                   onClick={() => toggleFavorite(product)}
@@ -584,7 +584,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-left">
               {relatedProducts.map((p) => (
                 <Link
                   key={p.id}
@@ -612,7 +612,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                     {p.name}
                   </h3>
-                  <p className="font-heading font-bold text-primary mt-2">${p.price}.00</p>
+                  <p className="font-heading font-bold text-primary mt-2">EGP {p.price}.00</p>
                 </Link>
               ))}
             </div>

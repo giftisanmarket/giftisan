@@ -40,7 +40,11 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
       <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-primary flex items-center gap-3">
-            Results for <span className="text-accent italic serif brightness-90">"{query}"</span>
+            {query ? (
+              <>Results for <span className="text-accent italic serif brightness-90">"{query}"</span></>
+            ) : (
+              <>Explore <span className="text-accent italic serif brightness-90">Our Collection</span></>
+            )}
           </h1>
           <p className="text-charcoal/60 text-sm font-medium mt-1">Found {filteredProducts.length} treasures match your criteria</p>
         </div>
@@ -117,7 +121,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           <AnimatePresence mode="popLayout">
             {filteredProducts.map((p, idx) => (
               <motion.div
@@ -153,8 +157,8 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                       </p>
                       {p.artisan.isVerified && <CheckCircle2 className="w-2.5 h-2.5 text-accent" />}
                     </div>
-                    <h3 className="text-xl font-heading font-bold text-primary leading-tight group-hover:text-accent transition-colors">{p.name}</h3>
-                    <p className="text-lg font-bold text-primary">${p.price}.00</p>
+                    <h3 className="text-xl font-heading font-bold text-primary leading-tight group-hover:text-accent transition-colors break-words line-clamp-2">{p.name}</h3>
+                    <p className="text-lg font-bold text-primary">EGP {p.price}.00</p>
                   </div>
                 </Link>
               </motion.div>
@@ -162,6 +166,23 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
           </AnimatePresence>
         </div>
       )}
+
+      {/* More Discovery */}
+      <section className="py-32 border-t border-primary/5 mt-24 bg-cream text-center relative overflow-hidden -mx-4">
+        <div className="container mx-auto px-4 max-w-2xl space-y-8 relative z-10">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary">Not what you're looking for?</h2>
+          <p className="text-charcoal/60 text-lg leading-relaxed">
+            Our artisans thrive on custom commissions. Start a conversation with a master maker to create a piece that tells your unique story.
+          </p>
+          <Link href="/artisans">
+            <button className="h-16 px-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group">
+              Explore Custom Makers
+              <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </Link>
+        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      </section>
     </div>
   );
 }

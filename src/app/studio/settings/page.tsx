@@ -35,7 +35,7 @@ export default async function StudioSettingsPage() {
   return (
     <main className="min-h-screen bg-cream">
       <Navbar />
-      <div className="container mx-auto px-4 pt-40 pb-20">
+      <div className="container mx-auto px-4 pt-24 md:pt-40 pb-20">
         <StudioSettingsClient artisan={sanitizedArtisan} />
       </div>
     </main>

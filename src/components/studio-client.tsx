@@ -109,7 +109,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white rounded-[3rem] p-10 md:p-12 max-w-lg w-full shadow-2xl border border-primary/5 text-center space-y-8"
+              className="relative bg-white rounded-[3rem] p-8 md:p-12 max-w-lg w-full shadow-2xl border border-primary/5 text-center space-y-8"
             >
               <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
                 <Trash2 className="w-10 h-10" />
@@ -217,7 +217,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           >
             {activeTab === "overview" && (
               <div className="space-y-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { label: "Total Impressions", value: totalViews.toLocaleString(), icon: MousePointer2, color: "bg-purple-500" },
                 { label: "Community Loves", value: totalFavorites, icon: Heart, color: "bg-red-500" },
@@ -228,7 +228,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                   color: "bg-indigo-500",
                   tooltip: "The percentage of visitors who converted into collectors. A healthy rate is between 2% and 5%."
                 },
-                { label: "Studio Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: BarChart3, color: "bg-green-500" },
+                { label: "Studio Revenue", value: `EGP ${totalRevenue.toLocaleString()}`, icon: BarChart3, color: "bg-green-500" },
               ].map((stat, i) => (
                 <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
                   <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6", stat.color)}>
@@ -316,7 +316,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                   Live Data
                 </div>
               </div>
-              <SalesChart sales={sales} />
+              <SalesChart sales={sales} tickFormatter={(value) => `EGP ${value}`} />
             </div>
           </div>
         )}
@@ -337,7 +337,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
               {products.length === 0 ? (
                 <div className="col-span-full py-20 text-center space-y-6">
                   <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-4">
@@ -393,7 +393,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-2xl font-heading font-bold text-accent">${p.price}.00</p>
+                        <p className="text-2xl font-heading font-bold text-accent">EGP {p.price}.00</p>
                         <div className="flex items-center gap-2 text-xs font-bold text-primary/40">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                           <span>{p.reviews?.length || 0} reviews</span>
@@ -470,6 +470,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                               className="overflow-hidden"
                             >
                               <div className="pt-4 space-y-2 border-t border-primary/5 mt-4">
+                                <p className="text-lg font-bold text-primary">EGP {item.price * item.quantity}.00</p>
                                 <p className="text-xs font-bold text-primary">
                                   {item.order.shippingAddress || "No address provided"}
                                 </p>
@@ -497,7 +498,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                     </div>
 
                     <div className="flex flex-col items-center md:items-end gap-4 shrink-0">
-                      <p className="text-2xl font-heading font-bold text-primary">${item.price * item.quantity}.00</p>
+                      <p className="text-2xl font-heading font-bold text-primary">EGP {item.price * item.quantity}.00</p>
                       <div className="flex gap-2">
                         {item.status === "PENDING" && (
                           <button 
@@ -592,7 +593,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
 
         {activeTab === "reviews" && (
           <div className="space-y-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {reviews.length === 0 ? (
                 <div className="col-span-full py-20 px-10 text-center bg-white rounded-[3rem] border border-primary/5">
                   <div className="w-16 h-16 bg-cream rounded-full flex items-center justify-center mx-auto mb-6 text-accent">
@@ -622,6 +623,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                           </div>
                           <div>
                             <p className="font-bold text-sm text-primary">{review.user.name}</p>
+                            <p className="font-bold text-primary">EGP {review.product.price}.00</p>
                             <p className="text-[10px] text-charcoal/30 font-black uppercase tracking-widest">{new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
                           </div>
                         </div>
@@ -700,7 +702,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden no-print"
           >
-            <div className="p-12 md:p-16 space-y-10">
+            <div className="p-8 md:p-16 space-y-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-4">
@@ -725,8 +727,8 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                     </div>
                     <div>
                       <p className="font-bold text-primary leading-tight">{selectedItem.product.name}</p>
-                      <p className="text-sm text-charcoal/60 mt-1 font-medium">Qty: {selectedItem.quantity}</p>
-                      <p className="text-lg font-heading font-bold mt-2 text-accent">${selectedItem.price.toFixed(2)}</p>
+                      <p className="text-xs text-charcoal/40 font-medium">Qty: {selectedItem.quantity} • EGP {selectedItem.price}</p>
+                      <p className="text-lg font-heading font-bold mt-2 text-accent">EGP {selectedItem.price.toFixed(2)}</p>
                     </div>
                   </div>
                   {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
@@ -948,7 +950,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
             <tr className="border-b">
               <td className="py-6 font-bold text-primary">{itemToPrint.product.name}</td>
               <td className="py-6 text-center font-bold text-charcoal/60">{itemToPrint.quantity}</td>
-              <td className="py-6 text-right font-bold text-primary">${itemToPrint.price.toFixed(2)}</td>
+              <td className="py-6 text-right font-bold text-primary">EGP {itemToPrint.price.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>

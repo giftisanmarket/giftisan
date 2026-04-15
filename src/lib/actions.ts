@@ -415,7 +415,8 @@ export async function getArtisanData(userId: string) {
       include: {
         products: {
           include: {
-            reviews: true
+            reviews: true,
+            favoritedBy: true
           },
           orderBy: {
             createdAt: 'desc'
@@ -454,7 +455,6 @@ export async function updateArtisanProfile(userId: string, data: any) {
     const slug = data.studioName 
       ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
       : null;
-
 
     const avatarUrl = await processImage(data.avatar);
     const bannerUrl = await processImage(data.bannerImage);
@@ -1054,5 +1054,18 @@ export async function trackProductView(productId: string) {
     return { success: false };
   }
 }
+
+export async function deleteAccountAction(userId: string) {
+  try {
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Delete account error:", error);
+    return { error: "Failed to delete account. Please try again." };
+  }
+}
+
 
 

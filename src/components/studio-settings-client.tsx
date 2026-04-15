@@ -123,20 +123,20 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         )}
       </AnimatePresence>
 
-      <div className="grid md:grid-cols-[240px_1fr] gap-8 md:gap-12">
-        <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+      <div className="grid md:grid-cols-[240px_1fr] gap-6 md:gap-12">
+        <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide sticky top-0 md:relative z-10 bg-cream md:bg-transparent py-2 md:py-0">
           {navItems.map((item) => (
             <button
               key={item.label}
               onClick={() => setActiveSettingsTab(item.label)}
-              className={`flex items-center gap-3 px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 ${
+              className={`flex items-center gap-3 px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 active:scale-95 ${
                 activeSettingsTab === item.label
                   ? "bg-primary text-white shadow-xl shadow-primary/20" 
-                  : "text-charcoal/40 hover:bg-primary/5 hover:text-primary bg-white/50 border border-primary/5 md:border-transparent md:bg-transparent"
+                  : "text-charcoal/40 hover:bg-primary/5 hover:text-primary bg-white border border-primary/5 md:border-transparent md:bg-transparent"
               }`}
             >
-              <item.icon className={cn("w-5 h-5 transition-transform", activeSettingsTab === item.label ? "scale-110" : "group-hover:scale-110")} />
-              <span className="text-sm md:text-base">{item.label}</span>
+              <item.icon className={cn("w-4 h-4 md:w-5 md:h-5 transition-transform", activeSettingsTab === item.label ? "scale-110" : "group-hover:scale-110")} />
+              <span className="text-xs md:text-base">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -150,45 +150,37 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onSubmit={handleSave} 
-                className="bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
+                className="bg-white p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
               >
-                <div className="space-y-12">
-                  <div className="space-y-6">
-                    <h3 className="text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
-                    <p className="text-charcoal/40 text-sm">Choose a primary brand color that will be used for buttons, icons, and accents on your studio profile.</p>
+                <div className="space-y-10 md:space-y-12">
+                  <div className="space-y-5 md:space-y-6">
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
+                    <p className="text-charcoal/40 text-xs">Choose a brand color for your studio profile accents.</p>
                     
-                    <div className="flex flex-wrap gap-3 md:gap-4">
+                    <div className="flex flex-wrap gap-2.5 md:gap-4">
                       {["#da7b5a", "#1a4332", "#4a90e2", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"].map((color) => (
                         <button
                           key={color}
                           type="button"
                           onClick={() => setBrandColor(color)}
                           className={cn(
-                            "w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl transition-all border-4 relative overflow-hidden",
+                            "w-10 h-10 md:w-16 md:h-16 rounded-lg md:rounded-2xl transition-all border-2 md:border-4 relative overflow-hidden active:scale-90",
                             brandColor === color ? "border-primary scale-110 shadow-lg" : "border-transparent hover:scale-105"
                           )}
                           style={{ backgroundColor: color }}
                         >
-                          {brandColor === color && <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white"><Check className="w-6 h-6 md:w-8 md:h-8" /></div>}
+                          {brandColor === color && <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-white"><Check className="w-5 h-5 md:w-8 md:h-8" /></div>}
                         </button>
                       ))}
-                      <div className="relative group">
-                        <input 
-                          type="color" 
-                          value={brandColor}
-                          onChange={(e) => setBrandColor(e.target.value)}
-                          className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-4 border-transparent bg-cream/30 cursor-pointer overflow-hidden p-0"
-                        />
-                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <h3 className="text-2xl font-heading font-bold text-primary">Studio <span className="serif italic">Banner</span></h3>
-                    <p className="text-charcoal/40 text-sm">Upload a premium banner that reflects your craft. This will be displayed at the top of your public gallery.</p>
+                  <div className="space-y-5 md:space-y-6">
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Studio <span className="serif italic">Banner</span></h3>
+                    <p className="text-charcoal/40 text-xs">Upload a banner image that reflects your craft.</p>
                     
                     <div 
-                      className="relative w-full h-32 md:h-48 rounded-2xl md:rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden"
+                      className="relative w-full h-28 md:h-48 rounded-xl md:rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden active:scale-[0.99]"
                     >
                       {bannerImage ? (
                         <>
@@ -199,10 +191,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         </>
                       ) : (
                         <>
-                          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary/20 mb-3 group-hover:scale-110 transition-transform">
-                            <Camera className="w-6 h-6" />
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center text-primary/20 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+                            <Camera className="w-5 h-5 md:w-6 md:h-6" />
                           </div>
-                          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">Select Banner Image</p>
+                          <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest px-4">Select Banner</p>
                         </>
                       )}
                       <input 
@@ -219,36 +211,27 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         }}
                       />
                     </div>
-                    {bannerImage && (
-                      <button 
-                        type="button"
-                        onClick={() => setBannerImage("")}
-                        className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:underline"
-                      >
-                        Remove Banner
-                      </button>
-                    )}
                   </div>
 
-                  <div className="p-8 bg-cream/30 rounded-[2rem] border border-primary/5 space-y-4">
-                    <h4 className="font-bold text-primary flex items-center gap-2">
+                  <div className="p-6 md:p-8 bg-cream/30 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 space-y-4">
+                    <h4 className="text-sm font-bold text-primary flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
-                      Live Preview Theme
+                      Preview Theme
                     </h4>
                     <div className="flex gap-2">
-                       <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button Style</div>
-                       <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline Style</div>
+                       <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button</div>
+                       <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-primary/5 flex">
+                <div className="pt-6 md:pt-8 border-t border-primary/5 flex">
                   <button 
                     type="submit"
                     disabled={isSaving}
-                    className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-base"
+                    className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base active:scale-95"
                   >
-                    {isSaving ? "Syncing..." : "Save Branding Vision"}
+                    {isSaving ? "Syncing..." : "Save Vision"}
                     <Save className="w-5 h-5" />
                   </button>
                 </div>
@@ -260,7 +243,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onSubmit={handleSave} 
-                className="bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
+                className="bg-white p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-6 md:space-y-10"
               >
                 <div className="space-y-8">
                   <div className="flex items-center gap-6">

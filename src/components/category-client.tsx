@@ -68,34 +68,34 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
       </section>
 
       {/* Toolbar */}
-      <div className="sticky top-[80px] md:top-[124px] z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-4">
-        <div className="container mx-auto px-6 flex flex-row justify-between items-center gap-4">
-          <p className="text-[10px] md:text-sm font-medium text-charcoal/60">
-            <span className="md:inline hidden">Showing </span><span className="text-primary font-bold">{filteredProducts.length}</span><span className="md:inline hidden"> artisanal works</span>
-            <span className="md:hidden inline text-primary font-bold"> Pieces</span>
+      <div className="sticky top-[72px] md:top-[124px] z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-3 md:py-4">
+        <div className="container mx-auto px-4 md:px-6 flex flex-row justify-between items-center gap-3">
+          <p className="text-[9px] md:text-sm font-medium text-charcoal/60 uppercase tracking-widest">
+            <span className="text-primary font-bold">{filteredProducts.length}</span>
+            <span className="ml-1 opacity-50">Treasures</span>
           </p>
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1.5 md:gap-3">
             <button 
               onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
               className={cn(
-                "flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 border rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all",
+                "flex items-center gap-1 px-3 md:px-6 py-1.5 md:py-2 border rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest transition-all active:scale-90",
                 showVerifiedOnly 
                   ? "bg-accent text-white border-accent shadow-lg shadow-accent/20" 
                   : "bg-white border-primary/10 text-primary hover:bg-primary/5"
               )}
             >
-              <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5" /> 
-              <span className="md:inline hidden">Verified</span>
-              <span className="md:hidden inline">Artisans</span>
+              <CheckCircle2 className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" /> 
+              <span>Artisans</span>
             </button>
 
             <div className="relative">
               <button 
                 onClick={() => setShowSortOptions(!showSortOptions)}
-                className="flex items-center gap-2 px-6 py-2 bg-white border border-primary/10 rounded-full text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 md:px-6 py-1.5 md:py-2 bg-white border border-primary/10 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-90"
               >
-                <ArrowUpDown className="w-3.5 h-3.5" /> 
-                {sortOptions.find(o => o.value === sortBy)?.label}
+                <ArrowUpDown className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" /> 
+                <span className="md:inline hidden">{sortOptions.find(o => o.value === sortBy)?.label}</span>
+                <span className="md:hidden inline">Sort</span>
               </button>
 
               <AnimatePresence>
@@ -104,7 +104,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
+                    className="absolute right-0 top-full mt-2 w-48 md:w-56 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
                   >
                     {sortOptions.map(option => (
                       <button
@@ -114,7 +114,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                           setShowSortOptions(false);
                         }}
                         className={cn(
-                          "w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all",
+                          "w-full text-left px-4 py-2.5 md:py-3 rounded-xl text-[10px] md:text-xs font-bold transition-all",
                           sortBy === option.value ? "bg-primary/5 text-primary" : "text-charcoal/60 hover:bg-cream hover:text-primary"
                         )}
                       >
@@ -130,42 +130,41 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
       </div>
 
       {/* Grid */}
-      <section className="py-8 md:py-12 container mx-auto px-6">
+      <section className="py-6 md:py-12 container mx-auto px-4 md:px-6">
         {initialProducts.length === 0 ? (
           <div className="py-16 md:py-24 flex flex-col items-center justify-center text-center space-y-6">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary/20">
               <SlidersHorizontal className="w-8 h-8 md:w-10 md:h-10" />
             </div>
             <div className="space-y-3 px-4">
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">No {categoryName} treasures yet</h2>
-              <p className="text-charcoal/60 max-w-md mx-auto text-sm md:text-lg font-medium leading-relaxed">
-                Our master makers are currently busy in their workshops crafting new pieces for the {categoryName} collection. 
-                Please check back soon for fresh arrivals.
+              <h2 className="text-xl md:text-3xl font-heading font-bold text-primary">No {categoryName} treasures yet</h2>
+              <p className="text-charcoal/60 max-w-md mx-auto text-xs md:text-lg font-medium leading-relaxed">
+                Our master makers are currently busy in their workshops crafting new pieces. Check back soon for fresh arrivals.
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product, idx) => (
                 <motion.div
                   key={product.id}
                   layout
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: idx * 0.05 }}
                 >
                   <Link
                     href={`/products/${product.slug || product.id}`}
                     className="group block"
                   >
-                  <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3rem] overflow-hidden mb-4 md:mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
+                  <div className="relative aspect-[3/4] md:aspect-[4/5] rounded-[1.5rem] md:rounded-[3rem] overflow-hidden mb-3 md:mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
                     <BespokeImage
                       src={product.images[0]}
                       alt={product.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-1000"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                     <button
                       onClick={(e) => {
@@ -174,31 +173,31 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                         toggleFavorite(product);
                       }}
                       className={cn(
-                        "absolute top-4 right-4 md:top-6 md:right-6 p-3 md:p-4 rounded-full transition-all shadow-lg",
+                        "absolute top-2 right-2 md:top-6 md:right-6 p-2 md:p-4 rounded-full transition-all shadow-lg scale-90 md:scale-100 active:scale-75",
                         isFavorite(product.id)
-                          ? "bg-red-50 text-red-500 opacity-100 scale-100"
-                          : "bg-white/90 backdrop-blur text-primary opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 hover:bg-white"
+                          ? "bg-red-50 text-red-500 opacity-100"
+                          : "bg-white/90 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
                       )}
                     >
-                      <Heart className={cn("w-5 h-5 md:w-6 md:h-6", isFavorite(product.id) && "fill-current")} />
+                      <Heart className={cn("w-4 h-4 md:w-6 md:h-6", isFavorite(product.id) && "fill-current")} />
                     </button>
                     {product.badge && (
-                      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 px-3 md:px-4 py-1 md:py-1.5 bg-white/90 backdrop-blur text-primary text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl">
+                      <div className="absolute bottom-2 left-2 md:bottom-6 md:left-6 px-2 md:px-4 py-0.5 md:py-1.5 bg-white/90 backdrop-blur text-primary text-[7px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl">
                         {product.badge}
                       </div>
                     )}
                   </div>
-                  <div className="space-y-2 px-1 md:px-2">
-                    <p className="text-[9px] md:text-[10px] font-black text-accent uppercase tracking-[0.3em] leading-none text-center md:text-left">
-                      {product.artisan.user?.name || product.artisan.studioName}
+                  <div className="space-y-1.5 md:space-y-2 px-1">
+                    <p className="text-[7px] md:text-[10px] font-black text-accent uppercase tracking-[0.3em] leading-none mb-1">
+                      {product.artisan.studioName || "Artisan Made"}
                     </p>
-                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight break-words line-clamp-2 text-center md:text-left">
+                    <h3 className="text-sm md:text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight line-clamp-1">
                       {product.name}
                     </h3>
-                    <div className="flex items-center justify-center md:justify-start gap-3">
-                      <p className="text-lg md:text-xl font-heading font-bold text-primary">EGP {product.price}.00</p>
-                      <div className="h-4 w-px bg-primary/10" />
-                      <span className="text-[9px] md:text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">{product.category}</span>
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <p className="text-xs md:text-xl font-heading font-bold text-primary">EGP {product.price}</p>
+                      <div className="h-3 w-px bg-primary/10" />
+                      <span className="text-[7px] md:text-[10px] font-bold text-charcoal/40 uppercase tracking-widest whitespace-nowrap">{product.category}</span>
                     </div>
                   </div>
                 </Link>
@@ -217,7 +216,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
             Our artisans thrive on custom commissions. Start a conversation with a master maker to create a piece that tells your unique story.
           </p>
           <Link href="/artisans">
-            <button className="h-14 md:h-16 px-8 md:px-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group text-sm md:text-base">
+            <button className="h-14 md:h-16 px-8 md:px-12 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group text-sm md:text-base active:scale-95 duration-200">
               Explore Custom Makers
               <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
             </button>

@@ -30,22 +30,22 @@ export function PreLaunchBanner() {
           exit={{ height: 0, opacity: 0 }}
           className="relative z-[60] bg-primary text-white overflow-hidden shadow-2xl"
         >
-          <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 text-center">
-            <div className="flex items-center gap-2 text-accent-light">
-              <Sparkles className="w-4 h-4 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Pre-Launch Protocol</span>
+          <div className="container mx-auto px-4 py-3 md:py-2.5 flex flex-col items-center justify-center text-center relative">
+            <div className="flex items-center gap-2 text-accent-light mb-1">
+              <Sparkles className="w-3 h-3 animate-pulse shrink-0" />
+              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em]">Pre-Launch Protocol</span>
             </div>
             
-            <p className="text-xs md:text-sm font-medium text-white/90 max-w-2xl leading-relaxed">
+            <p className="text-[10px] md:text-xs font-medium text-white/90 max-w-3xl leading-relaxed pr-8 md:pr-0">
               <span className="font-bold">Soft-Launch in Progress:</span> Complete your first order today! 
-              <span className="text-accent-light italic"> We're currently enabling manual shipping and payments as we finalize our automated systems.</span>
+              <span className="text-accent-light/80 italic hidden md:inline"> We're currently enabling manual shipping and payments as we finalize our automated systems.</span>
             </p>
 
             <button 
               onClick={handleDismiss}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/10 rounded-full transition-colors hidden md:block"
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-full transition-colors"
             >
-              <X className="w-4 h-4 text-white/40" />
+              <X className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/40" />
             </button>
           </div>
 

@@ -256,18 +256,18 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                 {selectedThreadKey?.startsWith("ghost-") && targetUser && (
                    <button
                     key={selectedThreadKey}
-                    className="w-full p-5 rounded-3xl border text-left transition-all bg-primary text-white border-primary shadow-xl shadow-primary/20"
+                    className="w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-left transition-all bg-primary text-white border-primary shadow-xl shadow-primary/20 active:scale-[0.98]"
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold">
+                      <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold shrink-0">
                         <Image src={targetUser.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${targetUser.name}`} alt={targetUser.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0 text-white">
-                        <span className="text-xs font-bold truncate block">{targetUser.name}</span>
-                        <span className="text-[9px] font-black uppercase tracking-tight text-accent">New Circle</span>
+                        <span className="text-xs font-bold truncate block leading-tight">{targetUser.name}</span>
+                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-tight text-accent">New Circle</span>
                       </div>
                     </div>
-                    <p className="text-xs text-white/60">Start a new conversation...</p>
+                    <p className="text-[11px] md:text-xs text-white/60 truncate">Start a new conversation...</p>
                   </button>
                 )}
                 {threads.map((t: any) => (
@@ -278,31 +278,31 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       setIsMobileChatView(true);
                     }}
                     className={cn(
-                      "w-full p-5 rounded-3xl border text-left transition-all group",
+                      "w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-left transition-all group active:scale-[0.98]",
                       selectedThreadKey === t.key 
                         ? "bg-primary text-white border-primary shadow-xl shadow-primary/20" 
                         : "bg-white border-primary/5 hover:border-accent/40 hover:bg-cream/50"
                     )}
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold text-primary">
+                      <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold text-primary shrink-0">
                         <Image src={t.partner.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.partner.name}`} alt={t.partner.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className={cn(
-                          "text-xs font-bold truncate block",
+                          "text-xs font-bold truncate block leading-tight",
                           selectedThreadKey === t.key ? "text-white" : "text-primary"
                         )}>{t.partner.name}</span>
                         {t.product && (
                           <span className={cn(
-                            "text-[9px] font-black uppercase tracking-tight truncate block",
+                            "text-[8px] md:text-[9px] font-black uppercase tracking-tight truncate block",
                             selectedThreadKey === t.key ? "text-accent" : "text-accent/60"
                           )}>Re: {t.product.name}</span>
                         )}
                       </div>
                     </div>
                     <p className={cn(
-                      "text-xs line-clamp-1",
+                      "text-[11px] md:text-xs line-clamp-1",
                       selectedThreadKey === t.key ? "text-white/60" : "text-charcoal/40"
                     )}>{t.lastMessage.content || (t.lastMessage.attachment ? "Sent an attachment" : "")}</p>
                   </button>
@@ -419,14 +419,14 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
+                      className="relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
                     >
                       {attachment.startsWith("data:image") ? (
                         <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">
-                          <FileIcon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
-                          <span className="text-[8px] font-black text-accent uppercase tracking-widest">Document</span>
+                          <FileIcon className="w-4 h-4 md:w-6 md:h-6 text-accent" />
+                          <span className="text-[7px] font-black text-accent uppercase tracking-widest">Doc</span>
                         </div>
                       )}
                       <button 
@@ -450,7 +450,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       }
                     }}
                     placeholder={`Reply to ${activeThread.partner.name}...`}
-                    className="w-full h-24 md:h-32 p-4 md:p-6 pr-4 md:pr-20 bg-cream/30 border border-primary/10 rounded-[1.25rem] md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
+                    className="w-full h-20 md:h-32 p-4 md:p-6 pr-4 md:pr-20 bg-cream/30 border border-primary/10 rounded-xl md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
                   />
                   <div className="flex md:absolute bottom-4 right-4 items-center justify-end gap-2 md:gap-3">
                     <input 
@@ -462,7 +462,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                     />
                     <label 
                       htmlFor="file-attachment"
-                      className="h-10 w-10 md:h-12 md:w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm"
+                      className="h-10 w-10 md:h-12 md:w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm active:scale-90"
                     >
                       <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
                     </label>
@@ -470,8 +470,8 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       onClick={handleReply}
                       disabled={isSending || (!reply.trim() && !attachment)}
                       className={cn(
-                        "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm",
-                        session?.user && !(session.user as any).emailVerified && "opacity-50 cursor-not-allowed bg-charcoal/40"
+                        "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm active:scale-95",
+                        session?.user && !(session.user as any).emailVerified && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
                       )}
                     >
                       {session?.user && !(session.user as any).emailVerified ? "Verify email to reply" : isSending ? "..." : "Reply"}

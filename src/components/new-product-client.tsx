@@ -209,9 +209,9 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                               setIsCategoryOpen(false);
                             }}
                             className={cn(
-                              "w-full px-6 py-3 text-left rounded-xl transition-all font-bold text-sm",
+                              "w-full px-5 md:px-6 py-2.5 md:py-3 text-left rounded-xl transition-all font-bold text-xs md:text-sm active:scale-[0.98]",
                               formData.category === cat
-                                ? "bg-primary text-white"
+                                ? "bg-primary text-white shadow-lg"
                                 : "text-primary/60 hover:bg-primary/5"
                             )}
                           >
@@ -225,7 +225,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                   Description *
                 </label>
                 <textarea
@@ -233,30 +233,30 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Tell the story of this piece..."
-                  className="w-full h-40 p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm"
+                  className="w-full h-32 md:h-40 p-5 md:p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm text-sm md:text-base"
                 />
               </div>
             </div>
           </section>
 
           {/* Gallery */}
-          <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
-            <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
-              <ImageIcon className="w-6 h-6 text-accent" />
-              <h2 className="text-2xl font-heading font-bold text-primary">Media Gallery</h2>
+          <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
+              <ImageIcon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">Media Gallery</h2>
             </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <p className="text-sm text-charcoal/40 italic">Showcase your masterpiece with high-res photos and cinematic videos.</p>
-              <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full">
+              <p className="text-xs md:text-sm text-charcoal/40 italic">Showcase your masterpiece with high-res photos and cinematic videos.</p>
+              <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full w-fit">
                 <Sparkles className="w-3 h-3 text-accent" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | Max: 100MB</span>
+                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | 100MB</span>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
               {formData.images.map((img, idx) => (
-                <div key={idx} className="space-y-4">
-                  <div className="relative aspect-square rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
+                <div key={idx} className="space-y-3 md:space-y-4">
+                  <div className="relative aspect-square rounded-[1.5rem] md:rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
                     {img ? (
                       img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
                         <video
@@ -272,24 +272,24 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                       )
                     ) : (
                       <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-8 h-8 text-primary/10" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
+                        <Upload className="w-6 h-6 md:w-8 md:h-8 text-primary/10" />
+                        <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
                       </div>
                     )}
 
                     {resolutions[idx] && (
-                      <div className="absolute top-4 left-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-tighter">
+                      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[7px] md:text-[8px] font-black text-white uppercase tracking-tighter">
                         {resolutions[idx]}
                       </div>
                     )}
 
                     {img && (img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i)) && (
-                      <div className="absolute top-4 right-4 z-20 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
-                        <Video className="w-3 h-3 text-white" />
+                      <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-5 h-5 md:w-6 md:h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
+                        <Video className="w-2.5 h-2.5 md:w-3 h-3 text-white" />
                       </div>
                     )}
 
-                    <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
+                    <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all active:scale-[0.98]">
                       <input
                         type="file"
                         accept="image/*,video/*"
@@ -346,20 +346,20 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                           }
                         }}
                       />
-                      <div className="px-4 py-2 bg-white text-primary text-[10px] font-black uppercase rounded-full shadow-lg">
+                      <div className="px-4 py-2 bg-white text-primary text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
                         {img ? "Change" : "Upload"}
                       </div>
                     </label>
                   </div>
                   <div className="flex justify-between items-center px-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-primary/20">
+                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/20">
                       {idx === 0 ? "Main Cover" : `Angle ${idx + 1}`}
                     </span>
                     {img && (
                       <button
                         type="button"
                         onClick={() => handleImageChange(idx, "")}
-                        className="text-[9px] font-black uppercase text-red-400 hover:text-red-500"
+                        className="text-[8px] md:text-[9px] font-black uppercase text-red-400 hover:text-red-500 active:scale-90"
                       >
                         Remove
                       </button>
@@ -371,42 +371,42 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
           </section>
 
           {/* Customization & Details */}
-          <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
-            <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
-              <CheckCircle2 className="w-6 h-6 text-accent" />
-              <h2 className="text-2xl font-heading font-bold text-primary">Special Details</h2>
+          <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
+              <CheckCircle2 className="w-5 md:w-6 h-5 md:h-6 text-accent" />
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">Special Details</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12">
-              <div className="flex items-start gap-4 p-6 bg-cream/20 rounded-[2rem] border border-primary/5">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+              <div className="flex items-start gap-4 p-5 md:p-6 bg-cream/20 rounded-2xl md:rounded-[2rem] border border-primary/5">
                 <div className="pt-1">
                   <input
                     type="checkbox"
                     id="personalize"
                     checked={formData.canPersonalize}
                     onChange={(e) => setFormData({ ...formData, canPersonalize: e.target.checked })}
-                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent"
+                    className="w-4 h-4 md:w-5 md:h-5 rounded border-primary/20 text-accent focus:ring-accent"
                   />
                 </div>
                 <label htmlFor="personalize" className="cursor-pointer">
-                  <p className="font-bold text-primary">Allow Personalization</p>
-                  <p className="text-xs text-charcoal/50">Allow buyers to add bespoke engravings or details.</p>
+                  <p className="font-bold text-primary text-sm md:text-base">Allow Personalization</p>
+                  <p className="text-[10px] md:text-xs text-charcoal/50">Allow buyers to add bespoke engravings or details.</p>
                 </label>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Promotion Badge</label>
+                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Promotion Badge</label>
                 <input
                   type="text"
                   value={formData.badge}
                   onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                  placeholder="e.g. Best Seller, New Arrival"
+                  placeholder="e.g. Best Seller"
                   className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Initial Stock</label>
+                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Initial Stock</label>
                 <input
                   type="number"
                   value={formData.stock}
@@ -419,7 +419,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
           </section>
 
           {error && (
-            <div className="p-6 bg-red-50 text-red-500 rounded-[2rem] text-center font-bold animate-pulse">
+            <div className="p-5 md:p-6 bg-red-50 text-red-500 rounded-2xl md:rounded-[2rem] text-center font-bold animate-pulse text-sm">
               {error}
             </div>
           )}
@@ -428,7 +428,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="h-16 px-16 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center gap-3 disabled:opacity-50"
+              className="h-16 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200"
             >
               {isLoading ? "Listing Treasure..." : "List Product in Gallery"}
               <Sparkles className="w-5 h-5" />

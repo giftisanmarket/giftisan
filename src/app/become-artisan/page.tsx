@@ -136,19 +136,19 @@ export default function BecomeArtisanPage() {
 
       <Navbar />
 
-      <div className="container mx-auto px-4 pt-32 max-w-4xl">
-        <div className="text-center mb-16">
+      <div className="container mx-auto px-4 pt-24 md:pt-32 max-w-4xl">
+        <div className="text-center mb-10 md:mb-16">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-xs font-black uppercase tracking-widest mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6"
           >
             <Sparkles className="w-3 h-3" />
             Empowering Craftsmanship
           </motion.div>
-          <h1 className="text-5xl md:text-6xl font-heading font-bold text-primary mb-6">Open Your <span className="serif italic font-normal text-accent">Studio</span></h1>
-          <p className="text-charcoal/40 max-w-xl mx-auto text-lg leading-relaxed">
-            Join a global community of master artisans. Share your story, sell your handcrafted treasures, and connect with collectors who value true craftsmanship.
+          <h1 className="text-4xl md:text-6xl font-heading font-bold text-primary mb-4 md:mb-6 leading-[1.1]">Open Your <span className="serif italic font-normal text-accent">Studio</span></h1>
+          <p className="text-charcoal/40 max-w-xl mx-auto text-base md:text-lg leading-relaxed">
+            Join a global community of master artisans. Share your story, sell your handcrafted treasures, and connect with collectors.
           </p>
         </div>
 
@@ -159,11 +159,11 @@ export default function BecomeArtisanPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={handleSubmit}
-              className="bg-white rounded-[3rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8"
+              className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8"
             >
-              <div className="space-y-6">
+              <div className="space-y-5 md:space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <Store className="w-3 h-3" /> Studio Name *
                   </label>
                   <input 
@@ -171,13 +171,13 @@ export default function BecomeArtisanPage() {
                     required
                     value={formData.studioName}
                     onChange={(e) => setFormData({...formData, studioName: e.target.value})}
-                    placeholder="e.g. The Midnight Potter, Artisan Glassworks"
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                    placeholder="e.g. The Midnight Potter"
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm active:scale-[0.99]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <MapPin className="w-3 h-3" /> Location
                   </label>
                   <input 
@@ -185,41 +185,41 @@ export default function BecomeArtisanPage() {
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
                     placeholder="e.g. Kyoto, Japan / London, UK"
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm active:scale-[0.99]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <AlignLeft className="w-3 h-3" /> Your Story (Bio) *
                   </label>
                   <textarea 
                     required
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                    placeholder="Tell our community about your craft, your inspiration, and your journey..."
-                    className="w-full h-40 p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm"
+                    placeholder="Tell our community about your craft and inspiration..."
+                    className="w-full h-32 md:h-40 p-5 md:p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none shadow-sm text-sm active:scale-[0.99]"
                   />
                 </div>
               </div>
 
               {error && (
-                <div className="p-4 bg-red-50 text-red-500 rounded-xl text-center text-sm font-bold animate-pulse">
+                <div className="p-4 bg-red-50 text-red-500 rounded-xl text-center text-xs md:text-sm font-bold animate-pulse">
                   {error}
                 </div>
               )}
 
-              <div className="pt-8 flex flex-col items-center gap-6">
+              <div className="pt-6 md:pt-8 flex flex-col items-center gap-6">
                 <button 
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-lg"
+                  className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base md:text-lg active:scale-95 group"
                 >
                   {isLoading ? "Preparing Your Studio..." : "Launch My Studio"}
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                 </button>
-                <div className="flex items-center gap-2 text-xs text-charcoal/40">
-                  <ShieldCheck className="w-4 h-4 text-accent" />
+                <div className="flex items-center gap-2 text-[10px] md:text-xs text-charcoal/40 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
                   No fees to join. Start listing treasures instantly.
                 </div>
               </div>

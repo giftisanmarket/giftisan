@@ -33,77 +33,82 @@ export function CartDrawer() {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed right-0 top-0 h-[100dvh] w-full max-w-md bg-cream shadow-2xl z-[101] flex flex-col"
           >
-            <div className="p-6 border-b border-primary/10 flex justify-between items-center">
-              <h2 className="text-2xl font-heading font-bold text-primary flex items-center gap-2">
-                <ShoppingBag className="w-6 h-6" /> Your Cart
+            <div className="p-4 md:p-6 border-b border-primary/10 flex justify-between items-center bg-cream/50 backdrop-blur-md sticky top-0 z-20">
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-primary flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" /> Your Cart
               </h2>
               <button 
                 onClick={() => setIsCartOpen(false)}
-                className="p-2 hover:bg-primary/5 rounded-full transition-colors"
+                className="p-2 hover:bg-primary/5 rounded-full transition-all active:scale-90"
               >
                 <X className="w-6 h-6 text-primary" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center">
+                  <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                     <ShoppingBag className="w-10 h-10 text-primary/20" />
                   </div>
-                  <p className="text-charcoal/40 font-medium text-lg">Your cart is empty</p>
-                  <button 
-                    onClick={() => setIsCartOpen(false)}
-                    className="text-primary font-bold hover:underline"
-                  >
-                    Start Gifting →
-                  </button>
+                  <div className="space-y-1">
+                    <p className="text-charcoal/40 font-bold text-lg">Your cart is empty</p>
+                    <button 
+                      onClick={() => setIsCartOpen(false)}
+                      className="text-accent font-black text-[10px] uppercase tracking-widest hover:underline active:scale-95"
+                    >
+                      Start Gifting →
+                    </button>
+                  </div>
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id + (item.personalization || "")} className="flex gap-4 group">
-                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white border border-primary/5">
+                  <div key={item.id + (item.personalization || "")} className="flex gap-4 group items-start animate-in slide-in-from-right-4 duration-300">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
                       <BespokeImage src={item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex justify-between">
-                        <h3 className="font-heading font-bold text-primary leading-tight line-clamp-1">{item.name}</h3>
-                        <div className="text-right">
-                          <p className="font-bold text-primary">EGP {item.price * item.quantity}</p>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-heading font-bold text-sm md:text-base text-primary leading-tight line-clamp-2 md:line-clamp-1">{item.name}</h3>
+                          <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{item.artisan.name}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-bold text-primary text-sm md:text-base">EGP {item.price * item.quantity}</p>
                           {(item.stock || 0) <= 0 && (
-                            <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">Sold Out</span>
+                            <span className="text-[7px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">Sold Out</span>
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-accent font-bold uppercase tracking-widest">{item.artisan.name}</p>
+                      
                       {item.personalization && (
-                        <div className="bg-primary/5 border border-primary/5 rounded-lg p-2 mt-2">
-                          <p className="text-[10px] text-primary/40 uppercase font-black tracking-tighter mb-1">Bespoke Detail:</p>
-                          <p className="text-[11px] text-primary italic leading-tight">"{item.personalization}"</p>
+                        <div className="bg-primary/5 border border-primary/5 rounded-xl p-2.5 mt-2">
+                          <p className="text-[8px] text-primary/40 uppercase font-black tracking-tighter mb-0.5">Bespoke Detail:</p>
+                          <p className="text-[10px] text-primary italic leading-tight">"{item.personalization}"</p>
                         </div>
                       )}
                       
                       <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center border border-primary/20 rounded-full h-9 px-3 gap-4 bg-white/50">
+                        <div className="flex items-center border border-primary/5 rounded-full h-8 md:h-9 px-3 gap-3 md:gap-4 bg-white shadow-sm">
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization)}
-                            className="p-1 text-primary hover:text-accent transition-colors"
+                            className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
-                          <span className="text-sm font-bold w-4 text-center text-primary leading-none">
+                          <span className="text-[11px] md:text-sm font-bold w-3 md:w-4 text-center text-primary leading-none">
                             {item.quantity}
                           </span>
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization)}
-                            className="p-1 text-primary hover:text-accent transition-colors"
+                            className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </div>
                         <button 
                           onClick={() => removeFromCart(item.id, item.personalization)}
-                          className="text-xs font-bold text-charcoal/40 hover:text-red-500 transition-colors"
+                          className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95"
                         >
                           Remove
                         </button>
@@ -115,12 +120,12 @@ export function CartDrawer() {
             </div>
 
             {cart.length > 0 && (
-              <div className="p-6 border-t border-primary/10 bg-white/50 space-y-4">
-                <div className="flex justify-between items-center text-lg">
-                  <span className="text-charcoal/60 font-medium">Subtotal</span>
-                  <span className="font-heading font-bold text-primary text-2xl">EGP {totalPrice}.00</span>
+              <div className="p-5 md:p-8 border-t border-primary/10 bg-white space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+                <div className="flex justify-between items-center">
+                  <span className="text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">Subtotal</span>
+                  <span className="font-heading font-bold text-primary text-2xl md:text-3xl">EGP {totalPrice}.00</span>
                 </div>
-                <p className="text-xs text-charcoal/40 text-center">Shipping & taxes calculated at checkout</p>
+                <p className="text-[9px] md:text-xs text-charcoal/40 text-center italic">Shipping & taxes calculated at checkout</p>
                 <Link 
                   href={hasUnavailableItems ? "#" : "/checkout"}
                   onClick={(e) => {
@@ -131,7 +136,7 @@ export function CartDrawer() {
                     setIsCartOpen(false);
                   }}
                   className={cn(
-                    "w-full h-14 font-bold rounded-full transition-all shadow-xl flex items-center justify-center",
+                    "w-full h-14 md:h-16 font-bold rounded-xl md:rounded-2xl transition-all shadow-xl flex items-center justify-center text-sm md:text-base active:scale-[0.98]",
                     hasUnavailableItems 
                       ? "bg-charcoal/10 text-charcoal/40 !cursor-not-allowed shadow-none pointer-events-auto" 
                       : "bg-primary text-white hover:bg-primary-light shadow-primary/20"

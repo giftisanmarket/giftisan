@@ -247,25 +247,25 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             </p>
 
             {/* Artisan Quick Bio */}
-            <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 group">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-8">
               <Link
                 href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
-                className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1"
+                className="flex items-center gap-4 p-5 md:p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1 active:scale-[0.98]"
               >
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-cream group-hover:scale-105 transition-transform">
+                <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-cream shrink-0">
                   <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" sizes="64px" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-xs font-bold text-accent uppercase tracking-tighter">Handcrafted by</p>
+                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">Handcrafted by</p>
                     {product.artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent" />}
                   </div>
-                  <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">{product.artisan.studioName || product.artisan.user.name}</h3>
-                  <p className="text-sm text-charcoal/60">{product.artisan.location}</p>
+                  <h3 className="text-lg md:text-xl font-heading font-bold text-primary truncate">{product.artisan.studioName || product.artisan.user.name}</h3>
+                  <p className="text-xs text-charcoal/60 truncate">{product.artisan.location}</p>
                 </div>
               </Link>
 
-              <div className="px-6 md:px-0">
+              <div className="px-0">
                 <ContactArtisanButton
                   artisanId={product.artisan.id}
                   artisanName={product.artisan.studioName || product.artisan.user.name}
@@ -298,7 +298,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   onClick={() => addToCart(product, personalization)}
                   disabled={(product.stock || 0) <= 0}
                   className={cn(
-                    "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3",
+                    "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
                     (product.stock || 0) > 0 
                       ? "hover:bg-primary-light shadow-primary/20" 
                       : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
@@ -309,7 +309,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 <button
                   onClick={() => toggleFavorite(product)}
                   className={cn(
-                    "w-16 h-16 border rounded-2xl transition-all flex items-center justify-center shrink-0",
+                    "w-16 h-16 border rounded-2xl transition-all flex items-center justify-center shrink-0 active:scale-95",
                     isFavorite(product.id)
                       ? "border-red-100 bg-red-50 text-red-500 shadow-inner"
                       : "border-primary/10 text-primary hover:bg-white"
@@ -325,9 +325,9 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 }}
                 disabled={(product.stock || 0) <= 0}
                 className={cn(
-                  "w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 transition-all active:scale-95",
+                  "w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95",
                   (product.stock || 0) > 0 
-                  ? "hover:bg-primary/5" 
+                  ? "hover:bg-primary/5 shadow-xl shadow-primary/5" 
                   : "opacity-30 grayscale !cursor-not-allowed pointer-events-auto"
                 )}
               >
@@ -622,7 +622,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-left">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
               {relatedProducts.map((p) => (
                 <Link
                   key={p.id}
@@ -736,6 +736,25 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Sticky Mobile Add to Cart Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-[55] md:hidden bg-white/80 backdrop-blur-xl border-t border-primary/5 p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <p className="text-[8px] font-black uppercase tracking-widest text-charcoal/40 mb-0.5">Price</p>
+            <p className="text-lg font-heading font-bold text-primary leading-none">EGP {product.price}</p>
+          </div>
+          <button
+            onClick={() => addToCart(product, personalization)}
+            disabled={(product.stock || 0) <= 0}
+            className={cn(
+              "flex-[2.5] h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-lg active:scale-95 text-xs",
+              (product.stock || 0) > 0 ? "shadow-primary/20" : "opacity-30 grayscale"
+            )}
+          >
+            {(product.stock || 0) > 0 ? "Add to Cart" : "Sold Out"}
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

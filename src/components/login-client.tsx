@@ -77,36 +77,34 @@ export function LoginClient() {
       </div>
 
       {/* Form Side */}
-      <div className="flex flex-col justify-center items-center py-20 px-6 md:p-20 relative overflow-y-auto">
+      <div className="flex flex-col justify-center items-center py-16 px-6 md:p-20 relative overflow-y-auto">
         <Link 
           href="/" 
-          className="absolute top-12 left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
+          className="md:absolute md:top-12 md:left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10 mb-8 md:mb-0 self-start md:self-auto"
         >
-          <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5">
+          <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5 active:scale-90">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          Back to Shop
+          <span className="text-xs md:text-sm">Back to Shop</span>
         </Link>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md space-y-10 md:space-y-12 mt-12 md:mt-24"
+          className="w-full max-w-md space-y-8 md:space-y-12"
         >
-          <div className="space-y-4">
-            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Login to <span className="serif italic font-normal text-accent">Giftisan</span></h1>
-            <p className="text-sm md:text-base text-charcoal/60">Enter your credentials to access your studio or profile.</p>
+          <div className="space-y-3 md:space-y-4">
+            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary leading-tight">Login to <span className="serif italic font-normal text-accent">Giftisan</span></h1>
+            <p className="text-xs md:text-base text-charcoal/60">Continue your journey in the circle.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Status messages removed from flow to prevent layout shift */}
-
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
             <button 
               type="button"
               onClick={() => socialSignIn("google", { callbackUrl: "/" })}
-              className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-sm md:text-base"
+              className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-xs md:text-base active:scale-95"
             >
-              <FcGoogle className="w-6 h-6" />
+              <FcGoogle className="w-5 h-5 md:w-6 md:h-6" />
               Sign in with Google
             </button>
 
@@ -120,7 +118,7 @@ export function LoginClient() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
+              <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
                   <User className="w-5 h-5" />
@@ -130,16 +128,16 @@ export function LoginClient() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@studio.com"
-                  className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm"
+                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm text-sm active:scale-[0.99]"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-end mb-1">
-                <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Password</label>
-                <Link href="/forgot-password" className="text-xs font-bold text-accent hover:underline">Forgot password?</Link>
+              <div className="flex justify-between items-end mb-0.5">
+                <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Password</label>
+                <Link href="/forgot-password" className="text-[10px] font-bold text-accent hover:underline">Forgot?</Link>
               </div>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
@@ -150,7 +148,7 @@ export function LoginClient() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm"
+                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm text-sm active:scale-[0.99]"
                   required
                 />
               </div>
@@ -159,16 +157,16 @@ export function LoginClient() {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
+              className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-base active:scale-95"
             >
               {isLoading ? "Authenticating..." : "Continue to Circle"}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 md:group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
 
-          <p className="text-center text-charcoal/40 font-medium mt-8">
+          <p className="text-center text-charcoal/40 font-medium text-xs md:text-sm mt-8">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-accent font-bold hover:underline">Apply to the Circle</Link>
+            <Link href="/signup" className="text-accent font-bold hover:underline">Apply here</Link>
           </p>
         </motion.div>
       </div>

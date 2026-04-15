@@ -188,7 +188,7 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-1 md:gap-4">
-          <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative">
+          <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative active:scale-90">
             <Heart className="w-6 h-6" />
             {totalFavorites > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
@@ -197,7 +197,7 @@ export function Navbar() {
             )}
           </Link>
           {session && (
-            <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors">
+            <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors active:scale-90">
               <MessageSquare className="w-6 h-6" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
@@ -213,7 +213,7 @@ export function Navbar() {
                 <Link 
                   href="/studio"
                   className={cn(
-                    "hidden lg:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm",
+                    "hidden lg:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm active:scale-95",
                     pathname === "/studio" 
                       ? "bg-primary text-white" 
                       : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
@@ -225,7 +225,7 @@ export function Navbar() {
               ) : (
                 <Link 
                   href="/become-artisan"
-                  className="hidden lg:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10"
+                  className="hidden lg:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 active:scale-95"
                 >
                   Sell
                 </Link>
@@ -235,7 +235,7 @@ export function Navbar() {
               <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 pl-3">
                 <Link 
                   href="/profile"
-                  className="group flex items-center gap-3 pl-1 pr-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5"
+                  className="group flex items-center gap-3 pl-1 pr-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
                 >
                   <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
                     {session.user?.image ? (
@@ -264,7 +264,7 @@ export function Navbar() {
 
                 <button 
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="p-2 text-charcoal/30 hover:text-red-500 transition-colors group"
+                  className="p-2 text-charcoal/30 hover:text-red-500 transition-colors group active:scale-90"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -274,7 +274,7 @@ export function Navbar() {
           ) : (
             <Link 
               href="/login" 
-              className="hidden md:flex group items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm"
+              className="hidden md:flex group items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm active:scale-95"
             >
               <User className="w-4 h-4" />
               <span className="text-xs font-bold uppercase tracking-widest">Sign In</span>
@@ -282,7 +282,7 @@ export function Navbar() {
           )}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="p-2 text-charcoal/70 hover:text-primary transition-colors relative"
+            className="p-2 text-charcoal/70 hover:text-primary transition-colors relative active:scale-90"
           >
             <ShoppingCart className="w-6 h-6" />
             {totalItems > 0 && (
@@ -293,7 +293,7 @@ export function Navbar() {
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="md:hidden p-2 text-charcoal/70 hover:text-primary transition-colors"
+            className="md:hidden p-2 text-charcoal/70 hover:text-primary transition-colors active:scale-90"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -382,7 +382,7 @@ export function Navbar() {
                   <Link 
                     href="/studio" 
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/10 text-center"
+                    className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/10 text-center active:scale-95 transition-transform"
                   >
                      <div className="w-2 h-2 rounded-full bg-accent mb-2" />
                      <span className="text-xs font-black text-accent uppercase">Studio</span>
@@ -391,7 +391,7 @@ export function Navbar() {
                    <Link 
                     href="/become-artisan" 
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-2xl border border-primary text-center"
+                    className="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-2xl border border-primary text-center active:scale-95 transition-transform"
                   >
                      <span className="text-xs font-black uppercase tracking-widest">Sell</span>
                   </Link>
@@ -404,7 +404,7 @@ export function Navbar() {
                <Link 
                 href="/login" 
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold"
+                className="flex items-center justify-between p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold active:scale-95 transition-transform"
               >
                 Sign In to your account
                 <span className="text-accent">→</span>
@@ -423,7 +423,7 @@ export function Navbar() {
                   key={cat}
                   href={`/category/${cat.toLowerCase().replace(/ & /g, "-")}`}
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors"
+                  className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors active:scale-[0.98] transition-transform"
                 >
                   {cat}
                   <span className="text-accent">→</span>

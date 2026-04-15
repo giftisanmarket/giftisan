@@ -2,8 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, Mail, ArrowRight, X } from "lucide-react";
-import Link from "next/link";
+import { AlertTriangle, Mail, X } from "lucide-react";
 import { useState } from "react";
 import { resendVerificationEmailAction } from "@/lib/actions";
 
@@ -35,26 +34,26 @@ export function VerificationBanner() {
         exit={{ height: 0, opacity: 0 }}
         className="bg-accent text-white border-b border-accent-light/20 relative z-[45]"
       >
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-4">
+        <div className="container mx-auto px-4 py-3 md:py-2 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-4 h-4 text-white" />
             </div>
-            <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">
-              Account Unverified: <span className="text-white/70 normal-case font-medium">Please check your inbox ({session.user.email}) to verify your account and unlock all features.</span>
+            <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest leading-relaxed text-center md:text-left">
+              Account Unverified: <span className="text-white/70 normal-case font-medium block md:inline">Please check {session.user.email} to verify and unlock features.</span>
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-full md:w-auto justify-center">
             <button
               onClick={handleResend}
               disabled={isResending || resent}
-              className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center gap-2"
+              className="text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap px-5 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center gap-2 active:scale-95"
             >
               {resent ? "Email Sent!" : isResending ? "Sending..." : "Resend Link"}
               {!resent && !isResending && <Mail className="w-3 h-3" />}
             </button>
-            <button onClick={() => setIsVisible(false)} className="hover:text-white/60 transition-colors">
+            <button onClick={() => setIsVisible(false)} className="p-1 hover:text-white/60 transition-colors shrink-0">
               <X className="w-4 h-4" />
             </button>
           </div>

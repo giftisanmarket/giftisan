@@ -76,7 +76,9 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("File size must be less than 2MB");
+        toast.error("File size must be less than 2MB", {
+          style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+        });
         return;
       }
       const reader = new FileReader();

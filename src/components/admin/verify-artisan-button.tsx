@@ -5,6 +5,8 @@ import { CheckCircle2, XCircle, ShieldCheck, ShieldAlert, Clock, Check, X } from
 import { toggleArtisanVerification, updateArtisanStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 
+import { toast } from "react-hot-toast";
+
 type ArtisanStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export function VerifyArtisanButton({ 
@@ -25,8 +27,13 @@ export function VerifyArtisanButton({
     const res = await toggleArtisanVerification(artisanId, !isVerified);
     if (res.success) {
       setIsVerified(!isVerified);
+      toast.success(`Artisan ${!isVerified ? 'Verified' : 'Unverified'}`, {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
     } else {
-      alert(res.error || "Failed to update verification");
+      toast.error(res.error || "Failed to update verification", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
     }
     setIsLoading(false);
   };
@@ -36,8 +43,13 @@ export function VerifyArtisanButton({
     const res = await updateArtisanStatus(artisanId, newStatus);
     if (res.success) {
       setStatus(newStatus);
+      toast.success(`Studio status: ${newStatus}`, {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
     } else {
-      alert(res.error || "Failed to update status");
+      toast.error(res.error || "Failed to update status", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
     }
     setIsLoading(false);
   };

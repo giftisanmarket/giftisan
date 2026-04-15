@@ -7,6 +7,8 @@ import { sendMessage } from "@/lib/actions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
+import { toast } from "react-hot-toast";
+
 interface ContactArtisanButtonProps {
   artisanId: string;
   artisanName: string;
@@ -40,7 +42,9 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
         setIsOpen(false);
       }, 2000);
     } else {
-      alert(res.error || "Failed to send message. Please try again.");
+      toast.error(res.error || "Failed to send message. Please try again.", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
     }
     setIsLoading(false);
   };

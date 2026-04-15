@@ -10,11 +10,12 @@ import { useSession } from "next-auth/react";
 import { toggleFollowAction, checkFollowStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 
+import { toast } from "react-hot-toast";
+
 export function ArtisanClient({ artisan }: { artisan: any }) {
   const { data: session } = useSession();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [filter, setFilter] = useState<'available' | 'soldout'>('available');
   const products = artisan.products || [];
   const displayName = artisan.studioName || artisan.user.name;
@@ -42,7 +43,12 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
   }, [session, artisan.id]);
 
   const handleFollow = async () => {
-    if (!session?.user?.id) return alert("Please sign in to follow artisans");
+    if (!session?.user?.id) {
+      toast.error("Please sign in to follow artisans", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
+      return;
+    }
     
     setIsPending(true);
     const res = await toggleFollowAction(artisan.id, session.user.id as string);
@@ -50,8 +56,10 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
     if (res.success) {
       setIsFollowing(res.action === "followed");
       if (res.action === "followed") {
-         setShowToast(true);
-         setTimeout(() => setShowToast(false), 3000);
+         toast.success(`You are now following ${displayName}`, {
+           icon: '✨',
+           style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+         });
       }
     }
     setIsPending(false);
@@ -69,7 +77,9 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Studio link copied to clipboard!");
+        toast.success("Studio link copied to clipboard!", {
+          style: { borderRadius: '15px', background: '#1a2c2c', color: '#fff' }
+        });
       }
     } catch (err) {
       console.error("Error sharing:", err);
@@ -91,25 +101,6 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
       `}</style>
       <Navbar />
 
-      <AnimatePresence>
-        {showToast && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-10 right-10 z-[200] px-10 py-5 bg-white text-green-600 rounded-[2rem] font-bold flex items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-green-50 backdrop-blur-xl"
-          >
-            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
-               <Check className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-black uppercase tracking-widest leading-none">Following Studio</p>
-              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">You'll get updates from {displayName}.</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       {/* Profile Header */}
       <section className="pt-24 md:pt-32 pb-12 md:pb-20 bg-cream relative overflow-hidden min-h-[400px] md:min-h-[450px] flex items-end">
         {artisan.bannerImage && (
@@ -180,20 +171,60 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
                     </>
                   ) : isPending ? "Wait..." : "Follow Studio"}
                 </button>
-                <div className="flex items-center gap-3 md:gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 max-w-full">
                   {artisan.instagram && (
                     <a 
-                      href={`https://instagram.com/${artisan.instagram}`} 
+                      href={artisan.instagram.startsWith('http') ? artisan.instagram : `https://instagram.com/${artisan.instagram}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="w-12 h-12 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm"
+                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
                     >
                       <FaInstagram className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                     </a>
                   )}
+                  {artisan.tiktok && (
+                    <a 
+                      href={artisan.tiktok.startsWith('http') ? artisan.tiktok : `https://tiktok.com/@${artisan.tiktok}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
+                    >
+                      <FaTiktok className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    </a>
+                  )}
+                  {artisan.facebook && (
+                    <a 
+                      href={artisan.facebook.startsWith('http') ? artisan.facebook : `https://facebook.com/${artisan.facebook}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
+                    >
+                      <FaFacebook className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    </a>
+                  )}
+                  {artisan.pinterest && (
+                    <a 
+                      href={artisan.pinterest.startsWith('http') ? artisan.pinterest : `https://pinterest.com/${artisan.pinterest}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
+                    >
+                      <FaPinterestP className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    </a>
+                  )}
+                  {artisan.website && (
+                    <a 
+                      href={artisan.website.startsWith('http') ? artisan.website : `https://${artisan.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
+                    >
+                      <FaGlobe className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    </a>
+                  )}
                   <button 
                     onClick={handleShare}
-                    className="w-12 h-12 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm group"
+                    className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm group"
                   >
                     <Share2 className="w-5 h-5 md:w-6 md:h-6 text-primary group-hover:text-brand" />
                   </button>

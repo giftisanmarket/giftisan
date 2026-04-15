@@ -750,7 +750,8 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
         updatedItem.order.user.name || "Customer",
         updatedItem.order.id,
         status,
-        updatedItem.product.name
+        updatedItem.product.name,
+        updatedItem.product.slug || undefined
       ).catch(err => console.error("Failed to send order status email:", err));
     }
     

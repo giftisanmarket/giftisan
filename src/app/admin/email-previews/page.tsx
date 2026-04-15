@@ -122,6 +122,33 @@ export default function EmailPreviewsPage() {
       `
     },
     {
+      name: "Journey Update (Delivered / Reviews)",
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: sans-serif;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 30px;">Your Treasure has Arrived</h1>
+              <p style="color: #4b5563; font-size: 17px; line-height: 1.6;">Hi Sherif, your order for <strong>Handmade Ceramics Set</strong> has been delivered.</p>
+              
+              <div style="margin: 40px 0; background-color: #f9fafb; padding: 40px; border-radius: 24px; border: 1px solid #f3f4f6;">
+                <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: black; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.2em;">Current Milestone</p>
+                <p style="margin: 0; font-size: 32px; font-weight: bold; color: #10b981;">DELIVERED</p>
+                <p style="margin: 20px 0 0 0; font-size: 13px; font-weight: bold; color: #6b7280;">Ref: #GT-94821</p>
+              </div>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Artisans thrive on your feedback—would you take a moment to share your story or rate the craftsmanship?</p>
+              
+              <div style="margin-top: 40px;">
+                <div style="background-color: ${ACCENT_COLOR}; color: white; padding: 20px 45px; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase;">Share Your Story</div>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `
+    },
+    {
       name: "Security Recovery",
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">

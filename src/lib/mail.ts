@@ -196,7 +196,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   }
 };
 
-export const sendOrderStatusUpdateEmail = async (email: string, name: string, orderId: string, status: string, productName: string) => {
+export const sendOrderStatusUpdateEmail = async (email: string, name: string, orderId: string, status: string, productName: string, productSlug?: string) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\n----------------------------------\n`);
     return { success: true };
@@ -215,27 +215,40 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
     'CANCELLED': 'has been cancelled'
   };
 
+  const isDelivered = status === 'DELIVERED';
+  const ctaLink = isDelivered && productSlug 
+    ? `${BASE_URL}/products/${productSlug}#reviews` 
+    : `${BASE_URL}/profile`;
+  
+  const subject = isDelivered 
+    ? `Share Your Story: Your treasure has arrived! | Giftisan`
+    : `Journey Update: Your treasure ${statusText[status] || 'is evolving'}`;
+
   try {
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: `Journey Update: Your treasure ${statusText[status] || 'is evolving'}`,
+      subject: subject,
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
             ${emailHeader}
             <div style="padding: 40px 30px; text-align: center;">
-              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 30px;">Journey Update</h1>
-              <p style="color: #4b5563; font-size: 17px; line-height: 1.6;">Hi ${name}, your order for <strong>${productName}</strong> has reached a new milestone.</p>
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 28px; margin-bottom: 30px;">${isDelivered ? 'Your Treasure has Arrived' : 'Journey Update'}</h1>
+              <p style="color: #4b5563; font-size: 17px; line-height: 1.6;">Hi ${name}, your order for <strong>${productName}</strong> ${statusText[status] || 'is moving forward'}.</p>
               
               <div style="margin: 40px 0; background-color: #f9fafb; padding: 40px; border-radius: 24px; border: 1px solid #f3f4f6;">
                 <p style="margin: 0 0 10px 0; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af;">Current Milestone</p>
                 <p style="margin: 0; font-size: 32px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
                 <p style="margin: 20px 0 0 0; font-size: 13px; font-weight: bold; color: #6b7280; font-family: monospace;">Ref: #${orderId.slice(0, 8)}</p>
               </div>
+
+              ${isDelivered ? `
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">We hope this piece brings soul and beauty to your space. Artisans thrive on your feedback—would you take a moment to share your story or rate the craftsmanship?</p>
+              ` : ''}
               
               <div style="margin-top: 40px;">
-                <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Track Journey</a>
+                <a href="${ctaLink}" style="background-color: ${isDelivered ? ACCENT_COLOR : PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px ${isDelivered ? 'rgba(218, 123, 90, 0.2)' : 'rgba(0,0,0,0.1)'};">${isDelivered ? 'Share Your Story' : 'Track Journey'}</a>
               </div>
             </div>
             ${emailFooter}

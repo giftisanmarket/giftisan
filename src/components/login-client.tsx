@@ -120,7 +120,7 @@ export function LoginClient() {
             <div className="space-y-2">
               <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
               <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors duration-200 z-10">
                   <User className="w-5 h-5" />
                 </div>
                 <input 
@@ -128,7 +128,7 @@ export function LoginClient() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@studio.com"
-                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm text-sm active:scale-[0.99]"
+                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm"
                   required
                 />
               </div>
@@ -140,7 +140,7 @@ export function LoginClient() {
                 <Link href="/forgot-password" className="text-[10px] font-bold text-accent hover:underline">Forgot?</Link>
               </div>
               <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors duration-200 z-10">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input 
@@ -148,7 +148,7 @@ export function LoginClient() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm text-sm active:scale-[0.99]"
+                  className="w-full h-14 md:h-16 pl-14 pr-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm"
                   required
                 />
               </div>

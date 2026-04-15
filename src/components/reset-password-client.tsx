@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { resetPasswordAction } from "@/lib/actions";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export function ResetPasswordClient() {
   const [password, setPassword] = useState("");
@@ -25,11 +26,11 @@ export function ResetPasswordClient() {
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.", { id: "validation-error" });
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      toast.error("Password must be at least 8 characters long.", { id: "validation-error" });
       return;
     }
 
@@ -55,8 +56,8 @@ export function ResetPasswordClient() {
       {/* Visual Side */}
       <div className="hidden lg:block relative overflow-hidden h-full">
         <BespokeImage 
-          src="https://images.unsplash.com/photo-1516733968668-dbdce39c46ef?q=80&w=2070&auto=format&fit=crop" 
-          alt="Antique handcrafted keys" 
+          src="https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=2070&auto=format&fit=crop" 
+          alt="Artisan workspace" 
           fill 
           className="object-cover"
           sizes="50vw"
@@ -77,15 +78,25 @@ export function ResetPasswordClient() {
       </div>
 
       {/* Form Side */}
-      <div className="flex flex-col justify-center items-center py-20 px-6 md:p-20 relative overflow-y-auto">
+      <div className="flex flex-col justify-center items-center py-16 px-6 md:p-20 relative overflow-y-auto">
+        <Link 
+          href="/login" 
+          className="md:absolute md:top-12 md:left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10 mb-8 md:mb-0 self-start md:self-auto"
+        >
+          <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5 active:scale-90">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          <span className="text-xs md:text-sm">Back to Login</span>
+        </Link>
+
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md space-y-10 md:space-y-12"
+          className="w-full max-w-md space-y-8 md:space-y-12"
         >
-          <div className="space-y-4 text-center md:text-left">
+          <div className="space-y-3 md:space-y-4 text-center md:text-left">
             <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Choose <span className="serif italic font-normal text-accent">Wisely</span></h1>
-            <p className="text-sm md:text-base text-charcoal/60">Craft a new key to unlock your journey. Make it robust and unique.</p>
+            <p className="text-xs md:text-base text-charcoal/60">Craft a new key to unlock your journey. Make it robust and unique.</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -96,7 +107,7 @@ export function ResetPasswordClient() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onSubmit={handleSubmit} 
-                className="space-y-6"
+                className="space-y-5 md:space-y-6"
               >
                 {error && (
                   <div className="p-5 bg-red-50 border border-red-100 rounded-[2rem] flex items-center gap-4">
@@ -117,7 +128,7 @@ export function ResetPasswordClient() {
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">New Password</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors duration-200 z-10">
                       <Lock className="w-5 h-5" />
                     </div>
                     <input 
@@ -125,7 +136,7 @@ export function ResetPasswordClient() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm"
+                      className="w-full h-14 md:h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm"
                       required
                     />
                   </div>
@@ -134,7 +145,7 @@ export function ResetPasswordClient() {
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Confirm Secret</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors duration-200 z-10">
                       <CheckCircle className="w-5 h-5" />
                     </div>
                     <input 
@@ -142,7 +153,7 @@ export function ResetPasswordClient() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm"
+                      className="w-full h-14 md:h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm"
                       required
                     />
                   </div>

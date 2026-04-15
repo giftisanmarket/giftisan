@@ -99,7 +99,7 @@ export function ForgotPasswordClient() {
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors duration-200 z-10">
                       <Mail className="w-5 h-5" />
                     </div>
                     <input 
@@ -107,7 +107,7 @@ export function ForgotPasswordClient() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Recover@circle.com"
-                      className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-sm"
+                      className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm"
                       required
                     />
                   </div>

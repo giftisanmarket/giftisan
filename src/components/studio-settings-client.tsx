@@ -325,7 +325,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         />
                       </div>
                       <p className="text-[10px] font-bold text-charcoal/40 ml-4">
-                        Your public link: <span className="text-primary italic">giftisan.shop/artisans/{slug || "your-path"}</span>
+                        Your public link: <span className="text-primary italic">giftisan.com/artisans/{slug || "your-path"}</span>
                       </p>
                     </div>
 

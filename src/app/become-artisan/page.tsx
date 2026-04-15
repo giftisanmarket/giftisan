@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +45,19 @@ export default function BecomeArtisanPage() {
   }
 
   if (session.user.role === "ARTISAN") {
-    return null;
+    return (
+      <main className="min-h-screen bg-cream flex flex-col items-center justify-center text-center p-6">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center shadow-2xl shadow-primary/20 mb-8"
+        >
+          <Store className="w-12 h-12 text-white" />
+        </motion.div>
+        <h2 className="text-3xl font-heading font-bold text-primary mb-4">Redirecting to Studio</h2>
+        <p className="text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">Your artisan journey begins...</p>
+      </main>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,7 +97,43 @@ export default function BecomeArtisanPage() {
   };
 
   return (
-    <main className="min-h-screen bg-cream pb-20">
+    <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
+      <AnimatePresence mode="wait">
+        {isLoading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-cream/90 backdrop-blur-xl flex flex-col items-center justify-center text-center p-6"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0]
+              }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center shadow-2xl shadow-primary/20 mb-8"
+            >
+              <Store className="w-12 h-12 text-white" />
+            </motion.div>
+            
+            <h2 className="text-3xl font-heading font-bold text-primary mb-4">Curating Your Studio</h2>
+            <div className="flex items-center gap-2 text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">
+              <motion.div
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-2 h-2 bg-accent rounded-full"
+              />
+              Authenticating Credentials
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Navbar />
 
       <div className="container mx-auto px-4 pt-32 max-w-4xl">

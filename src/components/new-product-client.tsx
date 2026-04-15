@@ -5,13 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowLeft, 
-  Upload, 
-  Sparkles, 
-  DollarSign, 
-  Tag, 
-  Type, 
+import {
+  ArrowLeft,
+  Upload,
+  Sparkles,
+  DollarSign,
+  Tag,
+  Type,
   Image as ImageIcon,
   CheckCircle2,
   ChevronDown,
@@ -104,7 +104,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
     form.append("canPersonalize", formData.canPersonalize.toString());
     form.append("badge", formData.badge);
     form.append("stock", formData.stock.trim());
-    
+
     formData.images.forEach((img, i) => {
       if (img) form.append(`image-${i}`, img);
     });
@@ -124,8 +124,8 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
       <Navbar />
 
       <div className="container mx-auto px-4 pt-32 pb-20 max-w-4xl">
-        <Link 
-          href="/studio" 
+        <Link
+          href="/studio"
           className="inline-flex items-center gap-2 text-primary/40 hover:text-primary text-sm font-bold uppercase tracking-widest mb-8 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -152,11 +152,12 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                 <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                   <Type className="w-3 h-3" /> Product Title *
                 </label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
+                  autoFocus
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Hand-Thrown Midnight Glaze Vase"
                   className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                 />
@@ -167,11 +168,11 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                     <DollarSign className="w-3 h-3" /> Price (USD) *
                   </label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     required
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="95.00"
                     className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                   />
@@ -209,8 +210,8 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                             }}
                             className={cn(
                               "w-full px-6 py-3 text-left rounded-xl transition-all font-bold text-sm",
-                              formData.category === cat 
-                                ? "bg-primary text-white" 
+                              formData.category === cat
+                                ? "bg-primary text-white"
                                 : "text-primary/60 hover:bg-primary/5"
                             )}
                           >
@@ -225,12 +226,12 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
-                   Description *
+                  Description *
                 </label>
-                <textarea 
+                <textarea
                   required
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Tell the story of this piece..."
                   className="w-full h-40 p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm"
                 />
@@ -247,8 +248,8 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <p className="text-sm text-charcoal/40 italic">Showcase your masterpiece with high-res photos and cinematic videos.</p>
               <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full">
-                 <Sparkles className="w-3 h-3 text-accent" />
-                 <span className="text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | Max: 100MB</span>
+                <Sparkles className="w-3 h-3 text-accent" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | Max: 100MB</span>
               </div>
             </div>
 
@@ -257,12 +258,12 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                 <div key={idx} className="space-y-4">
                   <div className="relative aspect-square rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
                     {img ? (
-                       img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
-                        <video 
-                          src={img} 
-                          className="w-full h-full object-cover" 
-                          muted 
-                          loop 
+                      img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
+                        <video
+                          src={img}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
                           onMouseOver={e => e.currentTarget.play()}
                           onMouseOut={e => e.currentTarget.pause()}
                         />
@@ -270,10 +271,10 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                         <Image src={img} alt="Preview" fill className="object-cover" />
                       )
                     ) : (
-                    <div className="flex flex-col items-center gap-2">
-                       <Upload className="w-8 h-8 text-primary/10" />
-                       <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
-                    </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="w-8 h-8 text-primary/10" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
+                      </div>
                     )}
 
                     {resolutions[idx] && (
@@ -289,8 +290,8 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                     )}
 
                     <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept="image/*,video/*"
                         className="hidden"
                         onChange={(e) => {
@@ -299,7 +300,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                             const reader = new FileReader();
                             reader.onloadend = () => {
                               const dataUrl = reader.result as string;
-                              
+
                               if (file.type.startsWith('video/')) {
                                 // Handle Video
                                 handleImageChange(idx, dataUrl);
@@ -315,7 +316,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                                   const canvas = document.createElement('canvas');
                                   let width = img.width;
                                   let height = img.height;
-                                  
+
                                   const MAX_SIZE = 1200;
                                   if (width > height) {
                                     if (width > MAX_SIZE) {
@@ -328,12 +329,12 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                                       height = MAX_SIZE;
                                     }
                                   }
-                                  
+
                                   canvas.width = width;
                                   canvas.height = height;
                                   const ctx = canvas.getContext('2d');
                                   ctx?.drawImage(img, 0, 0, width, height);
-                                  
+
                                   const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
                                   handleImageChange(idx, compressedDataUrl);
                                   setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
@@ -355,7 +356,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
                       {idx === 0 ? "Main Cover" : `Angle ${idx + 1}`}
                     </span>
                     {img && (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => handleImageChange(idx, "")}
                         className="text-[9px] font-black uppercase text-red-400 hover:text-red-500"
@@ -379,12 +380,12 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
             <div className="grid md:grid-cols-2 gap-12">
               <div className="flex items-start gap-4 p-6 bg-cream/20 rounded-[2rem] border border-primary/5">
                 <div className="pt-1">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="personalize"
                     checked={formData.canPersonalize}
-                    onChange={(e) => setFormData({...formData, canPersonalize: e.target.checked})}
-                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent" 
+                    onChange={(e) => setFormData({ ...formData, canPersonalize: e.target.checked })}
+                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent"
                   />
                 </div>
                 <label htmlFor="personalize" className="cursor-pointer">
@@ -395,10 +396,10 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Promotion Badge</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.badge}
-                  onChange={(e) => setFormData({...formData, badge: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
                   placeholder="e.g. Best Seller, New Arrival"
                   className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                 />
@@ -406,10 +407,10 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Initial Stock</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={formData.stock}
-                  onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   placeholder="e.g. 10"
                   className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
                 />
@@ -424,7 +425,7 @@ export function NewProductClient({ artisanId }: NewProductClientProps) {
           )}
 
           <div className="flex justify-end pt-8">
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
               className="h-16 px-16 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center gap-3 disabled:opacity-50"

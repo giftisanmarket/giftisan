@@ -41,8 +41,7 @@ export function VerificationBanner() {
               <AlertTriangle className="w-4 h-4 text-white" />
             </div>
             <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">
-              Account Unverified: <span className="text-white/70 normal-case font-medium">Please check your inbox ({session.user.email}) to verify. </span>
-              <Link href="/profile/settings" className="underline hover:text-white/60 transition-colors ml-1">Typo? Fix it here.</Link>
+              Account Unverified: <span className="text-white/70 normal-case font-medium">Please check your inbox ({session.user.email}) to verify your account and unlock all features.</span>
             </p>
           </div>
           

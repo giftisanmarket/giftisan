@@ -61,6 +61,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    async signIn({ user, account }) {
+      // If the user signed in via Google, mark their email as verified automatically
+      if (account?.provider === "google" && user.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() }
+        });
+      }
+    }
+  },
   callbacks: {
     async session({ session, token }) {
       if (token.sub && session.user) {
@@ -80,11 +91,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       return session;
     },
-    async jwt({ token, user }) {
-      // On initial login, add the role to the token
+    async jwt({ token, user, account }) {
+      // On initial login, add the role and verification status to the token
       if (user) {
         token.role = user.role;
-        token.emailVerified = user.emailVerified;
+        // If they use Google/OAuth, they are verified by default
+        token.emailVerified = (account?.type === "oauth") ? new Date() : user.emailVerified;
       }
 
       // ⚠️ CRITICAL: Scrub the image data out of the token to prevent 431 errors

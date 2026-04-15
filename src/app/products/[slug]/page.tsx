@@ -128,6 +128,8 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
+  const siteUrl = process.env.NEXTAUTH_URL || "https://giftisan.com";
+
   const relatedProducts = await prisma.product.findMany({
     where: { 
       category: product.category, 
@@ -163,5 +165,66 @@ export default async function ProductPage({ params }: Props) {
     }
   }));
 
-  return <ProductClient product={sanitizedProduct as any} relatedProducts={sanitizedRelated} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images,
+    "description": product.description,
+    "sku": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": product.artisan.studioName
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `${siteUrl}/products/${product.slug || product.id}`,
+      "priceCurrency": "EGP",
+      "price": product.price,
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "Giftisan"
+      }
+    }
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": product.category,
+        "item": `${siteUrl}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.name,
+        "item": `${siteUrl}/products/${product.slug || product.id}`
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ProductClient product={sanitizedProduct as any} relatedProducts={sanitizedRelated} />
+    </>
+  );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, User, Lock, ArrowRight, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { login } from "@/lib/actions";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -86,32 +86,67 @@ export function LoginClient() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {signupSuccess && (
-              <div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <p className="text-sm font-bold text-green-700 italic">
-                  Welcome to the Circle! Your studio is ready. Please sign in.
-                </p>
-              </div>
-            )}
+            <AnimatePresence>
+              {signupSuccess && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-5 bg-accent/5 border border-accent/10 rounded-[2rem] flex items-center gap-4 shadow-inner shadow-accent/5">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-heading font-bold text-primary">Portal Open!</h4>
+                      <p className="text-xs text-charcoal/60 leading-relaxed italic serif">
+                        Welcome to the Circle. Your studio is ready for your first treasures.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
-            {emailVerified && (
-              <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
-                <p className="text-sm font-bold text-primary italic">
-                  Email verified! Your account is now fully active.
-                </p>
-              </div>
-            )}
+              {emailVerified && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-5 bg-primary/5 border border-primary/10 rounded-[2rem] flex items-center gap-4 shadow-inner shadow-primary/5">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-heading font-bold text-primary">Identity Verified</h4>
+                      <p className="text-xs text-charcoal/60 leading-relaxed italic serif">
+                        Your account is now fully active. Step inside the Circle.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
-            {(error || loginError) && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                <p className="text-sm font-bold text-red-500 italic">
-                  {error || loginError}
-                </p>
-              </div>
-            )}
+              {(error || loginError) && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-5 bg-red-50 border border-red-100 rounded-[2rem] flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-heading font-bold text-red-900">Access Issue</h4>
+                      <p className="text-xs text-red-700/60 leading-relaxed font-medium">
+                        {error || loginError}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button 
               type="button"

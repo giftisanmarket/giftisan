@@ -11,9 +11,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   let product = await prisma.product.findFirst({
     where: {
-      OR: [
-        { id: { equals: slug, mode: "insensitive" } },
-        { slug: { equals: slug, mode: "insensitive" } }
+      AND: [
+        {
+          OR: [
+            { id: { equals: slug, mode: "insensitive" } },
+            { slug: { equals: slug, mode: "insensitive" } }
+          ]
+        },
+        {
+          artisan: {
+            status: "APPROVED"
+          }
+        }
       ]
     },
     select: {
@@ -30,7 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) {
     const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
     product = await prisma.product.findFirst({
-      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
+      where: { 
+        slug: { equals: cleanSlug, mode: "insensitive" },
+        artisan: { status: "APPROVED" }
+      },
       select: {
         id: true,
         name: true,
@@ -112,14 +124,17 @@ export default async function ProductPage({ params }: Props) {
     });
   }
   
-  if (!product) {
+  if (!product || product.artisan.status !== "APPROVED") {
     notFound();
   }
 
   const relatedProducts = await prisma.product.findMany({
     where: { 
       category: product.category, 
-      id: { not: product.id } 
+      id: { not: product.id },
+      artisan: {
+        status: "APPROVED"
+      }
     },
     include: { 
       artisan: { 

@@ -9,6 +9,11 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const products = await prisma.product.findMany({
+    where: {
+      artisan: {
+        status: "APPROVED"
+      }
+    },
     include: {
       artisan: {
         include: {
@@ -21,13 +26,18 @@ export default async function Home() {
   });
 
   const artisans = await prisma.artisanProfile.findMany({
+    where: {
+      status: "APPROVED"
+    },
     include: {
       user: true
     },
     take: 5
   });
 
-  const artisanCount = await prisma.artisanProfile.count();
+  const artisanCount = await prisma.artisanProfile.count({
+    where: { status: "APPROVED" }
+  });
 
   // Fetch real counts for the home page category grid
   const categoryNames = [
@@ -42,7 +52,10 @@ export default async function Home() {
           category: { 
             equals: name, 
             mode: 'insensitive' 
-          } 
+          },
+          artisan: {
+            status: "APPROVED"
+          }
         }
       });
       return { name, count };

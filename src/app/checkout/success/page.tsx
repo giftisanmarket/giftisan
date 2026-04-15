@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
-import { CheckCircle2, Package, ArrowRight, Heart } from "lucide-react";
+import { CheckCircle2, Package, ArrowRight, Heart, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
@@ -47,10 +47,10 @@ export default function SuccessPage() {
           className="text-center max-w-2xl px-4"
         >
           <h1 className="text-5xl md:text-6xl font-heading font-bold text-primary mb-6">
-            A Treasure is on <br /> its Way!
+            Your Request is in Good Hands!
           </h1>
           <p className="text-charcoal/60 text-lg leading-relaxed mb-12">
-            Thank you for supporting the global artisan community. Your order has been placed successfully and our artisans are already preparing your handcrafted treasures with care.
+            Thank you for supporting our artisan community. Your manual order request has been sent directly to the artisan's studio dashboard. They will review your treasures and contact you shortly to coordinate payment and delivery.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6 mb-12 text-left">
@@ -65,11 +65,11 @@ export default function SuccessPage() {
             </div>
             <div className="bg-white p-6 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 flex items-start gap-4">
               <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0">
-                <Heart className="w-6 h-6 text-primary" />
+                <MessageSquare className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-primary">Direct Support</h3>
-                <p className="text-sm text-charcoal/50">By shopping at Giftisan, you've directly contributed to an independent artisan studio.</p>
+                <h3 className="font-bold text-primary">Artisan Connection</h3>
+                <p className="text-sm text-charcoal/50">Expect a message or call from the artisan soon to finalize the manual billing and shipping details.</p>
               </div>
             </div>
           </div>

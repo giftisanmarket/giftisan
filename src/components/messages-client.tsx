@@ -45,6 +45,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
   useEffect(() => {
     if (!userId) return;
     const interval = setInterval(async () => {
+      if (document.visibilityState !== 'visible') return;
       try {
         const freshMessages = await getInbox(userId);
         setMessages(prev => {
@@ -57,7 +58,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
       } catch (err) {
         console.error("Polling error:", err);
       }
-    }, 10000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [userId]);
 

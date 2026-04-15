@@ -10,7 +10,10 @@ interface Props {
 async function getArtisanBySlug(slug: string) {
   // Try to find by the new slug field first
   const artisanBySlug = await prisma.artisanProfile.findFirst({
-    where: { slug: slug },
+    where: { 
+      slug: slug,
+      status: "APPROVED"
+    },
     include: {
       products: {
         include: {
@@ -28,7 +31,12 @@ async function getArtisanBySlug(slug: string) {
 
   // Fallback: match by name (old behavior)
   const users = await prisma.user.findMany({
-    where: { role: 'ARTISAN' },
+    where: { 
+      role: 'ARTISAN',
+      artisanProfile: {
+        status: 'APPROVED'
+      }
+    },
     include: {
       artisanProfile: {
         include: {

@@ -105,6 +105,12 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
+enum ArtisanStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model ArtisanProfile {
   id        String   @id @default(cuid())
   userId    String   @unique
@@ -113,7 +119,8 @@ model ArtisanProfile {
   avatar    String?  @db.Text
   studioName String?
   slug       String?  @unique
-  isVerified Boolean  @default(false)
+  status     ArtisanStatus @default(PENDING)
+  isVerified Boolean  @default(false) // Keeping this as a "verified badge" flag if needed, but status will control visibility.
   instagram  String?
   website    String?
   pinterest  String?

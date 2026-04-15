@@ -11,6 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { searchProducts } from "@/lib/actions";
+import { PreLaunchBanner } from "./pre-launch-banner";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -62,6 +63,7 @@ export function Navbar() {
 
   return (
     <>
+    <PreLaunchBanner />
     <nav className="sticky top-0 z-50 w-full glass border-b border-primary/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
         {/* Logo */}

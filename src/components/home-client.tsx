@@ -14,6 +14,8 @@ import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
+import { NewsletterForm } from "@/components/newsletter-form";
+import { useEffect } from "react";
 
 interface CategoryCount {
   name: string;
@@ -29,6 +31,18 @@ interface HomeClientProps {
 
 export default function HomeClient({ products, artisans, categoryCounts, artisanCount }: HomeClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
+
+  useEffect(() => {
+    if (window.location.hash === "#newsletter") {
+      const element = document.getElementById("newsletter");
+      if (element) {
+        // Delay slightly to ensure layout is finished
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 500);
+      }
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-cream">
@@ -238,22 +252,13 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       </section>
 
       {/* Newsletter */}
-      <section className="py-24 bg-primary text-white overflow-hidden relative">
+      <section id="newsletter" className="py-24 bg-primary text-white overflow-hidden relative">
         <div className="container mx-auto px-4 relative z-10 text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold">Join the Giftisan Circle</h2>
+          <h2 className="text-4xl md:text-5xl font-heading font-bold">Join the Giftisan Waitlist</h2>
           <p className="text-white/70 max-w-xl mx-auto text-lg text-balance">
-            Receive exclusive early access to new collections, artisan stories, and gifting inspiration.
+            Be the first to know when we launch! Secure your spot in our Inner Circle for exclusive early access and grand opening surprises.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 h-14 px-6 rounded-full bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-accent text-white placeholder:text-white/40"
-            />
-            <button className="h-14 px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all">
-              Subscribe
-            </button>
-          </div>
+          <NewsletterForm />
         </div>
 
         {/* Background blobs */}

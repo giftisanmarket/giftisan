@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video } from "lucide-react";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";

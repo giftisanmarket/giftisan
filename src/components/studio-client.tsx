@@ -140,6 +140,69 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
       </AnimatePresence>
 
       <div className="container mx-auto px-4 pt-32 pb-20">
+        {/* Verification Status Banner */}
+        {artisan.status === "PENDING" && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-8 bg-amber-50 border-2 border-amber-200 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-xl shadow-amber-500/5"
+          >
+            <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
+              <Clock className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl font-heading font-black text-amber-900 mb-2">Studio Under Review</h3>
+              <p className="text-amber-700/80 leading-relaxed font-medium">
+                Your workshop is almost ready! Our curators are currently reviewing your studio to ensure it meets our premium standards. <span className="font-bold underline decoration-amber-500/30">Your treasures will be visible to the public</span> once approved.
+              </p>
+            </div>
+            <div className="px-6 py-2 bg-white rounded-full border border-amber-200 text-[10px] font-black uppercase tracking-widest text-amber-600 shadow-sm">
+              Pending Verification
+            </div>
+          </motion.div>
+        )}
+
+        {artisan.status === "REJECTED" && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-8 bg-red-50 border-2 border-red-200 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-xl shadow-red-500/5"
+          >
+            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
+              <X className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl font-heading font-black text-red-900 mb-2">Verification Needed</h3>
+              <p className="text-red-700/80 leading-relaxed font-medium">
+                We've noticed a few things that need attention before your studio can go live. Please ensure your bio is complete and your product images are clear and high-resolution. Contact us if you have any questions!
+              </p>
+            </div>
+            <div className="px-6 py-2 bg-white rounded-full border border-red-200 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm">
+              Action Required
+            </div>
+          </motion.div>
+        )}
+
+        {/* Pre-launch Artisan Notice */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 p-6 bg-accent/5 border border-accent/20 rounded-[2rem] flex flex-col md:flex-row items-center gap-6"
+        >
+          <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center shrink-0">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-lg font-heading font-black text-primary mb-1">Direct Orders are Live!</h3>
+            <p className="text-sm text-charcoal/60 leading-relaxed">
+              We're in soft-launch mode. While we finalize automated payments and shipping, you can already <span className="font-bold text-primary">receive manual orders directly in this dashboard</span>. Prepare your inventory and chat with buyers today!
+            </p>
+          </div>
+          <div className="px-6 py-2 bg-white rounded-full border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
+            Phase 1: Profile Prep
+          </div>
+        </motion.div>
+
         <div className="relative bg-primary text-white rounded-[3rem] p-8 md:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">

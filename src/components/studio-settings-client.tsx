@@ -25,11 +25,11 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const [facebook, setFacebook] = useState(artisan.facebook || "");
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
+  const [activeSettingsTab, setActiveSettingsTab] = useState("Studio Profile");
+  const [slug, setSlug] = useState(artisan.slug || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
-
-  const [activeSettingsTab, setActiveSettingsTab] = useState("Studio Profile");
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +40,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       bio, 
       location, 
       avatar,
+      slug,
       instagram,
       website,
       pinterest,
@@ -306,6 +307,26 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                           placeholder="Your Studio Name"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4 flex items-center gap-2">
+                        Studio URL Slug 
+                        <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">Permanent Link</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
+                        <input 
+                          type="text" 
+                          value={slug || ""}
+                          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/ /g, "-"))}
+                          className="w-full h-16 pl-12 pr-8 rounded-2xl bg-white border-2 border-primary/5 focus:border-accent transition-all font-bold text-accent placeholder:text-primary/20"
+                          placeholder="your-custom-slug"
+                        />
+                      </div>
+                      <p className="text-[10px] font-bold text-charcoal/40 ml-4">
+                        Your public link: <span className="text-primary italic">giftisan.shop/artisans/{slug || "your-path"}</span>
+                      </p>
                     </div>
 
                     <div className="space-y-2">

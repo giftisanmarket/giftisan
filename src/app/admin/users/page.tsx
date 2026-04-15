@@ -1,8 +1,9 @@
-import { getAllUsers, deleteUser } from "@/lib/actions";
+import { getAllUsers } from "@/lib/actions";
 import { User, Shield, Store, Trash2, Calendar, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { VerifyArtisanButton } from "@/components/admin/verify-artisan-button";
+import { DeleteUserButton } from "@/components/admin/delete-user-button";
 
 export default async function AdminUsersPage() {
   const users = await getAllUsers();
@@ -75,7 +76,11 @@ export default async function AdminUsersPage() {
                         <p className="text-[10px] text-charcoal/40 italic mb-2">
                           {user.artisanProfile.location || "Global Studio"}
                         </p>
-                        <VerifyArtisanButton artisanId={user.artisanProfile.id} currentStatus={user.artisanProfile.isVerified} />
+                        <VerifyArtisanButton 
+                          artisanId={user.artisanProfile.id} 
+                          currentStatus={user.artisanProfile.isVerified} 
+                          status={user.artisanProfile.status}
+                        />
                       </div>
                     </div>
                   ) : (
@@ -95,12 +100,7 @@ export default async function AdminUsersPage() {
                   </div>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <button 
-                    className="p-3 text-primary/20 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    title="Delete User"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <DeleteUserButton userId={user.id} userName={user.name} />
                 </td>
               </tr>
             ))}

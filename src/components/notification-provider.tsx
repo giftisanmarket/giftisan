@@ -46,8 +46,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (session?.user?.id) {
       refreshUnreadCount();
       
-      // Real-time polling every 5 seconds (temporary for testing/demo)
-      const interval = setInterval(refreshUnreadCount, 5000);
+      // Real-time polling every 60 seconds (optimized for network transfer)
+      const interval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          refreshUnreadCount();
+        }
+      }, 60000);
       return () => clearInterval(interval);
     } else {
       setUnreadCount(0);

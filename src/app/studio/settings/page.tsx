@@ -20,6 +20,7 @@ export default async function StudioSettingsPage() {
     bio: artisan.bio,
     location: artisan.location,
     avatar: artisan.avatar,
+    slug: artisan.slug,
     instagram: artisan.instagram,
     website: artisan.website,
     pinterest: artisan.pinterest,

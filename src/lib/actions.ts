@@ -216,20 +216,29 @@ export async function resetPasswordAction(token: string, password: any) {
 export async function searchProducts(query: string) {
   try {
     const products = await prisma.product.findMany({
-      where: query ? {
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
-          { category: { contains: query, mode: "insensitive" } },
+      where: {
+        AND: [
+          query ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { description: { contains: query, mode: "insensitive" } },
+              { category: { contains: query, mode: "insensitive" } },
+              {
+                artisan: {
+                  user: {
+                    name: { contains: query, mode: "insensitive" }
+                  }
+                }
+              }
+            ]
+          } : {},
           {
             artisan: {
-              user: {
-                name: { contains: query, mode: "insensitive" }
-              }
+              status: "APPROVED"
             }
           }
         ]
-      } : {},
+      },
       include: {
         artisan: {
           include: {
@@ -264,6 +273,9 @@ export async function getProductsByCategory(category: string) {
         category: {
           equals: category,
           mode: "insensitive"
+        },
+        artisan: {
+          status: "APPROVED"
         }
       },
       include: {
@@ -508,6 +520,9 @@ export async function getArtisanData(userId: string) {
 export async function getAllArtisans() {
   try {
     const artisans = await prisma.artisanProfile.findMany({
+      where: {
+        status: "APPROVED"
+      },
       include: {
         user: true,
         products: true
@@ -525,9 +540,12 @@ export async function getAllArtisans() {
 
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
-    const slug = data.studioName 
-      ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
-      : null;
+    // Only generate slug if it's not manually provided OR it's a new profile
+    const slug = data.slug 
+      ? slugify(data.slug)
+      : data.studioName 
+        ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
+        : null;
 
     const avatarUrl = await processImage(data.avatar);
     const bannerUrl = await processImage(data.bannerImage);
@@ -576,7 +594,8 @@ export async function updateArtisanProfile(userId: string, data: any) {
         studioName: updated.studioName,
         bio: updated.bio,
         location: updated.location,
-        avatar: updated.avatar
+        avatar: updated.avatar,
+        slug: updated.slug
       } 
     };
   } catch (error: any) {
@@ -738,6 +757,10 @@ export async function subscribeToNewsletter(email: string) {
     const subscriber = await prisma.newsletterSubscriber.create({
       data: { email }
     });
+
+    // Send the welcome email to the new subscriber
+    await sendWelcomeEmail(email, "Friend");
+    
     return { success: true, data: subscriber };
   } catch (error: any) {
     console.error("Newsletter subscription error:", error);
@@ -942,6 +965,7 @@ export async function deleteUser(userId: string) {
     await prisma.user.delete({
       where: { id: userId }
     });
+    revalidatePath("/admin/users");
     return { success: true };
   } catch (error) {
     console.error("Delete user error:", error);
@@ -949,12 +973,29 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function toggleArtisanVerification(artisanId: string, status: boolean) {
+export async function updateArtisanStatus(artisanId: string, status: "PENDING" | "APPROVED" | "REJECTED") {
   try {
     await prisma.artisanProfile.update({
       where: { id: artisanId },
-      data: { isVerified: status }
+      data: { status }
     });
+    revalidatePath("/admin/users");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    return { success: true };
+  } catch (error) {
+    console.error("Update status error:", error);
+    return { error: "Failed to update studio status" };
+  }
+}
+
+export async function toggleArtisanVerification(artisanId: string, isVerified: boolean) {
+  try {
+    await prisma.artisanProfile.update({
+      where: { id: artisanId },
+      data: { isVerified }
+    });
+    revalidatePath("/admin/users");
     return { success: true };
   } catch (error) {
     console.error("Toggle verification error:", error);
@@ -985,13 +1026,25 @@ export async function sendMessage(senderId: string, receiverId: string, content:
       }
     });
 
-    // Send notification email to receiver (asynchronously)
+    // Send notification email to receiver ONLY if they don't already have unread messages from this sender
+    // This prevents spamming if the user sends multiple quick messages
     if (message.receiver.email) {
-      sendMessageNotification(
-        message.receiver.email, 
-        message.receiver.name || "Artisan", 
-        message.sender.name || "A customer"
-      ).catch(err => console.error("Failed to send message notification:", err));
+      const hasUnreadFromSender = await prisma.message.count({
+        where: {
+          receiverId: message.receiverId,
+          senderId: message.senderId,
+          read: false,
+          id: { not: message.id } // Don't count the message we just created
+        }
+      });
+
+      if (hasUnreadFromSender === 0) {
+        sendMessageNotification(
+          message.receiver.email, 
+          message.receiver.name || "Artisan", 
+          message.sender.name || "A customer"
+        ).catch(err => console.error("Failed to send message notification:", err));
+      }
     }
 
     return { success: true, message };
@@ -1014,9 +1067,27 @@ export async function getInbox(userId: string) {
         ]
       },
       include: {
-        sender: true,
-        receiver: true,
-        product: true
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        product: {
+          select: {
+            id: true,
+            name: true,
+            images: true
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
       take: 100

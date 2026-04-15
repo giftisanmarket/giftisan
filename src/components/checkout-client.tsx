@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, Sparkles, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder } from "@/lib/actions";
@@ -166,12 +166,14 @@ export function CheckoutClient() {
             </section>
 
             {/* Space for future payment implementation */}
-            <div className="bg-cream/20 border-2 border-dashed border-primary/10 rounded-[2.5rem] p-8 md:p-12 text-center">
+            <div className="bg-accent/5 border-2 border-dashed border-accent/20 rounded-[2.5rem] p-8 md:p-12 text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <ShieldCheck className="w-8 h-8 text-primary/20" />
+                <Sparkles className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-xl font-heading font-bold text-primary mb-2">Secure Checkout</h3>
-              <p className="text-sm text-charcoal/40 max-w-xs mx-auto">Your order will be sent to the artisan for confirmation. Payment details are not required at this stage.</p>
+              <h3 className="text-xl font-heading font-bold text-primary mb-2">Pre-Launch Gallery Mode</h3>
+              <p className="text-sm text-charcoal/60 max-w-sm mx-auto leading-relaxed">
+                Giftisan is currently in an exclusive profile-building phase. <span className="text-primary font-bold">Standard shipping and secure payments will be activated soon.</span> For now, you can explore treasures and join our "Inner Circle" newsletter for launch alerts!
+              </p>
             </div>
           </div>
 
@@ -222,14 +224,35 @@ export function CheckoutClient() {
                 </div>
               </div>
 
-              <button 
-                onClick={handlePurchase}
-                disabled={isProcessing}
-                className="w-full h-16 bg-white text-primary font-bold rounded-full mt-10 hover:bg-cream transition-all flex items-center justify-center shadow-xl text-lg group disabled:opacity-50"
-              >
-                {isProcessing ? "Processing..." : "Complete Purchase"}
-                <CheckCircle2 className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
+              <div className="mt-10 space-y-6">
+                <button 
+                  onClick={handlePurchase}
+                  disabled={isProcessing}
+                  className="w-full h-16 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center justify-center shadow-xl text-lg group disabled:opacity-50"
+                >
+                  {isProcessing ? "Processing..." : "Place Pre-Launch Order"}
+                  <CheckCircle2 className="w-5 h-5 ml-2 text-accent" />
+                </button>
+
+                <p className="text-[11px] text-center text-white/60 leading-relaxed max-w-sm mx-auto">
+                  By clicking above, your shipping details will be sent directly to the artisan's <span className="text-accent underline">Studio Dashboard</span>. They will then contact you to arrange manual payment and delivery.
+                </p>
+
+                <div className="relative flex items-center justify-center py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
+                  </div>
+                  <span className="relative px-4 bg-primary text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Alternative</span>
+                </div>
+
+                <Link 
+                  href="/#newsletter"
+                  className="w-full h-12 bg-white/5 text-white/60 font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2 border border-white/10 text-xs"
+                >
+                  Join the Waitlist instead
+                  <Sparkles className="w-3 h-3 text-accent" />
+                </Link>
+              </div>
 
               {error && (
                 <p className="mt-4 text-sm font-bold text-accent-light text-center animate-pulse">

@@ -2,10 +2,10 @@
   <!-- Solid background matching icon.png -->
   <rect width="512" height="512" fill="#043e2e" />
   
-  <!-- Recreating the exact Serif G from icon.png -->
+  <!-- Recreating the exact Serif G from icon.png - Visually Centered -->
   <text 
     x="50%" 
-    y="52%" 
+    y="55%" 
     text-anchor="middle" 
     dominant-baseline="middle" 
     fill="#fdfcf0" 

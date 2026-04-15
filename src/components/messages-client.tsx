@@ -9,6 +9,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any }) {
   return (
@@ -19,6 +20,7 @@ export function MessagesClient(props: { initialMessages: any[], userId: string, 
 }
 
 function MessagesContent({ initialMessages, userId, targetUser }: { initialMessages: any[], userId: string, targetUser?: any }) {
+  const { data: session } = useSession();
   const [messages, setMessages] = useState(initialMessages);
   
   // Sync state with props when server revalidates
@@ -192,6 +194,11 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
   const handleReply = async () => {
     if ((!reply.trim() && !attachment) || isSending || !activeThread) return;
     
+    if (session?.user && !(session.user as any).emailVerified) {
+      toast.error("Please verify your email to send messages.");
+      return;
+    }
+
     setIsSending(true);
     try {
       const isGhost = selectedThreadKey?.startsWith("ghost-");
@@ -462,10 +469,13 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                     <button 
                       onClick={handleReply}
                       disabled={isSending || (!reply.trim() && !attachment)}
-                      className="h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm"
+                      className={cn(
+                        "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm",
+                        session?.user && !(session.user as any).emailVerified && "opacity-50 cursor-not-allowed bg-charcoal/40"
+                      )}
                     >
-                      {isSending ? "..." : "Reply"}
-                      <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      {session?.user && !(session.user as any).emailVerified ? "Verify email to reply" : isSending ? "..." : "Reply"}
+                      {!isSending && <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                     </button>
                   </div>
                 </div>

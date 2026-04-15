@@ -12,13 +12,13 @@ export function PreLaunchBanner() {
   // Reset visibility when navigating if it was dismissed? 
   // No, let's keep it dismissed for the session if they close it.
   useEffect(() => {
-    const isDismissed = sessionStorage.getItem("prelaunch-banner-dismissed");
+    const isDismissed = sessionStorage.getItem("prelaunch-banner-v3");
     if (isDismissed) setIsVisible(false);
   }, []);
 
   const handleDismiss = () => {
     setIsVisible(false);
-    sessionStorage.setItem("prelaunch-banner-dismissed", "true");
+    sessionStorage.setItem("prelaunch-banner-v3", "true");
   };
 
   return (

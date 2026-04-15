@@ -36,6 +36,11 @@ export function CheckoutClient() {
       return;
     }
 
+    if (!(session.user as any).emailVerified) {
+      setError("Please verify your email address to complete your purchase. Check your inbox for the link!");
+      return;
+    }
+
     if (!shippingData.address || !shippingData.city || !shippingData.zip) {
       setError("Please fill in all shipping details.");
       return;

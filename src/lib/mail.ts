@@ -5,6 +5,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const LOGO_URL = "https://www.giftisan.com/icon.png";
 const SENDER = "Giftisan <support@giftisan.com>";
 
+const getBaseUrl = () => {
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NODE_ENV === "development") return "http://localhost:3000";
+  return "https://www.giftisan.com";
+};
+
+const BASE_URL = getBaseUrl();
+
 const emailHeader = `
   <div style="text-align: center; margin-bottom: 30px;">
     <img src="${LOGO_URL}" alt="Giftisan" style="width: 80px; height: 80px; margin-bottom: 10px;">
@@ -13,6 +22,10 @@ const emailHeader = `
 `;
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: WELCOME EMAIL ---\nTarget: ${email}\nName: ${name}\n-----------------------------\n`);
+    return { success: true };
+  }
   try {
     await resend.emails.send({
       from: SENDER,
@@ -25,7 +38,7 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
           <p style="color: #4b5563; line-height: 1.6; font-size: 16px; text-align: center;">We're so excited to have you join our community of artisans and treasure hunters.</p>
           <p style="color: #4b5563; line-height: 1.6; font-size: 16px; text-align: center;">Giftisan is a place where craft meets soul. Whether you're here to sell your handmade creations or find that perfect unique gift, you're in the right place.</p>
           <div style="margin: 40px 0; text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">Explore the Marketplace</a>
+            <a href="${BASE_URL}" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">Explore the Marketplace</a>
           </div>
           <p style="color: #9ca3af; font-size: 14px; text-align: center; margin-top: 40px; border-top: 1px solid #f3f4f6; pt-20">Happy hunting!</p>
           <p style="color: #1a2c2c; font-weight: bold; text-align: center;">The Giftisan Team</p>
@@ -40,6 +53,10 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
 };
 
 export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: ORDER NOTIFICATION ---\nTarget: ${artisanEmail}\nOrder: ${orderId}\nAmount: EGP ${totalAmount}\n----------------------------------\n`);
+    return { success: true };
+  }
   try {
     await resend.emails.send({
       from: SENDER,
@@ -59,7 +76,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
           </div>
           <p style="color: #4b5563; font-size: 16px;">Please log in to your studio dashboard to view shipping details and start fulfillment.</p>
           <div style="margin: 30px 0; text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/studio" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order in Studio</a>
+            <a href="${BASE_URL}/studio" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order in Studio</a>
           </div>
           <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
@@ -73,6 +90,10 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
 };
 
 export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: MESSAGE NOTIFICATION ---\nTarget: ${receiverEmail}\nSender: ${senderName}\n------------------------------------\n`);
+    return { success: true };
+  }
   try {
     await resend.emails.send({
       from: SENDER,
@@ -84,7 +105,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
           <p style="color: #4b5563; font-size: 16px;">Hi ${receiverName},</p>
           <p style="color: #4b5563; font-size: 16px; margin-bottom: 30px;"><strong>${senderName}</strong> sent you a new message regarding a treasure.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/profile/messages" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Reply to Message</a>
+            <a href="${BASE_URL}/profile/messages" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Reply to Message</a>
           </div>
           <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
         </div>
@@ -98,7 +119,15 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/api/auth/verify-email?token=${token}`;
+  const confirmLink = `${BASE_URL}/api/auth/verify-email?token=${token}`;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("\n--- 📧 DEV: VERIFICATION EMAIL ---");
+    console.log(`Target: ${email}`);
+    console.log(`Link:   ${confirmLink}`);
+    console.log("----------------------------------\n");
+    return { success: true };
+  }
 
   try {
     await resend.emails.send({
@@ -127,6 +156,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendOrderStatusUpdateEmail = async (email: string, name: string, orderId: string, status: string, productName: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\n----------------------------------\n`);
+    return { success: true };
+  }
   const statusColors: Record<string, string> = {
     'PROCESSING': '#3b82f6',
     'SHIPPED': '#da7b5a',
@@ -158,7 +191,7 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
           </div>
           <p style="color: #6b7280; font-size: 14px; text-align: center;"><strong>Order ID:</strong> ${orderId}</p>
           <div style="margin: 40px 0; text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/profile" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order Details</a>
+            <a href="${BASE_URL}/profile" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">View Order Details</a>
           </div>
           <p style="color: #4b5563; font-size: 16px; text-align: center; margin-top: 40px;">Thank you for supporting independent artisans!</p>
           <p style="color: #111827; font-weight: bold; text-align: center;">The Giftisan Team</p>
@@ -171,8 +204,17 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
     return { success: false, error };
   }
 };
+
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetLink = `${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/reset-password?token=${token}`;
+  const resetLink = `${BASE_URL}/reset-password?token=${token}`;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("\n--- 📧 DEV: PASSWORD RESET EMAIL ---");
+    console.log(`Target: ${email}`);
+    console.log(`Link:   ${resetLink}`);
+    console.log("------------------------------------\n");
+    return { success: true };
+  }
 
   try {
     await resend.emails.send({

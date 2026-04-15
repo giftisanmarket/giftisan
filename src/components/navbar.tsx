@@ -7,15 +7,16 @@ import { useCart } from "@/context/cart-context";
 import { useNotifications } from "./notification-provider";
 import { useFavorites } from "@/context/favorites-context";
 import { useState, useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { searchProducts } from "@/lib/actions";
 import { PreLaunchBanner } from "./pre-launch-banner";
 import { VerificationBanner } from "./verification-banner";
+import { toast } from "react-hot-toast";
 
 export function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const { setIsCartOpen, totalItems } = useCart();
   const { totalFavorites } = useFavorites();
   const { unreadCount } = useNotifications();
@@ -27,6 +28,21 @@ export function Navbar() {
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("success") === "EmailVerified") {
+      toast.success("Identity verified! Your account is now fully active.", { 
+        id: "global-verified",
+        duration: 5000 
+      });
+      update();
+      
+      // Clean up URL to prevent re-triggering on refresh
+      const newUrl = pathname;
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
+    }
+  }, [searchParams, update, pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,10 +79,10 @@ export function Navbar() {
   }, []);
 
   return (
-    <>
-    <VerificationBanner />
-    <PreLaunchBanner />
-    <nav className="sticky top-0 z-50 w-full glass border-b border-primary/10">
+    <div className="sticky top-0 z-50 w-full">
+      <PreLaunchBanner />
+      <VerificationBanner />
+      <nav className="w-full glass border-b border-primary/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0 group">
@@ -441,6 +457,6 @@ export function Navbar() {
         </div>
       </div>
     </div>
-    </>
+    </div>
   );
 }

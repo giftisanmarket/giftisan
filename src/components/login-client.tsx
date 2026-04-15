@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, User, Lock, ArrowRight, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,12 +9,12 @@ import { login } from "@/lib/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { signIn as socialSignIn } from "next-auth/react";
+import { toast } from "react-hot-toast";
 
 export function LoginClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -22,16 +22,29 @@ export function LoginClient() {
   const emailVerified = searchParams.get("success") === "EmailVerified";
   const loginError = searchParams.get("error");
 
+  useEffect(() => {
+    if (loginError) {
+      toast.error(loginError === "CredentialsSignin" ? "Invalid email or password." : loginError, { id: "url-error" });
+    }
+    if (signupSuccess) {
+      toast.success("Welcome to the Circle! Your studio is ready.", { id: "url-signup" });
+    }
+    if (emailVerified) {
+      toast.success("Identity verified. Your account is now active.", { id: "url-verified" });
+    }
+  }, [loginError, signupSuccess, emailVerified]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     const res = await login({ email, password });
     
     if (res?.error) {
-      setError(res.error);
-      setIsLoading(false);
+       toast.error(res.error, {
+         id: "login-error", // Prevent duplicates
+       });
+       setIsLoading(false);
     } else if (res?.success) {
       window.location.href = "/";
     }
@@ -86,67 +99,7 @@ export function LoginClient() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <AnimatePresence>
-              {signupSuccess && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-5 bg-accent/5 border border-accent/10 rounded-[2rem] flex items-center gap-4 shadow-inner shadow-accent/5">
-                    <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-6 h-6 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-heading font-bold text-primary">Portal Open!</h4>
-                      <p className="text-xs text-charcoal/60 leading-relaxed italic serif">
-                        Welcome to the Circle. Your studio is ready for your first treasures.
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {emailVerified && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-5 bg-primary/5 border border-primary/10 rounded-[2rem] flex items-center gap-4 shadow-inner shadow-primary/5">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-6 h-6 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-heading font-bold text-primary">Identity Verified</h4>
-                      <p className="text-xs text-charcoal/60 leading-relaxed italic serif">
-                        Your account is now fully active. Step inside the Circle.
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {(error || loginError) && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-5 bg-red-50 border border-red-100 rounded-[2rem] flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                      <AlertCircle className="w-6 h-6 text-red-500" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-heading font-bold text-red-900">Access Issue</h4>
-                      <p className="text-xs text-red-700/60 leading-relaxed font-medium">
-                        {error || loginError}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Status messages removed from flow to prevent layout shift */}
 
             <button 
               type="button"

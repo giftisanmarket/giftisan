@@ -1112,18 +1112,41 @@ export async function getInbox(userId: string) {
 export async function updateUser(userId: string, formData: FormData) {
   try {
     const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
     const image = formData.get("image") as string;
+
+    const currentUser = await prisma.user.findUnique({ where: { id: userId } });
+    const emailChanged = email && currentUser && currentUser.email !== email;
+
+    const data: any = { name, image };
+    if (emailChanged) {
+      // Check if email is already taken
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing) return { error: "Email is already in use by another account." };
+      
+      data.email = email;
+      data.emailVerified = null;
+    }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, image }
+      data
     });
+
+    if (emailChanged) {
+      const verificationToken = await generateVerificationToken(email);
+      await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
+    }
+
     return { 
       success: true, 
+      emailChanged,
       user: {
         id: user.id,
         name: user.name,
-        image: user.image
+        email: user.email,
+        image: user.image,
+        emailVerified: user.emailVerified
       } 
     };
   } catch (error) {

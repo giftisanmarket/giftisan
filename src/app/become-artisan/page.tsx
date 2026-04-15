@@ -53,6 +53,12 @@ export default function BecomeArtisanPage() {
     setIsLoading(true);
     setError("");
 
+    if (!(session.user as any).emailVerified) {
+      setError("Please verify your email address before opening a studio. Check your inbox for the link!");
+      setIsLoading(false);
+      return;
+    }
+
     if (!formData.studioName || !formData.bio) {
       setError("Please provide a name for your studio and a brief bio.");
       setIsLoading(false);

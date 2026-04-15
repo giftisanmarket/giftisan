@@ -6,6 +6,7 @@ import { updateUser, deleteAccountAction } from "@/lib/actions";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +16,7 @@ export function SettingsClient({ user }: { user: any }) {
   const { update } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(user.name || "");
+  const [email, setEmail] = useState(user.email || "");
   const [image, setImage] = useState(user.image || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -72,23 +74,33 @@ export function SettingsClient({ user }: { user: any }) {
     e.preventDefault();
     setIsSaving(true);
     
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("image", image);
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("image", image);
 
-    const res = await updateUser(user.id, formData);
-    
-    if (res.success) {
-      await update({ name, image }); // Force NextAuth to refresh its session data
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        router.refresh();
-      }, 2000);
-    } else {
-      alert(res.error || "Failed to update profile");
+      const res = await updateUser(user.id, formData);
+      
+      if (res.success) {
+        await update({ name, image, email: res.user.email, emailVerified: res.user.emailVerified }); 
+        setShowSuccess(true);
+        if (res.emailChanged) {
+          toast.success("Email updated! A new verification link has been sent.");
+        }
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.refresh();
+        }, 2000);
+      } else {
+        toast.error(res.error || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Save settings error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const handleConfirmDelete = async () => {
@@ -211,10 +223,14 @@ export function SettingsClient({ user }: { user: any }) {
 
               <div className="grid gap-2">
                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Email Address</label>
-                 <div className="w-full h-14 md:h-16 px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/40 cursor-not-allowed text-sm md:text-base overflow-hidden">
-                  <span className="truncate flex-1">{user.email}</span>
-                  <span className="ml-2 text-[8px] md:text-[9px] px-2 py-1 bg-white/50 rounded-md uppercase tracking-tighter whitespace-nowrap">Read Only</span>
-                 </div>
+                 <input 
+                   type="email" 
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
+                   className="w-full h-14 md:h-16 px-6 md:px-8 bg-cream/30 border border-primary/5 rounded-xl md:rounded-2xl focus:outline-none focus:border-accent transition-all font-bold text-primary placeholder:text-primary/40 text-sm md:text-base"
+                   placeholder="Enter your email"
+                 />
+                 <p className="ml-4 text-[9px] md:text-[10px] text-accent font-bold italic">Changing your email will require a new verification link.</p>
               </div>
             </div>
 

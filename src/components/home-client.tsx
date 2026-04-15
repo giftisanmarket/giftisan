@@ -11,11 +11,13 @@ import {
   Sparkles, ShoppingBag
 } from "lucide-react";
 import { useFavorites } from "@/context/favorites-context";
+import { useCart } from "@/context/cart-context";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 interface CategoryCount {
   name: string;
@@ -31,6 +33,7 @@ interface HomeClientProps {
 
 export default function HomeClient({ products, artisans, categoryCounts, artisanCount }: HomeClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (window.location.hash === "#newsletter") {
@@ -67,48 +70,74 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {products.map((product) => (
-            <Link
+            <div
               key={product.id}
-              href={`/products/${product.slug || product.id}`}
               className="group cursor-pointer block"
             >
-              <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
-                <BespokeImage
-                  src={product.images[0]}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                {product.badge && (
-                  <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
-                    {product.badge}
-                  </div>
-                )}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleFavorite(product);
-                  }}
-                  className={cn(
-                    "absolute top-4 right-4 p-3 rounded-full transition-all scale-90 group-hover:scale-100",
-                    isFavorite(product.id)
-                      ? "bg-red-50 text-red-500 opacity-100"
-                      : "bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
+              <Link href={`/products/${product.slug || product.id}`}>
+                <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
+                  <BespokeImage
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                  {product.badge && (
+                    <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                      {product.badge}
+                    </div>
                   )}
-                >
-                  <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
-                </button>
-              </div>
+                  
+                  {/* Actions Layer */}
+                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFavorite(product);
+                      }}
+                      className={cn(
+                        "p-3 rounded-full transition-all scale-90 active:scale-75 shadow-lg",
+                        isFavorite(product.id)
+                          ? "bg-red-50 text-red-500"
+                          : "bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
+                      )}
+                    >
+                      <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
+                    </button>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToCart(product, undefined, true);
+                        toast.success(`${product.name} added to cart!`, {
+                          icon: '🏺',
+                          style: {
+                            borderRadius: '1rem',
+                            background: '#1A2E2A',
+                            color: '#fff',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                          },
+                        });
+                      }}
+                      className="p-3 rounded-full bg-accent text-white shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-accent-light active:scale-75"
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </Link>
               <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">
                 {product.artisan.studioName || product.artisan.user.name}
               </p>
               <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
-                {product.name}
+                <Link href={`/products/${product.slug || product.id}`}>{product.name}</Link>
               </h3>
               <p className="font-heading font-bold text-primary mt-2">EGP {product.price}.00</p>
-            </Link>
+            </div>
           ))}
         </div>
       </section>

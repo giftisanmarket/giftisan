@@ -128,59 +128,132 @@ export function Navbar() {
           </form>
 
           {/* Quick Results Overlay */}
-          {showResults && searchQuery && (
+          {showResults && (
             <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
-                <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">Gifts for You</span>
-                <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
-                  {isSearching ? "Searching..." : `${searchResults.length} items found`}
-                </span>
-              </div>
+              {!searchQuery ? (
+                /* Empty Search State - Trending discovered */
+                <div className="p-6 space-y-6">
+                  <div className="flex justify-between items-center bg-accent/5 p-4 rounded-2xl border border-accent/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                        <Search className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">Discovery mode</p>
+                        <p className="text-sm font-bold text-primary">Explore Trending Treasures</p>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="max-h-[400px] overflow-y-auto">
-                {searchResults.length > 0 ? (
-                  searchResults.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/products/${p.slug}`}
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ml-1">Popular Collections</p>
+                    <div className="flex flex-wrap gap-2">
+                      {["Ceramics", "Jewelry", "Bespoke Decor", "Wedding", "Vintage", "Handmade"].map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={() => {
+                            setSearchQuery(tag);
+                            router.push(`/search?q=${encodeURIComponent(tag)}`);
+                            setShowResults(false);
+                          }}
+                          className="px-4 py-2 rounded-full bg-cream text-primary/60 text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-primary/5">
+                    <Link 
+                      href="/categories" 
                       onClick={() => setShowResults(false)}
-                      className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
+                      className="flex items-center justify-between group"
                     >
-                      <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
-                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
-                          <span className="text-sm font-bold text-primary">EGP {p.price}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center">
+                          <ShoppingCart className="w-4 h-4 text-primary" />
                         </div>
-                        <p className="text-xs text-charcoal/40 font-medium">
-                          {p.artisan.user?.name || p.artisan.studioName} • {p.category}
-                        </p>
+                        <span className="text-xs font-bold text-primary">Browse All Categories</span>
                       </div>
+                      <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
                     </Link>
-                  ))
-                ) : !isSearching ? (
-                  <div className="p-8 text-center space-y-2">
-                    <p className="text-charcoal/40 font-medium italic">"Nothing matches your search yet..."</p>
-                    <p className="text-[10px] text-accent font-bold uppercase tracking-widest">Try "Vase" or "Gold"</p>
                   </div>
-                ) : (
-                  <div className="p-8 text-center text-charcoal/40 animate-pulse">
-                    Scanning the workshop...
-                  </div>
-                )}
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="p-3 bg-primary/5 text-center">
-                  <button 
-                    onClick={handleSearch}
-                    className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
-                  >
-                    See All Results →
-                  </button>
                 </div>
+              ) : (
+                <>
+                  <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
+                    <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">Gifts for You</span>
+                    <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
+                      {isSearching ? "Searching..." : `${searchResults.length} items found`}
+                    </span>
+                  </div>
+
+                  <div className="max-h-[400px] overflow-y-auto">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/products/${p.slug}`}
+                          onClick={() => setShowResults(false)}
+                          className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
+                        >
+                          <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
+                            <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
+                              <span className="text-sm font-bold text-primary">EGP {p.price}</span>
+                            </div>
+                            <p className="text-xs text-charcoal/40 font-medium">
+                              {p.artisan.user?.name || p.artisan.studioName} • {p.category}
+                            </p>
+                          </div>
+                        </Link>
+                      ))
+                    ) : !isSearching ? (
+                      <div className="p-8 text-center space-y-6">
+                        <div className="space-y-2">
+                          <p className="text-charcoal/40 font-medium italic">"Nothing matches '{searchQuery}' yet..."</p>
+                        </div>
+                        <div className="space-y-3">
+                          <p className="text-[10px] text-accent font-black uppercase tracking-widest">Try trending instead</p>
+                          <div className="flex flex-wrap justify-center gap-2">
+                            {["Gift Guides", "Art Prints", "Minimalist"].map(tag => (
+                              <button
+                                key={tag}
+                                onClick={() => {
+                                  setSearchQuery(tag);
+                                  router.push(`/search?q=${encodeURIComponent(tag)}`);
+                                  setShowResults(false);
+                                }}
+                                className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-charcoal/40 animate-pulse">
+                        Scanning the workshop...
+                      </div>
+                    )}
+                  </div>
+
+                  {searchResults.length > 0 && (
+                    <div className="p-3 bg-primary/5 text-center">
+                      <button 
+                        onClick={handleSearch}
+                        className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
+                      >
+                        See All Results →
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

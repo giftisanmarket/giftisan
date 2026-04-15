@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
-import Image from "next/image";
+import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -35,7 +35,6 @@ import { updateOrderItemStatus, deleteProduct } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
 import { SalesChart } from "@/components/sales-chart";
-import { BespokeImage } from "@/components/bespoke-image";
 
 interface StudioClientProps {
   artisan: any;
@@ -145,7 +144,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
-                <Image src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
+                <BespokeImage src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
               </div>
               <div>
                 <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">Master Studio</p>
@@ -357,7 +356,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                     className="group relative bg-cream/30 rounded-[2.5rem] border border-primary/5 overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal"
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                      <BespokeImage src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
                       <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                         <button 
                           onClick={() => {
@@ -427,7 +426,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                 sales.map((item: any) => (
                   <div key={item.id} className="bg-white rounded-[2rem] border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-xl hover:shadow-primary/5 transition-all">
                     <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0">
-                      <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
+                      <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                     </div>
                     
                     <div className="flex-1 space-y-2 text-center md:text-left">
@@ -613,7 +612,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                       <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-cream shrink-0 border border-primary/5">
-                            <Image 
+                            <BespokeImage 
                               src={review.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user.name}`} 
                               alt={review.user.name} 
                               width={40} 
@@ -654,7 +653,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                       className="mt-auto pt-6 border-t border-primary/5 flex items-center gap-4 group/p"
                     >
                       <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-cream border border-primary/5 shadow-sm shrink-0">
-                        <Image src={review.product.images[0]} alt="" fill className="object-cover" />
+                        <BespokeImage src={review.product.images[0]} alt="" fill className="object-cover" />
                       </div>
                       <div>
                         <p className="text-[10px] text-primary/40 font-black uppercase tracking-widest mb-0.5 group-hover/p:text-accent transition-colors">Reviewed Item</p>
@@ -723,7 +722,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Item Information</h3>
                   <div className="flex gap-4">
                     <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm">
-                      <Image src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
+                      <BespokeImage src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
                     </div>
                     <div>
                       <p className="font-bold text-primary leading-tight">{selectedItem.product.name}</p>

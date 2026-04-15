@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-export function MessagesClient(props: { initialMessages: any[], userId: string }) {
+export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any }) {
   return (
     <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">Loading Inbox...</div>}>
       <MessagesContent {...props} />
@@ -18,7 +18,7 @@ export function MessagesClient(props: { initialMessages: any[], userId: string }
   );
 }
 
-function MessagesContent({ initialMessages, userId }: { initialMessages: any[], userId: string }) {
+function MessagesContent({ initialMessages, userId, targetUser }: { initialMessages: any[], userId: string, targetUser?: any }) {
   const [messages, setMessages] = useState(initialMessages);
   
   // Sync state with props when server revalidates
@@ -125,21 +125,39 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
 
   // Set initial selection
   useEffect(() => {
-    if (!selectedThreadKey && threads.length > 0) {
+    if (!selectedThreadKey) {
       if (targetUserId) {
         const threadToSelect = threads.find((t: any) => t.partner.id === targetUserId);
         if (threadToSelect) {
           setSelectedThreadKey(threadToSelect.key);
+          setIsMobileChatView(true);
+          return;
+        } else if (targetUser) {
+          // If a target user was passed but no thread exists, select the "ghost" thread
+          setSelectedThreadKey(`ghost-${targetUser.id}`);
+          setIsMobileChatView(true);
           return;
         }
       }
-      setSelectedThreadKey(threads[0].key);
+      
+      if (threads.length > 0) {
+        setSelectedThreadKey(threads[0].key);
+      }
     }
-  }, [threads, targetUserId, selectedThreadKey]);
+  }, [threads, targetUserId, selectedThreadKey, targetUser]);
 
-  const activeThread: any = useMemo(() => 
-    threads.find((t: any) => t.key === selectedThreadKey),
-  [threads, selectedThreadKey]);
+  const activeThread: any = useMemo(() => {
+    if (selectedThreadKey?.startsWith("ghost-") && targetUser) {
+      return {
+        key: selectedThreadKey,
+        partner: targetUser,
+        product: null,
+        messages: [],
+        lastMessage: { content: "Start a new conversation..." }
+      };
+    }
+    return threads.find((t: any) => t.key === selectedThreadKey);
+  }, [threads, selectedThreadKey, targetUser]);
   
   const [isMobileChatView, setIsMobileChatView] = useState(false);
 
@@ -175,9 +193,12 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
     
     setIsSending(true);
     try {
+      const isGhost = selectedThreadKey?.startsWith("ghost-");
+      const partnerId = isGhost ? selectedThreadKey?.split("ghost-")[1] : activeThread.partner.id;
+
       const res = await sendMessage(
         userId, 
-        activeThread.partner.id, 
+        partnerId, 
         reply.trim(), 
         activeThread.product?.id, 
         attachment || undefined
@@ -188,6 +209,13 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
         setReply("");
         setAttachment(null);
         toast.success("Message sent!");
+        
+        if (isGhost) {
+          // Calculate the new thread key to match what useMemo threads does
+          const newThreadKey = `${[userId, partnerId].sort().join("-")}-${activeThread.product?.id || "general"}`;
+          setSelectedThreadKey(newThreadKey);
+        }
+
         refreshUnreadCount();
       } else {
         toast.error(res.error || "Failed to send message");
@@ -210,49 +238,68 @@ function MessagesContent({ initialMessages, userId }: { initialMessages: any[], 
           <h1 className="text-3xl font-heading font-bold text-primary px-2">Your <span className="serif italic text-accent font-normal">Inbox</span></h1>
           
           <div className="space-y-3 max-h-[70vh] md:max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
-            {threads.length === 0 ? (
+            {threads.length === 0 && !selectedThreadKey?.startsWith("ghost-") ? (
               <div className="py-12 text-center bg-white rounded-3xl border border-primary/5">
                 <MessageSquare className="w-8 h-8 text-primary/10 mx-auto mb-3" />
                 <p className="text-xs font-bold text-primary/30 uppercase tracking-widest">No messages yet</p>
               </div>
             ) : (
-              threads.map((t: any) => (
-                <button
-                  key={t.key}
-                  onClick={() => {
-                    setSelectedThreadKey(t.key);
-                    setIsMobileChatView(true);
-                  }}
-                  className={cn(
-                    "w-full p-5 rounded-3xl border text-left transition-all group",
-                    selectedThreadKey === t.key 
-                      ? "bg-primary text-white border-primary shadow-xl shadow-primary/20" 
-                      : "bg-white border-primary/5 hover:border-accent/40 hover:bg-cream/50"
-                  )}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold text-primary">
-                      <Image src={t.partner.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.partner.name}`} alt={t.partner.name} fill className="object-cover" />
+              <>
+                {selectedThreadKey?.startsWith("ghost-") && targetUser && (
+                   <button
+                    key={selectedThreadKey}
+                    className="w-full p-5 rounded-3xl border text-left transition-all bg-primary text-white border-primary shadow-xl shadow-primary/20"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold">
+                        <Image src={targetUser.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${targetUser.name}`} alt={targetUser.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-white">
+                        <span className="text-xs font-bold truncate block">{targetUser.name}</span>
+                        <span className="text-[9px] font-black uppercase tracking-tight text-accent">New Circle</span>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                       <span className={cn(
-                        "text-xs font-bold truncate block",
-                        selectedThreadKey === t.key ? "text-white" : "text-primary"
-                      )}>{t.partner.name}</span>
-                      {t.product && (
+                    <p className="text-xs text-white/60">Start a new conversation...</p>
+                  </button>
+                )}
+                {threads.map((t: any) => (
+                  <button
+                    key={t.key}
+                    onClick={() => {
+                      setSelectedThreadKey(t.key);
+                      setIsMobileChatView(true);
+                    }}
+                    className={cn(
+                      "w-full p-5 rounded-3xl border text-left transition-all group",
+                      selectedThreadKey === t.key 
+                        ? "bg-primary text-white border-primary shadow-xl shadow-primary/20" 
+                        : "bg-white border-primary/5 hover:border-accent/40 hover:bg-cream/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold text-primary">
+                        <Image src={t.partner.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.partner.name}`} alt={t.partner.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
                         <span className={cn(
-                          "text-[9px] font-black uppercase tracking-tight truncate block",
-                          selectedThreadKey === t.key ? "text-accent" : "text-accent/60"
-                        )}>Re: {t.product.name}</span>
-                      )}
+                          "text-xs font-bold truncate block",
+                          selectedThreadKey === t.key ? "text-white" : "text-primary"
+                        )}>{t.partner.name}</span>
+                        {t.product && (
+                          <span className={cn(
+                            "text-[9px] font-black uppercase tracking-tight truncate block",
+                            selectedThreadKey === t.key ? "text-accent" : "text-accent/60"
+                          )}>Re: {t.product.name}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <p className={cn(
-                    "text-xs line-clamp-1",
-                    selectedThreadKey === t.key ? "text-white/60" : "text-charcoal/40"
-                  )}>{t.lastMessage.content || (t.lastMessage.attachment ? "Sent an attachment" : "")}</p>
-                </button>
-              ))
+                    <p className={cn(
+                      "text-xs line-clamp-1",
+                      selectedThreadKey === t.key ? "text-white/60" : "text-charcoal/40"
+                    )}>{t.lastMessage.content || (t.lastMessage.attachment ? "Sent an attachment" : "")}</p>
+                  </button>
+                ))}
+              </>
             )}
           </div>
         </div>

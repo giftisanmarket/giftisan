@@ -40,7 +40,7 @@ export function LoginClient() {
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-cream">
       {/* Visual Side */}
-      <div className="hidden lg:block relative overflow-hidden">
+      <div className="hidden lg:block relative overflow-hidden h-full">
         <BespokeImage 
           src="https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=2070&auto=format&fit=crop" 
           alt="Artisan workspace" 
@@ -186,7 +186,7 @@ export function LoginClient() {
             <div className="space-y-2">
               <div className="flex justify-between items-end mb-1">
                 <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Password</label>
-                <button type="button" className="text-xs font-bold text-accent hover:underline">Forgot password?</button>
+                <Link href="/forgot-password" className="text-xs font-bold text-accent hover:underline">Forgot password?</Link>
               </div>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors">

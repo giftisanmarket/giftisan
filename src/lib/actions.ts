@@ -7,8 +7,8 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail } from "@/lib/mail";
-import { generateVerificationToken } from "@/lib/tokens";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail } from "@/lib/mail";
+import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 
 export async function uploadImage(base64Data: string) {
   try {
@@ -137,6 +137,77 @@ export async function resendVerificationEmailAction(email: string) {
   } catch (error) {
     console.error("Resend verification error:", error);
     return { error: "Failed to resend verification email." };
+  }
+}
+
+export async function getUserInfo(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+      }
+    });
+    return user;
+  } catch (error) {
+    console.error("Get user info error:", error);
+    return null;
+  }
+}
+
+export async function sendPasswordResetEmailAction(email: string) {
+  try {
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { accounts: true }
+    });
+    if (!user) return { error: "If an account exists with this email, we've sent a reset link." };
+    
+    // Check if it's a social account (no password)
+    if (user.accounts.length > 0 && !user.password) {
+      return { error: "This account was created with Google. Please use Google Sign-in." };
+    }
+
+    const token = await generatePasswordResetToken(email);
+    const sent = await sendPasswordResetEmail(token.email, token.token);
+    if (!sent.success) {
+      return { error: "Mailing service is temporarily down. Please try again later." };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Password reset error:", error);
+    return { error: "Failed to send reset email." };
+  }
+}
+
+export async function resetPasswordAction(token: string, password: any) {
+  try {
+    const existingToken = await prisma.passwordResetToken.findUnique({ where: { token } });
+    if (!existingToken) return { error: "This link is invalid or has already been used." };
+    
+    const hasExpired = new Date(existingToken.expires) < new Date();
+    if (hasExpired) {
+      await prisma.passwordResetToken.delete({ where: { id: existingToken.id } });
+      return { error: "This link has expired. Please request a new one." };
+    }
+    
+    const user = await prisma.user.findUnique({ where: { email: existingToken.email } });
+    if (!user) return { error: "Something went wrong. User not found." };
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+    
+    await prisma.passwordResetToken.delete({ where: { id: existingToken.id } });
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return { error: "Failed to reset password." };
   }
 }
 

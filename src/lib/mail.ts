@@ -171,3 +171,31 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
     return { success: false, error };
   }
 };
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  const resetLink = `${process.env.NEXTAUTH_URL || 'https://www.giftisan.com'}/reset-password?token=${token}`;
+
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: email,
+      subject: 'Reset your Giftisan password',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff; border-radius: 20px;">
+          ${emailHeader}
+          <h1 style="color: #da7b5a; text-align: center; font-size: 24px;">Reset your password</h1>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.6; text-align: center;">We received a request to reset the password for your Giftisan account. Click the button below to choose a new password.</p>
+          <div style="margin: 40px 0; text-align: center;">
+            <a href="${resetLink}" style="background-color: #1a2c2c; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">Reset Password</a>
+          </div>
+          <p style="color: #9ca3af; font-size: 14px; text-align: center;">This link will expire in 1 hour.</p>
+          <p style="color: #9ca3af; font-size: 14px; text-align: center;">If you didn't request a password reset, you can safely ignore this email.</p>
+          <p style="color: #111827; font-weight: bold; text-align: center; margin-top: 40px;">The Giftisan Team</p>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { success: false, error };
+  }
+};

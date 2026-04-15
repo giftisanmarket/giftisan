@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
-import Image from "next/image";
+import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { Heart, SlidersHorizontal, ArrowLeft, ArrowUpDown, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -157,12 +157,12 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                     className="group block"
                   >
                   <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
-                    <Image
+                    <BespokeImage
                       src={product.images[0]}
                       alt={product.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-1000"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <button
                       onClick={(e) => {
@@ -193,7 +193,7 @@ export function CategoryClient({ slug, initialProducts }: CategoryClientProps) {
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-3">
-                      <p className="text-xl font-heading font-bold text-primary">${product.price}.00</p>
+                      <p className="text-xl font-heading font-bold text-primary">EGP {product.price}.00</p>
                       <div className="h-4 w-px bg-primary/10" />
                       <span className="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest">{product.category}</span>
                     </div>

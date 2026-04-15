@@ -35,6 +35,7 @@ export function BespokeImage({
           className
         )}
         onLoad={() => setIsLoading(false)}
+        sizes={props.sizes || (isFill ? "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" : undefined)}
         {...props}
       />
     </div>

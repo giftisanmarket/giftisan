@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
-import Image from "next/image";
+import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { 
   Package, 
@@ -41,7 +41,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                 <div className="relative w-32 h-32 mb-6 group">
                   <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                   <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
-                    <Image 
+                    <BespokeImage 
                       src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
                       alt={user.name} 
                       fill 
@@ -162,7 +162,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                           <div key={item.id} className="border-b last:border-0 border-primary/5 pb-8 last:pb-0">
                             <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-6 items-center">
                             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-inner bg-cream">
-                              <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
+                              <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                             </div>
                             <div className="flex-1">
                               <Link href={`/products/${item.product.slug || item.product.id}`} className="font-heading font-bold text-primary hover:text-accent transition-colors flex items-center gap-2 group">

@@ -184,7 +184,7 @@ export default function BecomeArtisanPage() {
                     type="text" 
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    placeholder="e.g. Kyoto, Japan / London, UK"
+                    placeholder="e.g. Maadi, Cairo / Alexandria, Egypt"
                     className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm active:scale-[0.99]"
                   />
                 </div>

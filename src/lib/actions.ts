@@ -69,7 +69,7 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
         data: {
           userId: user.id,
           bio: "A new artisan in the Giftisan community.",
-          location: "Global Studio",
+          location: "Artisan Member",
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
         },
       });
@@ -873,7 +873,7 @@ export async function promoteToArtisan(userId: string, studioData: any) {
         userId,
         studioName: studioData.studioName,
         bio: studioData.bio,
-        location: studioData.location || "Global Studio",
+        location: studioData.location || "Artisan Member",
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
       }
     });

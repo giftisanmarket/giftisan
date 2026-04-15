@@ -83,7 +83,7 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
             <p className="text-sm font-medium text-charcoal/80">
               "The quality of the handcrafted journal is better than anything I've found in high-end boutiques."
             </p>
-            <p className="text-xs font-bold text-accent mt-2">— Sarah J., London</p>
+            <p className="text-xs font-bold text-accent mt-2">— Nour E., Cairo</p>
           </div>
         </motion.div>
       </div>

@@ -516,7 +516,7 @@ export function Navbar() {
                 >
                   Join the Circle
                 </Link>
-                <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Global Artisan Community</p>
+                <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Homegrown Artisan Community</p>
               </>
             ) : (
               <button

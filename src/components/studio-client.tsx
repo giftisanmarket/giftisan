@@ -330,7 +330,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                               </div>
                               <div>
                                 <h4 className="text-2xl font-heading font-bold mb-1">{topViewed.name}</h4>
-                                <p className="text-white/40 text-sm font-medium">Accumulated {topViewed.views || 0} global impressions</p>
+                                <p className="text-white/40 text-sm font-medium">Accumulated {topViewed.views || 0} local visits</p>
                               </div>
                             </div>
                           );

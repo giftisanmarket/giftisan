@@ -200,7 +200,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           {[
             {
               title: "Direct from Artisans",
-              desc: "Support independent creators globally. Every purchase goes directly to the artist behind the work.",
+              desc: "Support independent local creators. Every purchase goes directly to the artist behind the work.",
               icon: Palette
             },
             {
@@ -311,7 +311,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <span className="text-xl font-heading font-bold text-primary">Giftisan</span>
           </div>
           <p className="text-charcoal/40 text-sm mb-4">
-            © 2026 Giftisan. Proudly Handcrafted in Egypt. All rights reserved.
+            © 2026 Giftisan. Proudly Handcrafted. All rights reserved.
           </p>
           <div className="flex justify-center gap-6">
             <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">Terms</Link>

@@ -26,7 +26,7 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
           </h1>
           
           <p className="text-base md:text-lg text-charcoal/70 max-w-lg leading-relaxed">
-            Discover a curated universe of handcrafted treasures, vintage finds, and personalized keepsakes from the world's most talented artisans.
+            Discover a curated collection of handcrafted treasures, vintage finds, and personalized keepsakes from our most talented local artisans.
           </p>
           
           <form 

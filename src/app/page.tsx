@@ -51,17 +51,17 @@ export default async function Home() {
 
   // Fetch real counts for the home page category grid
   const categoryNames = [
-    "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles", 
+    "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles",
     "Woodwork", "Wedding", "Personalized", "Art & Collectibles"
   ];
 
   const categoryCounts = await Promise.all(
     categoryNames.map(async (name) => {
       const count = await prisma.product.count({
-        where: { 
-          category: { 
-            equals: name, 
-            mode: 'insensitive' 
+        where: {
+          category: {
+            equals: name,
+            mode: 'insensitive'
           },
           artisan: {
             status: "APPROVED"

@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Giftisan | Premium Artisanal Marketplace",
-    description: "Discover unique handcrafted treasures from global artisans.",
+    description: "Discover unique handcrafted treasures from local artisans.",
     images: ["/hero.png"],
     creator: "@giftisan",
   },

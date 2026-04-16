@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/constants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://giftisan.com";
+  const baseUrl = SITE_URL;
 
   // Fetch real data from Prisma
   const [products, artisans] = await Promise.all([

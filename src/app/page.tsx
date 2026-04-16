@@ -4,9 +4,11 @@ import LandingPage from "@/components/landing-page";
 import { Metadata } from "next";
 import { auth } from "@/auth";
 
+import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+
 export const metadata: Metadata = {
-  title: "Giftisan | Premium Artisanal Marketplace",
-  description: "Discover Egypt's most unique handcrafted treasures, vintage finds, and personalized keepsakes. Connect directly with master artisans.",
+  title: `${SITE_NAME} | Premium Artisanal Marketplace`,
+  description: SITE_DESCRIPTION,
 };
 
 export default async function Home() {

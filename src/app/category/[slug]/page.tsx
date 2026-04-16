@@ -6,6 +6,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+import { SITE_URL } from "@/lib/constants";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
@@ -13,6 +15,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${categoryName} Treasures`,
     description: `Browse our curated collection of artisanal ${slug} handcrafted with passion by global makers.`,
+    alternates: {
+      canonical: `${SITE_URL}/category/${slug}`,
+    },
     openGraph: {
       title: `${categoryName} | Giftisan`,
       description: `Premium handcrafted ${slug} from independent artisans.`,

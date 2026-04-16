@@ -21,22 +21,27 @@ const ebGaramond = EB_Garamond({
   subsets: ["latin"],
 });
 
+import { SITE_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.giftisan.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Giftisan | Premium Artisanal Marketplace",
-    template: "%s | Giftisan"
+    default: `${SITE_NAME} | Premium Artisanal Marketplace`,
+    template: `%s | ${SITE_NAME}`
   },
-  description: "Discover unique handcrafted treasures, vintage finds, and personalized keepsakes. Elevate every gift-giving moment with professional artistry.",
+  description: SITE_DESCRIPTION,
   keywords: ["handcrafted", "artisanal", "vintage", "personalized gifts", "handmade jewelry", "bespoke stationery"],
   authors: [{ name: "Giftisan Team" }],
-  creator: "Giftisan",
+  creator: SITE_NAME,
   icons: {
     icon: "/icon.png",
   },
+  alternates: {
+    canonical: "./",
+  },
   twitter: {
     card: "summary_large_image",
-    title: "Giftisan | Premium Artisanal Marketplace",
+    title: `${SITE_NAME} | Premium Artisanal Marketplace`,
     description: "Discover unique handcrafted treasures from local artisans.",
     images: ["/hero.png"],
     creator: "@giftisan",
@@ -44,16 +49,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.giftisan.com",
-    siteName: "Giftisan",
-    title: "Giftisan | Premium Artisanal Marketplace",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | Premium Artisanal Marketplace`,
     description: "Discover the most unique handcrafted treasures, vintage finds, and personalized keepsakes.",
     images: [
       {
         url: "/hero.png",
         width: 1200,
         height: 630,
-        alt: "Giftisan Marketplace - Proudly Handcrafted with Heart",
+        alt: `${SITE_NAME} Marketplace - Proudly Handcrafted with Heart`,
       },
     ],
   },

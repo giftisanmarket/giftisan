@@ -1,5 +1,11 @@
 import { CategoriesClient } from "@/components/categories-client";
 import { prisma } from "@/lib/prisma";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Browse Categories",
+  description: "Explore our diverse range of artisanal categories, from handcrafted ceramics to bespoke jewelry.",
+};
 
 export const dynamic = "force-dynamic";
 

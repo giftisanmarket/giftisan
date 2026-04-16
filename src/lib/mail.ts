@@ -1,15 +1,17 @@
 import { Resend } from 'resend';
 
+import { SITE_URL } from './constants';
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const LOGO_URL = "https://www.giftisan.com/icon.png";
+const LOGO_URL = `${SITE_URL}/icon.png`;
 const SENDER = "Giftisan <support@giftisan.com>";
 
 const getBaseUrl = () => {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   if (process.env.NODE_ENV === "development") return "http://localhost:3000";
-  return "https://www.giftisan.com";
+  return SITE_URL;
 };
 
 const BASE_URL = getBaseUrl();

@@ -7,6 +7,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+import { SITE_URL } from "@/lib/constants";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   let product = await prisma.product.findFirst({
@@ -56,16 +58,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   if (!product) return { title: "Product Not Found" };
 
-  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `https://www.giftisan.com/api/image/product/${product.id}`;
+  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `${SITE_URL}/api/image/product/${product.id}`;
   const description = product.description.slice(0, 160);
-  const siteUrl = process.env.NEXTAUTH_URL || "https://www.giftisan.com";
 
   return {
     title: product.name,
     description: description,
     keywords: [product.name, product.category, "Handcrafted", "Giftisan"],
     alternates: {
-      canonical: `${siteUrl}/products/${product.slug || product.id}`,
+      canonical: `${SITE_URL}/products/${product.slug || product.id}`,
     },
     openGraph: {
       title: `${product.name} | Giftisan`,
@@ -128,7 +129,7 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  const siteUrl = process.env.NEXTAUTH_URL || "https://giftisan.com";
+  const baseUrl = SITE_URL;
 
   const relatedProducts = await prisma.product.findMany({
     where: { 
@@ -178,7 +179,7 @@ export default async function ProductPage({ params }: Props) {
     },
     "offers": {
       "@type": "Offer",
-      "url": `${siteUrl}/products/${product.slug || product.id}`,
+      "url": `${baseUrl}/products/${product.slug || product.id}`,
       "priceCurrency": "EGP",
       "price": product.price,
       "availability": "https://schema.org/InStock",
@@ -197,19 +198,19 @@ export default async function ProductPage({ params }: Props) {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": siteUrl
+        "item": baseUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": product.category,
-        "item": `${siteUrl}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
+        "item": `${baseUrl}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": product.name,
-        "item": `${siteUrl}/products/${product.slug || product.id}`
+        "item": `${baseUrl}/products/${product.slug || product.id}`
       }
     ]
   };

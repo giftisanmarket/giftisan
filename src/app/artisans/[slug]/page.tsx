@@ -60,6 +60,8 @@ async function getArtisanBySlug(slug: string) {
   } : null;
 }
 
+import { SITE_URL } from "@/lib/constants";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getArtisanBySlug(slug);
@@ -70,15 +72,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = artisan.bio || `Explore the handcrafted world of ${data.name}. Discover unique treasures made with passion.`;
   const keywords = [data.name, artisan.studioName, artisan.location, "Artisan", "Handmade", "Giftisan"].filter(Boolean) as string[];
   
-  const siteUrl = process.env.NEXTAUTH_URL || "https://www.giftisan.com";
-  const ogImage = artisan.bannerImage || artisan.avatar || `${siteUrl}/api/image/artisan/${artisan.id}`;
+  const ogImage = artisan.bannerImage || artisan.avatar || `${SITE_URL}/api/image/artisan/${artisan.id}`;
 
   return {
     title: `${data.name} Studio`,
     description: description.slice(0, 160),
     keywords,
     alternates: {
-      canonical: `${siteUrl}/artisans/${slug}`,
+      canonical: `${SITE_URL}/artisans/${slug}`,
     },
     openGraph: {
       title: `${data.name} | Master Artisan at Giftisan`,

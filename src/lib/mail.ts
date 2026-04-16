@@ -302,3 +302,42 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     return { success: false, error };
   }
 };
+
+export const sendInquiryNotification = async (name: string, email: string, message: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("\n--- 📧 DEV: NEW INQUIRY NOTIFICATION ---\nFrom:", name, "<", email, ">\nMessage:", message, "\n--------------------------------------\n");
+    return { success: true };
+  }
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: "support@giftisan.com",
+      subject: `New Inquiry: ${name} is reaching out | Giftisan`,
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px; text-align: center;">New Inquiry Received</h1>
+              
+              <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; margin-bottom: 25px;">
+                <p style="margin: 0 0 15px 0; color: #4b5563; font-size: 15px;"><strong>Name:</strong> ${name}</p>
+                <p style="margin: 0 0 15px 0; color: #4b5563; font-size: 15px;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 0; color: #4b5563; font-size: 15px; line-height: 1.6;"><strong>Message:</strong><br />${message}</p>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="mailto:${email}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Reply to Customer</a>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending inquiry notification:', error);
+    return { success: false, error };
+  }
+};

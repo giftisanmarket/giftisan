@@ -1,11 +1,11 @@
-import ComingSoon from "@/components/coming-soon";
+import LandingPage from "@/components/landing-page";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Coming Soon | Giftisan",
-  description: "Something exceptional is coming to Giftisan. Stay tuned for our grand opening.",
+  title: "Giftisan | Premium Artisanal Marketplace",
+  description: "Something exceptional is here at Giftisan. Explore our handcrafted collection.",
 };
 
 export default function Page() {
-  return <ComingSoon />;
+  return <LandingPage />;
 }

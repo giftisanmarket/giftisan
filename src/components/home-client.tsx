@@ -310,9 +310,13 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             </div>
             <span className="text-xl font-heading font-bold text-primary">Giftisan</span>
           </div>
-          <p className="text-charcoal/40 text-sm">
+          <p className="text-charcoal/40 text-sm mb-4">
             © 2026 Giftisan. Proudly Handcrafted in Egypt. All rights reserved.
           </p>
+          <div className="flex justify-center gap-6">
+            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">Terms</Link>
+            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">Privacy</Link>
+          </div>
         </div>
       </footer>
     </main>

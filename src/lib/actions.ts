@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 
 export async function uploadImage(base64Data: string) {
@@ -1271,5 +1271,23 @@ export async function deleteAccountAction(userId: string) {
   }
 }
 
+export async function submitInquiry(data: { name: string; email: string; message: string }) {
+  try {
+    const inquiry = await prisma.contactInquiry.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        message: data.message,
+      }
+    });
 
+    // Send notification email to support team
+    sendInquiryNotification(data.name, data.email, data.message)
+      .catch(err => console.error("Failed to send inquiry email:", err));
 
+    return { success: true, data: inquiry };
+  } catch (error: any) {
+    console.error("Inquiry submission error:", error);
+    return { success: false, error: "Failed to send message. Please try again later." };
+  }
+}

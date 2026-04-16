@@ -86,7 +86,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0 group">
-          <div className="relative w-10 h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-lg">
+          <div className="relative w-10 h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md">
             <Image
               src="/icon.png"
               alt="Giftisan Logo"

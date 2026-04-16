@@ -1,13 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import HomeClient from "@/components/home-client";
+import LandingPage from "@/components/landing-page";
 import { Metadata } from "next";
+import { auth } from "@/auth";
 
 export const metadata: Metadata = {
-  title: "Giftisan | Home of Handcrafted Treasures",
-  description: "Explore a curated collection of artisanal gifts, bespoke jewelry, and unique handcrafted items from the world's most talented creators.",
+  title: "Giftisan | Premium Artisanal Marketplace",
+  description: "Discover Egypt's most unique handcrafted treasures, vintage finds, and personalized keepsakes. Connect directly with master artisans.",
 };
 
 export default async function Home() {
+  const session = await auth();
+
+  // If user is not logged in, show the marketing landing page
+  if (!session) {
+    return <LandingPage />;
+  }
+
+  // If user is logged in, show the marketplace home page
   const products = await prisma.product.findMany({
     where: {
       artisan: {

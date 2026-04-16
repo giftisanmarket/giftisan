@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 
 export async function uploadImage(base64Data: string) {
@@ -987,10 +987,17 @@ export async function deleteUser(userId: string) {
 
 export async function updateArtisanStatus(artisanId: string, status: "PENDING" | "APPROVED" | "REJECTED") {
   try {
-    await prisma.artisanProfile.update({
+    const profile = await prisma.artisanProfile.update({
       where: { id: artisanId },
-      data: { status }
+      data: { status },
+      include: { user: true }
     });
+
+    if (status === "APPROVED" && profile.user.email) {
+      sendArtisanApprovalEmail(profile.user.email, profile.user.name || "Artisan")
+        .catch(err => console.error("Failed to send artisan approval email:", err));
+    }
+
     revalidatePath("/admin/users");
     revalidatePath("/");
     revalidatePath("/artisans");

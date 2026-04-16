@@ -341,3 +341,47 @@ export const sendInquiryNotification = async (name: string, email: string, messa
     return { success: false, error };
   }
 };
+
+export const sendArtisanApprovalEmail = async (email: string, name: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: ARTISAN APPROVAL EMAIL ---\nTarget: ${email}\nName: ${name}\n--------------------------------------\n`);
+    return { success: true };
+  }
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: email,
+      subject: 'Welcome to the Guild: Your Studio is Live! | Giftisan',
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 32px; margin-bottom: 20px;">Your Studio is Approved!</h1>
+              <p style="color: #4b5563; font-size: 17px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, our curators have reviewed your portfolio and we're thrilled to welcome you officially to the Giftisan Guild. Your studio is now live and ready to be discovered by collectors worldwide.</p>
+              
+              <div style="background-color: #f9fafb; padding: 30px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 40px;">
+                <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 15px;">Next steps for your journey:</p>
+                <ul style="text-align: left; color: #4b5563; font-size: 14px; margin-top: 15px; line-height: 2;">
+                  <li>Verify your inventory levels</li>
+                  <li>Complete your brand story in Studio Settings</li>
+                  <li>Share your link with your social community</li>
+                </ul>
+              </div>
+
+              <div style="margin: 40px 0;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Enter Your Studio</a>
+              </div>
+              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic;">We can't wait to see what you create.</p>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending artisan approval email:', error);
+    return { success: false, error };
+  }
+};

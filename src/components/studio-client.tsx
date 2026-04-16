@@ -26,7 +26,15 @@ import {
   MousePointer2,
   Percent,
   Sparkles,
-  Info
+  Info,
+  Globe,
+  LayoutGrid,
+  Share2,
+  Lock,
+  Coins,
+  ShieldCheck,
+  TrendingUp,
+  Megaphone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -44,7 +52,7 @@ interface StudioClientProps {
 
 export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics">("overview");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -57,6 +65,8 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   const [shippingItem, setShippingItem] = useState<any | null>(null);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
+  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
+  const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
 
   const handleDelete = async () => {
     if (!productToDelete) return;
@@ -78,6 +88,25 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
       setIsDeleting(null);
       setProductToDelete(null);
     }
+  };
+  
+  const handleJoinWaitlist = async () => {
+    setIsJoiningWaitlist(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setHasJoinedWaitlist(true);
+    setIsJoiningWaitlist(false);
+    
+    toast.success("You're on the list! We'll notify you when Phase 2 starts.", {
+      icon: <Sparkles className="w-5 h-5 text-accent" />,
+      style: {
+        borderRadius: '20px',
+        background: '#1a1a1a',
+        color: '#fff',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }
+    });
   };
 
   const products = artisan.products || [];
@@ -183,23 +212,41 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
             </motion.div>
           )}
 
-          {/* Pre-launch Artisan Notice */}
+          {/* Pro Studio Roadmap & Status */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-6 bg-accent/5 border border-accent/20 rounded-[2rem] flex flex-col md:flex-row items-center gap-6"
+            className="mb-8 p-6 bg-primary text-white rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-primary/20 relative overflow-hidden group"
           >
-            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/30 transition-all duration-1000" />
+            
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+              <ShieldCheck className="w-8 h-8 text-accent-light" />
             </div>
-            <div className="flex-1 text-center md:text-left">
-              <h3 className="text-lg font-heading font-black text-primary mb-1">Direct Orders are Live!</h3>
-              <p className="text-sm text-charcoal/60 leading-relaxed">
-                We're in soft-launch mode. While we finalize automated payments and shipping, you can already <span className="font-bold text-primary">receive manual orders directly in this dashboard</span>. Prepare your inventory and chat with buyers today!
+            
+            <div className="flex-1 text-center md:text-left relative z-10">
+              <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-2">
+                <h3 className="text-xl font-heading font-black">Pro Studio Founding Member</h3>
+                <span className="px-3 py-1 bg-accent rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-accent/20">
+                  Exclusive Launch Group
+                </span>
+              </div>
+              <p className="text-sm text-white/60 leading-relaxed max-w-2xl">
+                As a founding artisan, you have early access to the <span className="text-accent-light font-bold">Pro Studio Dashboard</span>. We are currently finalizing **automated payments and worldwide shipping** integrations to make your logistics hands-free.
               </p>
             </div>
-            <div className="px-6 py-2 bg-white rounded-full border border-accent/20 text-[10px] font-black uppercase tracking-widest text-accent">
-              Phase 1: Profile Prep
+
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="text-right hidden lg:block">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Marketing Status</p>
+                <p className="text-xs font-bold text-accent-light flex items-center gap-2 justify-end">
+                  <Megaphone className="w-3 h-3" /> Spotlight Ready
+                </p>
+              </div>
+              <div className="h-12 w-[1px] bg-white/10 hidden lg:block" />
+              <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-white">
+                Phase 1 Active
+              </div>
             </div>
           </motion.div>
 
@@ -231,20 +278,27 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
           <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
             {(
               [
-                { id: "overview", label: "Overview", icon: BarChart3 },
-                { id: "inventory", label: "Inventory", icon: ShoppingBag },
-                { id: "sales", label: "Sales", icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
-                { id: "reviews", label: "Community", icon: Star },
-              ] as { id: "overview" | "inventory" | "sales" | "reviews"; label: string; icon: any; badge?: number }[]
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group",
-                  activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
-                )}
-              >
+                  { id: "overview", label: "Overview", icon: BarChart3 },
+                  { id: "inventory", label: "Inventory", icon: ShoppingBag },
+                  { id: "sales", label: "Sales", icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+                  { id: "growth", label: "Studio Growth", icon: TrendingUp },
+                  { id: "logistics", label: "Logistics", icon: Truck },
+                  { id: "reviews", label: "Community", icon: Star },
+                ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0",
+                    activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
+                  )}
+                >
+                  {tab.id === "logistics" && (
+                    <div className="absolute -top-1 -right-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
+                      Soon
+                    </div>
+                  )}
                 {activeTab === tab.id && (
                   <motion.div
                     layoutId="activeTabPill"
@@ -649,6 +703,137 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                         </div>
                       ))
                     )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "growth" && (
+                <div className="space-y-12">
+                  <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
+                        <div className="max-w-2xl">
+                          <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-6">Studio <span className="serif italic font-normal text-accent">Marketing & Exposure</span></h2>
+                          <p className="text-charcoal/60 text-lg leading-relaxed">
+                            We don't just host your treasures; we actively find the collectors who love them. As a member of our exclusive launch group, your studio is prioritized for platform-wide exposure.
+                          </p>
+                        </div>
+                        <div className="p-8 bg-cream border border-primary/5 rounded-[2.5rem] shrink-0 text-center">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Marketing Priority</p>
+                          <p className="text-3xl font-heading font-bold text-primary">Top 1%</p>
+                          <p className="text-xs text-accent font-bold mt-1">Tier: Founding Artisan</p>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-8">
+                        <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+                          <Globe className="w-8 h-8 text-accent-light mb-6 group-hover:scale-110 transition-transform" />
+                          <h4 className="text-xl font-heading font-bold mb-2">Global Visibility</h4>
+                          <p className="text-white/60 text-sm leading-relaxed">Your studio is currently live to the global Giftisan community. SEO indexing is active.</p>
+                          <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent-light">
+                            <CheckCircle2 className="w-3 h-3" /> Status: Active
+                          </div>
+                        </div>
+
+                        <div className="p-8 bg-white border border-primary/5 rounded-[2.5rem] shadow-xl group">
+                          <LayoutGrid className="w-8 h-8 text-accent mb-6 group-hover:scale-110 transition-transform" />
+                          <h4 className="text-xl font-heading font-bold text-primary mb-2">Homepage Spotlight</h4>
+                          <p className="text-charcoal/60 text-sm leading-relaxed">Your studio is scheduled to be featured on our premium artisanal showcase soon.</p>
+                          <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/30">
+                            <Clock className="w-3 h-3 text-accent" /> Status: Queued
+                          </div>
+                        </div>
+
+                        <div className="p-8 bg-white border border-primary/5 rounded-[2.5rem] shadow-xl group">
+                          <Share2 className="w-8 h-8 text-accent mb-6 group-hover:scale-110 transition-transform" />
+                          <h4 className="text-xl font-heading font-bold text-primary mb-2">Social Push</h4>
+                          <p className="text-charcoal/60 text-sm leading-relaxed">Our content team is reviewing your top treasures for our upcoming creator spotlight.</p>
+                          <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/30">
+                            <Sparkles className="w-3 h-3 text-accent" /> Status: Curating
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-16 p-10 bg-accent/5 rounded-[3rem] border border-accent/20 flex flex-col md:flex-row items-center gap-10">
+                        <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center shrink-0 shadow-xl shadow-accent/20">
+                          <Megaphone className="w-10 h-10 text-white" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                          <h3 className="text-2xl font-heading font-bold text-primary mb-2">Boost Your Exposure</h3>
+                          <p className="text-charcoal/60 text-sm leading-relaxed">
+                            Studios with at least **5 high-resolution product photos** and a **detailed artisan story** get 300% more engagement. Update your profile to qualify for the next spotlight.
+                          </p>
+                        </div>
+                        <Link href="/studio/settings" className="px-10 h-14 bg-primary text-white font-bold rounded-full flex items-center gap-2 hover:bg-primary-light transition-all whitespace-nowrap">
+                          Optimize Profile
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "logistics" && (
+                <div className="space-y-12">
+                  <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 text-center relative overflow-hidden">
+                    <div className="relative z-10 max-w-2xl mx-auto py-20">
+                      <div className="w-24 h-24 bg-cream rounded-full flex items-center justify-center mx-auto mb-10 text-primary/20">
+                        <Lock className="w-12 h-12" />
+                      </div>
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/20 text-accent text-xs font-black uppercase tracking-[0.2em] mb-8 rounded-full">
+                        Phase 2: Pro Logistics
+                      </div>
+                      <h2 className="text-5xl font-heading font-bold text-primary mb-6">Hands-free <span className="serif italic">Fulfillment</span></h2>
+                      <p className="text-charcoal/40 text-lg leading-relaxed mb-12">
+                        We are currently integrating with local and international carriers to bring you **one-click shipping labels** and **automatic tracking**.
+                      </p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-left mb-12">
+                        {[
+                          { label: "Direct Payments", icon: Coins, desc: "EGP & International" },
+                          { label: "Smart Shipping", icon: Truck, desc: "One-click Labels" },
+                          { label: "Insured Transit", icon: ShieldCheck, desc: "Piece of mind" },
+                        ].map((item, i) => (
+                          <div key={i} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 opacity-60">
+                            <item.icon className="w-6 h-6 text-accent mb-4" />
+                            <p className="text-sm font-bold text-primary mb-1">{item.label}</p>
+                            <p className="text-[10px] text-charcoal/40 uppercase tracking-widest">{item.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                        <p className="relative z-10 font-bold mb-2">Want to test Phase 2 early?</p>
+                        <p className="relative z-10 text-white/40 text-sm mb-6">Join our beta testing group for integrated payments.</p>
+                        <button 
+                          onClick={handleJoinWaitlist}
+                          disabled={isJoiningWaitlist || hasJoinedWaitlist}
+                          className={cn(
+                            "relative z-10 px-8 h-12 font-bold rounded-full transition-all flex items-center gap-2 mx-auto",
+                            hasJoinedWaitlist 
+                              ? "bg-green-500 text-white cursor-default" 
+                              : "bg-white text-primary hover:bg-cream active:scale-95"
+                          )}
+                        >
+                          {isJoiningWaitlist ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                              Securing your spot...
+                            </>
+                          ) : hasJoinedWaitlist ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4" />
+                              You're on the Waitlist
+                            </>
+                          ) : (
+                            "Join Beta Waitlist"
+                          )}
+                        </button>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

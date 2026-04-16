@@ -293,7 +293,7 @@ export function Navbar() {
                     )}
                   >
                     <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", pathname === "/studio" ? "bg-white" : "bg-accent")} />
-                    Studio
+                    Pro Studio
                   </Link>
                 ) : (
                   <Link

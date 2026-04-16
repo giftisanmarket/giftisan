@@ -315,7 +315,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <p className="text-white font-bold text-lg md:text-xl leading-tight mb-2">&quot;Giftisan transformed my small hobby into a thriving global studio.&quot;</p>
-                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— Elena Rose, Master Ceramist</p>
+                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— Amira Hassan, Boutique Potter in Fustat</p>
                 </div>
               </div>
             </div>

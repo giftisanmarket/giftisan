@@ -31,8 +31,9 @@ export function ArtisanClient({ artisan }: { artisan: any }) {
   const feedbackScore = totalReviews > 0 ? Math.round((positiveReviewsCount / totalReviews) * 100) : 100;
   
   // Heuristic-based real numbers for sales and followers
-  const baseSales = products.reduce((acc: number, p: any) => acc + Math.max(1, 10 - (p.stock || 5)), 0);
-  const totalSales = baseSales + (new Date().getDate() % 10);
+  const totalSales = products.reduce((acc: number, p: any) => {
+    return acc + (p.orderItems?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0);
+  }, 0);
   const followersCount = Math.round(totalSales * 2.4 + (products.length * 8)) + (isFollowing ? 1 : 0);
   const yearsExp = (new Date().getFullYear() - new Date(artisan.createdAt).getFullYear()) + 1;
 

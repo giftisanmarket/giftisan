@@ -17,7 +17,8 @@ async function getArtisanBySlug(slug: string) {
     include: {
       products: {
         include: {
-          reviews: true
+          reviews: true,
+          orderItems: true
         }
       },
       user: true
@@ -42,7 +43,8 @@ async function getArtisanBySlug(slug: string) {
         include: {
           products: {
             include: {
-              reviews: true
+              reviews: true,
+              orderItems: true
             }
           },
           user: true

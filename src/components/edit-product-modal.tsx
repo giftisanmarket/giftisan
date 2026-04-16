@@ -12,9 +12,10 @@ interface EditProductModalProps {
   product: any;
   isOpen: boolean;
   onClose: () => void;
+  readOnly?: boolean;
 }
 
-export function EditProductModal({ product, isOpen, onClose }: EditProductModalProps) {
+export function EditProductModal({ product, isOpen, onClose, readOnly = false }: EditProductModalProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -145,7 +146,11 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm"
+                        disabled={readOnly}
+                        className={cn(
+                          "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+                          readOnly && "bg-cream/20 cursor-default"
+                        )}
                       />
                     </div>
 
@@ -157,7 +162,11 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                           required
                           value={formData.price}
                           onChange={(e) => setFormData({...formData, price: e.target.value})}
-                          className="w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm"
+                          disabled={readOnly}
+                          className={cn(
+                            "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+                            readOnly && "bg-cream/20 cursor-default"
+                          )}
                         />
                       </div>
                       <div className="space-y-2">
@@ -165,6 +174,7 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                         <CategoryDropdown 
                             value={formData.category} 
                             onChange={(val) => setFormData({...formData, category: val})} 
+                            disabled={readOnly}
                         />
                       </div>
                     </div>
@@ -175,7 +185,11 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                         required
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="w-full h-32 p-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none shadow-sm"
+                        disabled={readOnly}
+                        className={cn(
+                          "w-full h-32 p-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none shadow-sm",
+                          readOnly && "bg-cream/20 cursor-default"
+                        )}
                       />
                     </div>
                   </div>
@@ -231,73 +245,75 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                             </div>
                           )}
 
-                          <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
-                            <input 
-                              type="file" 
-                              accept="image/*,video/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    const dataUrl = reader.result as string;
-                                    
-                                    if (file.type.startsWith('video/')) {
-                                      // Handle Video
-                                      handleImageChange(idx, dataUrl);
-                                      const video = document.createElement('video');
-                                      video.src = dataUrl;
-                                      video.onloadedmetadata = () => {
-                                        setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
-                                      };
-                                    } else {
-                                      // Handle Image
-                                      const img = new (window as any).Image();
-                                      img.onload = () => {
-                                        const canvas = document.createElement('canvas');
-                                        let width = img.width;
-                                        let height = img.height;
-                                        
-                                        const MAX_SIZE = 1200;
-                                        if (width > height) {
-                                          if (width > MAX_SIZE) {
-                                            height *= MAX_SIZE / width;
-                                            width = MAX_SIZE;
+                          {!readOnly && (
+                            <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
+                              <input 
+                                type="file" 
+                                accept="image/*,video/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      const dataUrl = reader.result as string;
+                                      
+                                      if (file.type.startsWith('video/')) {
+                                        // Handle Video
+                                        handleImageChange(idx, dataUrl);
+                                        const video = document.createElement('video');
+                                        video.src = dataUrl;
+                                        video.onloadedmetadata = () => {
+                                          setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
+                                        };
+                                      } else {
+                                        // Handle Image
+                                        const img = new (window as any).Image();
+                                        img.onload = () => {
+                                          const canvas = document.createElement('canvas');
+                                          let width = img.width;
+                                          let height = img.height;
+                                          
+                                          const MAX_SIZE = 1200;
+                                          if (width > height) {
+                                            if (width > MAX_SIZE) {
+                                              height *= MAX_SIZE / width;
+                                              width = MAX_SIZE;
+                                            }
+                                          } else {
+                                            if (height > MAX_SIZE) {
+                                              width *= MAX_SIZE / height;
+                                              height = MAX_SIZE;
+                                            }
                                           }
-                                        } else {
-                                          if (height > MAX_SIZE) {
-                                            width *= MAX_SIZE / height;
-                                            height = MAX_SIZE;
-                                          }
-                                        }
-                                        
-                                        canvas.width = width;
-                                        canvas.height = height;
-                                        const ctx = canvas.getContext('2d');
-                                        ctx?.drawImage(img, 0, 0, width, height);
-                                        
-                                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                                        handleImageChange(idx, compressedDataUrl);
-                                        setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
-                                      };
-                                      img.src = dataUrl;
-                                    }
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                            <div className="px-4 py-2 bg-white text-primary text-[9px] font-black uppercase rounded-full shadow-lg">
-                              {img ? "Change" : "Upload"}
-                            </div>
-                          </label>
+                                          
+                                          canvas.width = width;
+                                          canvas.height = height;
+                                          const ctx = canvas.getContext('2d');
+                                          ctx?.drawImage(img, 0, 0, width, height);
+                                          
+                                          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                          handleImageChange(idx, compressedDataUrl);
+                                          setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
+                                        };
+                                        img.src = dataUrl;
+                                      }
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                              <div className="px-4 py-2 bg-white text-primary text-[9px] font-black uppercase rounded-full shadow-lg">
+                                {img ? "Change" : "Upload"}
+                              </div>
+                            </label>
+                          )}
                         </div>
                         <div className="flex justify-between items-center px-2">
                            <span className="text-[9px] font-black uppercase tracking-widest text-primary/20">
                              Slot {idx + 1}
                            </span>
-                           {img && (
+                           {img && !readOnly && (
                              <button 
                                type="button"
                                onClick={() => handleImageChange(idx, "")}
@@ -327,15 +343,20 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                           type="number" 
                           value={formData.stock}
                           onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                          className="w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm"
+                          disabled={readOnly}
+                          className={cn(
+                            "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+                            readOnly && "bg-cream/20 cursor-default"
+                          )}
                         />
                       </div>
                       <div className="flex items-center gap-3 p-4 bg-cream/10 rounded-xl border border-primary/5">
                         <input 
                           type="checkbox" 
                           id="edit-personalize"
+                          disabled={readOnly}
                           checked={formData.canPersonalize}
-                          onChange={(e) => setFormData({...formData, canPersonalize: e.target.checked})}
+                          onChange={(e) => !readOnly && setFormData({...formData, canPersonalize: e.target.checked})}
                           className="w-4 h-4 rounded text-accent focus:ring-accent"
                         />
                         <label htmlFor="edit-personalize" className="text-xs font-bold text-primary cursor-pointer">
@@ -350,7 +371,11 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
                         value={formData.badge}
                         onChange={(e) => setFormData({...formData, badge: e.target.value})}
                         placeholder="e.g. Best Seller"
-                        className="w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary"
+                        disabled={readOnly}
+                        className={cn(
+                          "w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary",
+                          readOnly && "cursor-default"
+                        )}
                       />
                     </div>
                   </div>
@@ -369,14 +394,23 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
-              >
-                {isLoading ? "Saving Changes..." : "Save Changes"}
-                <Save className="w-4 h-4" />
-              </button>
+              {readOnly ? (
+                <button 
+                  onClick={onClose}
+                  className="px-12 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20"
+                >
+                  Done Reviewing
+                </button>
+              ) : (
+                <button 
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isLoading ? "Saving Changes..." : "Save Changes"}
+                  <Save className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -385,7 +419,7 @@ export function EditProductModal({ product, isOpen, onClose }: EditProductModalP
   );
 }
 
-function CategoryDropdown({ value, onChange }: { value: string, onChange: (val: string) => void }) {
+function CategoryDropdown({ value, onChange, disabled = false }: { value: string, onChange: (val: string) => void, disabled?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const categories = ["Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"];
 
@@ -393,8 +427,11 @@ function CategoryDropdown({ value, onChange }: { value: string, onChange: (val: 
     <div className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary flex items-center justify-between group shadow-sm"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={cn(
+          "w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary flex items-center justify-between group shadow-sm",
+          disabled && "cursor-default"
+        )}
       >
         <span className="truncate">{value}</span>
         <motion.div

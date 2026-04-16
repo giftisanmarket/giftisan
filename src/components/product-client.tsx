@@ -35,9 +35,6 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
     return url.includes('video/upload') || url.match(/\.(mp4|webm|ogg|mov|quicktime)/i) || url.startsWith('data:video');
   };
   
-  useEffect(() => {
-    trackProductView(product.id);
-  }, [product.id]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

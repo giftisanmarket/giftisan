@@ -129,6 +129,12 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
+  // Count view on the server to prevent client-side double-counting
+  prisma.product.update({
+    where: { id: product.id },
+    data: { views: { increment: 1 } }
+  }).catch(err => console.error("Track view error:", err));
+
   const baseUrl = SITE_URL;
 
   const relatedProducts = await prisma.product.findMany({

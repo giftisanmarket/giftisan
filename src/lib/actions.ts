@@ -511,8 +511,12 @@ export async function getArtisanData(userId: string) {
       include: {
         products: {
           include: {
-            reviews: true,
-            favoritedBy: true
+            _count: {
+              select: {
+                reviews: true,
+                favoritedBy: true
+              }
+            }
           },
           orderBy: {
             createdAt: 'desc'
@@ -690,7 +694,8 @@ export async function getArtisanSales(artisanId: string) {
         order: {
           createdAt: 'desc'
         }
-      }
+      },
+      take: 50
     });
 
     return sales;
@@ -714,7 +719,8 @@ export async function getArtisanReviews(artisanId: string) {
       },
       orderBy: {
         createdAt: "desc"
-      }
+      },
+      take: 50
     });
 
     return reviews;
@@ -878,6 +884,10 @@ export async function promoteToArtisan(userId: string, studioData: any) {
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
       }
     });
+
+    revalidatePath("/studio");
+    revalidatePath("/become-artisan");
+    revalidatePath("/artisans");
 
     return { success: true };
   } catch (error) {

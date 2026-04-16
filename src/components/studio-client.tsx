@@ -34,7 +34,8 @@ import {
   Coins,
   ShieldCheck,
   TrendingUp,
-  Megaphone
+  Megaphone,
+  Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -48,12 +49,14 @@ interface StudioClientProps {
   artisan: any;
   sales: any[];
   reviews: any[];
+  isAdminPreview?: boolean;
 }
 
-export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
+export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }: StudioClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics">("overview");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [isSkipping, setIsSkipping] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -69,7 +72,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
 
   const handleDelete = async () => {
-    if (!productToDelete) return;
+    if (!productToDelete || isAdminPreview) return;
 
     setIsDeleting(productToDelete);
     const res = await deleteProduct(productToDelete);
@@ -91,6 +94,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   };
   
   const handleJoinWaitlist = async () => {
+    if (isAdminPreview) return;
     setIsJoiningWaitlist(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -110,8 +114,8 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
   };
 
   const products = artisan.products || [];
-  const totalFavorites = products.reduce((acc: number, p: any) => acc + (p.favoritedBy?.length || 0), 0);
-  const totalReviews = products.reduce((acc: number, p: any) => acc + (p.reviews?.length || 0), 0);
+  const totalFavorites = products.reduce((acc: number, p: any) => acc + (p._count?.favoritedBy || 0), 0);
+  const totalReviews = products.reduce((acc: number, p: any) => acc + (p._count?.reviews || 0), 0);
   const totalRevenue = sales.reduce((acc, sale) => acc + (sale.price * sale.quantity), 0);
   const totalViews = products.reduce((acc: number, p: any) => acc + (p.views || 0), 0);
   const conversionRate = totalViews > 0
@@ -266,10 +270,17 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
               </div>
 
               <div className="flex gap-4">
-                <Link href="/studio/settings" className="h-14 px-8 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Studio Settings
-                </Link>
+                {isAdminPreview ? (
+                  <div className="h-14 px-8 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/20 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-accent-light" />
+                    Read-only Auditor Access
+                  </div>
+                ) : (
+                  <Link href="/studio/settings" className="h-14 px-8 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Studio Settings
+                  </Link>
+                )}
               </div>
             </div>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
@@ -335,16 +346,34 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                 <div className="space-y-12">
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                      { label: "Total Impressions", value: totalViews.toLocaleString(), icon: MousePointer2, color: "bg-purple-500" },
-                      { label: "Community Loves", value: totalFavorites, icon: Heart, color: "bg-red-500" },
+                      { 
+                        label: "Total Impressions", 
+                        value: totalViews.toLocaleString(), 
+                        icon: MousePointer2, 
+                        color: "bg-purple-500",
+                        tooltip: "The total number of times your treasures have been viewed by collectors across the platform."
+                      },
+                      { 
+                        label: "Community Loves", 
+                        value: totalFavorites, 
+                        icon: Heart, 
+                        color: "bg-red-500",
+                        tooltip: "The total number of times collectors have added your treasures to their favorites list."
+                      },
                       {
-                        label: "Conversion Rate",
+                        label: "Sales Success",
                         value: `${conversionRate}%`,
                         icon: Percent,
                         color: "bg-indigo-500",
-                        tooltip: "The percentage of visitors who converted into collectors. A healthy rate is between 2% and 5%."
+                        tooltip: "Most people are just 'window shopping.' For every 100 visitors, having 2 to 5 buyers is the professional standard for a highly successful studio. If you're in this range, you're doing great!"
                       },
-                      { label: "Studio Revenue", value: `EGP ${totalRevenue.toLocaleString()}`, icon: BarChart3, color: "bg-green-500" },
+                      { 
+                        label: "Studio Revenue", 
+                        value: `EGP ${totalRevenue.toLocaleString()}`, 
+                        icon: BarChart3, 
+                        color: "bg-green-500",
+                        tooltip: "Your total lifetime earnings from treasures sold on Giftisan."
+                      },
                     ].map((stat, i) => (
                       <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
                         <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6", stat.color)}>
@@ -361,7 +390,25 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                             </>
                           )}
                         </div>
-                        <p className="text-3xl font-heading font-bold text-primary">{stat.value}</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-3xl font-heading font-bold text-primary">{stat.value}</p>
+                          {stat.label === "Sales Success" && (
+                            <span className={cn(
+                              "text-[8px] font-black uppercase px-2 py-0.5 rounded-full border",
+                              parseFloat(stat.value) === 0 ? "bg-cream text-primary/40 border-primary/5" :
+                              parseFloat(stat.value) < 2 ? "bg-blue-50 text-blue-600 border-blue-100" :
+                              parseFloat(stat.value) <= 5 ? "bg-green-50 text-green-600 border-green-100" :
+                              parseFloat(stat.value) <= 10 ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                              "bg-accent/10 text-accent border-accent/20"
+                            )}>
+                              {parseFloat(stat.value) === 0 ? "Building" :
+                               parseFloat(stat.value) < 2 ? "Rising" :
+                               parseFloat(stat.value) <= 5 ? "Healthy" :
+                               parseFloat(stat.value) <= 10 ? "Exceptional" :
+                               "Legendary"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -445,12 +492,18 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                       <h2 className="text-4xl font-heading font-bold text-primary">Studio <span className="serif italic font-normal text-accent">Inventory</span></h2>
                       <p className="text-charcoal/40 mt-1">Manage your storefront and handcrafted pieces</p>
                     </div>
-                    <Link
-                      href="/studio/new-product"
-                      className="h-14 px-10 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all flex items-center gap-2 shadow-xl shadow-accent/20"
-                    >
-                      <Plus className="w-5 h-5" /> Add New Treasure
-                    </Link>
+                    {!isAdminPreview ? (
+                      <Link
+                        href="/studio/new-product"
+                        className="h-14 px-10 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all flex items-center gap-2 shadow-xl shadow-accent/20"
+                      >
+                        <Plus className="w-5 h-5" /> Add New Treasure
+                      </Link>
+                    ) : (
+                      <div className="h-14 px-8 bg-primary text-white font-bold rounded-full flex items-center gap-2 shadow-xl">
+                        <Lock className="w-4 h-4" /> Management Locked
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
@@ -482,16 +535,21 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                                 }}
                                 className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
                               >
-                                <Edit2 className="w-5 h-5" />
+                                {isAdminPreview ? <Eye className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
                               </button>
-                              <button
-                                onClick={() => setProductToDelete(p.id)}
-                                disabled={isDeleting === p.id}
-                                className="w-12 h-12 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl disabled:opacity-50"
+                              {!isAdminPreview && (
+                                <button
+                                  onClick={() => setProductToDelete(p.id)}
+                                  disabled={isDeleting === p.id}
+                                  className="w-12 h-12 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl disabled:opacity-50"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              )}
+                              <Link 
+                                href={`/products/${p.slug || p.id}`} 
+                                className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
                               >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                              <Link href={`/products/${p.slug || p.id}`} className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl">
                                 <ArrowUpRight className="w-5 h-5" />
                               </Link>
                             </div>
@@ -512,7 +570,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                               <p className="text-2xl font-heading font-bold text-accent">EGP {p.price}.00</p>
                               <div className="flex items-center gap-2 text-xs font-bold text-primary/40">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span>{p.reviews?.length || 0} reviews</span>
+                                <span>{p._count?.reviews || 0} reviews</span>
                               </div>
                             </div>
                           </div>
@@ -927,6 +985,7 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                 setIsEditModalOpen(false);
                 setSelectedProductForEdit(null);
               }}
+              readOnly={isAdminPreview}
             />
           </div>
         )}
@@ -1132,16 +1191,33 @@ export function StudioClient({ artisan, sales, reviews }: StudioClientProps) {
                       }
                       setIsUpdating(null);
                     }}
-                    disabled={!carrier || !trackingNumber || isUpdating === shippingItem.id}
-                    className="w-full h-16 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary-light transition-all flex items-center justify-center disabled:opacity-50"
+                    disabled={isAdminPreview || !carrier || !trackingNumber || isUpdating === shippingItem.id || isSkipping === shippingItem.id}
+                    className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                   >
-                    {isUpdating === shippingItem.id ? "Updating..." : "Confirm & Mark as Shipped"}
+                    {isAdminPreview ? "Preview Only" : isUpdating === shippingItem.id ? "Saving..." : "Confirm Shipment"}
+                    {!isAdminPreview && <CheckCircle2 className="w-4 h-4" />}
                   </button>
                   <button
-                    onClick={() => setShippingItem(null)}
-                    className="w-full h-16 text-primary/40 font-bold hover:text-primary transition-colors"
+                    onClick={async () => {
+                      if (isAdminPreview) {
+                        setShippingItem(null);
+                        return;
+                      }
+                      setIsSkipping(shippingItem.id);
+                      const res = await updateOrderItemStatus(shippingItem.id, "SHIPPED");
+                      if (res.success) {
+                        toast.success("Marked as shipped!", {
+                          style: { borderRadius: '20px', background: '#1a4332', color: '#fff' }
+                        });
+                        setShippingItem(null);
+                        router.refresh();
+                      }
+                      setIsSkipping(null);
+                    }}
+                    disabled={isUpdating === shippingItem.id || isSkipping === shippingItem.id}
+                    className="w-full h-16 text-primary/40 font-bold hover:text-primary transition-colors disabled:opacity-50"
                   >
-                    Skip for now
+                    {isSkipping === shippingItem.id ? "Updating..." : "Skip for now"}
                   </button>
                 </div>
               </div>

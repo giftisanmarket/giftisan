@@ -1,6 +1,7 @@
 import { getAllUsers } from "@/lib/actions";
 import { User, Shield, Store, Trash2, Calendar, ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { VerifyArtisanButton } from "@/components/admin/verify-artisan-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
@@ -66,22 +67,32 @@ export default async function AdminUsersPage() {
                   </td>
                   <td className="px-6 md:px-8 py-4 md:py-6">
                     {user.artisanProfile ? (
-                      <div className="flex items-center gap-2 group/studio">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-accent/5 flex items-center justify-center">
-                          <Store className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
+                      <div className="flex items-center gap-3 md:gap-4 group/studio">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-accent/5 flex items-center justify-center shrink-0">
+                          <Store className="w-4 h-4 md:w-5 md:h-5 text-accent" />
                         </div>
-                        <div>
-                          <p className="text-[10px] md:text-xs font-bold text-primary group-hover/studio:text-accent transition-colors">
-                            {user.artisanProfile.studioName || `${user.name}'s Studio`}
-                          </p>
-                          <p className="text-[9px] text-charcoal/40 italic mb-2">
-                            {user.artisanProfile.location || "Global Studio"}
-                          </p>
-                          <VerifyArtisanButton 
-                            artisanId={user.artisanProfile.id} 
-                            currentStatus={user.artisanProfile.isVerified} 
-                            status={user.artisanProfile.status}
-                          />
+                        <div className="flex flex-col gap-3 min-w-0">
+                          <div className="space-y-1">
+                            <p className="font-bold text-primary text-sm truncate">
+                              {user.artisanProfile.studioName || `${user.name}'s Studio`}
+                            </p>
+                            <p className="text-[10px] text-charcoal/40 italic">
+                              {user.artisanProfile.location || "Global Studio"}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                             <Link 
+                               href={`/studio?artisanUserId=${user.id}`}
+                               className="h-8 md:h-9 px-4 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary-light transition-all active:scale-95 shadow-sm"
+                             >
+                               Preview Studio
+                             </Link>
+                             <VerifyArtisanButton 
+                               artisanId={user.artisanProfile.id} 
+                               currentStatus={user.artisanProfile.isVerified} 
+                               status={user.artisanProfile.status}
+                             />
+                          </div>
                         </div>
                       </div>
                     ) : (

@@ -68,12 +68,15 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream text-charcoal font-sans selection:bg-primary/20 overflow-x-hidden relative">
-      {/* Content Wrapper */}
-      <div className="relative z-10">
+    <div className="min-h-screen bg-cream text-charcoal font-sans selection:bg-primary/20 overflow-x-hidden">
+      {/* Texture Layer */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] -z-10" />
+      
+      {/* Decorative Grid Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
 
       {/* Floating Header */}
-      <nav className="fixed top-0 left-0 right-0 z-[200] p-4 md:p-6">
+      <nav className="fixed top-0 left-0 right-0 z-[60] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-xl border border-primary/5 rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 shadow-xl shadow-primary/5">
           <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden rounded-md shadow-sm">
@@ -122,7 +125,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="fixed inset-0 z-[150] bg-cream lg:hidden flex flex-col p-8 pt-40"
+            className="fixed inset-0 z-50 bg-cream lg:hidden flex flex-col p-8 pt-32"
           >
              <div className="flex flex-col gap-10 text-center">
                 <Link href="/search" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">Discover</Link>
@@ -194,13 +197,13 @@ export default function LandingPage() {
           >
             <Link 
               href="/search"
-              className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 group relative z-10"
+              className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 group"
             >
               Start Shopping <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
               href="/become-artisan"
-              className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-white text-primary border border-primary/10 font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 relative z-10"
+              className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-white text-primary border border-primary/10 font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95"
             >
               Open Your Studio <Store className="w-5 h-5" />
             </Link>
@@ -456,11 +459,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-      </div>
-
-      {/* Decorative Layers at the Bottom */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] z-0" />
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none z-0" />
     </div>
   );
 }

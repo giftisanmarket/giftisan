@@ -34,11 +34,11 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    
-    const res = await updateArtisanProfile(artisan.userId, { 
-      studioName, 
-      bio, 
-      location, 
+
+    const res = await updateArtisanProfile(artisan.userId, {
+      studioName,
+      bio,
+      location,
       avatar,
       slug,
       instagram,
@@ -49,10 +49,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
       brandColor,
       bannerImage
     });
-    
+
     if (res.success) {
       // Sync names if applicable
-      await update({ image: avatar }); 
+      await update({ image: avatar });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       router.refresh();
@@ -89,14 +89,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
       <AnimatePresence>
         {showSuccess && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
-               <Check className="w-5 h-5" />
+              <Check className="w-5 h-5" />
             </div>
             <div>
               <p className="text-sm font-black uppercase tracking-widest leading-none">Studio Updated</p>
@@ -106,14 +106,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         )}
 
         {errorStatus && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-red-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-red-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg">
-               <AlertCircle className="w-5 h-5" />
+              <AlertCircle className="w-5 h-5" />
             </div>
             <div>
               <p className="text-sm font-black uppercase tracking-widest leading-none">Update Failed</p>
@@ -129,11 +129,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             <button
               key={item.label}
               onClick={() => setActiveSettingsTab(item.label)}
-              className={`flex items-center gap-3 px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 active:scale-95 ${
-                activeSettingsTab === item.label
-                  ? "bg-primary text-white shadow-xl shadow-primary/20" 
+              className={`flex items-center gap-3 px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 active:scale-95 ${activeSettingsTab === item.label
+                  ? "bg-primary text-white shadow-xl shadow-primary/20"
                   : "text-charcoal/40 hover:bg-primary/5 hover:text-primary bg-white border border-primary/5 md:border-transparent md:bg-transparent"
-              }`}
+                }`}
             >
               <item.icon className={cn("w-4 h-4 md:w-5 md:h-5 transition-transform", activeSettingsTab === item.label ? "scale-110" : "group-hover:scale-110")} />
               <span className="text-xs md:text-base">{item.label}</span>
@@ -144,19 +143,19 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         <div className="min-h-[600px]">
           <AnimatePresence mode="wait">
             {activeSettingsTab === "Brand Styling" ? (
-              <motion.form 
+              <motion.form
                 key="branding"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                onSubmit={handleSave} 
+                onSubmit={handleSave}
                 className="bg-white p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-8 md:space-y-10"
               >
                 <div className="space-y-10 md:space-y-12">
                   <div className="space-y-5 md:space-y-6">
                     <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
                     <p className="text-charcoal/40 text-xs">Choose a brand color for your studio profile accents.</p>
-                    
+
                     <div className="flex flex-wrap gap-2.5 md:gap-4">
                       {["#da7b5a", "#1a4332", "#4a90e2", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"].map((color) => (
                         <button
@@ -178,15 +177,15 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   <div className="space-y-5 md:space-y-6">
                     <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Studio <span className="serif italic">Banner</span></h3>
                     <p className="text-charcoal/40 text-xs">Upload a banner image that reflects your craft.</p>
-                    
-                    <div 
+
+                    <div
                       className="relative w-full h-28 md:h-48 rounded-xl md:rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden active:scale-[0.99]"
                     >
                       {bannerImage ? (
                         <>
                           <Image src={bannerImage} alt="Banner" fill className="object-cover" />
                           <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                             <Camera className="w-8 h-8 text-white" />
+                            <Camera className="w-8 h-8 text-white" />
                           </div>
                         </>
                       ) : (
@@ -197,8 +196,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                           <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest px-4">Select Banner</p>
                         </>
                       )}
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept="image/*"
                         className="absolute inset-0 opacity-0 cursor-pointer"
                         onChange={(e) => {
@@ -219,14 +218,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                       Preview Theme
                     </h4>
                     <div className="flex gap-2">
-                       <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button</div>
-                       <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline</div>
+                      <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button</div>
+                      <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6 md:pt-8 border-t border-primary/5 flex">
-                  <button 
+                  <button
                     type="submit"
                     disabled={isSaving}
                     className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base active:scale-95"
@@ -237,26 +236,26 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 </div>
               </motion.form>
             ) : activeSettingsTab === "Studio Profile" ? (
-              <motion.form 
+              <motion.form
                 key="profile"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                onSubmit={handleSave} 
+                onSubmit={handleSave}
                 className="bg-white p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-primary/5 shadow-2xl space-y-6 md:space-y-10"
               >
                 <div className="space-y-8">
                   <div className="flex items-center gap-6">
                     <div className="relative group">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                        <Image 
-                          src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`} 
-                          alt="" fill className="object-cover" 
+                        <Image
+                          src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`}
+                          alt="" fill className="object-cover"
                         />
                       </div>
                       <label className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white">
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
@@ -282,8 +281,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Name</label>
                       <div className="relative">
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><User className="w-4 h-4" /></span>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={studioName || ""}
                           onChange={(e) => setStudioName(e.target.value)}
                           className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -294,13 +293,13 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4 flex items-center gap-2">
-                        Studio URL Slug 
+                        Studio URL Slug
                         <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">Permanent Link</span>
                       </label>
                       <div className="relative">
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={slug || ""}
                           onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/ /g, "-"))}
                           className="w-full h-16 pl-12 pr-8 rounded-2xl bg-white border-2 border-primary/5 focus:border-accent transition-all font-bold text-accent placeholder:text-primary/20"
@@ -314,7 +313,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Artisan Bio</label>
-                      <textarea 
+                      <textarea
                         value={bio || ""}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full h-32 p-8 rounded-[2rem] bg-cream/30 border border-primary/5 transition-all font-medium text-primary focus:outline-none focus:border-accent resize-none placeholder:text-primary/40"
@@ -327,8 +326,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Location</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaLocationDot className="w-4 h-4" /></span>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={location || ""}
                             onChange={(e) => setLocation(e.target.value)}
                             className="w-full h-14 md:h-16 pl-12 pr-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
@@ -350,8 +349,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Instagram Username</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={instagram || ""}
                             onChange={(e) => setInstagram(e.target.value)}
                             className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -363,8 +362,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Portfolio / Website</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
-                          <input 
-                            type="url" 
+                          <input
+                            type="url"
                             value={website || ""}
                             onChange={(e) => setWebsite(e.target.value)}
                             className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -379,8 +378,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">TikTok Handle</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={tiktok || ""}
                             onChange={(e) => setTiktok(e.target.value)}
                             className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -392,8 +391,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Facebook Profile</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={facebook || ""}
                             onChange={(e) => setFacebook(e.target.value)}
                             className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -408,8 +407,8 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Pinterest Username</label>
                         <div className="relative">
                           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={pinterest || ""}
                             onChange={(e) => setPinterest(e.target.value)}
                             className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -422,7 +421,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 </div>
 
                 <div className="pt-8 border-t border-primary/5 flex">
-                  <button 
+                  <button
                     type="submit"
                     disabled={isSaving}
                     className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-base"
@@ -433,7 +432,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 </div>
               </motion.form>
             ) : (
-              <motion.div 
+              <motion.div
                 key="coming-soon"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -449,7 +448,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   <h3 className="text-3xl font-heading font-bold text-primary">Coming Soon</h3>
                   <p className="text-charcoal/40 max-w-sm">We're building premium {activeSettingsTab.toLowerCase()} tools to help you grow your artisan brand.</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setActiveSettingsTab("Studio Profile")}
                   className="px-8 h-12 bg-primary/5 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-all"
                 >

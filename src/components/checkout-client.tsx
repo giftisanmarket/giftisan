@@ -109,7 +109,7 @@ export function CheckoutClient() {
                 <Lock className="w-5 h-5 text-accent-light" />
                 Order Summary
               </h2>
-              
+
               <div className="space-y-4 md:space-y-5 mb-8 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
                 {cart.map((item) => (
                   <div key={item.id + (item.personalization || "")} className="animate-in slide-in-from-right-4 duration-300">
@@ -149,7 +149,7 @@ export function CheckoutClient() {
               </div>
 
               <div className="mt-8 md:mt-10 space-y-6">
-                <button 
+                <button
                   onClick={handlePurchase}
                   disabled={isProcessing}
                   className="w-full h-14 md:h-16 bg-white text-primary font-bold rounded-xl md:rounded-2xl hover:bg-cream transition-all flex items-center justify-center shadow-xl text-base md:text-lg group disabled:opacity-50 active:scale-95 duration-200"
@@ -184,65 +184,65 @@ export function CheckoutClient() {
                 <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">First Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="Jane" 
+                    <input
+                      type="text"
+                      placeholder="Jane"
                       value={shippingData.firstName}
                       onChange={(e) => updateShippingField("firstName", e.target.value)}
-                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Last Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="Doe" 
+                    <input
+                      type="text"
+                      placeholder="Doe"
                       value={shippingData.lastName}
                       onChange={(e) => updateShippingField("lastName", e.target.value)}
-                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Shipping Address</label>
-                  <input 
-                    type="text" 
-                    placeholder="Street address and apartment number" 
+                  <input
+                    type="text"
+                    placeholder="Street address and apartment number"
                     value={shippingData.address}
                     onChange={(e) => updateShippingField("address", e.target.value)}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                   />
                 </div>
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6">
                   <div className="space-y-2 lg:col-span-2">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">City</label>
-                    <input 
-                      type="text" 
-                      placeholder="Cairo" 
+                    <input
+                      type="text"
+                      placeholder="Cairo"
                       value={shippingData.city}
                       onChange={(e) => updateShippingField("city", e.target.value)}
-                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Postal Code (Optional)</label>
-                    <input 
-                      type="text" 
-                      placeholder="11511" 
+                    <input
+                      type="text"
+                      placeholder="11511"
                       value={shippingData.zip}
                       onChange={(e) => updateShippingField("zip", e.target.value)}
-                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder="+20 100 000 0000" 
+                  <input
+                    type="tel"
+                    placeholder="+20 100 000 0000"
                     value={shippingData.phone}
                     onChange={(e) => updateShippingField("phone", e.target.value)}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base" 
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                   />
                 </div>
 

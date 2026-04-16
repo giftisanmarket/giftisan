@@ -24,10 +24,10 @@ const ebGaramond = EB_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.giftisan.com"),
   title: {
-    default: "Giftisan | Egypt's Premium Artisanal Marketplace",
+    default: "Giftisan | Premium Artisanal Marketplace",
     template: "%s | Giftisan"
   },
-  description: "Discover Egypt's most unique handcrafted treasures, vintage finds, and personalized keepsakes. Elevate every gift-giving moment with Egyptian artistry.",
+  description: "Discover unique handcrafted treasures, vintage finds, and personalized keepsakes. Elevate every gift-giving moment with professional artistry.",
   keywords: ["handcrafted", "artisanal", "vintage", "personalized gifts", "handmade jewelry", "bespoke stationery"],
   authors: [{ name: "Giftisan Team" }],
   creator: "Giftisan",
@@ -46,14 +46,14 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://www.giftisan.com",
     siteName: "Giftisan",
-    title: "Giftisan | Egypt's Premium Artisanal Marketplace",
-    description: "Discover Egypt's most unique handcrafted treasures, vintage finds, and personalized keepsakes. Prices in EGP.",
+    title: "Giftisan | Premium Artisanal Marketplace",
+    description: "Discover the most unique handcrafted treasures, vintage finds, and personalized keepsakes.",
     images: [
       {
         url: "/hero.png",
         width: 1200,
         height: 630,
-        alt: "Giftisan Marketplace - Proudly Handcrafted in Egypt",
+        alt: "Giftisan Marketplace - Proudly Handcrafted with Heart",
       },
     ],
   },

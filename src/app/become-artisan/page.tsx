@@ -33,7 +33,7 @@ export default function BecomeArtisanPage() {
         <div className="container mx-auto px-4 py-32 text-center">
           <h1 className="text-4xl font-heading font-bold text-primary mb-6">Join our Artisan Circle</h1>
           <p className="text-charcoal/60 mb-8 max-w-md mx-auto">You must be signed in to open your studio and share your treasures with the world.</p>
-          <button 
+          <button
             onClick={() => router.push("/login?callbackUrl=/become-artisan")}
             className="px-10 h-14 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20"
           >
@@ -100,18 +100,18 @@ export default function BecomeArtisanPage() {
     <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
       <AnimatePresence mode="wait">
         {isLoading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-cream/90 backdrop-blur-xl flex flex-col items-center justify-center text-center p-6"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 scale: [1, 1.1, 1],
                 rotate: [0, 5, -5, 0]
               }}
-              transition={{ 
+              transition={{
                 duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
@@ -120,7 +120,7 @@ export default function BecomeArtisanPage() {
             >
               <Store className="w-12 h-12 text-white" />
             </motion.div>
-            
+
             <h2 className="text-3xl font-heading font-bold text-primary mb-4">Curating Your Studio</h2>
             <div className="flex items-center gap-2 text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">
               <motion.div
@@ -138,7 +138,7 @@ export default function BecomeArtisanPage() {
 
       <div className="container mx-auto px-4 pt-24 md:pt-32 max-w-4xl">
         <div className="text-center mb-10 md:mb-16">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6"
@@ -155,7 +155,7 @@ export default function BecomeArtisanPage() {
         <div className="grid lg:grid-cols-12 gap-12">
           {/* Form */}
           <div className="lg:col-span-12">
-            <motion.form 
+            <motion.form
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={handleSubmit}
@@ -166,11 +166,11 @@ export default function BecomeArtisanPage() {
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <Store className="w-3 h-3" /> Studio Name *
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     value={formData.studioName}
-                    onChange={(e) => setFormData({...formData, studioName: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, studioName: e.target.value })}
                     placeholder="e.g. The Midnight Potter"
                     className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm active:scale-[0.99]"
                   />
@@ -180,10 +180,10 @@ export default function BecomeArtisanPage() {
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <MapPin className="w-3 h-3" /> Location
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="e.g. Maadi, Cairo / Alexandria, Egypt"
                     className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm active:scale-[0.99]"
                   />
@@ -193,10 +193,10 @@ export default function BecomeArtisanPage() {
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <AlignLeft className="w-3 h-3" /> Your Story (Bio) *
                   </label>
-                  <textarea 
+                  <textarea
                     required
                     value={formData.bio}
-                    onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     placeholder="Tell our community about your craft and inspiration..."
                     className="w-full h-32 md:h-40 p-5 md:p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none shadow-sm text-sm active:scale-[0.99]"
                   />
@@ -210,7 +210,7 @@ export default function BecomeArtisanPage() {
               )}
 
               <div className="pt-6 md:pt-8 flex flex-col items-center gap-6">
-                <button 
+                <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base md:text-lg active:scale-95 group"

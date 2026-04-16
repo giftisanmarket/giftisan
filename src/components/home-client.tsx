@@ -3,10 +3,10 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import Link from "next/link";
-import { 
-  Heart, ArrowRight, CheckCircle2, 
-  Leaf, Trophy, Palette, 
-  Gem, PencilLine, Radio, 
+import {
+  Heart, ArrowRight, CheckCircle2,
+  Leaf, Trophy, Palette,
+  Gem, PencilLine, Radio,
   Scissors, Hammer, Shapes,
   Sparkles, ShoppingBag
 } from "lucide-react";
@@ -59,8 +59,8 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <h2 className="text-3xl font-heading font-bold text-primary italic serif">Treasures of the Week</h2>
             <p className="text-charcoal/60 mt-2">Curated by our expert artisans for the perfect gift.</p>
           </div>
-          <Link 
-            href="/search" 
+          <Link
+            href="/search"
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
             Shop All Collections
@@ -88,7 +88,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                       {product.badge}
                     </div>
                   )}
-                  
+
                   {/* Actions Layer */}
                   <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
                     <button
@@ -106,7 +106,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     >
                       <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -149,8 +149,8 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <h2 className="text-3xl font-heading font-bold text-primary">Browse by Category</h2>
             <p className="text-charcoal/60 mt-2">Find the perfect gift for every personality</p>
           </div>
-          <Link 
-            href="/categories" 
+          <Link
+            href="/categories"
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
             View All Categories
@@ -241,7 +241,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         <div className="relative">
           <div className="flex gap-8 px-4 pt-4 overflow-x-auto pb-8 snap-x no-scrollbar">
             {artisans.map((artisan, idx) => (
-              <motion.div 
+              <motion.div
                 key={artisan.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -256,7 +256,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                         <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover" />
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-2xl font-heading font-bold text-primary">{artisan.studioName || artisan.user.name}</h3>
                       {artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent" />}
@@ -265,7 +265,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     <p className="text-charcoal/60 text-sm leading-relaxed mb-8 flex-1 italic group-hover:text-charcoal transition-colors">
                       "{artisan.bio}"
                     </p>
-                    
+
                     <div className="pt-6 border-t border-primary/5 flex items-center justify-between">
                       <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Master Artisan</span>
                       <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
@@ -300,10 +300,10 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="relative w-8 h-8 overflow-hidden rounded-lg">
-              <BespokeImage 
-                src="/icon.png" 
-                alt="Giftisan Logo" 
-                fill 
+              <BespokeImage
+                src="/icon.png"
+                alt="Giftisan Logo"
+                fill
                 className="object-cover"
                 sizes="32px"
               />

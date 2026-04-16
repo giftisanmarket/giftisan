@@ -81,7 +81,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-bold text-primary text-xl mb-1">Our Role</h3>
                   <p className="text-charcoal/60 font-medium leading-relaxed">
-                    Giftisan acts as a curated middle-ground. We don&apos;t have a physical showroom yet, as we focus on empowering artisans in their own studios across Egypt.
+                    Giftisan acts as a curated middle-ground. We don&apos;t have a physical showroom yet, as we focus on empowering artisans in their own studios everywhere.
                   </p>
                 </div>
               </div>

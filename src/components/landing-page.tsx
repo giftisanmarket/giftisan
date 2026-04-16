@@ -70,10 +70,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-cream text-charcoal font-sans selection:bg-primary/20 overflow-x-hidden">
       {/* Texture Layer */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] z-50" />
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] -z-10" />
       
       {/* Decorative Grid Background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
 
       {/* Floating Header */}
       <nav className="fixed top-0 left-0 right-0 z-[60] p-4 md:p-6">
@@ -157,7 +157,7 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* Hero Section */}
-      <section className="relative pt-40 md:pt-32 pb-20 px-4 md:px-6 min-h-[95vh] flex flex-col items-center justify-center text-center">
+      <section className="relative z-10 pt-40 md:pt-32 pb-20 px-4 md:px-6 min-h-[95vh] flex flex-col items-center justify-center text-center">
         <motion.div style={{ opacity }} className="max-w-6xl z-10 w-full">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
@@ -166,7 +166,7 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full mb-6 md:mb-10"
           >
             <Sparkles className="w-4 h-4 fill-accent" />
-            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-balance">Proudly Handcrafted in Egypt</span>
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-balance">Proudly Handcrafted with Soul</span>
           </motion.div>
 
           <motion.h1 
@@ -186,7 +186,7 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Discover a curated world of high-end artisanal treasures. We connect Egypt&apos;s most skilled creators with collectors who value soul over speed.
+            Discover a curated world of high-end artisanal treasures. We connect the world&apos;s most skilled creators with collectors who value soul over speed.
           </motion.p>
 
           <motion.div 
@@ -232,16 +232,16 @@ export default function LandingPage() {
       </section>
 
       {/* How it Works Section */}
-      <section className="py-24 md:py-32 px-6 border-y border-primary/5 bg-white/30 backdrop-blur-sm">
+      <section className="relative z-10 py-24 md:py-32 px-6 border-y border-primary/5 bg-white/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto text-center">
             <FadeInView>
               <h2 className="text-4xl md:text-6xl font-heading font-black text-primary mb-20 md:mb-32 tracking-tight">The Giftisan <span className="serif italic text-accent font-normal">Journey</span>.</h2>
             </FadeInView>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12 lg:gap-24">
               {[
-                { step: "01", title: "Discover", desc: "Browse a hand-vetted collection of the finest handcrafted items from across Egypt." },
+                { step: "01", title: "Discover", desc: "Browse a hand-vetted collection of the finest handcrafted items from around the world." },
                 { step: "02", title: "Connect", desc: "Interact directly with artisans to personalize your request or hear their story." },
-                { step: "03", title: "Cherish", desc: "Receive a piece of art that carries a story, a soul, and a piece of Egyptian heritage." }
+                { step: "03", title: "Cherish", desc: "Receive a piece of art that carries a story, a soul, and a piece of timeless heritage." }
               ].map((item, i) => (
                 <FadeInView key={i} delay={i * 0.1}>
                   <div className="flex flex-col items-center group">
@@ -261,7 +261,7 @@ export default function LandingPage() {
       </section>
 
       {/* For Artisans Section */}
-      <section id="artisans" className="py-24 md:py-40 px-6 bg-primary text-cream relative overflow-hidden">
+      <section id="artisans" className="relative z-10 py-24 md:py-40 px-6 bg-primary text-cream overflow-hidden">
         {/* Background Accent */}
         <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
         
@@ -275,7 +275,7 @@ export default function LandingPage() {
               Scale Your <br /> <span className="serif italic text-accent-light font-normal text-6xl md:text-9xl">Craft.</span>
             </h2>
             <p className="text-lg md:text-2xl text-white/70 mb-14 font-medium leading-relaxed">
-              Stop fighting algorithms on mass-market platforms. Giftisan is designed specifically for Egypt&apos;s master artisans who demand excellence.
+              Stop fighting algorithms on mass-market platforms. Giftisan is designed specifically for master artisans who demand excellence.
             </p>
             
             <div className="grid sm:grid-cols-2 gap-10 md:gap-12 mb-16">
@@ -315,7 +315,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <p className="text-white font-bold text-lg md:text-xl leading-tight mb-2">&quot;Giftisan transformed my small hobby into a thriving global studio.&quot;</p>
-                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— Amira Hassan, Boutique Potter in Fustat</p>
+                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— Amira Hassan, Boutique Studio Potter</p>
                 </div>
               </div>
             </div>
@@ -324,7 +324,7 @@ export default function LandingPage() {
       </section>
 
       {/* For Buyers Section */}
-      <section id="buyers" className="py-24 md:py-40 px-6">
+      <section id="buyers" className="relative z-10 py-24 md:py-40 px-6">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <FadeInView>
             <div className="text-center max-w-3xl mx-auto mb-20 md:mb-32">
@@ -368,7 +368,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Grid / Trust */}
-      <section className="py-24 md:py-40 px-6 border-y border-primary/5 bg-primary/[0.01]">
+      <section className="relative z-10 py-24 md:py-40 px-6 border-y border-primary/5 bg-primary/[0.01]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-20">
             {[
@@ -392,7 +392,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-24 md:py-40 px-6 bg-cream border-t border-primary/5">
+      <footer className="relative z-10 py-24 md:py-40 px-6 bg-cream border-t border-primary/5">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-20">
           <div className="flex flex-col items-center lg:items-start gap-8 max-w-lg">
             <div className="flex items-center gap-4">
@@ -402,7 +402,7 @@ export default function LandingPage() {
               <span className="text-4xl font-heading font-black text-primary tracking-tighter uppercase">Giftisan</span>
             </div>
             <p className="text-primary/50 text-xl font-medium leading-relaxed text-center lg:text-left">
-              The premier artisanal marketplace in Egypt. 
+              The premier curated artisanal marketplace. 
               Join a movement of conscious gifting and professional craftsmanship.
             </p>
             <div className="flex gap-4">

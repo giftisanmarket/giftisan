@@ -50,9 +50,10 @@ interface StudioClientProps {
   sales: any[];
   reviews: any[];
   isAdminPreview?: boolean;
+  dict: any;
 }
 
-export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }: StudioClientProps) {
+export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, dict }: StudioClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics">("overview");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
@@ -78,14 +79,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
     const res = await deleteProduct(productToDelete);
 
     if (res.success) {
-      toast.success("Treasure removed from your gallery", {
+      toast.success(dict.studio.treasure_removed, {
         icon: <Trash2 className="w-5 h-5 text-red-500" />,
       });
       setProductToDelete(null);
       setIsDeleting(null);
       router.refresh();
     } else {
-      toast.error(res.error || "Failed to delete product", {
+      toast.error(res.error || dict.studio.delete_failed, {
         icon: <X className="w-5 h-5 text-red-500" />,
       });
       setIsDeleting(null);
@@ -125,7 +126,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
   return (
     <>
       <main className="min-h-screen bg-cream">
-        <Navbar />
+        <Navbar dict={dict} />
 
         <AnimatePresence>
           {productToDelete && (
@@ -147,9 +148,9 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                   <Trash2 className="w-10 h-10" />
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-3xl font-heading font-bold text-primary">Remove Treasure?</h3>
+                  <h3 className="text-3xl font-heading font-bold text-primary">{dict.studio.remove_treasure}</h3>
                   <p className="text-charcoal/40 text-sm leading-relaxed">
-                    Are you sure you want to remove this piece from your studio? This action is permanent and your client reviews for this item will be lost.
+                    {dict.studio.remove_desc}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -157,14 +158,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                     onClick={() => setProductToDelete(null)}
                     className="flex-1 h-14 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
                   >
-                    Keep It
+                    {dict.studio.keep_it}
                   </button>
                   <button
                     disabled={isDeleting === productToDelete}
                     onClick={handleDelete}
                     className="flex-1 h-14 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
                   >
-                    {isDeleting === productToDelete ? "Removing..." : "Delete Permanently"}
+                    {isDeleting === productToDelete ? dict.studio.removing : dict.studio.delete_permanently}
                   </button>
                 </div>
               </motion.div>
@@ -183,14 +184,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
                 <Clock className="w-8 h-8 text-white" />
               </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-heading font-black text-amber-900 mb-2">Studio Under Review</h3>
+              <div className="flex-1 text-center md:text-start">
+                <h3 className="text-2xl font-heading font-black text-amber-900 mb-2">{dict.studio.under_review_title}</h3>
                 <p className="text-amber-700/80 leading-relaxed font-medium">
-                  Your workshop is almost ready! Our curators are currently reviewing your studio to ensure it meets our premium standards. <span className="font-bold underline decoration-amber-500/30">Your treasures will be visible to the public</span> once approved.
+                  {dict.studio.under_review_desc}
                 </p>
               </div>
               <div className="px-6 py-2 bg-white rounded-full border border-amber-200 text-[10px] font-black uppercase tracking-widest text-amber-600 shadow-sm">
-                Pending Verification
+                {dict.studio.pending_verification}
               </div>
             </motion.div>
           )}
@@ -204,14 +205,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
                 <X className="w-8 h-8 text-white" />
               </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-heading font-black text-red-900 mb-2">Verification Needed</h3>
+              <div className="flex-1 text-center md:text-start">
+                <h3 className="text-2xl font-heading font-black text-red-900 mb-2">{dict.studio.action_required}</h3>
                 <p className="text-red-700/80 leading-relaxed font-medium">
-                  We've noticed a few things that need attention before your studio can go live. Please ensure your bio is complete and your product images are clear and high-resolution. Contact us if you have any questions!
+                  {dict.studio.rejected_desc}
                 </p>
               </div>
               <div className="px-6 py-2 bg-white rounded-full border border-red-200 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm">
-                Action Required
+                {dict.studio.action_required}
               </div>
             </motion.div>
           )}
@@ -222,46 +223,46 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 p-6 bg-primary text-white rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-primary/20 relative overflow-hidden group"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/30 transition-all duration-1000" />
+            <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/30 transition-all duration-1000" />
             
             <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
               <ShieldCheck className="w-8 h-8 text-accent-light" />
             </div>
             
-            <div className="flex-1 text-center md:text-left relative z-10">
+            <div className="flex-1 text-center md:text-start relative z-10">
               <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-2">
-                <h3 className="text-xl font-heading font-black">Pro Studio Founding Member</h3>
+                <h3 className="text-xl font-heading font-black">{dict.studio.founding_member}</h3>
                 <span className="px-3 py-1 bg-accent rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-accent/20">
-                  Exclusive Launch Group
+                  {dict.studio.exclusive_launch_group}
                 </span>
               </div>
               <p className="text-sm text-white/60 leading-relaxed max-w-2xl">
-                As a founding artisan, you have early access to the <span className="text-accent-light font-bold">Pro Studio Dashboard</span>. We are currently finalizing **automated payments and worldwide shipping** integrations to make your logistics hands-free.
+                {dict.studio.founding_desc}
               </p>
             </div>
 
             <div className="flex items-center gap-4 relative z-10">
-              <div className="text-right hidden lg:block">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Marketing Status</p>
+              <div className="text-end hidden lg:block">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{dict.studio.marketing_status}</p>
                 <p className="text-xs font-bold text-accent-light flex items-center gap-2 justify-end">
-                  <Megaphone className="w-3 h-3" /> Spotlight Ready
+                  <Megaphone className="w-3 h-3" /> {dict.studio.spotlight_ready}
                 </p>
               </div>
               <div className="h-12 w-[1px] bg-white/10 hidden lg:block" />
               <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-white">
-                Phase 1 Active
+                {dict.studio.phase_1_active}
               </div>
             </div>
           </motion.div>
 
           <div className="relative bg-primary text-white rounded-[3rem] p-8 md:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
-              <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+              <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-start">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
                   <BespokeImage src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                 </div>
                 <div>
-                  <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">Master Studio</p>
+                  <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">{dict.studio.master_studio}</p>
                   <h1 className="text-4xl md:text-6xl font-heading font-bold mb-4">
                     {artisan.studioName || `${artisan.user.name}'s Studio`}
                   </h1>
@@ -273,28 +274,28 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                 {isAdminPreview ? (
                   <div className="h-14 px-8 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/20 flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-accent-light" />
-                    Read-only Auditor Access
+                    {dict.studio.auditor_access}
                   </div>
                 ) : (
                   <Link href="/studio/settings" className="h-14 px-8 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center gap-2">
                     <Settings className="w-5 h-5" />
-                    Studio Settings
+                    {dict.studio.studio_settings}
                   </Link>
                 )}
               </div>
             </div>
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
           </div>
 
           <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
             {(
               [
-                  { id: "overview", label: "Overview", icon: BarChart3 },
-                  { id: "inventory", label: "Inventory", icon: ShoppingBag },
-                  { id: "sales", label: "Sales", icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
-                  { id: "growth", label: "Studio Growth", icon: TrendingUp },
-                  { id: "logistics", label: "Logistics", icon: Truck },
-                  { id: "reviews", label: "Community", icon: Star },
+                  { id: "overview", label: dict.studio.overview, icon: BarChart3 },
+                  { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
+                  { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+                  { id: "growth", label: dict.studio.growth, icon: TrendingUp },
+                  { id: "logistics", label: dict.studio.logistics, icon: Truck },
+                  { id: "reviews", label: dict.studio.community, icon: Star },
                 ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
               ).map((tab) => (
                 <button
@@ -306,8 +307,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                   )}
                 >
                   {tab.id === "logistics" && (
-                    <div className="absolute -top-1 -right-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
-                      Soon
+                    <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
+                      {dict.studio.soon}
                     </div>
                   )}
                 {activeTab === tab.id && (
@@ -322,7 +323,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                   {tab.label}
                   {tab.badge ? (
                     <span className={cn(
-                      "ml-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px]",
+                      "ms-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px]",
                       activeTab === tab.id ? "bg-white text-primary" : "bg-accent text-white shadow-lg shadow-accent/20"
                     )}>
                       {tab.badge}
@@ -347,32 +348,32 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
                       { 
-                        label: "Total Impressions", 
+                        label: dict.studio.stats_impressions, 
                         value: totalViews.toLocaleString(), 
                         icon: MousePointer2, 
                         color: "bg-purple-500",
-                        tooltip: "The total number of times your treasures have been viewed by collectors across the platform."
+                        tooltip: dict.studio.tooltip_impressions
                       },
                       { 
-                        label: "Community Loves", 
+                        label: dict.studio.stats_loves, 
                         value: totalFavorites, 
                         icon: Heart, 
                         color: "bg-red-500",
-                        tooltip: "The total number of times collectors have added your treasures to their favorites list."
+                        tooltip: dict.studio.tooltip_loves
                       },
                       {
-                        label: "Sales Success",
+                        label: dict.studio.stats_success,
                         value: `${conversionRate}%`,
                         icon: Percent,
                         color: "bg-indigo-500",
-                        tooltip: "Most people are just 'window shopping.' For every 100 visitors, having 2 to 5 buyers is the professional standard for a highly successful studio. If you're in this range, you're doing great!"
+                        tooltip: dict.studio.tooltip_success
                       },
                       { 
-                        label: "Studio Revenue", 
-                        value: `EGP ${totalRevenue.toLocaleString()}`, 
+                        label: dict.studio.stats_revenue, 
+                        value: `${dict.product.currency} ${totalRevenue.toLocaleString()}`, 
                         icon: BarChart3, 
                         color: "bg-green-500",
-                        tooltip: "Your total lifetime earnings from treasures sold on Giftisan."
+                        tooltip: dict.studio.tooltip_revenue
                       },
                     ].map((stat, i) => (
                       <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
@@ -384,7 +385,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                           {stat.tooltip && (
                             <>
                               <Info className="w-3 h-3 text-primary/20 cursor-help" />
-                              <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl leading-relaxed">
+                              <div className="absolute bottom-full start-0 mb-2 w-64 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed">
                                 {stat.tooltip}
                               </div>
                             </>
@@ -392,7 +393,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                         </div>
                         <div className="flex items-baseline gap-2">
                           <p className="text-3xl font-heading font-bold text-primary">{stat.value}</p>
-                          {stat.label === "Sales Success" && (
+                          {stat.label === dict.studio.stats_success && (
                             <span className={cn(
                               "text-[8px] font-black uppercase px-2 py-0.5 rounded-full border",
                               parseFloat(stat.value) === 0 ? "bg-cream text-primary/40 border-primary/5" :
@@ -401,11 +402,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                               parseFloat(stat.value) <= 10 ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
                               "bg-accent/10 text-accent border-accent/20"
                             )}>
-                              {parseFloat(stat.value) === 0 ? "Building" :
-                               parseFloat(stat.value) < 2 ? "Rising" :
-                               parseFloat(stat.value) <= 5 ? "Healthy" :
-                               parseFloat(stat.value) <= 10 ? "Exceptional" :
-                               "Legendary"}
+                              {parseFloat(stat.value) === 0 ? dict.studio.status_building :
+                               parseFloat(stat.value) < 2 ? dict.studio.status_rising :
+                               parseFloat(stat.value) <= 5 ? dict.studio.status_healthy :
+                               parseFloat(stat.value) <= 10 ? dict.studio.status_exceptional :
+                               dict.studio.status_legendary}
                             </span>
                           )}
                         </div>
@@ -419,11 +420,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                       <div className="relative z-10">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest mb-6">
                           <Sparkles className="w-3 h-3" />
-                          Most Desired Treasure
+                          {dict.studio.most_desired_treasure}
                         </div>
                         {(() => {
                           const topViewed = [...products].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
-                          if (!topViewed) return <p className="text-white/40 italic">Gallery currently empty...</p>;
+                          if (!topViewed) return <p className="text-white/40 italic">{dict.studio.gallery_empty}</p>;
                           return (
                             <div className="flex items-center gap-6">
                               <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 shrink-0">
@@ -431,19 +432,19 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                               </div>
                               <div>
                                 <h4 className="text-2xl font-heading font-bold mb-1">{topViewed.name}</h4>
-                                <p className="text-white/40 text-sm font-medium">Accumulated {topViewed.views || 0} local visits</p>
+                                <p className="text-white/40 text-sm font-medium">{dict.studio.visits_count.replace('{count}', (topViewed.views || 0).toString())}</p>
                               </div>
                             </div>
                           );
                         })()}
                       </div>
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+                      <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
                     </div>
 
                     <div className="bg-white p-10 rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest mb-6">
                         <CheckCircle2 className="w-3 h-3" />
-                        Best-Selling Piece
+                        {dict.studio.best_selling_piece}
                       </div>
                       {(() => {
                         const topSold = [...products].sort((a, b) => {
@@ -451,7 +452,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                           const bSales = sales.filter(s => s.productId === b.id).length;
                           return bSales - aSales;
                         })[0];
-                        if (!topSold) return <p className="text-charcoal/30 italic">Waiting for the first sale...</p>;
+                        if (!topSold) return <p className="text-charcoal/30 italic">{dict.studio.waiting_first_sale}</p>;
                         const soldCount = sales.filter(s => s.productId === topSold.id).length;
                         return (
                           <div className="flex items-center gap-6">
@@ -460,7 +461,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                             </div>
                             <div>
                               <h4 className="text-2xl font-heading font-bold text-primary mb-1">{topSold.name}</h4>
-                              <p className="text-charcoal/40 text-sm font-medium">{soldCount} units traveling to collectors</p>
+                              <p className="text-charcoal/40 text-sm font-medium">{dict.studio.units_traveling.replace('{count}', soldCount.toString())}</p>
                             </div>
                           </div>
                         );
@@ -471,12 +472,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                   <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                     <div className="flex justify-between items-center mb-10">
                       <div>
-                        <h2 className="text-3xl font-heading font-bold text-primary">Sales <span className="serif italic font-normal text-accent">Performance</span></h2>
-                        <p className="text-charcoal/40 mt-1">Daily revenue trends over the last 7 days</p>
+                        <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
+                        <p className="text-charcoal/40 mt-1">{dict.studio.daily_revenue_desc}</p>
                       </div>
                       <div className="flex items-center gap-2 text-xs font-bold text-accent px-4 py-2 bg-accent/10 rounded-full">
                         <ArrowUpRight className="w-4 h-4" />
-                        Live Data
+                        {dict.studio.live_data}
                       </div>
                     </div>
                     <SalesChart sales={sales} tickFormatter={(value) => `EGP ${value}`} />
@@ -489,33 +490,33 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                 <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                   <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
-                      <h2 className="text-4xl font-heading font-bold text-primary">Studio <span className="serif italic font-normal text-accent">Inventory</span></h2>
-                      <p className="text-charcoal/40 mt-1">Manage your storefront and handcrafted pieces</p>
+                      <h2 className="text-4xl font-heading font-bold text-primary">{dict.studio.studio_inventory} <span className="serif italic font-normal text-accent">{dict.studio.studio_inventory_accent}</span></h2>
+                      <p className="text-charcoal/40 mt-1">{dict.studio.manage_inventory_desc}</p>
                     </div>
                     {!isAdminPreview ? (
                       <Link
                         href="/studio/new-product"
                         className="h-14 px-10 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all flex items-center gap-2 shadow-xl shadow-accent/20"
                       >
-                        <Plus className="w-5 h-5" /> Add New Treasure
+                        <Plus className="w-5 h-5" /> {dict.studio.add_treasure}
                       </Link>
                     ) : (
                       <div className="h-14 px-8 bg-primary text-white font-bold rounded-full flex items-center gap-2 shadow-xl">
-                        <Lock className="w-4 h-4" /> Management Locked
+                        <Lock className="w-4 h-4" /> {dict.studio.management_locked}
                       </div>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-start">
                     {products.length === 0 ? (
                       <div className="col-span-full py-20 text-center space-y-6">
                         <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-4">
                           <ShoppingBag className="w-10 h-10 text-primary/20" />
                         </div>
-                        <h3 className="text-2xl font-heading font-bold text-primary">Your studio is currently quiet</h3>
-                        <p className="text-charcoal/40 max-w-xs mx-auto">Share your first creation with the Giftisan community to start your craftsman journey.</p>
+                        <h3 className="text-2xl font-heading font-bold text-primary">{dict.studio.empty_studio_title}</h3>
+                        <p className="text-charcoal/40 max-w-xs mx-auto">{dict.studio.empty_studio_desc}</p>
                         <button className="inline-flex items-center gap-2 px-8 h-14 bg-primary text-white font-bold rounded-full">
-                          Create Your First Piece
+                          {dict.studio.create_first_piece}
                         </button>
                       </div>
                     ) : (
@@ -562,15 +563,15 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                   "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap",
                                   (p.stock || 0) > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                                 )}>
-                                  {(p.stock || 0)} in stock
+                                  {dict.studio.in_stock.replace('{count}', (p.stock || 0).toString())}
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <p className="text-2xl font-heading font-bold text-accent">EGP {p.price}.00</p>
+                              <p className="text-2xl font-heading font-bold text-accent">{dict.product.currency} {p.price}.00</p>
                               <div className="flex items-center gap-2 text-xs font-bold text-primary/40">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span>{p._count?.reviews || 0} reviews</span>
+                                <span>{dict.studio.reviews_count.replace('{count}', (p._count?.reviews || 0).toString())}</span>
                               </div>
                             </div>
                           </div>
@@ -584,8 +585,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               {activeTab === "sales" && (
                 <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-charcoal">
                   <div className="mb-12">
-                    <h2 className="text-4xl font-heading font-bold text-primary">Sales & <span className="serif italic font-normal text-accent">Fulfillment</span></h2>
-                    <p className="text-charcoal/40 mt-1">Track orders and manage handcrafted requests from your clients</p>
+                    <h2 className="text-4xl font-heading font-bold text-primary">{dict.studio.sales_fulfillment} <span className="serif italic font-normal text-accent">{dict.studio.sales_fulfillment_accent}</span></h2>
+                    <p className="text-charcoal/40 mt-1">{dict.studio.track_orders_desc}</p>
                   </div>
 
                   <div className="space-y-6">
@@ -594,8 +595,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                         <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto">
                           <Truck className="w-10 h-10 text-primary/20" />
                         </div>
-                        <h3 className="text-2xl font-heading font-bold text-primary">No sales yet</h3>
-                        <p className="text-charcoal/40 max-w-xs mx-auto">When clients purchase your treasures, they will appear here for fulfillment.</p>
+                        <h3 className="text-2xl font-heading font-bold text-primary">{dict.studio.no_sales_title}</h3>
+                        <p className="text-charcoal/40 max-w-xs mx-auto">{dict.studio.no_sales_desc}</p>
                       </div>
                     ) : (
                       sales.map((item: any) => (
@@ -604,7 +605,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                             <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                           </div>
 
-                          <div className="flex-1 space-y-2 text-center md:text-left">
+                          <div className="flex-1 space-y-2 text-center md:text-start">
                             <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
                               <h4 className="text-xl font-heading font-bold text-primary">{item.product.name}</h4>
                               <span className={cn(
@@ -621,7 +622,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                             </p>
                             {item.personalization && (
                               <div className="bg-accent/5 border border-accent/10 p-3 rounded-xl inline-block mt-2">
-                                <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">Bespoke Request:</p>
+                                <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{dict.studio.bespoke_request}:</p>
                                 <p className="text-sm italic text-primary">"{item.personalization}"</p>
                               </div>
                             )}
@@ -632,7 +633,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                 className="text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-colors flex items-center gap-1"
                               >
                                 <Truck className="w-3 h-3" />
-                                {expandedOrder === item.id ? "Hide Shipping" : "Show Shipping Address"}
+                                {expandedOrder === item.id ? dict.studio.hide_shipping : dict.studio.show_shipping}
                               </button>
 
                               <AnimatePresence>
@@ -644,15 +645,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                     className="overflow-hidden"
                                   >
                                     <div className="pt-4 space-y-2 border-t border-primary/5 mt-4">
-                                      <p className="text-lg font-bold text-primary">EGP {item.price * item.quantity}.00</p>
+                                      <p className="text-lg font-bold text-primary">{dict.product.currency} {item.price * item.quantity}.00</p>
                                       <p className="text-xs font-bold text-primary">
                                         {item.order.shippingAddress || "No address provided"}
                                       </p>
                                       <p className="text-xs text-charcoal/60">
                                         {item.order.shippingCity}, {item.order.shippingZip}
-                                      </p>
-                                      <p className="text-xs text-charcoal/60">
-                                        {item.order.shippingCountry}
                                       </p>
                                       <div className="pt-2 flex flex-wrap gap-4">
                                         <span className="text-[10px] font-bold text-accent flex items-center gap-1.5">
@@ -672,7 +670,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                           </div>
 
                           <div className="flex flex-col items-center md:items-end gap-4 shrink-0">
-                            <p className="text-2xl font-heading font-bold text-primary">EGP {item.price * item.quantity}.00</p>
+                            <p className="text-2xl font-heading font-bold text-primary">{dict.product.currency} {item.price * item.quantity}.00</p>
                             <div className="flex gap-2">
                               {item.status === "PENDING" && (
                                 <button
@@ -682,7 +680,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                   }}
                                   className="px-6 h-10 bg-primary text-white text-xs font-bold rounded-full hover:bg-primary-light transition-all font-bold"
                                 >
-                                  Mark as Shipped
+                                  {dict.studio.mark_shipped}
                                 </button>
                               )}
                               {item.status === "SHIPPED" && (
@@ -696,7 +694,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                   }}
                                   className="px-6 h-10 bg-green-500 text-white text-xs font-bold rounded-full hover:bg-green-600 transition-all font-bold"
                                 >
-                                  {isUpdating === item.id ? "Updating..." : "Mark as Delivered"}
+                                  {isUpdating === item.id ? dict.studio.updating : dict.studio.mark_delivered}
                                 </button>
                               )}
                               <div className="relative">
@@ -718,14 +716,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-2xl border border-primary/5 p-2 z-50 overflow-hidden"
+                                        className="absolute end-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-2xl border border-primary/5 p-2 z-50 overflow-hidden"
                                       >
                                         <Link
                                           href={`/profile/messages?userId=${item.order.userId}`}
                                           className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
                                         >
                                           <Mail className="w-4 h-4 text-accent" />
-                                          Contact Buyer
+                                          {dict.studio.contact_buyer}
                                         </Link>
                                         <button
                                           onClick={() => {
@@ -735,7 +733,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                           className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
                                         >
                                           <BarChart3 className="w-4 h-4 text-accent" />
-                                          Full Order Details
+                                          {dict.studio.full_order_details}
                                         </button>
                                         <button
                                           onClick={() => {
@@ -749,7 +747,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                                           className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-primary hover:bg-cream rounded-xl transition-colors"
                                         >
                                           <Package className="w-4 h-4 text-accent" />
-                                          Print Packing Slip
+                                          {dict.studio.print_packing_slip}
                                         </button>
                                       </motion.div>
                                     </>
@@ -768,48 +766,48 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               {activeTab === "growth" && (
                 <div className="space-y-12">
                   <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
+                    <div className="absolute top-0 end-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
                     
                     <div className="relative z-10">
                       <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
                         <div className="max-w-2xl">
-                          <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-6">Studio <span className="serif italic font-normal text-accent">Marketing & Exposure</span></h2>
+                          <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-6">{dict.studio.growth_title} <span className="serif italic font-normal text-accent">{dict.studio.growth_title_accent}</span></h2>
                           <p className="text-charcoal/60 text-lg leading-relaxed">
-                            We don't just host your treasures; we actively find the collectors who love them. As a member of our exclusive launch group, your studio is prioritized for platform-wide exposure.
+                            {dict.studio.growth_desc}
                           </p>
                         </div>
                         <div className="p-8 bg-cream border border-primary/5 rounded-[2.5rem] shrink-0 text-center">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Marketing Priority</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">{dict.studio.marketing_priority}</p>
                           <p className="text-3xl font-heading font-bold text-primary">Top 1%</p>
-                          <p className="text-xs text-accent font-bold mt-1">Tier: Founding Artisan</p>
+                          <p className="text-xs text-accent font-bold mt-1">{dict.studio.founding_tier}</p>
                         </div>
                       </div>
 
                       <div className="grid md:grid-cols-3 gap-8">
                         <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-xl relative overflow-hidden group">
                           <Globe className="w-8 h-8 text-accent-light mb-6 group-hover:scale-110 transition-transform" />
-                          <h4 className="text-xl font-heading font-bold mb-2">Global Visibility</h4>
-                          <p className="text-white/60 text-sm leading-relaxed">Your studio is currently live to the global Giftisan community. SEO indexing is active.</p>
+                          <h4 className="text-xl font-heading font-bold mb-2">{dict.studio.global_visibility_title}</h4>
+                          <p className="text-white/60 text-sm leading-relaxed">{dict.studio.global_visibility_desc}</p>
                           <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent-light">
-                            <CheckCircle2 className="w-3 h-3" /> Status: Active
+                            <CheckCircle2 className="w-3 h-3" /> {dict.studio.status_active}
                           </div>
                         </div>
 
                         <div className="p-8 bg-white border border-primary/5 rounded-[2.5rem] shadow-xl group">
                           <LayoutGrid className="w-8 h-8 text-accent mb-6 group-hover:scale-110 transition-transform" />
-                          <h4 className="text-xl font-heading font-bold text-primary mb-2">Homepage Spotlight</h4>
-                          <p className="text-charcoal/60 text-sm leading-relaxed">Your studio is scheduled to be featured on our premium artisanal showcase soon.</p>
+                          <h4 className="text-xl font-heading font-bold text-primary mb-2">{dict.studio.homepage_spotlight_title}</h4>
+                          <p className="text-charcoal/60 text-sm leading-relaxed">{dict.studio.homepage_spotlight_desc}</p>
                           <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/30">
-                            <Clock className="w-3 h-3 text-accent" /> Status: Queued
+                            <Clock className="w-3 h-3 text-accent" /> {dict.studio.status_queued}
                           </div>
                         </div>
 
                         <div className="p-8 bg-white border border-primary/5 rounded-[2.5rem] shadow-xl group">
                           <Share2 className="w-8 h-8 text-accent mb-6 group-hover:scale-110 transition-transform" />
-                          <h4 className="text-xl font-heading font-bold text-primary mb-2">Social Push</h4>
-                          <p className="text-charcoal/60 text-sm leading-relaxed">Our content team is reviewing your top treasures for our upcoming creator spotlight.</p>
+                          <h4 className="text-xl font-heading font-bold text-primary mb-2">{dict.studio.social_push_title}</h4>
+                          <p className="text-charcoal/60 text-sm leading-relaxed">{dict.studio.social_push_desc}</p>
                           <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/30">
-                            <Sparkles className="w-3 h-3 text-accent" /> Status: Curating
+                            <Sparkles className="w-3 h-3 text-accent" /> {dict.studio.status_curating}
                           </div>
                         </div>
                       </div>
@@ -818,14 +816,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                         <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center shrink-0 shadow-xl shadow-accent/20">
                           <Megaphone className="w-10 h-10 text-white" />
                         </div>
-                        <div className="flex-1 text-center md:text-left">
-                          <h3 className="text-2xl font-heading font-bold text-primary mb-2">Boost Your Exposure</h3>
+                        <div className="flex-1 text-center md:text-start">
+                          <h3 className="text-2xl font-heading font-bold text-primary mb-2">{dict.studio.boost_title}</h3>
                           <p className="text-charcoal/60 text-sm leading-relaxed">
-                            Studios with at least **5 high-resolution product photos** and a **detailed artisan story** get 300% more engagement. Update your profile to qualify for the next spotlight.
+                            {dict.studio.boost_desc}
                           </p>
                         </div>
                         <Link href="/studio/settings" className="px-10 h-14 bg-primary text-white font-bold rounded-full flex items-center gap-2 hover:bg-primary-light transition-all whitespace-nowrap">
-                          Optimize Profile
+                          {dict.studio.optimize_profile}
                         </Link>
                       </div>
                     </div>
@@ -837,22 +835,23 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                 <div className="space-y-12">
                   <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 text-center relative overflow-hidden">
                     <div className="relative z-10 max-w-2xl mx-auto py-20">
-                      <div className="w-24 h-24 bg-cream rounded-full flex items-center justify-center mx-auto mb-10 text-primary/20">
-                        <Lock className="w-12 h-12" />
+                      <div className="text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[10px] font-black uppercase tracking-widest mb-10 border border-accent/20">
+                          {dict.studio.logistics_phase_2}
+                        </div>
+                        <h2 className="text-5xl md:text-7xl font-heading font-bold text-primary mb-8">{dict.studio.fulfillment_handsfree} <span className="serif italic font-normal text-accent">{dict.studio.fulfillment_handsfree_accent}</span></h2>
+                        <p className="text-charcoal/40 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                          {dict.studio.logistics_desc.split('**').map((text: string, i: number) => 
+                            i % 2 === 1 ? <strong key={i} className="text-primary font-bold">{text}</strong> : text
+                          )}
+                        </p>
                       </div>
-                      <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/20 text-accent text-xs font-black uppercase tracking-[0.2em] mb-8 rounded-full">
-                        Phase 2: Pro Logistics
-                      </div>
-                      <h2 className="text-5xl font-heading font-bold text-primary mb-6">Hands-free <span className="serif italic">Fulfillment</span></h2>
-                      <p className="text-charcoal/40 text-lg leading-relaxed mb-12">
-                        We are currently integrating with local and international carriers to bring you **one-click shipping labels** and **automatic tracking**.
-                      </p>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-left mb-12">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-start mb-12">
                         {[
-                          { label: "Direct Payments", icon: Coins, desc: "EGP & International" },
-                          { label: "Smart Shipping", icon: Truck, desc: "One-click Labels" },
-                          { label: "Insured Transit", icon: ShieldCheck, desc: "Piece of mind" },
+                          { label: dict.studio.direct_payments, icon: Coins, desc: dict.studio.egp_intl },
+                          { label: dict.studio.smart_shipping, icon: Truck, desc: dict.studio.one_click_labels },
+                          { label: dict.studio.insured_transit, icon: ShieldCheck, desc: dict.studio.peace_of_mind },
                         ].map((item, i) => (
                           <div key={i} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 opacity-60">
                             <item.icon className="w-6 h-6 text-accent mb-4" />
@@ -863,8 +862,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                       </div>
 
                       <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                        <p className="relative z-10 font-bold mb-2">Want to test Phase 2 early?</p>
-                        <p className="relative z-10 text-white/40 text-sm mb-6">Join our beta testing group for integrated payments.</p>
+                        <p className="relative z-10 font-bold mb-2">{dict.studio.beta_test_title}</p>
+                        <p className="relative z-10 text-white/40 text-sm mb-6">{dict.studio.beta_test_desc}</p>
                         <button 
                           onClick={handleJoinWaitlist}
                           disabled={isJoiningWaitlist || hasJoinedWaitlist}
@@ -878,18 +877,18 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                           {isJoiningWaitlist ? (
                             <>
                               <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-                              Securing your spot...
+                              {dict.studio.securing_spot}
                             </>
                           ) : hasJoinedWaitlist ? (
                             <>
                               <CheckCircle2 className="w-4 h-4" />
-                              You're on the Waitlist
+                              {dict.studio.on_waitlist}
                             </>
                           ) : (
-                            "Join Beta Waitlist"
+                            dict.studio.join_waitlist
                           )}
                         </button>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute top-0 end-0 w-32 h-32 bg-accent/20 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2" />
                       </div>
                     </div>
                   </div>
@@ -900,12 +899,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {reviews.length === 0 ? (
-                      <div className="col-span-full py-20 px-10 text-center bg-white rounded-[3rem] border border-primary/5">
-                        <div className="w-16 h-16 bg-cream rounded-full flex items-center justify-center mx-auto mb-6 text-accent">
-                          <Star className="w-8 h-8" />
+                      <div className="col-span-full py-20 px-10 text-center bg-white rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5">
+                        <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+                          <Star className="w-10 h-10 text-accent" />
                         </div>
-                        <h3 className="text-2xl font-heading font-bold text-primary mb-2">No Reviews Yet</h3>
-                        <p className="text-charcoal/40 max-w-xs mx-auto">Treasures are being shipped! Reviews will appear here once your collectors share their joy.</p>
+                        <h3 className="text-3xl font-heading font-bold text-primary mb-4">{dict.studio.no_reviews_title}</h3>
+                        <p className="text-charcoal/40 max-w-md mx-auto leading-relaxed italic serif text-lg">
+                          {dict.studio.no_reviews_desc}
+                        </p>
                       </div>
                     ) : (
                       reviews.map((review) => (
@@ -1006,99 +1007,101 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden no-print"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[90vh] flex flex-col"
             >
-              <div className="p-8 md:p-16 space-y-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                      Sale Receipt #{selectedItem.orderId.slice(-6).toUpperCase()}
-                    </div>
-                    <h2 className="text-4xl font-heading font-bold text-primary">Order <span className="serif italic">Details</span></h2>
-                  </div>
-                  <button
-                    onClick={() => setSelectedItem(null)}
-                    className="w-12 h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-12 pt-4">
-                  <div className="space-y-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Item Information</h3>
-                    <div className="flex gap-4">
-                      <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm">
-                        <BespokeImage src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-primary leading-tight">{selectedItem.product.name}</p>
-                        <p className="text-xs text-charcoal/40 font-medium">Qty: {selectedItem.quantity} • EGP {selectedItem.price}</p>
-                        <p className="text-lg font-heading font-bold mt-2 text-accent">EGP {selectedItem.price.toFixed(2)}</p>
-                      </div>
-                    </div>
-                    {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
-                      <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/5">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-primary/40 mb-1">Shipment Tracking</p>
-                        <p className="text-xs font-bold text-primary flex items-center gap-2">
-                          <Truck className="w-3 h-3 text-accent" />
-                          {selectedItem.carrier}: {selectedItem.trackingNumber}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Buyer Details</h3>
+              <div className="overflow-y-auto custom-scrollbar">
+                <div className="p-6 md:p-16 space-y-8 md:space-y-10">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-primary">{selectedItem.order.user.name}</p>
-                      <p className="text-charcoal/60 text-sm font-medium mt-1">{selectedItem.order.user.email}</p>
-                      {selectedItem.order.clientPhone && (
-                        <p className="text-accent text-sm font-bold mt-2">{selectedItem.order.clientPhone}</p>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                        {dict.studio.sale_receipt} #{selectedItem.orderId.slice(-6).toUpperCase()}
+                      </div>
+                      <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
+                    </div>
+                    <button
+                      onClick={() => setSelectedItem(null)}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors shrink-0"
+                    >
+                      <X className="w-5 h-5 md:w-6 md:h-6" />
+                    </button>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8 md:gap-12 pt-0 md:pt-4">
+                    <div className="space-y-4 md:space-y-6">
+                      <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.item_info}</h3>
+                      <div className="flex gap-4">
+                        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm shrink-0">
+                          <BespokeImage src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-primary text-sm md:text-base leading-tight truncate md:whitespace-normal">{selectedItem.product.name}</p>
+                          <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.studio.qty_label}: {selectedItem.quantity} • {dict.product.currency} {selectedItem.price}</p>
+                          <p className="text-base md:text-lg font-heading font-bold mt-1 md:mt-2 text-accent">{dict.product.currency} {selectedItem.price.toFixed(2)}</p>
+                        </div>
+                      </div>
+                      {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
+                        <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/5">
+                          <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/40 mb-1">{dict.studio.shipment_tracking}</p>
+                          <p className="text-xs font-bold text-primary flex items-center gap-2">
+                            <Truck className="w-3 h-3 text-accent" />
+                            {selectedItem.carrier}: {selectedItem.trackingNumber}
+                          </p>
+                        </div>
                       )}
-                      <div className="mt-6 pt-6 border-t border-primary/5">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">Shipping To</p>
-                        <p className="text-sm text-charcoal/60 leading-relaxed font-medium">
-                          {selectedItem.order.shippingAddress}<br />
-                          {selectedItem.order.shippingCity}, {selectedItem.order.shippingZip}
-                        </p>
+                    </div>
+
+                    <div className="space-y-4 md:space-y-6">
+                      <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.buyer_details}</h3>
+                      <div>
+                        <p className="font-bold text-primary text-sm md:text-base">{selectedItem.order.user.name}</p>
+                        <p className="text-charcoal/60 text-xs md:text-sm font-medium mt-1 truncate">{selectedItem.order.user.email}</p>
+                        {selectedItem.order.clientPhone && (
+                          <p className="text-accent text-xs md:text-sm font-bold mt-2">{selectedItem.order.clientPhone}</p>
+                        )}
+                        <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5">
+                          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">{dict.studio.shipping_to}</p>
+                          <p className="text-xs md:text-sm text-charcoal/60 leading-relaxed font-medium">
+                            {selectedItem.order.shippingAddress}<br />
+                            {selectedItem.order.shippingCity}{selectedItem.order.shippingZip ? `, ${selectedItem.order.shippingZip}` : ''}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {selectedItem.order.orderNotes && (
-                  <div className="mt-10 p-6 bg-accent/5 rounded-[2rem] border border-accent/10">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                      <h3 className="text-[10px] font-black uppercase tracking-widest text-accent">Order Notes from Client</h3>
+                  {selectedItem.order.orderNotes && (
+                    <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
+                      <div className="flex items-center gap-2 mb-2 md:mb-3">
+                        <div className="w-1.5 h-1.5 bg-accent rounded-full" />
+                        <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.studio.order_notes_client}</h3>
+                      </div>
+                      <p className="text-xs md:text-sm italic text-charcoal/60 leading-relaxed">
+                        "{selectedItem.order.orderNotes}"
+                      </p>
                     </div>
-                    <p className="text-sm italic text-charcoal/60 leading-relaxed">
-                      "{selectedItem.order.orderNotes}"
-                    </p>
-                  </div>
-                )}
+                  )}
 
-                <div className="pt-10 flex flex-col md:flex-row items-center gap-6">
-                  <Link
-                    href={`/profile/messages?userId=${selectedItem.order.userId}`}
-                    className="w-full h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20"
-                  >
-                    <Mail className="w-5 h-5" />
-                    Message Customer
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setItemToPrint(selectedItem);
-                      setTimeout(() => {
-                        window.print();
-                        setItemToPrint(null);
-                      }, 100);
-                    }}
-                    className="w-full md:w-fit px-10 h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
-                  >
-                    Print Summary
-                  </button>
+                  <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 pt-2">
+                    <Link
+                      href={`/profile/messages?userId=${selectedItem.order.userId}`}
+                      className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
+                    >
+                      <Mail className="w-4 h-4 md:w-5 md:h-5" />
+                      {dict.studio.message_customer}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setItemToPrint(selectedItem);
+                        setTimeout(() => {
+                          window.print();
+                          setItemToPrint(null);
+                        }, 100);
+                      }}
+                      className="w-full md:w-fit px-8 h-14 md:h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm md:text-base"
+                    >
+                      {dict.studio.print_summary}
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1127,9 +1130,9 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                      Fulfillment Status
+                      {dict.studio.fulfillment_status}
                     </div>
-                    <h2 className="text-3xl font-heading font-bold text-primary">Ship <span className="serif italic">Item</span></h2>
+                    <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.ship_item} <span className="serif italic">{dict.studio.ship_item_accent}</span></h2>
                   </div>
                   <button
                     onClick={() => setShippingItem(null)}
@@ -1141,14 +1144,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
 
                 {shippingItem.order.orderNotes && (
                   <div className="p-5 bg-accent/5 rounded-2xl border border-accent/10">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-accent mb-2">Client Notes</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-accent mb-2">{dict.studio.client_notes}</p>
                     <p className="text-xs italic text-charcoal/60 leading-relaxed">"{shippingItem.order.orderNotes}"</p>
                   </div>
                 )}
 
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Shipment Carrier</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio.shipment_carrier}</label>
                     <input
                       type="text"
                       placeholder="e.g. Aramex, DHL, FedEx"
@@ -1158,10 +1161,10 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Tracking Number</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio.tracking_number}</label>
                     <input
                       type="text"
-                      placeholder="Enter tracking ID..."
+                      placeholder={dict.studio.enter_tracking_id}
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
                       className="w-full h-14 px-6 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent transition-all font-bold text-primary"
@@ -1175,7 +1178,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                       setIsUpdating(shippingItem.id);
                       const res = await updateOrderItemStatus(shippingItem.id, "SHIPPED", trackingNumber, carrier);
                       if (res.success) {
-                        toast.success("Shipment data saved & buyer notified!", {
+                        toast.success(dict.studio.shipment_success, {
                           icon: <div className="p-1 bg-green-500 rounded-full text-white"><CheckCircle2 className="w-4 h-4" /></div>,
                           style: { borderRadius: '20px', background: '#1a4332', color: '#fff' }
                         });
@@ -1184,7 +1187,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                         setCarrier("");
                         router.refresh();
                       } else {
-                        toast.error("Failed to update status", {
+                        toast.error(dict.studio.update_failed, {
                           icon: <X className="w-4 h-4 text-white" />,
                           style: { borderRadius: '20px', background: '#4a1d1d', color: '#fff' }
                         });
@@ -1194,7 +1197,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
                     disabled={isAdminPreview || !carrier || !trackingNumber || isUpdating === shippingItem.id || isSkipping === shippingItem.id}
                     className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                   >
-                    {isAdminPreview ? "Preview Only" : isUpdating === shippingItem.id ? "Saving..." : "Confirm Shipment"}
+                    {isAdminPreview ? dict.studio.preview_only : isUpdating === shippingItem.id ? dict.studio.saving : dict.studio.confirm_shipment}
                     {!isAdminPreview && <CheckCircle2 className="w-4 h-4" />}
                   </button>
                   <button
@@ -1234,7 +1237,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               <h1 className="text-3xl font-heading font-bold text-primary">GIFTISAN</h1>
               <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">Official Packing Slip</p>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(-6).toUpperCase()}</p>
               <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
             </div>
@@ -1247,15 +1250,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
               <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
                 {itemToPrint.order.shippingAddress}<br />
                 {itemToPrint.order.shippingCity}, {itemToPrint.order.shippingZip}<br />
-                {itemToPrint.order.shippingCountry || "Egypt"}<br />
                 {itemToPrint.order.clientPhone && <span className="font-bold text-primary">{itemToPrint.order.clientPhone}</span>}
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">From</h3>
               <p className="font-bold text-primary">{artisan.studioName || artisan.user.name}</p>
               <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
-                {artisan.location || "Egypt"}<br />
                 {artisan.user.email}
               </p>
             </div>
@@ -1263,17 +1264,17 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
 
           <table className="w-full mb-12">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b text-start">
                 <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40">Item</th>
                 <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-center">Qty</th>
-                <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-right">Price</th>
+                <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-end">Price</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b">
                 <td className="py-6 font-bold text-primary">{itemToPrint.product.name}</td>
                 <td className="py-6 text-center font-bold text-charcoal/60">{itemToPrint.quantity}</td>
-                <td className="py-6 text-right font-bold text-primary">EGP {itemToPrint.price.toFixed(2)}</td>
+                <td className="py-6 text-end font-bold text-primary">EGP {itemToPrint.price.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
@@ -1287,3 +1288,4 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false }
     </>
   );
 }
+

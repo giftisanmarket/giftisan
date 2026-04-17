@@ -29,9 +29,10 @@ interface HomeClientProps {
   artisans: any[];
   categoryCounts: CategoryCount[];
   artisanCount: number;
+  dict: any;
 }
 
-export default function HomeClient({ products, artisans, categoryCounts, artisanCount }: HomeClientProps) {
+export default function HomeClient({ products, artisans, categoryCounts, artisanCount, dict }: HomeClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart } = useCart();
 
@@ -49,21 +50,21 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
   return (
     <main className="min-h-screen bg-cream">
-      <Navbar />
-      <Hero artisanCount={artisanCount} />
+      <Navbar dict={dict} />
+      <Hero artisanCount={artisanCount} dict={dict} />
 
       {/* Featured Treasures */}
       <section className="py-20 container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-primary italic serif">Treasures of the Week</h2>
-            <p className="text-charcoal/60 mt-2">Curated by our expert artisans for the perfect gift.</p>
+            <h2 className="text-3xl font-heading font-bold text-primary italic serif">{dict.home.treasures_week}</h2>
+            <p className="text-charcoal/60 mt-2">{dict.home.treasures_desc}</p>
           </div>
           <Link
             href="/search"
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
-            Shop All Collections
+            {dict.home.shop_all_collections}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -84,13 +85,13 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
                   {product.badge && (
-                    <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                    <div className="absolute top-4 start-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
                       {product.badge}
                     </div>
                   )}
 
                   {/* Actions Layer */}
-                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                  <div className="absolute top-4 end-4 z-10 flex flex-col gap-2">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -136,7 +137,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
               <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                 <Link href={`/products/${product.slug || product.id}`}>{product.name}</Link>
               </h3>
-              <p className="font-heading font-bold text-primary mt-2">EGP {product.price}.00</p>
+              <p className="font-heading font-bold text-primary mt-2">{dict.product.currency} {product.price}.00</p>
             </div>
           ))}
         </div>
@@ -146,14 +147,14 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       <section id="categories" className="py-20 container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-primary">Browse by Category</h2>
-            <p className="text-charcoal/60 mt-2">Find the perfect gift for every personality</p>
+            <h2 className="text-3xl font-heading font-bold text-primary">{dict.home.browse_category}</h2>
+            <p className="text-charcoal/60 mt-2">{dict.home.category_desc}</p>
           </div>
           <Link
             href="/categories"
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
-            View All Categories
+            {dict.home.view_all_categories}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -183,9 +184,9 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                   <Icon className="w-7 h-7" />
                 </div>
                 <div className="text-center">
-                  <span className="block font-heading font-bold text-primary text-sm tracking-tight">{cat.name}</span>
+                  <span className="block font-heading font-bold text-primary text-sm tracking-tight">{dict.common.categories_list?.[cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")] || cat.name}</span>
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary/30 group-hover:text-accent transition-colors">
-                    {cat.count} Items
+                    {dict.home.items_count.replace('{count}', cat.count.toString())}
                   </span>
                 </div>
               </Link>
@@ -199,22 +200,22 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-12">
           {[
             {
-              title: "Direct from Artisans",
-              desc: "Support independent local creators. Every purchase goes directly to the artist behind the work.",
+              title: dict.home.direct_artisans,
+              desc: dict.home.direct_artisans_desc,
               icon: Palette
             },
             {
-              title: "Curated Excellence",
-              desc: "Every item is vetted for quality and originality. We only feature the best in handmade crafts.",
+              title: dict.home.curated_excellence,
+              desc: dict.home.curated_excellence_desc,
               icon: Trophy
             },
             {
-              title: "Sustainable Gifting",
-              desc: "Eco-friendly packaging and ethical sourcing. Beautiful gifts that don't cost the earth.",
+              title: dict.home.sustainable_gifting,
+              desc: dict.home.sustainable_gifting_desc,
               icon: Leaf
             },
           ].map((item) => (
-            <div key={item.title} className="text-center md:text-left space-y-4">
+            <div key={item.title} className="text-center md:text-start space-y-4">
               <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-accent shadow-sm mx-auto md:mx-0">
                 <item.icon className="w-6 h-6" />
               </div>
@@ -229,11 +230,11 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       <section className="py-24 bg-white overflow-hidden">
         <div className="container mx-auto px-4 mb-12 flex justify-between items-end">
           <div>
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">Meet the <span className="serif italic font-normal text-accent">Masters</span></h2>
-            <p className="text-charcoal/60 max-w-lg">The hands and hearts behind your favorite treasures.</p>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">{(dict.home.meet_masters_base || dict.home.meet_masters.split('Makers')[0])}{' '}<span className="serif italic font-normal text-accent">{(dict.home.meet_masters_accent || (dict.home.meet_masters.includes('Masters') ? 'Masters' : 'المبدعين'))}</span></h2>
+            <p className="text-charcoal/60 max-w-lg">{dict.home.meet_masters_desc}</p>
           </div>
           <Link href="/artisans" className="hidden md:flex items-center gap-2 text-primary font-bold hover:text-accent transition-colors group">
-            View All Studios
+            {dict.home.view_studios}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -283,16 +284,16 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       {/* Newsletter */}
       <section id="newsletter" className="py-24 bg-primary text-white overflow-hidden relative">
         <div className="container mx-auto px-4 relative z-10 text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold">Join the Giftisan Waitlist</h2>
+          <h2 className="text-4xl md:text-5xl font-heading font-bold">{dict.home.waitlist_title}</h2>
           <p className="text-white/70 max-w-xl mx-auto text-lg text-balance">
-            Be the first to know when we launch! Secure your spot in our Inner Circle for exclusive early access and grand opening surprises.
+            {dict.home.waitlist_desc}
           </p>
-          <NewsletterForm />
+          <NewsletterForm dict={dict} />
         </div>
 
         {/* Background blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary-light/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 end-0 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 start-0 w-96 h-96 bg-primary-light/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
       </section>
 
       {/* Footer */}
@@ -311,14 +312,15 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <span className="text-xl font-heading font-bold text-primary">Giftisan</span>
           </div>
           <p className="text-charcoal/40 text-sm mb-4">
-            © 2026 Giftisan. Proudly Handcrafted. All rights reserved.
+            © 2026 Giftisan. {dict.home.proudly_handcrafted}. {dict.home.rights_reserved}
           </p>
           <div className="flex justify-center gap-6">
-            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">Terms</Link>
-            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.terms || 'Terms'}</Link>
+            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.privacy || 'Privacy'}</Link>
           </div>
         </div>
       </footer>
     </main>
   );
 }
+

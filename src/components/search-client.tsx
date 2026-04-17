@@ -12,9 +12,10 @@ import { cn } from "@/lib/utils";
 interface SearchClientProps {
   query: string;
   initialProducts: any[];
+  dict: any;
 }
 
-export function SearchClient({ query, initialProducts }: SearchClientProps) {
+export function SearchClient({ query, initialProducts, dict }: SearchClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high">("newest");
@@ -29,9 +30,9 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
     });
 
   const sortOptions = [
-    { label: "Newest Arrivals", value: "newest" },
-    { label: "Price: Low to High", value: "price-low" },
-    { label: "Price: High to Low", value: "price-high" }
+    { label: dict.home.newest_arrivals, value: "newest" },
+    { label: dict.home.price_low_high, value: "price-low" },
+    { label: dict.home.price_high_low, value: "price-high" }
   ];
 
   return (
@@ -41,14 +42,14 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
         <div className="space-y-2">
           <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary flex flex-wrap items-center gap-x-3 gap-y-1">
             {query ? (
-              <>Results for <span className="text-accent italic serif brightness-90">"{query}"</span></>
+              <>{dict.home.search_results_for} <span className="text-accent italic serif brightness-90">"{query}"</span></>
             ) : (
-              <>Explore <span className="text-accent italic serif brightness-90">Our Collection</span></>
+              <>{(dict.home.explore_title_base || dict.home.explore_collection_title?.split(' ')[0])} <span className="text-accent italic serif brightness-90">{(dict.home.explore_title_accent || dict.home.explore_collection_title?.split(' ').slice(1).join(' '))}</span></>
             )}
           </h1>
           <p className="text-charcoal/40 text-xs md:text-base font-medium flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            Found {filteredProducts.length} unique treasures
+            {dict.home.found_treasures.replace('{count}', filteredProducts.length.toString())}
           </p>
         </div>
 
@@ -63,8 +64,8 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
             )}
           >
             <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4" /> 
-            <span className="hidden sm:inline">Verified Only</span>
-            <span className="sm:hidden">Verified</span>
+            <span className="hidden sm:inline">{dict.home.verified_only}</span>
+            <span className="sm:hidden">{dict.home.verified}</span>
           </button>
           
           <div className="relative flex-1 md:flex-none">
@@ -74,7 +75,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
             >
               <ArrowUpDown className="w-3 h-3 md:w-4 md:h-4" /> 
               <span className="hidden sm:inline">{sortOptions.find(o => o.value === sortBy)?.label}</span>
-              <span className="sm:hidden">Sort</span>
+              <span className="sm:hidden">{dict.home.sort}</span>
             </button>
 
             <AnimatePresence>
@@ -83,7 +84,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 w-48 md:w-64 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
+                  className="absolute end-0 top-full mt-2 w-48 md:w-64 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-[100]"
                 >
                   {sortOptions.map(option => (
                     <button
@@ -93,7 +94,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                         setShowSortOptions(false);
                       }}
                       className={cn(
-                        "w-full text-left px-4 py-3 rounded-xl text-[10px] md:text-sm font-bold transition-all",
+                        "w-full text-start px-4 py-3 rounded-xl text-[10px] md:text-sm font-bold transition-all",
                         sortBy === option.value ? "bg-primary/5 text-primary" : "text-charcoal/60 hover:bg-cream hover:text-primary"
                       )}
                     >
@@ -113,8 +114,8 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
             <Search className="w-10 h-10 text-primary/10" />
           </div>
           <div className="space-y-3">
-            <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">No treasures found...</h2>
-            <p className="text-charcoal/40 text-xs md:text-base leading-relaxed">We couldn't find anything matching your search. Try adjusting your keywords or browse our top categories.</p>
+            <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">{dict.home.no_treasures_found}</h2>
+            <p className="text-charcoal/40 text-xs md:text-base leading-relaxed">{dict.home.no_treasures_desc}</p>
           </div>
           <div className="flex flex-wrap gap-2 justify-center pt-4">
             {["Vase", "Jewelry", "Handmade", "Wedding"].map(tag => (
@@ -149,7 +150,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                         toggleFavorite(p);
                       }}
                       className={cn(
-                        "absolute top-2 right-2 md:top-6 md:right-6 p-2 md:p-4 rounded-full transition-all active:scale-75 shadow-lg",
+                        "absolute top-2 end-2 md:top-6 md:end-6 p-2 md:p-4 rounded-full transition-all active:scale-75 shadow-lg",
                         isFavorite(p.id)
                           ? "bg-red-50 text-red-500 opacity-100"
                           : "bg-white/90 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
@@ -168,7 +169,7 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
                     <h3 className="text-sm md:text-2xl font-heading font-bold text-primary leading-tight group-hover:text-accent transition-colors truncate">
                       {p.name}
                     </h3>
-                    <p className="text-xs md:text-xl font-heading font-bold text-primary">EGP {p.price}</p>
+                    <p className="text-xs md:text-xl font-heading font-bold text-primary">{dict.product.currency} {p.price}</p>
                   </div>
                 </Link>
               </motion.div>
@@ -180,19 +181,20 @@ export function SearchClient({ query, initialProducts }: SearchClientProps) {
       {/* More Discovery */}
       <section className="py-20 md:py-32 border-t border-primary/5 mt-20 md:mt-32 bg-cream text-center relative overflow-hidden -mx-4 md:-mx-12 px-6">
         <div className="container mx-auto max-w-2xl space-y-6 md:space-y-10 relative z-10">
-          <h2 className="text-3xl md:text-6xl font-heading font-bold text-primary">Not what you're looking for?</h2>
+          <h2 className="text-3xl md:text-6xl font-heading font-bold text-primary">{dict.home.not_found_title}</h2>
           <p className="text-charcoal/60 text-base md:text-lg leading-relaxed max-w-md mx-auto">
-            Our artisans thrive on custom commissions. Start a conversation with a master maker today.
+            {dict.home.custom_commissions_desc}
           </p>
           <Link href="/artisans">
             <button className="h-14 md:h-16 px-8 md:px-16 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group active:scale-95 duration-200">
-              Explore Custom Makers
-              <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+              {dict.home.explore_custom_makers}
+              <span className="inline-block ms-2 group-hover:translate-x-1 transition-transform">→</span>
             </button>
           </Link>
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </section>
     </div>
   );
 }
+

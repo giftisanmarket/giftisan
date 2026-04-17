@@ -83,3 +83,4 @@ export function SalesChart({ sales, tickFormatter }: SalesChartProps) {
     </div>
   );
 }
+

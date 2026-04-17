@@ -1,6 +1,41 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const locales = ['en', 'ar'];
+const defaultLocale = 'en';
+
+/**
+ * Parse the Accept-Language header and return the best matching supported locale.
+ * Respects quality values (q=...) so the browser's preferred order is honoured.
+ * Example header: "ar,en-US;q=0.9,en;q=0.8,fr;q=0.7"
+ */
+function getLocale(request: NextRequest): string {
+  const cookieLocale = request.cookies.get('NEXT_LOCALE');
+  if (cookieLocale && locales.includes(cookieLocale.value)) {
+    return cookieLocale.value;
+  }
+
+  const acceptLanguage = request.headers.get('accept-language');
+  if (!acceptLanguage) return defaultLocale;
+
+  // Parse "lang;q=value" pairs, sort by quality descending
+  const parsed = acceptLanguage
+    .split(',')
+    .map((part) => {
+      const [lang, q] = part.trim().split(';q=');
+      return { lang: lang.trim(), q: q ? parseFloat(q) : 1.0 };
+    })
+    .sort((a, b) => b.q - a.q);
+
+  // Find the first supported locale (compare by primary language tag, e.g. "ar" from "ar-EG")
+  for (const { lang } of parsed) {
+    const primary = lang.split('-')[0].toLowerCase();
+    if (locales.includes(primary)) return primary;
+  }
+
+  return defaultLocale;
+}
+
 export default function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   
@@ -9,15 +44,27 @@ export default function proxy(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/fonts') ||
+    pathname.startsWith('/images') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
   }
 
+  // 2. Internationalization Redirection
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  );
+
+  if (!pathnameHasLocale) {
+    const locale = getLocale(request);
+    const newUrl = new URL(`/${locale}${pathname}${request.nextUrl.search}`, request.url);
+    return NextResponse.redirect(newUrl);
+  }
+
   const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
   const isDevBypass = request.cookies.get('dev_bypass')?.value === 'active' || searchParams.get('dev') === 'true';
 
-  // 2. Handle Developer Bypass
+  // 3. Handle Developer Bypass
   if (searchParams.get('dev') === 'true') {
     const response = NextResponse.next();
     response.cookies.set('dev_bypass', 'active', { 
@@ -30,22 +77,29 @@ export default function proxy(request: NextRequest) {
     return response;
   }
 
-  // 3. Normal Mode or Bypass
+  // 4. Normal Mode or Bypass
   if (!isMaintenanceMode || isDevBypass) {
     return NextResponse.next();
   }
 
-  // 4. Maintenance Mode Logic
+  // 5. Maintenance Mode Logic - needs to handle locale prefix
+  const purePathname = locales.reduce((acc, locale) => {
+    if (acc.startsWith(`/${locale}/`)) return acc.replace(`/${locale}/`, '/');
+    if (acc === `/${locale}`) return '/';
+    return acc;
+  }, pathname);
+
   const isAllowedInMaintenance = 
-    pathname === '/maintenance' ||
-    pathname.startsWith('/admin');
+    purePathname === '/maintenance' ||
+    purePathname.startsWith('/admin');
 
   if (isAllowedInMaintenance) {
     return NextResponse.next();
   }
 
-  // 5. Redirect everything else to maintenance
-  return NextResponse.redirect(new URL('/maintenance', request.url));
+  // 6. Redirect everything else to maintenance (with locale)
+  const currentLocale = locales.find(l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`) || defaultLocale;
+  return NextResponse.redirect(new URL(`/${currentLocale}/maintenance`, request.url));
 }
 
 export const config = {

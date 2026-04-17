@@ -234,13 +234,13 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                           )}
 
                           {resolutions[idx] && (
-                            <div className="absolute top-4 left-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-tighter">
+                            <div className="absolute top-4 start-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-tighter">
                               {resolutions[idx]}
                             </div>
                           )}
 
                           {img && (img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i)) && (
-                            <div className="absolute top-4 right-4 z-20 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
+                            <div className="absolute top-4 end-4 z-20 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
                               <Video className="w-3 h-3 text-white" />
                             </div>
                           )}
@@ -453,7 +453,7 @@ function CategoryDropdown({ value, onChange, disabled = false }: { value: string
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 5, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute left-0 right-0 top-full bg-white border border-primary/10 rounded-2xl shadow-2xl z-[120] py-2 overflow-hidden overflow-y-auto max-h-[200px] custom-scrollbar border-b-4 border-b-accent/20"
+              className="absolute start-0 end-0 top-full bg-white border border-primary/10 rounded-2xl shadow-2xl z-[120] py-2 overflow-hidden overflow-y-auto max-h-[200px] custom-scrollbar border-b-4 border-b-accent/20"
             >
               {categories.map((cat) => (
                 <button
@@ -464,7 +464,7 @@ function CategoryDropdown({ value, onChange, disabled = false }: { value: string
                     setIsOpen(false);
                   }}
                   className={cn(
-                    "w-full px-5 py-3 text-left text-[13px] font-bold transition-all",
+                    "w-full px-5 py-3 text-start text-[13px] font-bold transition-all",
                     value === cat 
                         ? "bg-primary text-white" 
                         : "text-primary hover:bg-cream/50"
@@ -480,4 +480,5 @@ function CategoryDropdown({ value, onChange, disabled = false }: { value: string
     </div>
   );
 }
+
 

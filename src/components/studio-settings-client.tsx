@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2 } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
-import { updateArtisanProfile } from "@/lib/actions";
+import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function StudioSettingsClient({ artisan }: { artisan: any }) {
+export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: any }) {
   const router = useRouter();
   const { update } = useSession();
   const [studioName, setStudioName] = useState(artisan.studioName || "");
@@ -25,11 +25,34 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   const [facebook, setFacebook] = useState(artisan.facebook || "");
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
-  const [activeSettingsTab, setActiveSettingsTab] = useState("Studio Profile");
+  const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [slug, setSlug] = useState(artisan.slug || "");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+  const [slugAvailability, setSlugAvailability] = useState<'available' | 'taken' | 'idle'>('idle');
+
+  useEffect(() => {
+    if (!slug || slug === artisan.slug) {
+      setSlugAvailability('idle');
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCheckingSlug(true);
+      const res = await checkSlugAvailability(slug, artisan.userId);
+      setIsCheckingSlug(false);
+      
+      if (res.available) {
+        setSlugAvailability('available');
+      } else {
+        setSlugAvailability('taken');
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [slug, artisan.slug, artisan.userId]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,10 +87,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
   };
 
   const navItems = [
-    { icon: User, label: "Studio Profile" },
-    { icon: Palette, label: "Brand Styling" },
-    { icon: Bell, label: "Orders & News" },
-    { icon: Shield, label: "Verification" },
+    { id: "profile", icon: User, label: dict.studio_profile.profile_tab },
+    { id: "branding", icon: Palette, label: dict.studio_profile.brand_tab },
+    { id: "orders", icon: Bell, label: dict.studio_profile.orders_tab },
+    { id: "verify", icon: Shield, label: dict.studio_profile.verify_tab },
   ];
 
   return (
@@ -76,14 +99,16 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         <div className="space-y-6">
           <Link href="/studio" className="inline-flex items-center gap-2 text-primary/40 hover:text-primary transition-colors text-xs font-black uppercase tracking-widest group">
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Studio
+            {dict.studio_profile.back_to_studio}
           </Link>
           <div className="flex items-center gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] w-fit">
-              Artisan Portal
+              {dict.studio_profile.artisan_portal}
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary italic serif leading-tight">Studio <span className="not-italic">Settings</span></h1>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary italic serif leading-tight">
+            {dict.studio_profile.studio_title_base} <span className="not-italic">{dict.studio_profile.studio_title_accent}</span>
+          </h1>
         </div>
       </div>
 
@@ -93,14 +118,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
+            className="fixed bottom-6 end-4 start-4 md:start-auto md:end-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
               <Check className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-black uppercase tracking-widest leading-none">Studio Updated</p>
-              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">Your branding is now live.</p>
+              <p className="text-sm font-black uppercase tracking-widest leading-none">{dict.studio_profile.studio_updated}</p>
+              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">{dict.studio_profile.branding_live}</p>
             </div>
           </motion.div>
         )}
@@ -110,13 +135,13 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-red-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-red-50 backdrop-blur-xl"
+            className="fixed bottom-6 end-4 start-4 md:start-auto md:end-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-red-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-red-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-black uppercase tracking-widest leading-none">Update Failed</p>
+              <p className="text-sm font-black uppercase tracking-widest leading-none">{dict.studio_profile.update_failed}</p>
               <p className="text-[10px] text-red-600/60 mt-1 uppercase font-bold max-w-xs">{errorStatus}</p>
             </div>
           </motion.div>
@@ -127,14 +152,14 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
         <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide sticky top-0 md:relative z-10 bg-cream md:bg-transparent py-2 md:py-0">
           {navItems.map((item) => (
             <button
-              key={item.label}
-              onClick={() => setActiveSettingsTab(item.label)}
-              className={`flex items-center gap-3 px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 active:scale-95 ${activeSettingsTab === item.label
+              key={item.id}
+              onClick={() => setActiveSettingsTab(item.id)}
+              className={`flex items-center gap-3 px-5 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold transition-all whitespace-nowrap md:whitespace-normal group shrink-0 active:scale-95 ${activeSettingsTab === item.id
                   ? "bg-primary text-white shadow-xl shadow-primary/20"
                   : "text-charcoal/40 hover:bg-primary/5 hover:text-primary bg-white border border-primary/5 md:border-transparent md:bg-transparent"
                 }`}
             >
-              <item.icon className={cn("w-4 h-4 md:w-5 md:h-5 transition-transform", activeSettingsTab === item.label ? "scale-110" : "group-hover:scale-110")} />
+              <item.icon className={cn("w-4 h-4 md:w-5 md:h-5 transition-transform", activeSettingsTab === item.id ? "scale-110" : "group-hover:scale-110")} />
               <span className="text-xs md:text-base">{item.label}</span>
             </button>
           ))}
@@ -142,7 +167,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
         <div className="min-h-[600px]">
           <AnimatePresence mode="wait">
-            {activeSettingsTab === "Brand Styling" ? (
+            {activeSettingsTab === "branding" ? (
               <motion.form
                 key="branding"
                 initial={{ opacity: 0, y: 10 }}
@@ -153,8 +178,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
               >
                 <div className="space-y-10 md:space-y-12">
                   <div className="space-y-5 md:space-y-6">
-                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Signature <span className="serif italic">Palette</span></h3>
-                    <p className="text-charcoal/40 text-xs">Choose a brand color for your studio profile accents.</p>
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">
+                      {dict.studio_profile.signature_palette} <span className="serif italic">{dict.studio_profile.palette_accent}</span>
+                    </h3>
+                    <p className="text-charcoal/40 text-xs">{dict.studio_profile.brand_color_desc}</p>
 
                     <div className="flex flex-wrap gap-2.5 md:gap-4">
                       {["#da7b5a", "#1a4332", "#4a90e2", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"].map((color) => (
@@ -175,8 +202,10 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   </div>
 
                   <div className="space-y-5 md:space-y-6">
-                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">Studio <span className="serif italic">Banner</span></h3>
-                    <p className="text-charcoal/40 text-xs">Upload a banner image that reflects your craft.</p>
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary">
+                      {dict.studio_profile.studio_banner} <span className="serif italic">{dict.studio_profile.banner_accent}</span>
+                    </h3>
+                    <p className="text-charcoal/40 text-xs">{dict.studio_profile.banner_desc}</p>
 
                     <div
                       className="relative w-full h-28 md:h-48 rounded-xl md:rounded-[2rem] bg-cream/30 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-center group hover:border-accent/40 transition-all cursor-pointer overflow-hidden active:scale-[0.99]"
@@ -193,7 +222,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center text-primary/20 mb-2 md:mb-3 group-hover:scale-110 transition-transform">
                             <Camera className="w-5 h-5 md:w-6 md:h-6" />
                           </div>
-                          <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest px-4">Select Banner</p>
+                          <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest px-4">{dict.studio_profile.select_banner}</p>
                         </>
                       )}
                       <input
@@ -215,11 +244,11 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                   <div className="p-6 md:p-8 bg-cream/30 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 space-y-4">
                     <h4 className="text-sm font-bold text-primary flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
-                      Preview Theme
+                      {dict.studio_profile.preview_theme}
                     </h4>
                     <div className="flex gap-2">
-                      <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>Button</div>
-                      <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>Outline</div>
+                      <div className="h-8 flex-1 rounded-full text-white flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ backgroundColor: brandColor }}>{dict.studio_profile.button}</div>
+                      <div className="h-8 flex-1 rounded-full border flex items-center justify-center text-[8px] md:text-[10px] font-black uppercase" style={{ borderColor: brandColor, color: brandColor }}>{dict.studio_profile.outline}</div>
                     </div>
                   </div>
                 </div>
@@ -230,12 +259,12 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                     disabled={isSaving}
                     className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base active:scale-95"
                   >
-                    {isSaving ? "Syncing..." : "Save Vision"}
+                    {isSaving ? dict.studio_profile.syncing : dict.studio_profile.save_vision}
                     <Save className="w-5 h-5" />
                   </button>
                 </div>
               </motion.form>
-            ) : activeSettingsTab === "Studio Profile" ? (
+            ) : activeSettingsTab === "profile" ? (
               <motion.form
                 key="profile"
                 initial={{ opacity: 0, y: 10 }}
@@ -271,74 +300,94 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                       </label>
                     </div>
                     <div>
-                      <h3 className="text-xl font-heading font-bold text-primary">{studioName || "Your Studio"}</h3>
-                      <p className="text-charcoal/40 font-bold text-[10px] uppercase tracking-widest">Studio Avatar</p>
+                      <h3 className="text-xl font-heading font-bold text-primary">{studioName || dict.studio_profile.studio_name_placeholder}</h3>
+                      <p className="text-charcoal/40 font-bold text-[10px] uppercase tracking-widest">{dict.studio_profile.studio_avatar}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-8 pt-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Name</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label}</label>
                       <div className="relative">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><User className="w-4 h-4" /></span>
+                        <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><User className="w-4 h-4" /></span>
                         <input
                           type="text"
                           value={studioName || ""}
                           onChange={(e) => setStudioName(e.target.value)}
-                          className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                          placeholder="Your Studio Name"
+                          className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                          placeholder={dict.studio_profile.studio_name_placeholder}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4 flex items-center gap-2">
-                        Studio URL Slug
-                        <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">Permanent Link</span>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center gap-2">
+                        {dict.studio_profile.studio_slug_label}
+                        <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">{dict.studio_profile.studio_slug_permanent}</span>
                       </label>
                       <div className="relative">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
+                        <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
                         <input
                           type="text"
                           value={slug || ""}
-                          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/ /g, "-"))}
-                          className="w-full h-16 pl-12 pr-8 rounded-2xl bg-white border-2 border-primary/5 focus:border-accent transition-all font-bold text-accent placeholder:text-primary/20"
-                          placeholder="your-custom-slug"
+                          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
+                          className={cn(
+                            "w-full h-16 ps-12 pe-12 rounded-2xl bg-white border-2 transition-all font-bold placeholder:text-primary/20",
+                            slugAvailability === 'available' ? "border-green-500/50 text-green-700 bg-green-50/10" : 
+                            slugAvailability === 'taken' ? "border-red-500/50 text-red-700 bg-red-50/10" : 
+                            "border-primary/5 focus:border-accent text-accent"
+                          )}
+                          placeholder={dict.studio_profile.studio_slug_placeholder}
                         />
+                        <div className="absolute end-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                          {isCheckingSlug ? (
+                            <Loader2 className="w-5 h-5 text-primary/40 animate-spin" />
+                          ) : slugAvailability === 'available' ? (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-100/50 rounded-full border border-green-200">
+                              <Check className="w-3.5 h-3.5 text-green-600" />
+                              <span className="text-[9px] font-black text-green-700 uppercase tracking-widest">{dict.studio_profile.slug_available || "Available"}</span>
+                            </div>
+                          ) : slugAvailability === 'taken' ? (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100/50 rounded-full border border-red-200">
+                              <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                              <span className="text-[9px] font-black text-red-700 uppercase tracking-widest">{dict.studio_profile.slug_taken || "Taken"}</span>
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
-                      <p className="text-[10px] font-bold text-charcoal/40 ml-4">
-                        Your public link: <span className="text-primary italic">www.giftisan.com/artisans/{slug || "your-path"}</span>
+                      <p className="text-[10px] font-bold text-charcoal/40 ms-4">
+                        {dict.studio_profile.public_link} <span className="text-primary italic">www.giftisan.com/artisans/{slug || "your-path"}</span>
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Artisan Bio</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.artisan_bio_label}</label>
                       <textarea
                         value={bio || ""}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full h-32 p-8 rounded-[2rem] bg-cream/30 border border-primary/5 transition-all font-medium text-primary focus:outline-none focus:border-accent resize-none placeholder:text-primary/40"
-                        placeholder="Tell your story..."
+                        placeholder={dict.studio_profile.bio_placeholder}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Studio Location</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaLocationDot className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaLocationDot className="w-4 h-4" /></span>
                           <input
                             type="text"
                             value={location || ""}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="w-full h-14 md:h-16 pl-12 pr-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
-                            placeholder="e.g. Cairo, Egypt"
+                            className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
+                            placeholder={dict.studio_profile.location_placeholder}
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Primary Email</label>
-                        <div className="w-full h-14 md:h-16 pl-12 pr-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.primary_email}</label>
+                        <div className="w-full h-14 md:h-16 ps-12 pe-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
                           <span className="truncate w-full">{artisan.user.email}</span>
                         </div>
                       </div>
@@ -346,28 +395,28 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
                     <div className="grid md:grid-cols-2 gap-8 pt-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Instagram Username</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.instagram_handle}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
                           <input
                             type="text"
                             value={instagram || ""}
                             onChange={(e) => setInstagram(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                            placeholder="your.handle"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder={dict.studio_profile.insta_placeholder}
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Portfolio / Website</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.website_url}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
                           <input
                             type="url"
                             value={website || ""}
                             onChange={(e) => setWebsite(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                            placeholder="https://yourpage.com"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder={dict.studio_profile.website_placeholder}
                           />
                         </div>
                       </div>
@@ -375,28 +424,28 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
                     <div className="grid md:grid-cols-2 gap-8 pt-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">TikTok Handle</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.tiktok_handle}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
                           <input
                             type="text"
                             value={tiktok || ""}
                             onChange={(e) => setTiktok(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                            placeholder="your.tiktok"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder={dict.studio_profile.tiktok_placeholder}
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Facebook Profile</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.facebook_profile}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
                           <input
                             type="text"
                             value={facebook || ""}
                             onChange={(e) => setFacebook(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                            placeholder="your.facebook"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder={dict.studio_profile.facebook_placeholder}
                           />
                         </div>
                       </div>
@@ -404,15 +453,15 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
 
                     <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Pinterest Username</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.pinterest_username}</label>
                         <div className="relative">
-                          <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
                           <input
                             type="text"
                             value={pinterest || ""}
                             onChange={(e) => setPinterest(e.target.value)}
-                            className="w-full h-16 pl-12 pr-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
-                            placeholder="your.pinterest"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            placeholder={dict.studio_profile.pinterest_placeholder}
                           />
                         </div>
                       </div>
@@ -426,7 +475,7 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                     disabled={isSaving}
                     className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl md:shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-base"
                   >
-                    {isSaving ? "Syncing..." : "Save Studio Branding"}
+                    {isSaving ? dict.studio_profile.syncing : dict.studio_profile.save_branding}
                     <Save className="w-5 h-5" />
                   </button>
                 </div>
@@ -440,19 +489,19 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
                 className="bg-white p-20 rounded-[3rem] border border-primary/5 shadow-2xl flex flex-col items-center justify-center text-center space-y-6"
               >
                 <div className="w-24 h-24 bg-cream rounded-3xl flex items-center justify-center text-primary/20">
-                  {activeSettingsTab === "Brand Styling" && <Palette className="w-12 h-12" />}
-                  {activeSettingsTab === "Orders & News" && <Bell className="w-12 h-12" />}
-                  {activeSettingsTab === "Verification" && <Shield className="w-12 h-12" />}
+                  {activeSettingsTab === "branding" && <Palette className="w-12 h-12" />}
+                  {activeSettingsTab === "orders" && <Bell className="w-12 h-12" />}
+                  {activeSettingsTab === "verify" && <Shield className="w-12 h-12" />}
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-3xl font-heading font-bold text-primary">Coming Soon</h3>
-                  <p className="text-charcoal/40 max-w-sm">We're building premium {activeSettingsTab.toLowerCase()} tools to help you grow your artisan brand.</p>
+                  <h3 className="text-3xl font-heading font-bold text-primary">{dict.studio_profile.coming_soon}</h3>
+                  <p className="text-charcoal/40 max-w-sm">{dict.studio_profile.building_tools.replace('{tab}', (navItems.find(i => i.id === activeSettingsTab)?.label || activeSettingsTab).toLowerCase())}</p>
                 </div>
                 <button
-                  onClick={() => setActiveSettingsTab("Studio Profile")}
+                  onClick={() => setActiveSettingsTab("profile")}
                   className="px-8 h-12 bg-primary/5 text-primary font-bold rounded-full hover:bg-primary hover:text-white transition-all"
                 >
-                  Back to Profile
+                  {dict.studio_profile.back_to_profile}
                 </button>
               </motion.div>
             )}
@@ -462,3 +511,4 @@ export function StudioSettingsClient({ artisan }: { artisan: any }) {
     </div>
   );
 }
+

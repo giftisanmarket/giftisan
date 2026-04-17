@@ -8,12 +8,13 @@ import { motion } from "framer-motion";
 
 interface ArtisansClientProps {
   artisans: any[];
+  dict: any;
 }
 
-export function ArtisansClient({ artisans }: ArtisansClientProps) {
+export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
   return (
     <main className="min-h-screen bg-cream">
-      <Navbar />
+      <Navbar dict={dict} />
 
       <div className="container mx-auto px-4 pt-40 pb-20">
         <div className="text-center mb-20 space-y-6">
@@ -22,13 +23,13 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-xs font-black uppercase tracking-[0.2em]"
           >
-            <Sparkles className="w-4 h-4" /> The Master Registry
+            <Sparkles className="w-4 h-4" /> {dict.home.artisans_registry}
           </motion.div>
           <h1 className="text-5xl md:text-7xl font-heading font-bold text-primary">
-            Meet the <span className="serif italic font-normal text-accent">Masters</span>
+            {dict.home.artisans_meet_masters_prefix} <span className="serif italic font-normal text-accent">{dict.home.artisans_meet_masters_suffix}</span>
           </h1>
           <p className="text-charcoal/40 max-w-2xl mx-auto text-lg">
-            Discover the independent studios and skilled artisans behind the world's most unique handcrafted treasures.
+            {dict.home.artisans_desc}
           </p>
         </div>
 
@@ -68,7 +69,7 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
                     <div className="pt-8 border-t border-primary/5 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-primary/30 uppercase tracking-widest mb-1">Treasures</span>
+                          <span className="text-[10px] font-black text-primary/30 uppercase tracking-widest mb-1">{dict.home.found_treasures.split(' ')[2]}</span>
                           <span className="text-sm font-bold text-primary flex items-center gap-1">
                             <ShoppingBag className="w-3 h-3 text-accent" />
                             {artisan.products.length}
@@ -82,7 +83,7 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
                   </div>
                   
                   {/* Decorative background element */}
-                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute -bottom-10 -end-10 w-40 h-40 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </Link>
             </motion.div>
@@ -92,3 +93,4 @@ export function ArtisansClient({ artisans }: ArtisansClientProps) {
     </main>
   );
 }
+

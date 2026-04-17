@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Lock, ArrowRight, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Lock, ArrowRight, CheckCircle, AlertCircle, Sparkles, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { resetPasswordAction } from "@/lib/actions";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-export function ResetPasswordClient() {
+export function ResetPasswordClient({ dict }: { dict: any }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -22,15 +24,15 @@ export function ResetPasswordClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      setError("Missing reset token. Please request a new one.");
+      setError(dict.auth.missing_token_error);
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match.", { id: "validation-error" });
+      toast.error(dict.auth.passwords_mismatch, { id: "validation-error" });
       return;
     }
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long.", { id: "validation-error" });
+      toast.error(dict.auth.password_too_short, { id: "validation-error" });
       return;
     }
 
@@ -69,24 +71,24 @@ export function ResetPasswordClient() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white/10 backdrop-blur-xl p-12 rounded-[3rem] border border-white/20 shadow-2xl"
           >
-            <h2 className="text-4xl font-heading font-bold text-white mb-6">Securing the Circle.</h2>
+            <h2 className="text-4xl font-heading font-bold text-white mb-6">{dict.auth.securing_circle_title}</h2>
             <p className="text-white/80 text-lg max-w-sm leading-relaxed">
-              Almost there. Choose a strong, memorable secret to keep your treasures and studio safe.
+              {dict.auth.securing_circle_desc}
             </p>
           </motion.div>
         </div>
       </div>
 
       {/* Form Side */}
-      <div className="flex flex-col justify-center items-center py-16 px-6 md:p-20 relative overflow-y-auto">
+      <div className="flex flex-col justify-center items-center py-16 px-6 md:p-20 relative">
         <Link 
           href="/login" 
-          className="md:absolute md:top-12 md:left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10 mb-8 md:mb-0 self-start md:self-auto"
+          className="md:absolute md:top-12 md:start-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10 mb-8 md:mb-0 self-start md:self-auto"
         >
           <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5 active:scale-90">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          <span className="text-xs md:text-sm">Back to Login</span>
+          <span className="text-xs md:text-sm">{dict.auth.back_to_login}</span>
         </Link>
 
         <motion.div 
@@ -94,9 +96,9 @@ export function ResetPasswordClient() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md space-y-8 md:space-y-12"
         >
-          <div className="space-y-3 md:space-y-4 text-center md:text-left">
-            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Choose <span className="serif italic font-normal text-accent">Wisely</span></h1>
-            <p className="text-xs md:text-base text-charcoal/60">Craft a new key to unlock your journey. Make it robust and unique.</p>
+          <div className="space-y-3 md:space-y-4 text-center md:text-start">
+            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">{dict.auth.choose_wisely_title} <span className="serif italic font-normal text-accent">{dict.auth.choose_wisely_subtitle}</span></h1>
+            <p className="text-xs md:text-base text-charcoal/60">{dict.auth.choose_wisely_desc}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -121,41 +123,55 @@ export function ResetPasswordClient() {
                 {!token && (
                   <div className="p-5 bg-accent/5 border border-accent/10 rounded-2xl flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-accent" />
-                    <p className="text-xs text-accent font-black uppercase tracking-widest">No token found! Use the link in your email.</p>
+                    <p className="text-xs text-accent font-black uppercase tracking-widest">{dict.auth.no_token_warning}</p>
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">New Password</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.new_password_label}</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
+                    <div className="absolute start-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
                       <Lock className="w-5 h-5 transition-none" />
                     </div>
                     <input 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-14 md:h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
+                      className="w-full h-14 md:h-16 ps-14 pe-14 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute end-5 top-1/2 -translate-y-1/2 text-primary/20 hover:text-accent transition-colors z-20"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Confirm Secret</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.confirm_password_label}</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
+                    <div className="absolute start-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
                       <CheckCircle className="w-5 h-5 transition-none" />
                     </div>
                     <input 
-                      type="password" 
+                      type={showConfirmPassword ? "text" : "password"} 
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-14 md:h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
+                      className="w-full h-14 md:h-16 ps-14 pe-14 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute end-5 top-1/2 -translate-y-1/2 text-primary/20 hover:text-accent transition-colors z-20"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
                 </div>
 
@@ -164,7 +180,7 @@ export function ResetPasswordClient() {
                   disabled={isLoading || !token}
                   className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
                 >
-                  {isLoading ? "Rewriting Key..." : "Seal New Password"}
+                  {isLoading ? dict.auth.rewriting_key : dict.auth.seal_password}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </motion.form>
@@ -179,9 +195,9 @@ export function ResetPasswordClient() {
                   <CheckCircle className="w-12 h-12" />
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-3xl font-heading font-bold text-primary">Success!</h3>
+                  <h3 className="text-3xl font-heading font-bold text-primary">{dict.auth.success_reset_title}</h3>
                   <p className="text-charcoal/60 leading-relaxed italic serif">
-                    Your password has been reset. Returning you to the login portal...
+                    {dict.auth.success_reset_desc}
                   </p>
                 </div>
               </motion.div>
@@ -192,3 +208,4 @@ export function ResetPasswordClient() {
     </main>
   );
 }
+

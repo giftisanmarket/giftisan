@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, User, Lock, ArrowRight, Paintbrush, ShoppingBag } from "lucide-react";
+import { ArrowLeft, User, Lock, ArrowRight, Paintbrush, ShoppingBag, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { signUp } from "@/lib/actions";
@@ -10,11 +10,12 @@ import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { signIn as socialSignIn } from "next-auth/react";
 
-export function SignupClient() {
+export function SignupClient({ dict }: { dict: any }) {
   const [role, setRole] = useState<"CLIENT" | "ARTISAN">("CLIENT");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -47,20 +48,22 @@ export function SignupClient() {
   };
 
   return (
-    <main className="min-h-screen bg-cream flex flex-col justify-center items-center py-12 px-6 md:p-20 relative overflow-x-hidden">
+    <main className="min-h-screen bg-cream flex flex-col justify-center items-center py-12 px-6 md:p-20 relative">
       <Link 
         href="/" 
-        className="absolute top-12 left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
+        className="absolute top-12 start-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
       >
         <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5">
           <ArrowLeft className="w-4 h-4" />
         </div>
-        Home
+        {dict.auth.back_to_shop}
       </Link>
 
       {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-50 md:opacity-100" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 opacity-50 md:opacity-100" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 end-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-50 md:opacity-100" />
+        <div className="absolute bottom-0 start-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 opacity-50 md:opacity-100" />
+      </div>
 
       <motion.div 
         layout
@@ -78,8 +81,13 @@ export function SignupClient() {
               className="space-y-8 md:space-y-12"
             >
               <div className="space-y-4 text-center">
-                <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Join the <span className="serif italic font-normal text-accent">Circle</span></h1>
-                <p className="text-sm md:text-base text-charcoal/60">Choose how you want to participate in our craftsmanship community.</p>
+                <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">
+                  {(dict.auth.signup_title_base || dict.auth.signup_title?.split(' ')[0])}{" "}
+                  <span className="serif italic font-normal text-accent">
+                    {(dict.auth.signup_title_accent || dict.auth.signup_title?.split(' ').slice(1).join(' '))}
+                  </span>
+                </h1>
+                <p className="text-sm md:text-base text-charcoal/60">{dict.auth.signup_subtitle}</p>
               </div>
 
               <button 
@@ -88,7 +96,7 @@ export function SignupClient() {
                 className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-sm md:text-base"
               >
                 <FcGoogle className="w-6 h-6" />
-                Sign up with Google
+                {dict.auth.signup_google}
               </button>
 
               <div className="relative py-2">
@@ -96,7 +104,7 @@ export function SignupClient() {
                   <div className="w-full border-t border-primary/5"></div>
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-black">
-                  <span className="bg-white px-4 text-primary/20 italic serif">Or choose your path</span>
+                  <span className="bg-white px-4 text-primary/20 italic serif">{dict.auth.signup_path}</span>
                 </div>
               </div>
 
@@ -117,8 +125,8 @@ export function SignupClient() {
                     <ShoppingBag className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
                   <div>
-                    <h3 className="text-lg md:text-xl font-heading font-bold text-primary mb-1 md:mb-2">Treasure Hunter</h3>
-                    <p className="text-[10px] md:text-sm text-charcoal/50 leading-relaxed">I want to discover and collect unique, handcrafted pieces.</p>
+                    <h3 className="text-lg md:text-xl font-heading font-bold text-primary mb-1 md:mb-2">{dict.auth.signup_treasure_hunter}</h3>
+                    <p className="text-[10px] md:text-sm text-charcoal/50 leading-relaxed">{dict.auth.signup_treasure_hunter_desc}</p>
                   </div>
                 </button>
 
@@ -138,8 +146,8 @@ export function SignupClient() {
                     <Paintbrush className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
                   <div>
-                    <h3 className="text-lg md:text-xl font-heading font-bold text-primary mb-1 md:mb-2">Master Artisan</h3>
-                    <p className="text-[10px] md:text-sm text-charcoal/50 leading-relaxed">I want to open a studio and share my creations with the world.</p>
+                    <h3 className="text-lg md:text-xl font-heading font-bold text-primary mb-1 md:mb-2">{dict.auth.signup_master_artisan}</h3>
+                    <p className="text-[10px] md:text-sm text-charcoal/50 leading-relaxed">{dict.auth.signup_master_artisan_desc}</p>
                   </div>
                 </button>
               </div>
@@ -148,7 +156,7 @@ export function SignupClient() {
                 onClick={() => setStep(2)}
                 className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group text-sm md:text-base"
               >
-                Set My Purpose
+                {dict.auth.signup_set_purpose}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </motion.div>
@@ -165,18 +173,18 @@ export function SignupClient() {
                   onClick={() => setStep(1)}
                   className="text-[10px] font-bold text-accent uppercase tracking-widest hover:underline mb-2 block"
                 >
-                  ← Previous step
+                  ← {dict.auth.signup_previous}
                 </button>
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary italic serif">Your <span className="not-italic">{role === "ARTISAN" ? "Studio" : "Account"}</span> Details</h2>
-                <p className="text-sm md:text-base text-charcoal/60">Fill in your information to complete the onboarding.</p>
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary italic serif">{dict.auth.signup_details.replace('{role}', role === "ARTISAN" ? dict.auth.signup_studio : dict.auth.signup_account)}</h2>
+                <p className="text-sm md:text-base text-charcoal/60">{dict.auth.signup_onboarding_desc}</p>
               </div>
 
               <form onSubmit={handleNext} className="space-y-5 md:space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-1">Full Name</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.signup_full_name}</label>
                   <input 
                     type="text" 
-                    placeholder="Marcus Rossi"
+                    placeholder={dict.auth.signup_name_placeholder}
                     className="w-full h-14 md:h-16 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -185,10 +193,10 @@ export function SignupClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.login_email_label}</label>
                   <input 
                     type="email" 
-                    placeholder="marcus@studio.com"
+                    placeholder={dict.auth.login_email_placeholder}
                     className="w-full h-14 md:h-16 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -197,15 +205,24 @@ export function SignupClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-1">Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••"
-                    className="w-full h-14 md:h-16 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    required
-                  />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.login_password_label}</label>
+                  <div className="relative group">
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••"
+                      className="w-full h-14 md:h-16 ps-6 pe-14 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base relative z-0"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute end-5 top-1/2 -translate-y-1/2 text-primary/20 hover:text-accent transition-colors z-20"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (
@@ -219,7 +236,7 @@ export function SignupClient() {
                   disabled={isLoading}
                   className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
                 >
-                  {isLoading ? "Creating Your Studio..." : "Create My Presence"}
+                  {isLoading ? dict.auth.signup_creating : dict.auth.signup_create_presence}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
@@ -228,10 +245,11 @@ export function SignupClient() {
         </AnimatePresence>
 
         <p className="text-center text-charcoal/40 font-medium mt-10 md:mt-12 text-sm">
-          Already a member?{" "}
-          <Link href="/login" className="text-accent font-bold hover:underline">Sign in</Link>
+          {dict.auth.signup_already_member}{" "}
+          <Link href="/login" className="text-accent font-bold hover:underline">{dict.auth.signup_sign_in}</Link>
         </p>
       </motion.div>
     </main>
   );
 }
+

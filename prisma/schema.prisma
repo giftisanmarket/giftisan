@@ -149,6 +149,7 @@ model Product {
   category       String
   tags           String[]
   canPersonalize Boolean  @default(false)
+  personalizationPrompt String? // Instruction for the buyer (e.g. "Enter name for engraving")
   badge          String?
   stock          Int      @default(1)
   

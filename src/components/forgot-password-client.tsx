@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { sendPasswordResetEmailAction } from "@/lib/actions";
 
-export function ForgotPasswordClient() {
+export function ForgotPasswordClient({ dict }: { dict: any }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,24 +47,24 @@ export function ForgotPasswordClient() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white/10 backdrop-blur-xl p-12 rounded-[3rem] border border-white/20 shadow-2xl"
           >
-            <h2 className="text-4xl font-heading font-bold text-white mb-6">Lost Your Way?</h2>
+            <h2 className="text-4xl font-heading font-bold text-white mb-6">{dict.auth.lost_way_title}</h2>
             <p className="text-white/80 text-lg max-w-sm leading-relaxed">
-              It happens to the best of us. Let's get you back inside the Circle quickly and safely.
+              {dict.auth.lost_way_desc}
             </p>
           </motion.div>
         </div>
       </div>
 
       {/* Form Side */}
-      <div className="flex flex-col justify-center items-center py-20 px-6 md:p-20 relative overflow-y-auto">
+      <div className="flex flex-col justify-center items-center py-20 px-6 md:p-20 relative">
         <Link 
           href="/login" 
-          className="absolute top-12 left-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
+          className="absolute top-12 start-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
         >
           <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          Return to Login
+          {dict.auth.return_to_login}
         </Link>
 
         <motion.div 
@@ -73,8 +73,8 @@ export function ForgotPasswordClient() {
           className="w-full max-w-md space-y-10 md:space-y-12"
         >
           <div className="space-y-4">
-            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">Reset <span className="serif italic font-normal text-accent">Portal</span></h1>
-            <p className="text-sm md:text-base text-charcoal/60">Enter the email associated with your account to receive a secure recovery link.</p>
+            <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary">{dict.auth.reset_portal_title} <span className="serif italic font-normal text-accent">{dict.auth.reset_portal_subtitle}</span></h1>
+            <p className="text-sm md:text-base text-charcoal/60">{dict.auth.reset_portal_desc}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -97,9 +97,9 @@ export function ForgotPasswordClient() {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ml-1">Email Address</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-primary/40 ms-1">{dict.auth.login_email_label}</label>
                   <div className="relative group">
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
+                    <div className="absolute start-5 top-1/2 -translate-y-1/2 text-primary/20 group-focus-within:text-accent transition-colors pointer-events-none z-20">
                       <Mail className="w-5 h-5 transition-none" />
                     </div>
                     <input 
@@ -107,7 +107,7 @@ export function ForgotPasswordClient() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Recover@circle.com"
-                      className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm relative z-0"
+                      className="w-full h-16 ps-14 pe-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm relative z-0"
                       required
                     />
                   </div>
@@ -118,7 +118,7 @@ export function ForgotPasswordClient() {
                   disabled={isLoading}
                   className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
                 >
-                  {isLoading ? "Generating Link..." : "Send Recovery Link"}
+                  {isLoading ? dict.auth.generating_link : dict.auth.send_recovery_link}
                   <Send className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
                 </button>
               </motion.form>
@@ -133,9 +133,9 @@ export function ForgotPasswordClient() {
                   <Sparkles className="w-12 h-12" />
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-heading font-bold text-primary">Check Your Inbox</h3>
+                  <h3 className="text-2xl font-heading font-bold text-primary">{dict.auth.check_inbox_title}</h3>
                   <p className="text-charcoal/60 leading-relaxed italic serif">
-                    If an account exists for {email}, a secure link has been sent. It will stay active for exactly one hour.
+                    {dict.auth.check_inbox_desc.replace('{email}', email)}
                   </p>
                 </div>
                 <div className="pt-8">
@@ -143,7 +143,7 @@ export function ForgotPasswordClient() {
                     href="/login"
                     className="inline-flex items-center justify-center px-10 h-14 bg-white border border-primary/10 text-primary font-bold rounded-full hover:bg-primary/5 transition-all shadow-sm"
                   >
-                    Return to Login
+                    {dict.auth.return_to_login}
                   </Link>
                 </div>
               </motion.div>
@@ -151,11 +151,12 @@ export function ForgotPasswordClient() {
           </AnimatePresence>
 
           <p className="text-center text-charcoal/40 font-medium mt-8">
-            Remembered your password?{" "}
-            <Link href="/login" className="text-accent font-bold hover:underline">Try again</Link>
+            {dict.auth.remembered_password}{" "}
+            <Link href="/login" className="text-accent font-bold hover:underline">{dict.auth.try_again}</Link>
           </p>
         </motion.div>
       </div>
     </main>
   );
 }
+

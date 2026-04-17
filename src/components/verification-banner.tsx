@@ -6,7 +6,16 @@ import { AlertTriangle, Mail, X } from "lucide-react";
 import { useState } from "react";
 import { resendVerificationEmailAction } from "@/lib/actions";
 
-export function VerificationBanner() {
+export function VerificationBanner({ dict }: { dict?: any }) {
+  const d = dict || {
+    common: {
+      account_unverified: "Account Unverified:",
+      check_email_to_verify: "Please check {email} to verify and unlock features.",
+      email_sent: "Email Sent!",
+      sending: "Sending...",
+      resend_link: "Resend Link"
+    }
+  };
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [isResending, setIsResending] = useState(false);
@@ -39,8 +48,8 @@ export function VerificationBanner() {
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-4 h-4 text-white" />
             </div>
-            <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest leading-relaxed text-center md:text-left">
-              Account Unverified: <span className="text-white/70 normal-case font-medium block md:inline">Please check {session.user.email} to verify and unlock features.</span>
+            <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest leading-relaxed text-center md:text-start">
+              {d.common.account_unverified} <span className="text-white/70 normal-case font-medium block md:inline">{d.common.check_email_to_verify.replace('{email}', session.user.email || '')}</span>
             </p>
           </div>
           
@@ -50,7 +59,7 @@ export function VerificationBanner() {
               disabled={isResending || resent}
               className="text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap px-5 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center gap-2 active:scale-95"
             >
-              {resent ? "Email Sent!" : isResending ? "Sending..." : "Resend Link"}
+              {resent ? d.common.email_sent : isResending ? d.common.sending : d.common.resend_link}
               {!resent && !isResending && <Mail className="w-3 h-3" />}
             </button>
             <button onClick={() => setIsVisible(false)} className="p-1 hover:text-white/60 transition-colors shrink-0">
@@ -62,3 +71,4 @@ export function VerificationBanner() {
     </AnimatePresence>
   );
 }
+

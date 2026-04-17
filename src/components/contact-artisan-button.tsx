@@ -15,9 +15,10 @@ interface ContactArtisanButtonProps {
   productId?: string;
   productName?: string;
   artisanUserId: string;
+  dict: any;
 }
 
-export function ContactArtisanButton({ artisanId, artisanName, productId, productName, artisanUserId }: ContactArtisanButtonProps) {
+export function ContactArtisanButton({ artisanId, artisanName, productId, productName, artisanUserId, dict }: ContactArtisanButtonProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +43,7 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
         setIsOpen(false);
       }, 2000);
     } else {
-      toast.error(res.error || "Failed to send message. Please try again.", {
+      toast.error(res.error || dict.contact_artisan.failed_send, {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     }
@@ -56,7 +57,7 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
         className="flex items-center gap-2 px-6 py-3 bg-white border border-primary/10 rounded-2xl text-sm font-bold text-primary hover:bg-primary/5 hover:border-accent/40 hover:text-accent transition-all shadow-sm"
       >
         <MessageSquare className="w-4 h-4" />
-        Message Artisan
+        {dict.contact_artisan.message_artisan}
       </button>
 
       <AnimatePresence>
@@ -78,8 +79,8 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
             >
               <div className="p-8 border-b border-primary/5 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-heading font-bold text-primary">Inquiry for <span className="text-accent">{artisanName}</span></h3>
-                  {productName && <p className="text-xs text-charcoal/40 font-bold uppercase tracking-widest mt-1">Re: {productName}</p>}
+                  <h3 className="text-xl font-heading font-bold text-primary">{dict.contact_artisan.inquiry_for} <span className="text-accent">{artisanName}</span></h3>
+                  {productName && <p className="text-xs text-charcoal/40 font-bold uppercase tracking-widest mt-1">{dict.contact_artisan.re_product} {productName}</p>}
                 </div>
                 <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-primary/5 rounded-full">
                   <X className="w-5 h-5" />
@@ -92,15 +93,15 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
                     <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
                       <Send className="w-8 h-8" />
                     </div>
-                    <p className="font-bold text-primary text-xl">Message Sent!</p>
-                    <p className="text-charcoal/40 text-sm">The artisan will get back to you soon.</p>
+                    <p className="font-bold text-primary text-xl">{dict.contact_artisan.message_sent}</p>
+                    <p className="text-charcoal/40 text-sm">{dict.contact_artisan.artisan_reply_soon}</p>
                   </div>
                 ) : (
                   <>
                     <textarea 
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Ask about customization, materials, or shipping..."
+                      placeholder={dict.contact_artisan.placeholder}
                       className="w-full h-40 p-5 bg-cream/30 border border-primary/10 rounded-2xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none"
                     />
                     <button 
@@ -108,7 +109,7 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
                       disabled={isLoading || !message.trim()}
                       className="w-full h-14 bg-primary text-white font-bold rounded-xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      {isLoading ? "Sending..." : "Send Message"}
+                      {isLoading ? dict.contact_artisan.sending : dict.contact_artisan.send_message}
                       <Send className="w-4 h-4" />
                     </button>
                   </>
@@ -121,3 +122,4 @@ export function ContactArtisanButton({ artisanId, artisanName, productId, produc
     </>
   );
 }
+

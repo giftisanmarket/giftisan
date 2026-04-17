@@ -1,14 +1,14 @@
 "use client";
 
 import { useCart } from "@/context/cart-context";
-import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "./bespoke-image";
 import { cn } from "@/lib/utils";
 
-export function CartDrawer() {
+export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice } = useCart();
   const hasUnavailableItems = cart.some(item => (item.stock || 0) <= 0);
 
@@ -27,15 +27,15 @@ export function CartDrawer() {
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: "100%" }}
+            initial={{ x: lang === 'ar' ? "-100%" : "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            exit={{ x: lang === 'ar' ? "-100%" : "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-[100dvh] w-full max-w-md bg-cream shadow-2xl z-[101] flex flex-col"
+            className="fixed end-0 top-0 h-[100dvh] w-full max-w-md bg-cream shadow-2xl z-[101] flex flex-col"
           >
             <div className="p-4 md:p-6 border-b border-primary/10 flex justify-between items-center bg-cream/50 backdrop-blur-md sticky top-0 z-20">
               <h2 className="text-xl md:text-2xl font-heading font-bold text-primary flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" /> Your Cart
+                <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" /> {dict.cart.your_cart}
               </h2>
               <button 
                 onClick={() => setIsCartOpen(false)}
@@ -52,18 +52,20 @@ export function CartDrawer() {
                     <ShoppingBag className="w-10 h-10 text-primary/20" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-charcoal/40 font-bold text-lg">Your cart is empty</p>
-                    <button 
+                    <p className="text-charcoal/40 font-bold text-lg">{dict.cart.cart_empty}</p>
+                    <Link 
+                      href={`/${lang}`}
                       onClick={() => setIsCartOpen(false)}
-                      className="text-accent font-black text-[10px] uppercase tracking-widest hover:underline active:scale-95"
+                      className="mt-6 px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-lg shadow-primary/10 flex items-center justify-center gap-2 group active:scale-95 text-xs uppercase tracking-widest"
                     >
-                      Start Gifting →
-                    </button>
+                      {dict.cart.start_gifting}
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" />
+                    </Link>
                   </div>
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id + (item.personalization || "")} className="flex gap-4 group items-start animate-in slide-in-from-right-4 duration-300">
+                  <div key={item.id + (item.personalization || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
                     <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
                       <BespokeImage src={item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
@@ -73,17 +75,17 @@ export function CartDrawer() {
                           <h3 className="font-heading font-bold text-sm md:text-base text-primary leading-tight line-clamp-2 md:line-clamp-1">{item.name}</h3>
                           <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{item.artisan.name}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-bold text-primary text-sm md:text-base">EGP {item.price * item.quantity}</p>
+                        <div className="text-end shrink-0">
+                          <p className="font-bold text-primary text-sm md:text-base">{dict.product.currency} {item.price * item.quantity}</p>
                           {(item.stock || 0) <= 0 && (
-                            <span className="text-[7px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">Sold Out</span>
+                            <span className="text-[7px] font-black text-red-500 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded-sm">{dict.product.sold_out}</span>
                           )}
                         </div>
                       </div>
                       
                       {item.personalization && (
                         <div className="bg-primary/5 border border-primary/5 rounded-xl p-2.5 mt-2">
-                          <p className="text-[8px] text-primary/40 uppercase font-black tracking-tighter mb-0.5">Bespoke Detail:</p>
+                          <p className="text-[8px] text-primary/40 uppercase font-black tracking-tighter mb-0.5">{dict.cart.bespoke_detail}:</p>
                           <p className="text-[10px] text-primary italic leading-tight">"{item.personalization}"</p>
                         </div>
                       )}
@@ -110,7 +112,7 @@ export function CartDrawer() {
                           onClick={() => removeFromCart(item.id, item.personalization)}
                           className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95"
                         >
-                          Remove
+                          {dict.cart.remove}
                         </button>
                       </div>
                     </div>
@@ -122,10 +124,10 @@ export function CartDrawer() {
             {cart.length > 0 && (
               <div className="p-5 md:p-8 border-t border-primary/10 bg-white space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
                 <div className="flex justify-between items-center">
-                  <span className="text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">Subtotal</span>
-                  <span className="font-heading font-bold text-primary text-2xl md:text-3xl">EGP {totalPrice}.00</span>
+                  <span className="text-charcoal/40 font-bold uppercase tracking-widest text-[10px]">{dict.cart.subtotal}</span>
+                  <span className="font-heading font-bold text-primary text-2xl md:text-3xl">{dict.product.currency} {totalPrice}.00</span>
                 </div>
-                <p className="text-[9px] md:text-xs text-charcoal/40 text-center italic">Shipping & taxes calculated at checkout</p>
+                <p className="text-[9px] md:text-xs text-charcoal/40 text-center italic">{dict.cart.shipping_info}</p>
                 <Link 
                   href={hasUnavailableItems ? "#" : "/checkout"}
                   onClick={(e) => {
@@ -142,7 +144,7 @@ export function CartDrawer() {
                       : "bg-primary text-white hover:bg-primary-light shadow-primary/20"
                   )}
                 >
-                  {hasUnavailableItems ? "Please Review Sold Out Items" : "Proceed to Checkout"}
+                  {hasUnavailableItems ? dict.cart.review_unavailable : dict.cart.proceed_to_checkout}
                 </Link>
               </div>
             )}
@@ -152,3 +154,4 @@ export function CartDrawer() {
     </AnimatePresence>
   );
 }
+

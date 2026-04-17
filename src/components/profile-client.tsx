@@ -24,12 +24,13 @@ import { cn } from "@/lib/utils";
 interface ProfileClientProps {
   user: any;
   orders: any[];
+  dict: any;
 }
 
-export function ProfileClient({ user, orders }: ProfileClientProps) {
+export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
   return (
     <main className="min-h-screen bg-cream">
-      <Navbar />
+      <Navbar dict={dict} />
 
       <div className="container mx-auto px-4 pt-24 md:pt-32 pb-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 md:gap-12">
@@ -60,7 +61,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                   >
                     <div className="flex items-center gap-3">
                       <Settings className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
-                      <span>Settings</span>
+                      <span>{dict.profile.settings}</span>
                     </div>
                     <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
                   </Link>
@@ -71,7 +72,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                     >
                       <div className="flex items-center gap-3">
                         <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
-                        <span>Admin</span>
+                        <span>{dict.profile.admin}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
                     </Link>
@@ -82,7 +83,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                   >
                     <div className="flex items-center gap-3">
                       <LogOut className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
-                      <span>Sign Out</span>
+                      <span>{dict.profile.sign_out}</span>
                     </div>
                   </button>
                 </div>
@@ -90,15 +91,16 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
             </div>
 
             <div className="bg-primary text-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-10 shadow-2xl shadow-primary/20">
-              <h3 className="text-lg md:text-xl font-heading font-bold mb-4 md:mb-6">Order Impact</h3>
+              <h3 className="text-lg md:text-xl font-heading font-bold mb-4 md:mb-6">{dict.profile.order_impact}</h3>
               <div className="space-y-4 md:space-y-6">
+Trace
                 <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                  <span className="text-white/60 text-sm">Creations Owned</span>
+                  <span className="text-white/60 text-sm">{dict.profile.creations_owned}</span>
                   <span className="text-xl md:text-2xl font-bold">{orders.length}</span>
                 </div>
                 <div className="p-4 bg-white/10 rounded-2xl">
-                  <p className="text-[10px] text-white/40 uppercase font-black mb-1">Our Mission</p>
-                  <p className="text-[10px] md:text-sm italic leading-relaxed text-white/80">"Supporting independent artisans with every treasure you find."</p>
+                  <p className="text-[10px] text-white/40 uppercase font-black mb-1">{dict.profile.our_mission}</p>
+                  <p className="text-[10px] md:text-sm italic leading-relaxed text-white/80">"{dict.profile.mission_quote}"</p>
                 </div>
               </div>
             </div>
@@ -109,11 +111,16 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
             <section>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4">
                 <div>
-                  <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">Your <span className="serif italic font-normal text-accent">Journey</span></h2>
-                  <p className="text-charcoal/40 text-xs md:text-sm mt-1">Track your handcrafted orders</p>
+                  <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">
+                    {(dict.profile.journey_title_base || dict.profile.your_journey?.split(' ')[0])}{" "}
+                    <span className="serif italic font-normal text-accent">
+                      {(dict.profile.journey_title_accent || dict.profile.your_journey?.split(' ').slice(1).join(' '))}
+                    </span>
+                  </h2>
+                  <p className="text-charcoal/40 text-xs md:text-sm mt-1">{dict.profile.track_orders}</p>
                 </div>
                 <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-accent hover:underline">
-                  Continue Shopping →
+                  {dict.checkout.continue_shopping} →
                 </Link>
               </div>
 
@@ -123,10 +130,10 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                     <div className="w-16 h-16 md:w-20 md:h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-6">
                       <Package className="w-8 h-8 md:w-10 md:h-10 text-primary/20" />
                     </div>
-                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary mb-2">No treasures yet...</h3>
-                    <p className="text-charcoal/40 text-xs md:text-sm max-w-xs mx-auto mb-8">Ready to find your first handcrafted piece?</p>
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-primary mb-2">{dict.profile.no_treasures_yet}</h3>
+                    <p className="text-charcoal/40 text-xs md:text-sm max-w-xs mx-auto mb-8">{dict.profile.ready_find_first}</p>
                     <Link href="/" className="inline-flex items-center justify-center px-8 md:px-10 h-12 md:h-14 bg-primary text-white font-bold rounded-full text-xs transition-all">
-                      Explore Gallery
+                      {dict.profile.explore_gallery}
                     </Link>
                   </div>
                 ) : (
@@ -140,16 +147,16 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                     <div className="p-4 md:p-8 border-b border-primary/5 bg-cream/30 flex flex-wrap justify-between items-center gap-3">
                       <div className="flex flex-wrap gap-4 md:gap-8 overflow-x-auto no-scrollbar scrollbar-hide pb-1">
                           <div className="shrink-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">Reference</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">{dict.profile.reference}</p>
                             <p className="text-xs md:text-sm font-bold text-primary uppercase font-mono tracking-tighter shrink-0">{order.id.slice(0, 8)}</p>
                           </div>
                           <div className="shrink-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">Placed On</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">{dict.profile.placed_on}</p>
                             <p className="text-xs md:text-sm font-bold text-primary shrink-0">{new Date(order.createdAt).toLocaleDateString()}</p>
                           </div>
                           <div className="shrink-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">Total Paid</p>
-                            <p className="text-xs md:text-sm font-bold text-primary shrink-0">EGP {order.totalAmount}</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">{dict.profile.total_paid}</p>
+                            <p className="text-xs md:text-sm font-bold text-primary shrink-0">{dict.product.currency} {order.totalAmount}</p>
                           </div>
                         </div>
                       </div>
@@ -165,7 +172,7 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                 <Link href={`/products/${item.product.slug || item.product.id}`} className="block text-sm md:text-base font-heading font-bold text-primary hover:text-accent transition-colors line-clamp-1">
                                   {item.product.name}
                                 </Link>
-                                <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">Qty: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
+                                <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
                                 
                                 <div className="mt-2 flex flex-wrap items-center gap-2">
                                   <div className={cn(
@@ -174,21 +181,23 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                     item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
                                     "bg-green-50 text-green-600 border-green-200"
                                   )}>
-                                    {item.status}
+                                    {item.status === "PENDING" ? dict.profile.pending :
+                                    item.status === "SHIPPED" ? dict.profile.shipped :
+                                    dict.profile.delivered}
                                   </div>
                                   <Link 
                                     href={`/profile/messages?userId=${item.product.artisan.userId}`}
                                     className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"
                                   >
                                     <MessageCircle className="w-3 h-3" />
-                                    Contact
+                                    {dict.profile.contact}
                                   </Link>
                                 </div>
 
                                 {item.personalization && (
                                   <div className="mt-2 text-[9px] md:text-[10px] italic text-accent flex items-center gap-2">
                                     <span className="w-1 h-1 bg-accent rounded-full shrink-0" />
-                                    <span className="line-clamp-1">Personalized: "{item.personalization}"</span>
+                                    <span className="line-clamp-1">{dict.profile.personalized}: "{item.personalization}"</span>
                                   </div>
                                 )}
                               </div>
@@ -201,13 +210,13 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
                                     <Truck className="w-4 h-4 md:w-5 md:h-5" />
                                   </div>
                                   <div>
-                                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 leading-none mb-1">Carrier</p>
+                                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 leading-none mb-1">{dict.profile.carrier}</p>
                                     <p className="text-xs md:text-sm font-bold text-primary">{item.carrier}</p>
                                   </div>
                                 </div>
                                 <div className="flex flex-col md:items-end w-full md:w-auto border-t md:border-t-0 border-primary/5 pt-3 md:pt-0">
-                                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-left md:text-right">Tracking ID</p>
-                                  <p className="text-xs md:text-sm font-mono font-bold text-primary text-left md:text-right">{item.trackingNumber}</p>
+                                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-start md:text-end">{dict.profile.tracking_id}</p>
+                                  <p className="text-xs md:text-sm font-mono font-bold text-primary text-start md:text-end">{item.trackingNumber}</p>
                                 </div>
                               </div>
                             )}
@@ -225,3 +234,4 @@ export function ProfileClient({ user, orders }: ProfileClientProps) {
     </main>
   );
 }
+

@@ -51,10 +51,10 @@ interface CategoryData {
   count: number;
 }
 
-export function CategoriesClient({ categories }: { categories: CategoryData[] }) {
+export function CategoriesClient({ categories, dict }: { categories: CategoryData[], dict: any }) {
   return (
     <main className="min-h-screen bg-cream">
-      <Navbar />
+      <Navbar dict={dict} />
       
       <section className="pt-24 md:pt-40 pb-20">
         <div className="container mx-auto px-4">
@@ -64,10 +64,10 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
             className="max-w-3xl mb-16"
           >
             <h1 className="text-5xl md:text-6xl font-heading font-bold text-primary mb-6">
-              Browse by <span className="serif italic font-normal text-accent">Collection</span>
+              {dict.home.browse_categories.split(' ')[0]} <span className="serif italic font-normal text-accent">{dict.home.browse_categories.split(' ')[1]}</span>
             </h1>
             <p className="text-xl text-charcoal/60 leading-relaxed font-medium">
-              Explore our curated universe of handcrafted treasures. Every category is a doorway to a world of global craftsmanship and unique stories.
+              {dict.home.category_desc}
             </p>
           </motion.div>
 
@@ -95,16 +95,16 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
                       </div>
                       
                       <h3 className="text-3xl font-heading font-bold text-primary mb-4 group-hover:text-accent transition-colors">
-                        {cat.name}
+                        {dict.common.categories_list?.[slug] || cat.name}
                       </h3>
                       
                       <p className="text-charcoal/60 text-lg leading-relaxed mb-8 flex-1">
-                        {desc}
+                        {dict.common[`${slug.replace(/-/g, '_')}_desc`] || desc}
                       </p>
                       
                       <div className="pt-8 border-t border-primary/5 flex items-center justify-between">
                         <span className="text-xs font-black uppercase tracking-[0.2em] text-primary/30">
-                          {cat.count} {cat.count === 1 ? 'Treasure' : 'Treasures'}
+                          {cat.count} {dict.home.items_count.split(' ')[1]}
                         </span>
                         <div className="w-12 h-12 rounded-full bg-cream border border-primary/10 flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                           <span className="text-xl">→</span>
@@ -122,10 +122,11 @@ export function CategoriesClient({ categories }: { categories: CategoryData[] })
       <footer className="py-12 bg-cream/30 border-t border-primary/5">
         <div className="container mx-auto px-4 text-center">
           <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">
-            © 2026 Giftisan • Proudly Crafted in Egypt • Supporting Egyptian Makers
+            {dict.home.rights_reserved}
           </p>
         </div>
       </footer>
     </main>
   );
 }
+

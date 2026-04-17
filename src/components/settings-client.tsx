@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function SettingsClient({ user }: { user: any }) {
+export function SettingsClient({ user, dict }: { user: any; dict: any }) {
   const router = useRouter();
   const { update } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,11 +89,11 @@ export function SettingsClient({ user }: { user: any }) {
           router.refresh();
         }, 2000);
       } else {
-        toast.error(res.error || "Failed to update profile");
+        toast.error(res.error || dict.common?.error_updating_profile || "Failed to update profile");
       }
     } catch (error) {
       console.error("Save settings error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error(dict.common?.unexpected_error || "An unexpected error occurred. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -106,14 +106,14 @@ export function SettingsClient({ user }: { user: any }) {
     const res = await deleteAccountAction(user.id);
     
     if (res.success) {
-      toast.success("Account deleted successfully.");
+      toast.success(dict.common?.account_deleted_success || "Account deleted successfully.");
       // Perform a clean redirect to home while clearing the session
       await signOut({ 
         redirect: true,
         callbackUrl: "/" 
       });
     } else {
-      setDeleteError(res.error || "Something went wrong.");
+      setDeleteError(res.error || dict.common?.something_went_wrong || "Something went wrong.");
       setIsDeleting(false);
     }
   };
@@ -124,9 +124,9 @@ export function SettingsClient({ user }: { user: any }) {
         <div>
           <Link href="/profile" className="flex items-center gap-2 text-charcoal/40 hover:text-primary transition-colors text-[10px] md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-4 group">
             <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Profile
+            {dict.profile.back_to_profile}
           </Link>
-          <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary italic serif">Account <span className="not-italic">Settings</span></h1>
+          <h1 className="text-3xl md:text-5xl font-heading font-bold text-primary italic serif">{dict.profile.settings_title_base} <span className="not-italic">{dict.profile.settings_title_accent}</span></h1>
         </div>
       </div>
 
@@ -136,14 +136,14 @@ export function SettingsClient({ user }: { user: any }) {
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-6 right-4 left-4 md:left-auto md:right-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
+            className="fixed bottom-6 end-4 start-4 md:start-auto md:end-10 md:bottom-10 z-[200] px-6 md:px-10 py-4 md:py-5 bg-white text-green-600 rounded-3xl md:rounded-[2rem] font-bold flex items-center gap-4 shadow-2xl border border-green-50 backdrop-blur-xl"
           >
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg">
                <Check className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-black uppercase tracking-widest leading-none">Settings Saved</p>
-              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">Your profile is now synced.</p>
+              <p className="text-sm font-black uppercase tracking-widest leading-none">{dict.profile.settings_saved}</p>
+              <p className="text-[10px] text-green-600/60 mt-1 uppercase font-bold">{dict.profile.profile_synced}</p>
             </div>
           </motion.div>
         )}
@@ -169,13 +169,13 @@ export function SettingsClient({ user }: { user: any }) {
                  <Camera className="w-8 h-8 text-white" />
                </div>
              </div>
-             <h3 className="font-heading font-bold text-primary truncate w-full text-base md:text-xl">{name || "Your Name"}</h3>
-             <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">Profile Preview</p>
+             <h3 className="font-heading font-bold text-primary truncate w-full text-base md:text-xl">{name || dict.profile.your_name}</h3>
+             <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">{dict.profile.profile_preview}</p>
           </div>
           
           <div className="p-5 md:p-8 bg-primary rounded-[1.5rem] md:rounded-[2.5rem] text-white space-y-3 md:space-y-4 shadow-xl shadow-primary/10">
-             <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Privacy Note</p>
-             <p className="text-xs md:text-sm leading-relaxed text-white/80 italic">"Your information is only shared with artisans you purchase from to ensure seamless delivery of your treasures."</p>
+             <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40">{dict.profile.privacy_note_title}</p>
+             <p className="text-xs md:text-sm leading-relaxed text-white/80 italic">"{dict.profile.privacy_note_desc}"</p>
           </div>
         </div>
 
@@ -183,26 +183,26 @@ export function SettingsClient({ user }: { user: any }) {
           <form onSubmit={handleSave} className="bg-white rounded-[2rem] md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-10">
             <div className="space-y-5 md:space-y-6">
               <div className="grid gap-1.5 md:gap-2">
-                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Full Name</label>
+                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.auth.signup_full_name}</label>
                 <input 
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full h-14 md:h-16 px-6 md:px-8 bg-cream/30 border border-primary/5 rounded-xl md:rounded-2xl focus:outline-none focus:border-accent transition-all font-bold text-primary placeholder:text-primary/40 text-sm md:text-base active:scale-[0.99]"
-                  placeholder="Enter your name"
+                  placeholder={dict.auth.signup_name_placeholder}
                 />
               </div>
 
               <div className="grid gap-1.5 md:gap-2">
-                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Profile Photo</label>
+                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.profile.profile_photo_label || "Profile Photo"}</label>
                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                   <div className="flex-1 relative">
                     <input 
                       type="text" 
-                      value={image.startsWith('data:') ? 'Custom Photo' : image}
+                      value={image.startsWith('data:') ? (dict.profile.custom_photo || 'Custom Photo') : image}
                       readOnly
                       className="w-full h-14 md:h-16 px-6 md:px-8 bg-cream/10 border border-primary/5 rounded-xl md:rounded-2xl font-bold text-primary/40 cursor-default text-[10px] md:text-sm truncate"
-                      placeholder="No photo"
+                      placeholder={dict.profile.no_photo || "No photo"}
                     />
                   </div>
                   <label className="cursor-pointer group relative">
@@ -215,18 +215,18 @@ export function SettingsClient({ user }: { user: any }) {
                     />
                     <div className="h-14 md:h-16 px-6 md:px-8 bg-accent text-white font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20 text-xs md:text-base active:scale-95">
                       <Camera className="w-5 h-5" />
-                      Upload
+                      {dict.profile.upload_action}
                     </div>
                   </label>
                 </div>
-                <p className="ml-4 text-[9px] text-charcoal/40 italic">JPG/PNG. Max 2MB recommended.</p>
+                <p className="ms-4 text-[9px] text-charcoal/40 italic">{dict.profile.photo_max_size}</p>
               </div>
 
               <div className="grid gap-1.5 md:gap-2">
-                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ml-4">Email Address</label>
+                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.auth.login_email_label}</label>
                  <div className="w-full h-14 md:h-16 px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/40 cursor-not-allowed text-xs md:text-base overflow-hidden">
                   <span className="truncate flex-1">{user.email}</span>
-                  <span className="ml-2 text-[7px] md:text-[8px] px-2 py-0.5 md:py-1 bg-white/50 rounded-md uppercase tracking-widest whitespace-nowrap">Read Only</span>
+                  <span className="ms-2 text-[7px] md:text-[8px] px-2 py-0.5 md:py-1 bg-white/50 rounded-md uppercase tracking-widest whitespace-nowrap">{dict.profile.read_only}</span>
                  </div>
               </div>
             </div>
@@ -237,23 +237,23 @@ export function SettingsClient({ user }: { user: any }) {
                 disabled={isSaving}
                 className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 md:gap-3 shadow-xl shadow-primary/20 disabled:opacity-50 text-xs md:text-base active:scale-95"
               >
-                {isSaving ? "Updating..." : "Save Changes"}
+                {isSaving ? dict.profile.updating_action : dict.profile.save_changes}
                 <Save className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
           </form>
 
           <div className="mt-8 md:mt-12 bg-red-50/50 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 border border-red-100 flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8">
-            <div className="text-center lg:text-left">
-              <h3 className="text-xl font-heading font-bold text-red-900 mb-1 md:mb-2">Danger Zone</h3>
-              <p className="text-xs md:text-sm text-red-700/60 max-w-sm">Permanently delete your account. This action cannot be reversed.</p>
+            <div className="text-center lg:text-start">
+              <h3 className="text-xl font-heading font-bold text-red-900 mb-1 md:mb-2">{dict.profile.danger_zone}</h3>
+              <p className="text-xs md:text-sm text-red-700/60 max-w-sm">{dict.profile.delete_account_desc}</p>
             </div>
             <button 
               type="button"
               onClick={() => setShowDeleteModal(true)}
               className="w-full lg:w-auto px-10 h-14 bg-white border-2 border-red-200 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-lg shadow-red-500/5 disabled:opacity-50 whitespace-nowrap text-sm active:scale-95"
             >
-              Delete Account
+              {dict.profile.delete_account_action}
             </button>
           </div>
         </div>
@@ -275,7 +275,7 @@ export function SettingsClient({ user }: { user: any }) {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-2 bg-red-500" />
+              <div className="absolute top-0 start-0 w-full h-2 bg-red-500" />
               
               <div className="flex justify-between items-start mb-8">
                 <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
@@ -290,9 +290,9 @@ export function SettingsClient({ user }: { user: any }) {
               </div>
 
               <div className="space-y-4 mb-10">
-                <h2 className="text-3xl font-heading font-bold text-primary italic serif">Final <span className="not-italic">Goodbye?</span></h2>
+                <h2 className="text-3xl font-heading font-bold text-primary italic serif">{dict.profile.final_goodbye_base} <span className="not-italic">{dict.profile.final_goodbye_accent}</span></h2>
                 <p className="text-charcoal/60 leading-relaxed font-medium">
-                  Are you absolutely sure? This will permanently delete your account, your treasures, and all your collections. <span className="text-red-600 font-bold">This cannot be undone.</span>
+                  {dict.profile.delete_confirm_desc}
                 </p>
               </div>
 
@@ -307,14 +307,14 @@ export function SettingsClient({ user }: { user: any }) {
                   onClick={() => setShowDeleteModal(false)}
                   className="h-14 bg-cream text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm uppercase tracking-widest"
                 >
-                  Keep Account
+                  {dict.profile.keep_account_action}
                 </button>
                 <button 
                   onClick={handleConfirmDelete}
                   disabled={isDeleting}
                   className="h-14 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 group text-sm uppercase tracking-widest"
                 >
-                  {isDeleting ? "Deleting..." : "Erase Data"}
+                  {isDeleting ? dict.profile.deleting_action : dict.profile.erase_data_action}
                   {!isDeleting && <Trash2 className="w-4 h-4 group-hover:shake" />}
                 </button>
               </div>
@@ -325,3 +325,4 @@ export function SettingsClient({ user }: { user: any }) {
     </div>
   );
 }
+

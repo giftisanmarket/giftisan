@@ -15,7 +15,37 @@ import { PreLaunchBanner } from "./pre-launch-banner";
 import { VerificationBanner } from "./verification-banner";
 import { toast } from "react-hot-toast";
 
-export function Navbar() {
+import { getDictionary } from "@/app/[lang]/dictionaries";
+
+export function Navbar({ dict }: { dict?: any }) {
+  // Safe fallback if dict is not provided
+  const d = dict || {
+    common: {
+      search: "Search products, artisans, crafts...",
+      categories: "Categories",
+      login: "Login",
+      signup: "Sign Up",
+      logout: "Logout",
+      home: "Home",
+      artisans: "Artisans",
+      manage_profile: "Manage Profile",
+      support: "Support",
+      become_artisan: "Apply to Join",
+      open_studio: "Open Your Studio",
+      start_shopping: "Start Shopping",
+      search_placeholder: "Search for unique gifts...",
+      explore_trending: "Explore Trending Treasures",
+      all_categories: "Browse All Categories",
+      sell: "Sell",
+      pro_studio: "Pro Studio",
+      sign_in: "Sign In",
+      sign_out: "Sign Out",
+      menu: "Menu",
+      explore: "Explore Treasures",
+      terms: "Terms of Service",
+      privacy: "Privacy Policy"
+    }
+  };
   const { data: session, update } = useSession();
   const { setIsCartOpen, totalItems } = useCart();
   const { totalFavorites } = useFavorites();
@@ -32,7 +62,7 @@ export function Navbar() {
 
   useEffect(() => {
     if (searchParams.get("success") === "EmailVerified") {
-      toast.success("Identity verified! Your account is now fully active.", {
+      toast.success(d.home.verified_toast || "Identity verified! Your account is now fully active.", {
         id: "global-verified",
         duration: 5000
       });
@@ -80,8 +110,8 @@ export function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      <PreLaunchBanner />
-      <VerificationBanner />
+      <PreLaunchBanner dict={d} />
+      <VerificationBanner dict={d} />
       <nav className="w-full glass border-b border-primary/10">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
           {/* Logo */}
@@ -111,16 +141,16 @@ export function Navbar() {
                   setShowResults(true);
                 }}
                 onFocus={() => setShowResults(true)}
-                placeholder="Search for unique gifts..."
-                className="w-full h-12 pl-12 pr-10 bg-white border border-primary/20 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent text-primary font-medium placeholder:text-primary/50 transition-all shadow-inner"
+                placeholder={d.common.search_placeholder}
+                className="w-full h-12 ps-12 pe-10 bg-white border border-primary/20 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent text-primary font-medium placeholder:text-primary/50 transition-all shadow-inner"
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5 group-focus-within:text-accent transition-colors" />
+              <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5 group-focus-within:text-accent transition-colors" />
 
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-charcoal transition-colors"
+                  className="absolute end-4 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-charcoal transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -129,7 +159,7 @@ export function Navbar() {
 
             {/* Quick Results Overlay */}
             {showResults && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-full start-0 w-full mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 {!searchQuery ? (
                   /* Empty Search State - Trending discovered */
                   <div className="p-6 space-y-6">
@@ -139,26 +169,27 @@ export function Navbar() {
                           <Search className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">Discovery mode</p>
-                          <p className="text-sm font-bold text-primary">Explore Trending Treasures</p>
+                          <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
+                          <p className="text-sm font-bold text-primary">{d.common.explore_trending}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ml-1">Popular Collections</p>
+                      <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
                       <div className="flex flex-wrap gap-2">
-                        {["Ceramics", "Jewelry", "Bespoke Decor", "Wedding", "Vintage", "Handmade"].map((tag) => (
+                        {Object.entries(d.common.trending_tags || {}).map(([key, label]) => (
                           <button
-                            key={tag}
+                            key={key}
                             onClick={() => {
-                              setSearchQuery(tag);
-                              router.push(`/search?q=${encodeURIComponent(tag)}`);
+                              const searchLabel = label as string;
+                              setSearchQuery(searchLabel);
+                              router.push(`/search?q=${encodeURIComponent(searchLabel)}`);
                               setShowResults(false);
                             }}
                             className="px-4 py-2 rounded-full bg-cream text-primary/60 text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
                           >
-                            {tag}
+                            {label as string}
                           </button>
                         ))}
                       </div>
@@ -174,7 +205,7 @@ export function Navbar() {
                           <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center">
                             <ShoppingCart className="w-4 h-4 text-primary" />
                           </div>
-                          <span className="text-xs font-bold text-primary">Browse All Categories</span>
+                          <span className="text-xs font-bold text-primary">{d.common.all_categories}</span>
                         </div>
                         <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
                       </Link>
@@ -183,9 +214,9 @@ export function Navbar() {
                 ) : (
                   <>
                     <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
-                      <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">Gifts for You</span>
+                      <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
                       <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
-                        {isSearching ? "Searching..." : `${searchResults.length} items found`}
+                        {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
                       </span>
                     </div>
 
@@ -215,30 +246,33 @@ export function Navbar() {
                       ) : !isSearching ? (
                         <div className="p-8 text-center space-y-6">
                           <div className="space-y-2">
-                            <p className="text-charcoal/40 font-medium italic">"Nothing matches '{searchQuery}' yet..."</p>
+                            <p className="text-charcoal/40 font-medium italic">"{d.common.nothing_matches.replace('{query}', searchQuery)}"</p>
                           </div>
                           <div className="space-y-3">
-                            <p className="text-[10px] text-accent font-black uppercase tracking-widest">Try trending instead</p>
+                            <p className="text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
                             <div className="flex flex-wrap justify-center gap-2">
-                              {["Gift Guides", "Art Prints", "Minimalist"].map(tag => (
-                                <button
-                                  key={tag}
-                                  onClick={() => {
-                                    setSearchQuery(tag);
-                                    router.push(`/search?q=${encodeURIComponent(tag)}`);
-                                    setShowResults(false);
-                                  }}
-                                  className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
-                                >
-                                  {tag}
-                                </button>
-                              ))}
+                              {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
+                                const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
+                                return (
+                                  <button
+                                    key={tagKey}
+                                    onClick={() => {
+                                      setSearchQuery(tagLabel);
+                                      router.push(`/search?q=${encodeURIComponent(tagLabel)}`);
+                                      setShowResults(false);
+                                    }}
+                                    className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
+                                  >
+                                    {tagLabel}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
                       ) : (
                         <div className="p-8 text-center text-charcoal/40 animate-pulse">
-                          Scanning the workshop...
+                          {d.common.scanning_workshop}
                         </div>
                       )}
                     </div>
@@ -249,7 +283,7 @@ export function Navbar() {
                           onClick={handleSearch}
                           className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
                         >
-                          See All Results →
+                          {d.common.see_all_results} →
                         </button>
                       </div>
                     )}
@@ -264,7 +298,7 @@ export function Navbar() {
             <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative active:scale-90">
               <Heart className="w-6 h-6" />
               {totalFavorites > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-1 -end-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                   {totalFavorites}
                 </span>
               )}
@@ -273,7 +307,7 @@ export function Navbar() {
               <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors active:scale-90">
                 <MessageSquare className="w-6 h-6" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                  <span className="absolute -top-1 -end-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                     {unreadCount}
                   </span>
                 )}
@@ -293,22 +327,22 @@ export function Navbar() {
                     )}
                   >
                     <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", pathname === "/studio" ? "bg-white" : "bg-accent")} />
-                    Pro Studio
+                    {d.common.pro_studio}
                   </Link>
                 ) : (
                   <Link
                     href="/become-artisan"
                     className="hidden lg:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 active:scale-95"
                   >
-                    Sell
+                    {d.common.sell}
                   </Link>
                 )}
 
                 {/* Consolidated Profile Hub (Desktop only) */}
-                <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 pl-3">
+                <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 ps-3">
                   <Link
                     href="/profile"
-                    className="group flex items-center gap-3 pl-1 pr-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
+                    className="group flex items-center gap-3 ps-1 pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
                   >
                     <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
                       {session.user?.image ? (
@@ -328,7 +362,7 @@ export function Navbar() {
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">Account</p>
+                      <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">{d.common.account}</p>
                       <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
                         {session.user?.name?.split(' ')[0]}
                       </p>
@@ -338,7 +372,7 @@ export function Navbar() {
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="p-2 text-charcoal/30 hover:text-red-500 transition-colors group active:scale-90"
-                    title="Sign Out"
+                    title={d.common.sign_out}
                   >
                     <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   </button>
@@ -350,7 +384,7 @@ export function Navbar() {
                 className="hidden md:flex group items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm active:scale-95"
               >
                 <User className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Sign In</span>
+                <span className="text-xs font-bold uppercase tracking-widest">{d.common.sign_in}</span>
               </Link>
             )}
             <button
@@ -359,7 +393,7 @@ export function Navbar() {
             >
               <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] font-black rounded-full flex items-center justify-center animate-in zoom-in-50 duration-300 shadow-sm">
+                <span className="absolute -top-1 -end-1 w-5 h-5 bg-accent text-white text-[10px] font-black rounded-full flex items-center justify-center animate-in zoom-in-50 duration-300 shadow-sm">
                   {totalItems}
                 </span>
               )}
@@ -370,20 +404,39 @@ export function Navbar() {
             >
               <Menu className="w-6 h-6" />
             </button>
+
+            {/* Language Switcher */}
+            <div className="flex items-center gap-2 ms-2 ps-2 border-s border-primary/10">
+              <Link 
+                href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
+                onClick={() => {
+                  document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
+                }}
+                className="text-xs font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-colors active:scale-90"
+              >
+                {pathname.startsWith('/en') ? 'عربي' : 'EN'}
+              </Link>
+            </div>
           </div>
         </div>
         {/* Categories Bar - Desktop */}
         <div className="hidden md:block border-t border-primary/5 py-3">
           <div className="container mx-auto px-4 flex justify-between">
             {[
-              "Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"
+              { id: "ceramics", label: d.common.ceramics },
+              { id: "jewelry", label: d.common.jewelry },
+              { id: "wedding", label: d.common.wedding },
+              { id: "personalized", label: d.common.personalized },
+              { id: "art-collectibles", label: d.common.art_collectibles },
+              { id: "vintage", label: d.common.vintage },
+              { id: "stationery", label: d.common.stationery }
             ].map((cat) => (
               <Link
-                key={cat}
-                href={`/category/${cat.toLowerCase().replace(/ & /g, "-")}`}
+                key={cat.id}
+                href={`/category/${cat.id}`}
                 className="text-sm font-medium text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all"
               >
-                {cat}
+                {cat.label}
               </Link>
             ))}
           </div>
@@ -396,11 +449,11 @@ export function Navbar() {
         isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}>
         <div className={cn(
-          "absolute right-0 top-0 h-[100dvh] w-[80%] max-w-sm bg-cream shadow-2xl transition-transform duration-500 flex flex-col",
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+          "absolute end-0 top-0 h-[100dvh] w-[80%] max-w-sm bg-cream shadow-2xl transition-transform duration-500 flex flex-col",
+          isMenuOpen ? "translate-x-0" : (pathname.startsWith('/ar') ? "-translate-x-full" : "translate-x-full")
         )}>
           <div className="p-6 border-b border-primary/10 flex justify-between items-center">
-            <span className="font-heading font-black text-primary text-xl">Menu</span>
+            <span className="font-heading font-black text-primary text-xl">{d.common.menu}</span>
             <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
               <X className="w-6 h-6 text-primary" />
             </button>
@@ -409,23 +462,23 @@ export function Navbar() {
           <div className="flex-1 overflow-y-auto p-6 space-y-8">
             {/* Mobile Search */}
             <div className="space-y-3">
-              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Find a Treasure</p>
+              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.find_treasure}</p>
               <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search gifts..."
-                  className="w-full h-12 pl-12 pr-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
+                  placeholder={d.common.search_placeholder}
+                  className="w-full h-12 ps-12 pe-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
                 />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
+                <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
               </form>
             </div>
 
             {/* User Specific Links */}
             {session ? (
               <div className="space-y-4">
-                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Your Studio Hub</p>
+                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.your_studio_hub}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Link
                     href="/profile"
@@ -433,7 +486,7 @@ export function Navbar() {
                     className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
                   >
                     <User className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">Profile</span>
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.profile}</span>
                   </Link>
                   <Link
                     href="/profile/messages"
@@ -441,7 +494,7 @@ export function Navbar() {
                     className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
                   >
                     <MessageSquare className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">Messages</span>
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.messages}</span>
                   </Link>
                   <Link
                     href="/favorites"
@@ -449,7 +502,7 @@ export function Navbar() {
                     className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
                   >
                     <Heart className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">Favorites</span>
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.favorites}</span>
                   </Link>
                   {session.user?.role === "ARTISAN" ? (
                     <Link
@@ -458,7 +511,7 @@ export function Navbar() {
                       className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/10 text-center active:scale-95 transition-transform"
                     >
                       <div className="w-2 h-2 rounded-full bg-accent mb-2" />
-                      <span className="text-xs font-black text-accent uppercase">Studio</span>
+                      <span className="text-xs font-black text-accent uppercase">{d.common.studio}</span>
                     </Link>
                   ) : (
                     <Link
@@ -466,20 +519,20 @@ export function Navbar() {
                       onClick={() => setIsMenuOpen(false)}
                       className="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-2xl border border-primary text-center active:scale-95 transition-transform"
                     >
-                      <span className="text-xs font-black uppercase tracking-widest">Sell</span>
+                      <span className="text-xs font-black uppercase tracking-widest">{d.common.sell}</span>
                     </Link>
                   )}
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Join Giftisan</p>
+                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.join_the_circle}</p>
                 <Link
                   href="/login"
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center justify-between p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold active:scale-95 transition-transform"
                 >
-                  Sign In to your account
+                  {d.common.sign_in}
                   <span className="text-accent">→</span>
                 </Link>
               </div>
@@ -487,18 +540,24 @@ export function Navbar() {
 
             {/* Mobile Categories */}
             <div className="space-y-4">
-              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">Collections</p>
+              <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.categories}</p>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  "Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"
+                  { id: "ceramics", label: d.common.ceramics },
+                  { id: "jewelry", label: d.common.jewelry },
+                  { id: "wedding", label: d.common.wedding },
+                  { id: "personalized", label: d.common.personalized },
+                  { id: "art-collectibles", label: d.common.art_collectibles },
+                  { id: "vintage", label: d.common.vintage },
+                  { id: "stationery", label: d.common.stationery }
                 ].map((cat) => (
                   <Link
-                    key={cat}
-                    href={`/category/${cat.toLowerCase().replace(/ & /g, "-")}`}
+                    key={cat.id}
+                    href={`/category/${cat.id}`}
                     onClick={() => setIsMenuOpen(false)}
                     className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors active:scale-[0.98] transition-transform"
                   >
-                    {cat}
+                    {cat.label}
                     <span className="text-accent">→</span>
                   </Link>
                 ))}
@@ -514,9 +573,9 @@ export function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full h-12 bg-primary text-white font-bold rounded-xl flex items-center justify-center shadow-lg"
                 >
-                  Join the Circle
+                  {d.common.join_the_circle}
                 </Link>
-                <p className="text-xs text-charcoal/40 text-center italic">Crafted for the Homegrown Artisan Community</p>
+                <p className="text-xs text-charcoal/40 text-center italic">{d.common.crafted_for_community}</p>
               </>
             ) : (
               <button
@@ -524,7 +583,7 @@ export function Navbar() {
                 className="w-full h-12 border border-red-100 bg-red-50/50 text-red-500 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
               >
                 <LogOut className="w-4 h-4" />
-                Sign Out
+                {d.common.sign_out}
               </button>
             )}
           </div>
@@ -533,3 +592,4 @@ export function Navbar() {
     </div>
   );
 }
+

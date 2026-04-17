@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
+export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: any }) {
   return (
     <section className="relative w-full overflow-hidden bg-cream py-16 md:py-24">
       <div className="container mx-auto px-4 grid md:grid-cols-2 items-center gap-12">
@@ -16,17 +16,15 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
           className="relative z-10 space-y-6 md:space-y-8"
         >
           <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-accent/5 border border-accent/20 text-accent font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] w-fit">
-            <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" /> Handpicked for the discerning eye
+            <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" /> {dict.common.explore}
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-heading font-bold text-primary leading-[1.15] md:leading-[1.1]">
-            Elevate Every <br className="hidden md:block" />
-            <span className="serif italic font-normal text-accent">Gift-Giving</span> <br className="hidden md:block" />
-            Moment
+            {dict.home.hero_elevate}
           </h1>
           
-          <p className="text-base md:text-lg text-charcoal/70 max-w-lg leading-relaxed">
-            Discover a curated collection of handcrafted treasures, vintage finds, and personalized keepsakes from our most talented local artisans.
+          <p className="text-base md:text-lg text-charcoal/60 max-w-lg leading-relaxed">
+            {dict.home.hero_discover}
           </p>
           
           <form 
@@ -34,26 +32,26 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
             className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 max-w-xl"
           >
             <div className="relative flex-1 group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-primary/30 group-focus-within:text-accent transition-colors" />
+              <Search className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-primary/30 group-focus-within:text-accent transition-colors" />
               <input 
                 name="q"
                 type="text"
-                placeholder="Search for treasures..."
-                className="w-full h-14 md:h-16 pl-12 md:pl-14 pr-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
+                placeholder={dict.home.hero_search_placeholder}
+                className="w-full h-14 md:h-16 ps-12 md:ps-14 pe-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
               />
             </div>
             <button 
               type="submit"
               className="h-14 md:h-16 px-8 md:px-10 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 shrink-0 text-sm md:text-base active:scale-95 duration-200"
             >
-              Search
+              {dict.home.hero_search_button}
             </button>
           </form>
           
           <div className="flex flex-wrap gap-6 pt-2">
             <Link href="/artisans" className="text-[10px] md:text-xs font-bold text-charcoal/40 hover:text-accent transition-all flex items-center gap-2 group active:scale-95">
               <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              Join {artisanCount > 0 ? `${artisanCount}+` : ""} Master Artisans
+              {dict.home.hero_join_artisans.replace('{count}', artisanCount > 0 ? `${artisanCount}+` : "")}
             </Link>
           </div>
         </motion.div>
@@ -76,10 +74,10 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
           </div>
           
           {/* Decorative Elements */}
-          <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-accent/20 rounded-full blur-3xl -z-10" />
-          <div className="absolute -top-6 -right-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-10" />
+          <div className="absolute -bottom-6 -start-6 w-32 h-32 bg-accent/20 rounded-full blur-3xl -z-10" />
+          <div className="absolute -top-6 -end-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-10" />
           
-          <div className="absolute bottom-4 right-4 md:-bottom-8 md:-right-8 glass p-6 rounded-2xl shadow-xl max-w-[200px] border border-white/50">
+          <div className="absolute bottom-4 end-4 md:-bottom-8 md:-end-8 glass p-6 rounded-2xl shadow-xl max-w-[200px] border border-white/50">
             <p className="text-sm font-medium text-charcoal/80">
               "The quality of the handcrafted journal is better than anything I've found in high-end boutiques."
             </p>
@@ -90,3 +88,4 @@ export function Hero({ artisanCount = 0 }: { artisanCount?: number }) {
     </section>
   );
 }
+

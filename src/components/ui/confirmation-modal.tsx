@@ -93,7 +93,7 @@ export function ConfirmationModal({
 
             <button 
               onClick={onClose}
-              className="absolute top-6 right-6 p-2 hover:bg-primary/5 rounded-full transition-colors"
+              className="absolute top-6 end-6 p-2 hover:bg-primary/5 rounded-full transition-colors"
             >
               <X className="w-4 h-4 text-primary/20" />
             </button>
@@ -103,3 +103,4 @@ export function ConfirmationModal({
     </AnimatePresence>
   );
 }
+

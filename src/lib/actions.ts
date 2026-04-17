@@ -9,6 +9,7 @@ import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
+import { cookies } from "next/headers";
 
 export async function uploadImage(base64Data: string) {
   try {
@@ -553,6 +554,23 @@ export async function getAllArtisans() {
   }
 }
 
+export async function checkSlugAvailability(slug: string, currentUserId: string) {
+  try {
+    const existing = await prisma.artisanProfile.findUnique({
+      where: { slug },
+      select: { userId: true }
+    });
+    
+    // Available if no one has it OR the current user already has it
+    return { 
+      available: !existing || existing.userId === currentUserId 
+    };
+  } catch (error) {
+    console.error("Slug check error:", error);
+    return { error: "Failed to verify slug" };
+  }
+}
+
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
     // Only generate slug if it's not manually provided OR it's a new profile
@@ -631,6 +649,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
       price: formData.get("price") as string,
       category: formData.get("category") as string,
       canPersonalize: formData.get("canPersonalize") === "true",
+      personalizationPrompt: formData.get("personalizationPrompt") as string,
       badge: formData.get("badge") as string,
       stock: formData.get("stock") as string,
     };
@@ -653,12 +672,13 @@ export async function createProduct(artisanId: string, formData: FormData) {
         name: data.name,
         slug,
         description: data.description,
-        price: parseFloat(data.price),
+        price: parseFloat(data.price) || 0,
         category: data.category,
         images: finalImages,
         canPersonalize: data.canPersonalize,
+        personalizationPrompt: data.personalizationPrompt || null,
         badge: data.badge,
-        stock: parseInt(data.stock) || 1,
+        stock: parseInt(data.stock) || 0,
       }
     });
 
@@ -668,9 +688,9 @@ export async function createProduct(artisanId: string, formData: FormData) {
     revalidatePath("/categories");
 
     return { success: true, product };
-  } catch (error) {
-    console.error("Create product error:", error);
-    return { error: "Failed to list new treasure" };
+  } catch (error: any) {
+    console.error("Create product error detail:", error);
+    return { error: error.message || "Failed to list new treasure" };
   }
 }
 
@@ -778,14 +798,40 @@ export async function subscribeToNewsletter(email: string) {
 
     // Send the welcome email to the new subscriber
     await sendWelcomeEmail(email, "Friend");
-    
-    return { success: true, data: subscriber };
-  } catch (error: any) {
-    console.error("Newsletter subscription error:", error);
-    if (error.code === 'P2002') {
-      return { success: false, error: 'You are already subscribed!' };
+    return { success: true };
+  } catch (err: any) {
+    if (err.code === "P2002") {
+      return { error: "This email is already waiting for the next drop!" };
     }
-    return { success: false, error: error.message || 'Something went wrong.' };
+    return { error: "Something went wrong." };
+  }
+}
+
+export async function trackProductView(productId: string) {
+  try {
+    const cookieStore = await cookies();
+    const viewCookieName = `vtd_${productId}`;
+    const hasViewed = cookieStore.get(viewCookieName);
+
+    if (!hasViewed) {
+      console.log(`[SEO] Counting unique view for product: ${productId}`);
+      await prisma.product.update({
+        where: { id: productId },
+        data: { views: { increment: 1 } }
+      });
+
+      cookieStore.set(viewCookieName, "1", {
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production"
+      });
+      return { success: true };
+    }
+    return { success: true, alreadyViewed: true };
+  } catch (err) {
+    console.error("Action view track error:", err);
+    return { error: "Failed to track view" };
   }
 }
 
@@ -797,6 +843,19 @@ export async function getSubscribers() {
   } catch (error) {
     console.error("Fetch subscribers error:", error);
     return [];
+  }
+}
+
+export async function deleteSubscriber(id: string) {
+  try {
+    await prisma.newsletterSubscriber.delete({
+      where: { id }
+    });
+    revalidatePath("/admin/subscribers");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete subscriber error:", error);
+    return { error: "Failed to remove subscriber" };
   }
 }
 
@@ -1032,6 +1091,20 @@ export async function toggleArtisanVerification(artisanId: string, isVerified: b
   }
 }
 
+export async function updateUserRole(userId: string, role: "CLIENT" | "ARTISAN" | "ADMIN") {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role }
+    });
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Update user role error:", error);
+    return { error: "Failed to update user role" };
+  }
+}
+
 export async function sendMessage(senderId: string, receiverId: string, content: string, productId?: string, attachment?: string) {
   if (!senderId || !receiverId) {
     return { error: "Missing sender or receiver ID" };
@@ -1259,19 +1332,6 @@ export async function markMessagesAsRead(userId: string, senderId: string) {
     revalidatePath("/profile/messages");
     return { success: true };
   } catch (error) {
-    return { success: false };
-  }
-}
-
-export async function trackProductView(productId: string) {
-  try {
-    await prisma.product.update({
-      where: { id: productId },
-      data: { views: { increment: 1 } }
-    });
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to track view:", error);
     return { success: false };
   }
 }

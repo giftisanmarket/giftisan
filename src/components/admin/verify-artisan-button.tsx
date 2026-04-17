@@ -12,11 +12,13 @@ type ArtisanStatus = "PENDING" | "APPROVED" | "REJECTED";
 export function VerifyArtisanButton({ 
   artisanId, 
   currentStatus, 
-  status: initialStatus 
+  status: initialStatus,
+  dict
 }: { 
   artisanId: string;
   currentStatus: boolean;
   status: ArtisanStatus;
+  dict: any;
 }) {
   const [isVerified, setIsVerified] = useState(currentStatus);
   const [status, setStatus] = useState<ArtisanStatus>(initialStatus);
@@ -27,11 +29,11 @@ export function VerifyArtisanButton({
     const res = await toggleArtisanVerification(artisanId, !isVerified);
     if (res.success) {
       setIsVerified(!isVerified);
-      toast.success(`Artisan ${!isVerified ? 'Verified' : 'Unverified'}`, {
+      toast.success(!isVerified ? dict.admin.artisan_verified : dict.admin.artisan_unverified, {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     } else {
-      toast.error(res.error || "Failed to update verification", {
+      toast.error(res.error || dict.admin.update_verification_failed, {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     }
@@ -43,11 +45,11 @@ export function VerifyArtisanButton({
     const res = await updateArtisanStatus(artisanId, newStatus);
     if (res.success) {
       setStatus(newStatus);
-      toast.success(`Studio status: ${newStatus}`, {
+      toast.success(dict.admin.studio_status_updated.replace('{status}', newStatus), {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     } else {
-      toast.error(res.error || "Failed to update status", {
+      toast.error(res.error || dict.studio.update_failed, {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     }
@@ -58,7 +60,7 @@ export function VerifyArtisanButton({
     <div className="flex flex-col gap-3">
       {/* Approval Status Section */}
       <div className="flex flex-col gap-1.5">
-        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">Studio Approval</p>
+        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">{dict.admin.studio_approval}</p>
         <div className="flex items-center gap-1.5 p-1 bg-primary/5 rounded-2xl w-fit">
           <button
             onClick={() => handleUpdateStatus("APPROVED")}
@@ -71,7 +73,7 @@ export function VerifyArtisanButton({
             )}
           >
             <Check className="w-3 h-3" />
-            Approve
+            {dict.admin.approve}
           </button>
           
           <button
@@ -85,7 +87,7 @@ export function VerifyArtisanButton({
             )}
           >
             <Clock className="w-3 h-3" />
-            Pending
+            {dict.admin.pending}
           </button>
 
           <button
@@ -99,14 +101,14 @@ export function VerifyArtisanButton({
             )}
           >
             <X className="w-3 h-3" />
-            Reject
+            {dict.admin.reject}
           </button>
         </div>
       </div>
 
       {/* Verification Badge Section */}
       <div className="flex flex-col gap-1.5">
-        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">Authentic Badge</p>
+        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">{dict.admin.authentic_badge}</p>
         <button
           onClick={handleToggleVerification}
           disabled={isLoading}
@@ -120,12 +122,12 @@ export function VerifyArtisanButton({
           {isVerified ? (
             <>
               <ShieldCheck className="w-4 h-4 fill-blue-600 text-white" />
-              Verified Artisan
+              {dict.admin.verified_artisan}
             </>
           ) : (
             <>
               <ShieldAlert className="w-4 h-4" />
-              Standard Artisan
+              {dict.admin.standard_artisan}
             </>
           )}
         </button>
@@ -133,3 +135,4 @@ export function VerifyArtisanButton({
     </div>
   );
 }
+

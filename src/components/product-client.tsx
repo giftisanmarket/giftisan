@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
 import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
@@ -16,7 +16,7 @@ import { BespokeImage } from "./bespoke-image";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 
-export function ProductClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
+export function ProductClient({ product, relatedProducts, dict, lang }: { product: any, relatedProducts: any[], dict: any, lang: string }) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -29,6 +29,14 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [personalizationError, setPersonalizationError] = useState(false);
+  const personalizationRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (product.id) {
+      trackProductView(product.id);
+    }
+  }, [product.id]);
   
   const isVideo = (url: string) => {
     if (!url) return false;
@@ -90,7 +98,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
     });
 
     if (res.success) {
-      toast.success("Discovery shared! Your story is now part of this treasure.", {
+      toast.success(dict.product.review_posted_success, {
         icon: <Sparkles className="w-5 h-5 text-accent" />,
       });
       setNewReview({ rating: 5, comment: "" });
@@ -117,7 +125,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success("Gallery link copied to your clipboard!", {
+        toast.success(dict.product.share_copied, {
           icon: <CheckCircle2 className="w-5 h-5 text-accent" />,
         });
       }
@@ -128,48 +136,90 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
   return (
     <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
-      <Navbar />
+      <Navbar dict={dict} />
 
       <div className="container mx-auto px-4 py-8 md:py-16">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 min-w-0">
           {/* Image Gallery */}
           <div className="space-y-6 min-w-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => {
-                setLightboxIndex(selectedImage);
-                setIsLightboxOpen(true);
-              }}
-              className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-white cursor-zoom-in group"
-            >
-              {isVideo(product.images[selectedImage]) ? (
-                <video
-                  src={product.images[selectedImage]}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
-              ) : (
-                <BespokeImage
-                  src={product.images[selectedImage]}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-end justify-end p-6 opacity-0 group-hover:opacity-100">
-                <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur shadow-xl flex items-center justify-center text-primary translate-y-2 group-hover:translate-y-0 transition-all">
-                   <Camera className="w-6 h-6" />
+            <div className="relative group">
+              <motion.div
+                key={selectedImage}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                onClick={() => {
+                  setLightboxIndex(selectedImage);
+                  setIsLightboxOpen(true);
+                }}
+                className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-transparent cursor-zoom-in"
+              >
+                {isVideo(product.images[selectedImage]) ? (
+                  <video
+                    src={product.images[selectedImage]}
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <BespokeImage
+                    src={product.images[selectedImage]}
+                    alt={product.name}
+                    fill
+                    className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-end justify-end p-6 opacity-0 group-hover:opacity-100">
+                  <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur shadow-xl flex items-center justify-center text-primary translate-y-2 group-hover:translate-y-0 transition-all">
+                    <Camera className="w-6 h-6" />
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide">
+              {/* Slider Controls */}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
+                    }}
+                    className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10"
+                  >
+                    <ArrowRight className="w-6 h-6 rtl:rotate-0 ltr:rotate-180" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
+                    }}
+                    className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10"
+                  >
+                    <ArrowRight className="w-6 h-6 rtl:rotate-180 ltr:rotate-0" />
+                  </button>
+                  
+                  {/* Dots Indicator */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    {product.images.map((_: any, i: number) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                          selectedImage === i ? "bg-primary w-4" : "bg-primary/20"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide" dir="ltr">
               {product.images.map((img: string, idx: number) => (
                 <button
                   key={idx}
@@ -179,7 +229,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 >
                   {isVideo(img) ? (
                     <div className="relative w-full h-full">
-                      <video src={img} className="w-full h-full object-cover" />
+                      <video src={img} className="w-full h-full object-contain" />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                           <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
                               <Video className="w-4 h-4 text-white" />
@@ -187,7 +237,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       </div>
                     </div>
                   ) : (
-                    <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />
+                    <BespokeImage src={img} alt="" fill className="object-contain" sizes="96px" />
                   )}
                 </button>
               ))}
@@ -198,7 +248,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           <div className="flex flex-col min-w-0">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
-                <p className="text-accent font-bold tracking-widest uppercase text-sm mb-2">{product.category}</p>
+                <p className="text-accent font-bold tracking-widest uppercase text-sm mb-2">{dict.common.categories_list?.[product.category.toLowerCase()] || product.category}</p>
                 <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4 leading-tight break-words">
                   {product.name}
                 </h1>
@@ -208,7 +258,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       <Star key={s} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <span className="text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} Reviews)</span>
+                  <span className="text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} {dict.product.reviews})</span>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
@@ -223,7 +273,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
             <div className="flex items-center justify-between mb-8">
               <p className="text-3xl font-heading font-bold text-primary">
-                EGP {product.price}.00
+                {dict.product.currency} {product.price}.00
               </p>
               <div className="flex items-center gap-2">
                 <div className={cn(
@@ -234,12 +284,12 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   "text-xs font-black uppercase tracking-widest",
                   (product.stock || 0) > 0 ? "text-primary/60" : "text-red-500"
                 )}>
-                  {(product.stock || 0) > 0 ? `${product.stock} in stock` : "Sold Out"}
+                  {(product.stock || 0) > 0 ? dict.product.in_stock.replace('{count}', product.stock.toString()) : dict.product.sold_out}
                 </span>
               </div>
             </div>
 
-            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 pl-6 py-2 break-words">
+            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 ps-6 py-2 break-words">
               {product.description}
             </p>
 
@@ -254,11 +304,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">Handcrafted by</p>
+                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">{dict.product.handcrafted_by || "Handcrafted by"}</p>
                     {product.artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent" />}
                   </div>
                   <h3 className="text-lg md:text-xl font-heading font-bold text-primary truncate">{product.artisan.studioName || product.artisan.user.name}</h3>
-                  <p className="text-xs text-charcoal/60 truncate">{product.artisan.location}</p>
+                  <p className="text-xs text-charcoal/60 truncate">{dict.product.operating_out_of} {product.artisan.location}</p>
                 </div>
               </Link>
 
@@ -269,30 +319,55 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   productId={product.id}
                   productName={product.name}
                   artisanUserId={product.artisan.user.id}
+                  dict={dict}
                 />
               </div>
             </div>
 
             {product.canPersonalize && (
-              <div className="bg-white/50 border border-primary/10 rounded-2xl p-6 mb-8">
+              <motion.div 
+                animate={personalizationError ? { x: [-5, 5, -5, 5, 0] } : {}}
+                className={cn(
+                  "bg-white/50 border rounded-2xl p-6 mb-8 transition-colors",
+                  personalizationError ? "border-red-400 bg-red-50/30" : "border-primary/10"
+                )}
+              >
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-5 h-5 text-accent" />
-                  <h3 className="font-heading font-bold text-primary">Personalize Your Treasure</h3>
+                  <h3 className="font-heading font-bold text-primary">
+                    {dict.product.personalize_treasure}
+                  </h3>
                 </div>
-                <p className="text-xs text-charcoal/50 mb-4">Our artisans will hand-emboss your text onto this piece.</p>
+                <p className="text-xs text-charcoal/50 mb-4">{product.personalizationPrompt || dict.product.personalization_desc || "Our artisans will hand-emboss your text onto this piece."}</p>
                 <textarea
-                  placeholder="Enter engraving text (e.g. 'For Sarah, with love')"
-                  className="w-full bg-white border border-primary/20 rounded-xl p-4 text-sm font-medium text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent min-h-[100px] resize-none transition-all placeholder:text-primary/40 shadow-inner"
+                  ref={personalizationRef}
+                  placeholder={dict.product.personalize_placeholder}
+                  className={cn(
+                    "w-full bg-white border rounded-xl p-4 text-sm font-medium text-primary focus:outline-none focus:ring-2 focus:border-accent min-h-[100px] resize-none transition-all placeholder:text-primary/40 shadow-inner",
+                    personalizationError ? "border-red-400 focus:ring-red-200" : "border-primary/20 focus:ring-accent/20"
+                  )}
                   value={personalization}
-                  onChange={(e) => setPersonalization(e.target.value)}
+                  onChange={(e) => {
+                    setPersonalization(e.target.value);
+                    if (personalizationError) setPersonalizationError(false);
+                  }}
+                  required
                 />
-              </div>
+              </motion.div>
             )}
 
             <div className="space-y-4 mb-8">
               <div className="flex gap-3">
                 <button
-                  onClick={() => addToCart(product, personalization)}
+                  onClick={() => {
+                    if (product.canPersonalize && !personalization.trim()) {
+                      setPersonalizationError(true);
+                      personalizationRef.current?.focus();
+                      toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
+                      return;
+                    }
+                    addToCart(product, personalization.trim());
+                  }}
                   disabled={(product.stock || 0) <= 0}
                   className={cn(
                     "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
@@ -301,7 +376,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
                   )}
                 >
-                  {(product.stock || 0) > 0 ? `Add to Cart — EGP ${product.price}` : "Out of Stock"}
+                  {(product.stock || 0) > 0 ? `${dict.product.add_to_cart} — ${dict.product.currency} ${product.price}` : dict.product.sold_out}
                 </button>
                 <button
                   onClick={() => toggleFavorite(product)}
@@ -317,7 +392,13 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               </div>
               <button 
                 onClick={() => {
-                  addToCart(product, personalization, true);
+                  if (product.canPersonalize && !personalization.trim()) {
+                    setPersonalizationError(true);
+                    personalizationRef.current?.focus();
+                    toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
+                    return;
+                  }
+                  addToCart(product, personalization.trim(), true);
                   window.location.href = "/checkout";
                 }}
                 disabled={(product.stock || 0) <= 0}
@@ -328,17 +409,17 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   : "opacity-30 grayscale !cursor-not-allowed pointer-events-auto"
                 )}
               >
-                {(product.stock || 0) > 0 ? "Buy It Now" : "Currently Unavailable"}
+                {(product.stock || 0) > 0 ? dict.product.buy_now : dict.product.sold_out}
               </button>
             </div>
 
             {/* Benefits */}
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Truck, text: "Fast Shipping" },
-                { icon: ShieldCheck, text: "Carbon Neutral" },
-                { icon: Clock, text: "Returns in 30d" },
-                { icon: Star, text: "Gift Wrap Ready" },
+                { icon: Truck, text: dict.product.benefit_fast_shipping },
+                { icon: ShieldCheck, text: dict.product.benefit_carbon_neutral },
+                { icon: Clock, text: dict.product.benefit_returns },
+                { icon: Star, text: dict.product.benefit_gift_wrap },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-sm text-charcoal/60">
                   <item.icon className="w-5 h-5 text-accent/60" />
@@ -359,7 +440,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 activeTab === "details" ? "border-primary text-primary" : "border-transparent text-charcoal/40 hover:text-primary"
               )}
             >
-              Details
+              {dict.product.details}
             </button>
             <button
               onClick={() => setActiveTab("artisan")}
@@ -368,7 +449,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 activeTab === "artisan" ? "border-primary text-primary" : "border-transparent text-charcoal/40 hover:text-primary"
               )}
             >
-              Artisan Story
+              {dict.product.artisan_story}
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
@@ -377,7 +458,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 activeTab === "reviews" ? "border-primary text-primary" : "border-transparent text-charcoal/40 hover:text-primary"
               )}
             >
-              Reviews ({product.reviews?.length || 0})
+              {dict.product.reviews} ({product.reviews?.length || 0})
             </button>
           </div>
 
@@ -391,16 +472,16 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
             {activeTab === "details" && (
               <div className="grid md:grid-cols-2 gap-16">
                 <div className="prose prose-stone leading-relaxed text-charcoal/70">
-                  <h3 className="text-xl font-heading font-bold text-primary mb-4">The Story Behind the Treasure</h3>
+                  <h3 className="text-xl font-heading font-bold text-primary mb-4">{dict.product.story_behind}</h3>
                   <p>
-                    Handcrafted by {product.artisan.studioName || product.artisan.user.name} in {product.artisan.location}, this {product.name} represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience.
+                    {dict.product.handcrafted_by} {product.artisan.studioName || product.artisan.user.name} {dict.product.operating_out_of.toLowerCase()} {product.artisan.location}, {dict.product.details_text_1 || "this treasure represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience."}
                   </p>
-                  <ul className="mt-8 space-y-4 list-disc pl-5">
-                    <li>Category: {product.category}</li>
-                    <li>Handcrafted by: {product.artisan.studioName || product.artisan.user.name}</li>
-                    <li>Personalization: {product.canPersonalize ? "Available" : "Not available"}</li>
-                    <li>Stock Status: {product.stock > 0 ? "In Stock" : "Limited Edition / Sold Out"}</li>
-                    <li>Eco-friendly packaging included</li>
+                  <ul className="mt-8 space-y-4 list-disc ps-5">
+                    <li>{dict.product.details_category}: {dict.common.categories_list?.[product.category.toLowerCase()] || product.category}</li>
+                    <li>{dict.product.details_handcrafted_by}: {product.artisan.studioName || product.artisan.user.name}</li>
+                    <li>{dict.product.details_personalization}: {product.canPersonalize ? dict.product.details_available : dict.product.details_not_available}</li>
+                    <li>{dict.product.details_stock}: {product.stock > 0 ? dict.product.details_in_stock : dict.product.details_limited}</li>
+                    <li>{dict.product.details_eco}</li>
                   </ul>
                 </div>
                 <div className="relative aspect-video rounded-3xl overflow-hidden group">
@@ -416,7 +497,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/30 to-transparent" />
                   
-                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <div className="absolute bottom-6 start-6 end-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-xl">
                         <BespokeImage src={product.artisan.avatar} alt="" fill className="object-cover" />
@@ -431,14 +512,14 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                       href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                       className="px-6 h-10 bg-white text-primary text-[10px] font-black uppercase tracking-widest rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
                     >
-                      Visit Studio
+                      {dict.product.visit_studio}
                     </Link>
                   </div>
                   
                   {/* Decorative badge */}
-                  <div className="absolute top-6 right-6">
+                  <div className="absolute top-6 end-6">
                     <div className="glass px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-primary bg-white/40 backdrop-blur-md border border-white/40">
-                      Studio Hub
+                      {dict.product.studio_hub}
                     </div>
                   </div>
                 </div>
@@ -447,7 +528,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
 
             {activeTab === "artisan" && (
               <div className="max-w-4xl">
-                <div className="flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
+                <div className="flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-start">
                   <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl shrink-0">
                     <BespokeImage src={product.artisan.avatar} alt={product.artisan.studioName || product.artisan.user.name} fill className="object-cover" />
                   </div>
@@ -458,7 +539,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                         {product.artisan.isVerified && <CheckCircle2 className="w-6 h-6 text-accent" />}
                       </div>
                       <p className="text-accent font-black uppercase tracking-[0.2em] text-[10px]">
-                        Master Artisan: {product.artisan.user.name}
+                        {dict.product.master_artisan || "Master Artisan"}: {product.artisan.user.name}
                       </p>
                     </div>
                     <p className="text-lg text-charcoal/70 italic leading-relaxed">
@@ -466,13 +547,13 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                     </p>
                     <div className="flex items-center gap-2 text-charcoal/40 font-medium justify-center md:justify-start">
                       <MapPin className="w-4 h-4" />
-                      <span>Operating out of {product.artisan.location}</span>
+                      <span>{dict.product.operating_out_of} {product.artisan.location}</span>
                     </div>
                     <Link
                       href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
                       className="inline-flex items-center gap-2 px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all"
                     >
-                      Visit the Studio Gallery
+                      {dict.product.visit_studio_gallery}
                     </Link>
                   </div>
                 </div>
@@ -485,8 +566,8 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 <div className="lg:col-span-7 space-y-8">
                   {product.reviews?.length === 0 ? (
                     <div className="py-20 text-center space-y-4">
-                      <p className="text-2xl font-heading font-bold text-primary/20 italic">"This treasure is waiting for its first story..."</p>
-                      {!session && <p className="text-charcoal/40 text-sm">Join the circle to be the first to leave a review.</p>}
+                      <p className="text-2xl font-heading font-bold text-primary/20 italic">{dict.product.no_reviews_text}</p>
+                      {!session && <p className="text-charcoal/40 text-sm">{dict.product.signin_to_share}</p>}
                     </div>
                   ) : (
                     product.reviews.map((review: any) => (
@@ -526,10 +607,10 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                 <div className="lg:col-span-5">
                   {session ? (
                     <div className="sticky top-32 bg-white rounded-[2rem] p-8 border border-primary/5 shadow-2xl shadow-primary/5">
-                      <h4 className="text-xl font-heading font-bold text-primary mb-6">Leave a Review</h4>
+                      <h4 className="text-xl font-heading font-bold text-primary mb-6">{dict.product.leave_review}</h4>
                       <form onSubmit={handleReviewSubmit} className="space-y-6">
                         <div className="space-y-2">
-                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Your Rating</label>
+                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">{dict.product.your_rating}</label>
                           <div className="flex gap-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <button
@@ -549,17 +630,17 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Your Experience</label>
+                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">{dict.product.your_experience}</label>
                           <textarea
                             required
                             value={newReview.comment}
                             onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                            placeholder="How did this piece make you feel? Describe the craftsmanship..."
+                            placeholder={dict.product.experience_placeholder}
                             className="w-full h-32 p-4 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all text-sm font-bold text-primary placeholder:text-primary/40 resize-none shadow-inner"
                           />
                         </div>
                         <div className="space-y-4">
-                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">Share a Glimpse (Optional)</label>
+                          <label className="text-xs font-black text-primary/40 uppercase tracking-widest">{dict.product.add_photo} ({dict.common.optional || "Optional"})</label>
                           <div className="flex flex-wrap gap-3">
                             {reviewImages.map((img, i) => (
                               <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden group">
@@ -567,7 +648,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                                 <button 
                                   type="button" 
                                   onClick={() => setReviewImages(prev => prev.filter((_, idx) => idx !== i))}
-                                  className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-1 end-1 bg-white/80 rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <X className="w-3 h-3" />
                                 </button>
@@ -576,7 +657,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                             {reviewImages.length < 4 && (
                               <label className="w-20 h-20 rounded-xl border-2 border-dashed border-primary/10 flex flex-col items-center justify-center cursor-pointer hover:border-accent/40 text-primary/30 hover:text-accent transition-all group bg-cream/20">
                                 <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                <span className="text-[8px] font-black uppercase mt-1">Add Photo</span>
+                                <span className="text-[8px] font-black uppercase mt-1">{dict.product.add_photo}</span>
                                 <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
                               </label>
                             )}
@@ -588,16 +669,16 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                           disabled={isSubmitting}
                           className="w-full h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
                         >
-                          {isSubmitting ? "Posting Discovery..." : "Post Review"}
+                          {isSubmitting ? dict.product.posting_discovery : dict.product.post_review}
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </form>
                     </div>
                   ) : (
                     <div className="sticky top-32 bg-primary text-white rounded-[2rem] p-10 shadow-2xl shadow-primary/20 text-center">
-                      <h4 className="text-xl font-heading font-bold mb-4">Sharing a story?</h4>
-                      <p className="text-white/60 text-sm mb-8 leading-relaxed">Please sign in to share your thoughts on this treasure with the community.</p>
-                      <Link href="/login" className="inline-block px-10 h-12 bg-white text-primary font-bold rounded-full shadow-lg">Sign In</Link>
+                      <h4 className="text-xl font-heading font-bold mb-4">{dict.product.sharing_story}</h4>
+                      <p className="text-white/60 text-sm mb-8 leading-relaxed">{dict.product.signin_to_share}</p>
+                      <Link href="/login" className="inline-block px-10 h-12 bg-white text-primary font-bold rounded-full shadow-lg">{dict.common.sign_in}</Link>
                     </div>
                   )}
                 </div>
@@ -611,11 +692,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           <section className="mt-20 pt-16 border-t border-primary/10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
               <div>
-                <h2 className="text-3xl font-heading font-bold text-primary italic serif">You May Also Like</h2>
-                <p className="text-charcoal/60 mt-2">More handcrafted treasures from the {product.category} collection.</p>
+                <h2 className="text-3xl font-heading font-bold text-primary italic serif">{dict.product.related_products}</h2>
+                <p className="text-charcoal/60 mt-2">{dict.product.related_desc}</p>
               </div>
               <Link href={`/category/${product.category.toLowerCase()}`} className="text-primary font-bold hover:underline decoration-accent decoration-2 underline-offset-4">
-                Shop Entire Collection
+                {dict.product.shop_collection}
               </Link>
             </div>
 
@@ -626,20 +707,20 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   href={`/products/${p.slug || p.id}`}
                   className="group cursor-pointer block"
                 >
-                  <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
+                  <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5 bg-transparent">
                     <BespokeImage
                       src={p.images[0]}
                       alt={p.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="object-contain group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                     {p.badge && (
-                      <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                      <div className="absolute top-4 start-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
                         {p.badge}
                       </div>
                     )}
-                    <div className="absolute top-4 right-4 p-3 rounded-full bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                    <div className="absolute top-4 end-4 p-3 rounded-full bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
                       <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
                     </div>
                   </div>
@@ -647,7 +728,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                   <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
                     {p.name}
                   </h3>
-                  <p className="font-heading font-bold text-primary mt-2">EGP {p.price}.00</p>
+                  <p className="font-heading font-bold text-primary mt-2">{dict.product.currency} {p.price}.00</p>
                 </Link>
               ))}
             </div>
@@ -667,7 +748,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
           >
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors z-50 p-2"
+              className="absolute top-8 end-8 text-white/60 hover:text-white transition-colors z-50 p-2"
             >
               <X className="w-10 h-10" />
             </button>
@@ -679,20 +760,28 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
+                        // In RTL, Start is Right, so this moves "Previous"
+                        if (lang === 'ar') {
+                          setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
+                        } else {
+                          setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
+                        }
                       }}
-                      className="absolute left-0 md:-left-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                      className="absolute start-0 md:-start-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
                     >
-                      <ArrowRight className="w-8 h-8 rotate-180" />
+                      {/* Points Away from content: Right in AR, Left in EN */}
+                      <ArrowRight className={cn("w-8 h-8", lang === 'ar' ? "" : "rotate-180")} />
                     </button>
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
+                        // In RTL, End is Left, so this moves "Next"
                         setLightboxIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
                       }}
-                      className="absolute right-0 md:-right-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                      className="absolute end-0 md:-end-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
                     >
-                      <ArrowRight className="w-8 h-8" />
+                      {/* Points Away from content: Left in AR, Right in EN */}
+                      <ArrowRight className={cn("w-8 h-8", lang === 'ar' ? "rotate-180" : "")} />
                     </button>
                   </>
                )}
@@ -704,13 +793,14 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
                  className="relative w-full h-full flex items-center justify-center"
                >
-                 {isVideo(product.images[lightboxIndex]) ? (
+                  {isVideo(product.images[lightboxIndex]) ? (
                     <video 
                       src={product.images[lightboxIndex]} 
                       className="max-h-[85vh] max-w-full rounded-2xl shadow-2xl" 
-                      controls 
                       autoPlay 
                       loop
+                      muted
+                      playsInline
                     />
                  ) : (
                     <div className="relative w-full h-full">
@@ -726,7 +816,7 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
                </motion.div>
 
                {/* Counter */}
-               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white/40 font-bold tracking-[0.3em] uppercase text-xs">
+               <div className="absolute bottom-0 start-1/2 -translate-x-1/2 text-white/40 font-bold tracking-[0.3em] uppercase text-xs">
                   {lightboxIndex + 1} / {product.images.length}
                </div>
             </div>
@@ -734,11 +824,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
         )}
       </AnimatePresence>
       {/* Sticky Mobile Add to Cart Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-[55] md:hidden bg-white/80 backdrop-blur-xl border-t border-primary/5 p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 start-0 end-0 z-[55] md:hidden bg-white/80 backdrop-blur-xl border-t border-primary/5 p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-[8px] font-black uppercase tracking-widest text-charcoal/40 mb-0.5">Price</p>
-            <p className="text-lg font-heading font-bold text-primary leading-none">EGP {product.price}</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-charcoal/40 mb-0.5">{dict.common.price || "Price"}</p>
+            <p className="text-lg font-heading font-bold text-primary leading-none">{dict.product.currency} {product.price}</p>
           </div>
           <button
             onClick={() => addToCart(product, personalization)}
@@ -748,10 +838,11 @@ export function ProductClient({ product, relatedProducts }: { product: any, rela
               (product.stock || 0) > 0 ? "shadow-primary/20" : "opacity-30 grayscale"
             )}
           >
-            {(product.stock || 0) > 0 ? "Add to Cart" : "Sold Out"}
+            {(product.stock || 0) > 0 ? dict.product.add_to_cart : dict.product.sold_out}
           </button>
         </div>
       </div>
     </main>
   );
 }
+

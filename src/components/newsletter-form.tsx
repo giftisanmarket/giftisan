@@ -5,7 +5,7 @@ import { subscribeToNewsletter } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { CheckCircle2, Loader2, Sparkles, X } from "lucide-react";
 
-export function NewsletterForm() {
+export function NewsletterForm({ dict }: { dict: any }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
@@ -21,7 +21,7 @@ export function NewsletterForm() {
     if (res.success) {
       setIsJoined(true);
       setEmail("");
-      toast.success("Welcome to the Circle!", {
+      toast.success(dict.home.newsletter_toast_welcome, {
         icon: <Sparkles className="w-5 h-5 text-accent" />,
         style: {
           borderRadius: "20px",
@@ -48,8 +48,8 @@ export function NewsletterForm() {
         <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-accent ring-8 ring-white/5">
           <CheckCircle2 className="w-8 h-8" />
         </div>
-        <p className="font-heading font-bold text-xl">You're in the Circle!</p>
-        <p className="text-white/60 text-sm">Check your inbox for a little welcome surprise.</p>
+        <p className="font-heading font-bold text-xl">{dict.home.newsletter_success_title}</p>
+        <p className="text-white/60 text-sm">{dict.home.newsletter_success_desc}</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export function NewsletterForm() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          placeholder={dict.home.newsletter_placeholder}
           required
           className="w-full h-14 px-6 rounded-full bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-accent text-white placeholder:text-white/40 transition-all font-bold"
         />
@@ -75,9 +75,10 @@ export function NewsletterForm() {
         {isLoading ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          "Subscribe"
+          dict.home.newsletter_button
         )}
       </button>
     </form>
   );
 }
+

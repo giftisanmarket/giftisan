@@ -8,7 +8,7 @@ interface Subscriber {
   createdAt: Date | string;
 }
 
-export default function ExportSubscribersButton({ subscribers }: { subscribers: Subscriber[] }) {
+export default function ExportSubscribersButton({ subscribers, dict }: { subscribers: Subscriber[], dict: any }) {
   const exportToCSV = () => {
     if (subscribers.length === 0) return;
 
@@ -63,10 +63,11 @@ export default function ExportSubscribersButton({ subscribers }: { subscribers: 
         <FileSpreadsheet className="w-4 h-4 group-hover:rotate-12 transition-transform" />
       </div>
       <div className="flex flex-col items-start leading-none gap-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Database</span>
-        <span className="text-xs font-black uppercase tracking-wider">Export Emails</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">{dict.admin.database}</span>
+        <span className="text-xs font-black uppercase tracking-wider">{dict.admin.export_emails}</span>
       </div>
-      <Download className="w-3 h-3 ml-2 opacity-40 group-hover:translate-y-0.5 transition-transform" />
+      <Download className="w-3 h-3 ms-2 opacity-40 group-hover:translate-y-0.5 transition-transform" />
     </button>
   );
 }
+

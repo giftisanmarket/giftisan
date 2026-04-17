@@ -11,15 +11,15 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 
-export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any }) {
+export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any, dict: any }) {
   return (
-    <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">Loading Inbox...</div>}>
+    <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">{props.dict.home.loading_inbox || "Loading Inbox..."}</div>}>
       <MessagesContent {...props} />
     </Suspense>
   );
 }
 
-function MessagesContent({ initialMessages, userId, targetUser }: { initialMessages: any[], userId: string, targetUser?: any }) {
+function MessagesContent({ initialMessages, userId, targetUser, dict }: { initialMessages: any[], userId: string, targetUser?: any, dict: any }) {
   const { data: session } = useSession();
   const [messages, setMessages] = useState(initialMessages);
   
@@ -76,7 +76,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size must be less than 2MB", {
+        toast.error(dict.home.attachment_too_large || "File size must be less than 2MB", {
           style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
         });
         return;
@@ -158,7 +158,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
         partner: targetUser,
         product: null,
         messages: [],
-        lastMessage: { content: "Start a new conversation..." }
+        lastMessage: { content: dict.home.start_new_convo }
       };
     }
     return threads.find((t: any) => t.key === selectedThreadKey);
@@ -197,7 +197,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
     if ((!reply.trim() && !attachment) || isSending || !activeThread) return;
     
     if (session?.user && !(session.user as any).emailVerified) {
-      toast.error("Please verify your email to send messages.");
+      toast.error(dict.home.verify_to_send);
       return;
     }
 
@@ -218,7 +218,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
         setMessages(prev => [res.message, ...prev]);
         setReply("");
         setAttachment(null);
-        toast.success("Message sent!");
+        toast.success(dict.home.message_sent);
         
         if (isGhost) {
           // Calculate the new thread key to match what useMemo threads does
@@ -228,10 +228,10 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
 
         refreshUnreadCount();
       } else {
-        toast.error(res.error || "Failed to send message");
+        toast.error(res.error || dict.home.send_failed);
       }
     } catch (err) {
-      toast.error("An error occurred while sending. Please check your connection.");
+      toast.error(dict.home.connection_error);
     } finally {
       setIsSending(false);
     }
@@ -245,20 +245,20 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
           "w-full md:w-80 space-y-6",
           isMobileChatView ? "hidden md:block" : "block"
         )}>
-          <h1 className="text-3xl font-heading font-bold text-primary px-2">Your <span className="serif italic text-accent font-normal">Inbox</span></h1>
+          <h1 className="text-3xl font-heading font-bold text-primary px-2">{dict.home.inbox_title} <span className="serif italic text-accent font-normal">{dict.home.inbox_subtitle}</span></h1>
           
-          <div className="space-y-3 max-h-[70vh] md:max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-3 max-h-[70vh] md:max-h-[65vh] overflow-y-auto pe-2 custom-scrollbar">
             {threads.length === 0 && !selectedThreadKey?.startsWith("ghost-") ? (
               <div className="py-12 text-center bg-white rounded-3xl border border-primary/5">
                 <MessageSquare className="w-8 h-8 text-primary/10 mx-auto mb-3" />
-                <p className="text-xs font-bold text-primary/30 uppercase tracking-widest">No messages yet</p>
+                <p className="text-xs font-bold text-primary/30 uppercase tracking-widest">{dict.home.no_messages}</p>
               </div>
             ) : (
               <>
                 {selectedThreadKey?.startsWith("ghost-") && targetUser && (
                    <button
                     key={selectedThreadKey}
-                    className="w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-left transition-all bg-primary text-white border-primary shadow-xl shadow-primary/20 active:scale-[0.98]"
+                    className="w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-start transition-all bg-primary text-white border-primary shadow-xl shadow-primary/20 active:scale-[0.98]"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border-2 border-white/20 font-bold shrink-0">
@@ -266,10 +266,10 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       </div>
                       <div className="flex-1 min-w-0 text-white">
                         <span className="text-xs font-bold truncate block leading-tight">{targetUser.name}</span>
-                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-tight text-accent">New Circle</span>
+                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-tight text-accent">{dict.home.new_circle}</span>
                       </div>
                     </div>
-                    <p className="text-[11px] md:text-xs text-white/60 truncate">Start a new conversation...</p>
+                    <p className="text-[11px] md:text-xs text-white/60 truncate">{dict.home.start_new_convo}</p>
                   </button>
                 )}
                 {threads.map((t: any) => (
@@ -280,7 +280,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       setIsMobileChatView(true);
                     }}
                     className={cn(
-                      "w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-left transition-all group active:scale-[0.98]",
+                      "w-full p-4 md:p-5 rounded-2xl md:rounded-3xl border text-start transition-all group active:scale-[0.98]",
                       selectedThreadKey === t.key 
                         ? "bg-primary text-white border-primary shadow-xl shadow-primary/20" 
                         : "bg-white border-primary/5 hover:border-accent/40 hover:bg-cream/50"
@@ -299,14 +299,14 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                           <span className={cn(
                             "text-[8px] md:text-[9px] font-black uppercase tracking-tight truncate block",
                             selectedThreadKey === t.key ? "text-accent" : "text-accent/60"
-                          )}>Re: {t.product.name}</span>
+                          )}>{dict.home.inquiry_for} {t.product.name}</span>
                         )}
                       </div>
                     </div>
                     <p className={cn(
                       "text-[11px] md:text-xs line-clamp-1",
                       selectedThreadKey === t.key ? "text-white/60" : "text-charcoal/40"
-                    )}>{t.lastMessage.content || (t.lastMessage.attachment ? "Sent an attachment" : "")}</p>
+                    )}>{t.lastMessage.content || (t.lastMessage.attachment ? dict.home.attachment_sent || "Sent an attachment" : "")}</p>
                   </button>
                 ))}
               </>
@@ -326,7 +326,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                 <div className="flex items-center gap-3 md:gap-4">
                   <button 
                     onClick={() => setIsMobileChatView(false)}
-                    className="md:hidden p-2 -ml-2 text-primary hover:bg-primary/5 rounded-full"
+                    className="md:hidden p-2 -ms-2 text-primary hover:bg-primary/5 rounded-full"
                   >
                     <ArrowLeft className="w-6 h-6" />
                   </button>
@@ -341,17 +341,17 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                       {activeThread.partner.name}
                     </h2>
                     <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none truncate">
-                      {activeThread.product ? `Inquiry for ${activeThread.product.name}` : "General Conversation"}
+                      {activeThread.product ? `${dict.home.inquiry_for} ${activeThread.product.name}` : dict.home.general_convo}
                     </p>
                   </div>
                 </div>
                 {activeThread.product && (
-                  <div className="hidden sm:flex items-center gap-3 bg-white p-2 pr-4 rounded-2xl border border-primary/5 shadow-sm">
+                  <div className="hidden sm:flex items-center gap-3 bg-white p-2 pe-4 rounded-2xl border border-primary/5 shadow-sm">
                     <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm">
                       <Image src={activeThread.product.images[0]} alt="" fill className="object-cover" />
                     </div>
                     <div className="max-w-[150px]">
-                      <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">Treasure</p>
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">{dict.home.treasure}</p>
                       <p className="text-xs font-bold text-primary truncate uppercase">{activeThread.product.name}</p>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                     key={m.id}
                     className={cn(
                       "flex flex-col gap-1 max-w-[80%]",
-                      m.senderId === userId ? "items-end ml-auto" : "items-start"
+                      m.senderId === userId ? "items-end ms-auto" : "items-start"
                     )}
                   >
                     <div className={cn(
@@ -388,7 +388,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                                 className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2"
                               >
                                 <Eye className="w-5 h-5 text-white" />
-                                <span className="text-[10px] font-black text-white uppercase tracking-widest">View Image</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{dict.home.view_image}</span>
                               </a>
                             </div>
                           ) : (
@@ -398,7 +398,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                                 href={m.attachment} 
                                 download="document"
                                 className="text-xs font-bold underline truncate"
-                              >View Document</a>
+                              >{dict.home.view_document}</a>
                             </div>
                           )}
                         </div>
@@ -451,10 +451,10 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                         handleReply();
                       }
                     }}
-                    placeholder={`Reply to ${activeThread.partner.name}...`}
-                    className="w-full h-20 md:h-32 p-4 md:p-6 pr-4 md:pr-20 bg-cream/30 border border-primary/10 rounded-xl md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
+                    placeholder={dict.home.reply_placeholder.replace('{name}', activeThread.partner.name)}
+                    className="w-full h-20 md:h-32 p-4 md:p-6 pe-4 md:pe-20 bg-cream/30 border border-primary/10 rounded-xl md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
                   />
-                  <div className="flex md:absolute bottom-4 right-4 items-center justify-end gap-2 md:gap-3">
+                  <div className="flex md:absolute bottom-4 end-4 items-center justify-end gap-2 md:gap-3">
                     <input 
                       type="file" 
                       id="file-attachment" 
@@ -476,7 +476,7 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
                         session?.user && !(session.user as any).emailVerified && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
                       )}
                     >
-                      {session?.user && !(session.user as any).emailVerified ? "Verify email to reply" : isSending ? "..." : "Reply"}
+                      {session?.user && !(session.user as any).emailVerified ? dict.home.verify_to_reply : isSending ? "..." : dict.home.reply_button}
                       {!isSending && <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                     </button>
                   </div>
@@ -488,8 +488,8 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
               <div className="w-24 h-24 bg-cream rounded-full flex items-center justify-center">
                 <MessageSquare className="w-10 h-10 text-primary/10 font-bold text-primary" />
               </div>
-              <h3 className="text-2xl font-heading font-bold text-primary">No Conversation Selected</h3>
-              <p className="text-charcoal/40 max-w-xs">Choose a conversation from the sidebar to view messages and respond.</p>
+              <h3 className="text-2xl font-heading font-bold text-primary">{dict.home.no_convo_selected}</h3>
+              <p className="text-charcoal/40 max-w-xs">{dict.home.choose_convo_desc}</p>
             </div>
           )}
         </div>
@@ -497,3 +497,4 @@ function MessagesContent({ initialMessages, userId, targetUser }: { initialMessa
     </div>
   );
 }
+

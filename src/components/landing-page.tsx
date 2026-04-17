@@ -37,7 +37,7 @@ const FadeInView = ({ children, delay = 0 }: { children: React.ReactNode; delay?
   </motion.div>
 );
 
-export default function LandingPage() {
+export default function LandingPage({ dict }: { dict: any }) {
   const { data: session } = useSession();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -76,7 +76,7 @@ export default function LandingPage() {
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
 
       {/* Floating Header */}
-      <nav className="fixed top-0 left-0 right-0 z-[60] p-4 md:p-6">
+      <nav className="fixed top-0 start-0 end-0 z-[60] p-4 md:p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-xl border border-primary/5 rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 shadow-xl shadow-primary/5">
           <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden rounded-md shadow-sm">
@@ -86,8 +86,8 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden lg:flex items-center gap-10">
-            <Link href="/search" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">Explore Treasures</Link>
-            <a href="#artisans" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">For Artisans</a>
+            <Link href="/search" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">{dict.common.explore}</Link>
+            <a href="#artisans" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">{dict.common.artisans}</a>
             {session ? (
               <Link href="/profile" className="flex items-center gap-2 group italic serif text-primary hover:text-accent font-bold transition-colors">
                 Hi, {session.user?.name?.split(' ')[0]} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -97,7 +97,7 @@ export default function LandingPage() {
                 href="/login"
                 className="bg-primary text-white px-8 py-3 rounded-xl text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-primary/20"
               >
-                Join the Circle
+                {dict.common.login}
               </Link>
             )}
           </div>
@@ -128,14 +128,14 @@ export default function LandingPage() {
             className="fixed inset-0 z-50 bg-cream lg:hidden flex flex-col p-8 pt-32"
           >
             <div className="flex flex-col gap-10 text-center">
-              <Link href="/search" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">Discover</Link>
-              <a href="#artisans" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">Sell</a>
-              <Link href="/become-artisan" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">Artisan Portal</Link>
+              <Link href="/search" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.common.explore.split(' ')[0]}</Link>
+              <a href="#artisans" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.home.view_studios.split(' ')[0]}</a>
+              <Link href="/become-artisan" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.common.open_studio.split(' ')[0]}</Link>
               <div className="h-px bg-primary/10 w-24 mx-auto" />
               {session ? (
-                <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-accent italic serif">Manage Profile</Link>
+                <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-accent italic serif">{dict.common.manage_profile}</Link>
               ) : (
-                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-primary">Sign In</Link>
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-primary">{dict.common.login}</Link>
               )}
             </div>
             <div className="mt-auto flex justify-center gap-8 pb-10">
@@ -166,7 +166,7 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full mb-6 md:mb-10"
           >
             <Sparkles className="w-4 h-4 fill-accent" />
-            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-balance">Proudly Handcrafted with Soul</span>
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-balance">{dict.home.proudly_handcrafted}</span>
           </motion.div>
 
           <motion.h1
@@ -175,9 +175,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            WHERE ART <br />
-            <span className="serif italic text-accent font-normal underline decoration-accent/20 underline-offset-[12px] md:underline-offset-[20px]">Meets</span> <br />
-            HEART.
+            {dict.home.hero_title}
           </motion.h1>
 
           <motion.p
@@ -186,7 +184,7 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Discover a curated collection of high-end artisanal treasures. We connect our most skilled local creators with collectors who value soul over speed.
+            {dict.home.hero_subtitle}
           </motion.p>
 
           <motion.div
@@ -199,19 +197,19 @@ export default function LandingPage() {
               href="/search"
               className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 group"
             >
-              Start Shopping <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              {dict.common.start_shopping} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/become-artisan"
               className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-white text-primary border border-primary/10 font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95"
             >
-              Open Your Studio <Store className="w-5 h-5" />
+              {dict.common.open_studio} <Store className="w-5 h-5" />
             </Link>
           </motion.div>
         </motion.div>
 
         {/* Hero Visuals */}
-        <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 pointer-events-none -z-10 flex justify-between px-10 opacity-10 md:opacity-100">
+        <div className="absolute top-1/2 start-0 w-full -translate-y-1/2 pointer-events-none -z-10 flex justify-between px-10 opacity-10 md:opacity-100">
           <motion.div
             initial={{ x: -100, opacity: 0, rotate: -10 }}
             animate={{ x: 0, opacity: 0.6, rotate: -5 }}
@@ -235,18 +233,18 @@ export default function LandingPage() {
       <section className="relative z-10 py-24 md:py-32 px-6 border-y border-primary/5 bg-white/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto text-center">
           <FadeInView>
-            <h2 className="text-4xl md:text-6xl font-heading font-black text-primary mb-20 md:mb-32 tracking-tight">The Giftisan <span className="serif italic text-accent font-normal">Journey</span>.</h2>
+            <h2 className="text-4xl md:text-6xl font-heading font-black text-primary mb-20 md:mb-32 tracking-tight">{(dict.home.journey_title_base || dict.home.journey_title.split('Journey')[0])}{' '}<span className="serif italic text-accent font-normal">{(dict.home.journey_title_accent || (dict.home.journey_title.includes('Journey') ? 'Journey' : 'رحلة'))}</span></h2>
           </FadeInView>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12 lg:gap-24">
             {[
-              { step: "01", title: "Discover", desc: "Browse a hand-vetted collection of the finest handcrafted items from our native master artisans." },
-              { step: "02", title: "Connect", desc: "Interact directly with artisans to personalize your request or hear their story." },
-              { step: "03", title: "Cherish", desc: "Receive a piece of art that carries a story, a soul, and a piece of timeless heritage." }
+              { step: "01", title: dict.home.journey_discover, desc: dict.home.journey_discover_desc },
+              { step: "02", title: dict.home.journey_connect, desc: dict.home.journey_connect_desc },
+              { step: "03", title: dict.home.journey_cherish, desc: dict.home.journey_cherish_desc }
             ].map((item, i) => (
               <FadeInView key={i} delay={i * 0.1}>
                 <div className="flex flex-col items-center group">
                   <div className="relative mb-8 md:mb-12">
-                    <span className="text-[120px] md:text-[160px] font-heading font-black text-primary/[0.03] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none group-hover:text-accent/[0.05] transition-colors">{item.step}</span>
+                    <span className="text-[120px] md:text-[160px] font-heading font-black text-primary/[0.03] absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 select-none group-hover:text-accent/[0.05] transition-colors">{item.step}</span>
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[1.5rem] bg-white shadow-xl shadow-primary/5 border border-primary/5 flex items-center justify-center text-primary relative z-10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
                       <span className="text-xl font-black">{item.step}</span>
                     </div>
@@ -263,27 +261,27 @@ export default function LandingPage() {
       {/* For Artisans Section */}
       <section id="artisans" className="relative z-10 py-24 md:py-40 px-6 bg-primary text-cream overflow-hidden">
         {/* Background Accent */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 end-0 w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <FadeInView>
             <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-8">
               <Store className="w-4 h-4 text-accent-light" />
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white text-center">Empowering Creators</span>
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white text-center">{dict.home.empowering_creators}</span>
             </div>
             <h2 className="text-5xl md:text-8xl font-heading font-black mb-10 leading-[0.9] md:leading-tight">
-              Scale Your <br /> <span className="serif italic text-accent-light font-normal text-6xl md:text-9xl">Craft.</span>
+              {(dict.home.scale_craft_base || dict.home.scale_craft.split('Craft')[0])} <br /> <span className="serif italic text-accent-light font-normal text-6xl md:text-9xl">{(dict.home.scale_craft_accent || (dict.home.scale_craft.includes('Craft') ? 'Craft.' : 'حرفتك.'))}</span>
             </h2>
             <p className="text-lg md:text-2xl text-white/70 mb-14 font-medium leading-relaxed">
-              Stop fighting algorithms on mass-market platforms. Giftisan is designed specifically for master artisans who demand excellence.
+              {dict.home.artisan_desc}
             </p>
 
             <div className="grid sm:grid-cols-2 gap-10 md:gap-12 mb-16">
               {[
-                { icon: ShieldCheck, title: "Curated Only", desc: "Join an elite community where quality is the top priority." },
-                { icon: Users, title: "Direct Sales", desc: "Keep the relationship with your collectors." },
-                { icon: Star, title: "Pro Tools", desc: "Professional studio tools to manage orders and portfolio." },
-                { icon: Mail, title: "Built-in Audience", desc: "We handle the marketing while you handle the craft." }
+                { icon: ShieldCheck, title: dict.home.curated_only, desc: dict.home.curated_only_desc },
+                { icon: Users, title: dict.home.direct_sales, desc: dict.home.direct_sales_desc },
+                { icon: Star, title: dict.home.pro_tools, desc: dict.home.pro_tools_desc },
+                { icon: Mail, title: dict.home.built_audience, desc: dict.home.built_audience_desc }
               ].map((item, i) => (
                 <div key={i} className="flex gap-5">
                   <div className="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -301,7 +299,7 @@ export default function LandingPage() {
               href="/become-artisan"
               className="inline-flex items-center gap-3 bg-accent text-white px-12 py-5 rounded-2xl font-black text-xl hover:bg-accent-light transition-all shadow-2xl shadow-black/30 w-full sm:w-auto justify-center"
             >
-              Apply to Join <ArrowRight className="w-6 h-6" />
+              {dict.home.apply_join} <ArrowRight className="w-6 h-6" />
             </Link>
           </FadeInView>
 
@@ -309,13 +307,13 @@ export default function LandingPage() {
             <div className="relative aspect-square md:aspect-[4/5] lg:h-[700px] rounded-[3rem] overflow-hidden shadow-2xl border border-white/5">
               <Image src="/marketing/artisan-working.png" alt="Artisan Studio" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 md:bottom-12 md:left-12 md:right-12 flex flex-col md:flex-row gap-6 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem]">
+              <div className="absolute bottom-6 start-6 end-6 md:bottom-12 md:start-12 md:end-12 flex flex-col md:flex-row gap-6 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem]">
                 <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center shrink-0 shadow-xl">
                   <Star className="w-8 h-8 text-white fill-white" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-lg md:text-xl leading-tight mb-2">&quot;Giftisan transformed my small hobby into a thriving global studio.&quot;</p>
-                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— Amira Hassan, Boutique Studio Potter</p>
+                  <p className="text-white font-bold text-lg md:text-xl leading-tight mb-2">&quot;{dict.home.amira_quote}&quot;</p>
+                  <p className="text-white/60 text-sm md:text-base uppercase tracking-widest font-black">— {dict.home.amira_credit}</p>
                 </div>
               </div>
             </div>
@@ -330,33 +328,33 @@ export default function LandingPage() {
             <div className="text-center max-w-3xl mx-auto mb-20 md:mb-32">
               <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full mb-8">
                 <Gift className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">Gifts with Soul</span>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">{dict.home.gifts_soul}</span>
               </div>
               <h2 className="text-5xl md:text-8xl font-heading font-black text-primary mb-10 leading-tight">
-                Discover the <br /> <span className="serif italic text-accent font-normal text-6xl md:text-9xl">Extraordinary.</span>
+                {(dict.home.extraordinary_title_base || dict.home.extraordinary_title.split('Extraordinary')[0])} <br /> <span className="serif italic text-accent font-normal text-6xl md:text-9xl">{(dict.home.extraordinary_title_accent || (dict.home.extraordinary_title.includes('Extraordinary') ? 'Extraordinary.' : 'الاستثنائي.'))}</span>
               </h2>
               <p className="text-lg md:text-2xl text-primary/60 font-medium leading-relaxed px-4">
-                Every item on Giftisan is more than a product—it&apos;s a timestamp of someone&apos;s creativity. Crafted for those who seek meaning in every gift.
+                {dict.home.extraordinary_desc}
               </p>
             </div>
           </FadeInView>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full">
             {[
-              { img: "/marketing/jewelry.png", title: "Bespoke Jewelry", tag: "Handmade", link: "/category/jewelry" },
-              { img: "/marketing/gift-box.png", title: "Luxury Gift Sets", tag: "Exclusive", link: "/category/personalized" },
-              { img: "/marketing/home-decor.png", title: "Unique Home Décor", tag: "Limited", link: "/category/ceramics" },
+              { img: "/marketing/jewelry.png", title: dict.home.bespoke_jewelry, tag: dict.home.handmade_tag, link: "/category/jewelry" },
+              { img: "/marketing/gift-box.png", title: dict.home.luxury_gift_sets, tag: dict.home.exclusive_tag, link: "/category/personalized" },
+              { img: "/marketing/home-decor.png", title: dict.home.unique_home_decor, tag: dict.home.limited_tag, link: "/category/ceramics" },
             ].map((item, i) => (
               <FadeInView key={i} delay={i * 0.1}>
                 <Link href={item.link}>
                   <div className="group relative rounded-[2.5rem] overflow-hidden aspect-[4/5] shadow-2xl hover:-translate-y-4 transition-all duration-700">
                     <Image src={item.img} alt={item.title} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent" />
-                    <div className="absolute bottom-10 left-10 right-10">
+                    <div className="absolute bottom-10 start-10 end-10">
                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent p-1 bg-white/10 backdrop-blur-md rounded-md mb-3 inline-block">{item.tag}</span>
                       <h3 className="text-white text-3xl md:text-4xl font-black mb-4">{item.title}</h3>
                       <div className="flex items-center gap-3 text-white/50 text-[10px] md:text-xs font-black uppercase tracking-widest group-hover:text-accent transition-colors">
-                        Explore Collection <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                        {dict.home.explore_collection} <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -372,10 +370,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-20">
             {[
-              { icon: Heart, title: "Built with Passion", desc: "We celebrate the makers and the heritage behind every craft in our collection." },
-              { icon: ShieldCheck, title: "Verified Artisans", desc: "Every creator is manually vetted to ensure premium quality and originality." },
-              { icon: Users, title: "Direct Contact", desc: "Message artisans directly to personalize your treasures or hear the story." },
-              { icon: Sparkles, title: "Unique Selection", desc: "No mass production. Only one-of-a-kind and limited editions for the soul." }
+              { icon: Heart, title: dict.home.built_passion, desc: dict.home.built_passion_desc },
+              { icon: ShieldCheck, title: dict.home.verified_artisans, desc: dict.home.verified_artisans_desc },
+              { icon: Users, title: dict.home.direct_contact, desc: dict.home.direct_contact_desc },
+              { icon: Sparkles, title: dict.home.unique_selection, desc: dict.home.unique_selection_desc }
             ].map((feature, i) => (
               <FadeInView key={i} delay={i * 0.1}>
                 <div className="flex flex-col items-center text-center group">
@@ -401,9 +399,8 @@ export default function LandingPage() {
               </div>
               <span className="text-4xl font-heading font-black text-primary tracking-tighter uppercase">Giftisan</span>
             </div>
-            <p className="text-primary/50 text-xl font-medium leading-relaxed text-center lg:text-left">
-              The premier curated artisanal marketplace.
-              Join a movement of conscious gifting and professional craftsmanship.
+            <p className="text-primary/50 text-xl font-medium leading-relaxed text-center lg:text-start">
+              {dict.home.premier_marketplace}
             </p>
             <div className="flex gap-4">
               <a href="https://www.instagram.com/giftisanmarket/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
@@ -422,16 +419,16 @@ export default function LandingPage() {
           </div>
 
           <div className="w-full max-w-xl">
-            <h4 className="font-bold text-primary mb-6 text-center lg:text-left uppercase tracking-[0.3em] text-xs">Stay in the Loop</h4>
+            <h4 className="font-bold text-primary mb-6 text-center lg:text-start uppercase tracking-[0.3em] text-xs">{dict.home.stay_loop}</h4>
             <div className="bg-white p-2 rounded-3xl border border-primary/5 shadow-2xl flex flex-col sm:flex-row gap-2">
               <div className="flex-1 relative">
-                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-primary/20" />
+                <Mail className="absolute start-6 top-1/2 -translate-y-1/2 w-6 h-6 text-primary/20" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full h-16 md:h-20 pl-16 pr-6 bg-transparent outline-none font-bold text-primary placeholder:text-primary/20 text-lg md:text-xl"
+                  placeholder={dict.home.newsletter_placeholder}
+                  className="w-full h-16 md:h-20 ps-16 pe-6 bg-transparent outline-none font-bold text-primary placeholder:text-primary/20 text-lg md:text-xl"
                 />
               </div>
               <button
@@ -439,26 +436,27 @@ export default function LandingPage() {
                 disabled={status === "loading" || status === "success"}
                 className="h-16 md:h-20 px-10 md:px-14 bg-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[1.5rem] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
               >
-                {status === "loading" ? <Loader2 className="w-6 h-6 animate-spin" /> : status === "success" ? <CheckCircle2 className="w-6 h-6" /> : "Subscribe"}
+                {status === "loading" ? <Loader2 className="w-6 h-6 animate-spin" /> : status === "success" ? <CheckCircle2 className="w-6 h-6" /> : dict.home.newsletter_button}
               </button>
             </div>
             {message && (
-              <p className={`mt-6 text-sm font-black text-center lg:text-left uppercase tracking-widest ${status === "error" ? "text-red-500" : "text-primary"}`}>
+              <p className={`mt-6 text-sm font-black text-center lg:text-start uppercase tracking-widest ${status === "error" ? "text-red-500" : "text-primary"}`}>
                 {message}
               </p>
             )}
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-32 pt-10 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-[10px] md:text-xs font-black text-primary/30 uppercase tracking-[0.4em]">© 2026 Giftisan. Every Gift Tells a Story.</p>
-          <div className="flex flex-wrap justify-center gap-8">
-            <Link href="/contact" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">Support</Link>
-            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">Terms of Service</Link>
-            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="/become-artisan" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">Artisan Portal</Link>
+          <p className="text-[10px] md:text-xs font-black text-primary/30 uppercase tracking-[0.4em] text-center md:text-start">© 2026 Giftisan. {dict.home.every_gift_story}</p>
+          <div className="flex flex-wrap justify-center md:justify-end gap-8">
+            <Link href="/contact" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.support}</Link>
+            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.terms}</Link>
+            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.privacy}</Link>
+            <Link href="/become-artisan" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.open_studio.split(' ')[0]}</Link>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+

@@ -21,8 +21,10 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   
   return {
-    title: `${SITE_NAME} | ${dict.home.hero_title || "Premium Artisanal Marketplace"}`,
-    description: dict.home.hero_subtitle || SITE_DESCRIPTION,
+    title: {
+      absolute: dict.seo.title
+    },
+    description: dict.seo.description || SITE_DESCRIPTION,
   };
 }
 

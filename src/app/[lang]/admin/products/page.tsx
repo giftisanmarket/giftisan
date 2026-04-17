@@ -4,6 +4,15 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../../dictionaries";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: `${dict.admin?.global_products_title || "Products"} | ${dict.admin?.marketplace || "Marketplace"}`,
+  };
+}
 
 export default async function AdminProductsPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

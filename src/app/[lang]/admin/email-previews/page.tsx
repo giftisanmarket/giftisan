@@ -3,6 +3,15 @@ import { SITE_URL } from "@/lib/constants";
 import { Link } from "lucide-react";
 
 import { getDictionary } from "../../dictionaries";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: `${dict.admin?.email_previews_title || "Email Previews"} | ${dict.admin?.marketplace || "Marketplace"}`,
+  };
+}
 
 export default async function EmailPreviewsPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

@@ -3,10 +3,14 @@ import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { ChevronRight, Shield, Scale, FileText } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Giftisan",
-  description: "Read the Giftisan terms and conditions for artisans and buyers.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: dict.common?.terms || "Terms of Service",
+    description: "Read the Giftisan terms and conditions for artisans and buyers.",
+  };
+}
 
 import { getDictionary } from "../dictionaries";
 

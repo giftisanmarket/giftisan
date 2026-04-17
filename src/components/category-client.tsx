@@ -59,7 +59,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
             </Link>
             <h1 className="text-4xl md:text-6xl font-heading font-bold mb-4">{dict.common.categories_list?.[slug] || categoryName}</h1>
             <p className="text-white/70 text-base md:text-lg leading-relaxed">
-              {dict.home.category_desc_prefix} {dict.common.categories_list?.[slug]?.toLowerCase() || categoryName.toLowerCase()} {dict.home.category_desc_suffix}
+              {dict.home.category_desc_prefix}{dict.common.categories_list?.[slug]?.toLowerCase() || categoryName.toLowerCase()} {dict.home.category_desc_suffix}
             </p>
           </motion.div>
         </div>

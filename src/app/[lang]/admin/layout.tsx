@@ -2,7 +2,20 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { AdminNavClient } from "@/components/admin-nav-client"; // We'll move the client parts to a client component for pathname access
+import { AdminNavClient } from "@/components/admin-nav-client"; 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
 import { getDictionary } from "../dictionaries";
 

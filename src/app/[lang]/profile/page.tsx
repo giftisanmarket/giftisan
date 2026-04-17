@@ -14,6 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return {
     title: dict.common.manage_profile,
     description: "View your handcrafted journey and manage your artisanal treasures.",
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

@@ -9,8 +9,12 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   
   return {
-    title: `${dict.auth.forgot_password_title} | Giftisan`,
+    title: dict.auth.forgot_password_title,
     description: "Reset your Giftisan password to continue discovering unique handcrafted treasures.",
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   
   return {
-    title: `${dict.home.artisans_registry} | Giftisan`,
+    title: dict.home.artisans_registry,
     description: dict.home.artisans_desc,
   };
 }

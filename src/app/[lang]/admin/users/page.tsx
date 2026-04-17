@@ -8,6 +8,15 @@ import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { RoleManager } from "@/components/admin/role-manager";
 
 import { getDictionary } from "../../dictionaries";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: `${dict.admin?.artisans_title || "Artisans"} & ${dict.admin?.users_accent || "Users"}`,
+  };
+}
 
 export default async function AdminUsersPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

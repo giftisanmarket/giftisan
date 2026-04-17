@@ -11,7 +11,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const { q } = await searchParams;
   
   return {
-    title: q ? `${dict.home.search_results_for} "${q}"` : `${dict.common.explore} | Giftisan`,
+    title: q ? `${dict.home.search_results_for} "${q}"` : dict.common.explore,
     description: dict.home.treasures_desc,
   };
 }

@@ -1,15 +1,20 @@
 import { getSubscribers } from "@/lib/actions";
-import { Mail, Clock, ShieldCheck } from "lucide-react";
+import { Mail, Clock } from "lucide-react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import ExportSubscribersButton from "@/components/admin/export-subscribers-button";
 import DeleteSubscriberButton from "@/components/admin/delete-subscriber-button";
-
-export const metadata = {
-  title: "Admin | Newsletter Subscribers",
-};
-
+import { Metadata } from "next";
 import { getDictionary } from "../../dictionaries";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const { getDictionary } = await import("../../dictionaries");
+  const dict = await getDictionary(lang as any);
+  return {
+    title: `${dict.admin?.newsletter_title || "Subscribers"} | ${dict.admin?.marketplace || "Marketplace"}`,
+  };
+}
 
 export default async function AdminSubscribersPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

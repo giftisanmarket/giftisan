@@ -7,7 +7,7 @@ interface Props {
   params: Promise<{ slug: string; lang: string }>;
 }
 
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, SITE_NAME } from "@/lib/constants";
 import { getDictionary } from "@/app/[lang]/dictionaries";
 
 import { cookies } from "next/headers";
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   });
 
-  if (!product) return { title: "Product Not Found" };
+  if (!product) return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
 
   const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `${SITE_URL}/api/image/product/${product.id}`;
   const description = product.description.slice(0, 160);
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: product.name,
     description: description,
-    keywords: [product.name, product.category, "Handcrafted", "Giftisan", "Egypt"],
+    keywords: [product.name, product.category, lang === 'ar' ? "صنع يدوياً" : "Handcrafted", SITE_NAME, lang === 'ar' ? "مصر" : "Egypt"],
     alternates: {
       canonical: `${SITE_URL}/${lang}/products/${product.slug || product.id}`,
       languages: {
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     },
     openGraph: {
-      title: `${product.name} | Giftisan`,
+      title: product.name,
       description: description,
       images: [{
         url: firstImage,
@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | Giftisan`,
+      title: product.name,
       description: description,
       images: [firstImage],
     }
@@ -166,7 +166,7 @@ export default async function ProductPage({ params }: Props) {
     "sku": product.id,
     "brand": {
       "@type": "Brand",
-      "name": product.artisan.studioName
+      "name": product.artisan.studioName || SITE_NAME
     },
     "offers": {
       "@type": "Offer",
@@ -176,7 +176,7 @@ export default async function ProductPage({ params }: Props) {
       "availability": "https://schema.org/InStock",
       "seller": {
         "@type": "Organization",
-        "name": "Giftisan"
+        "name": SITE_NAME
       }
     }
   };
@@ -188,13 +188,13 @@ export default async function ProductPage({ params }: Props) {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "Home",
+        "name": dict.common?.home || "Home",
         "item": baseUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": product.category,
+        "name": (dict.common?.categories_list as any)?.[product.category.toLowerCase().replace(/ /g, '-')] || product.category,
         "item": `${baseUrl}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
       },
       {

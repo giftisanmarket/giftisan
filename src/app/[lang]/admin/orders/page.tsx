@@ -3,6 +3,15 @@ import { Package, Truck, CheckCircle2, Clock, User, ArrowRight } from "lucide-re
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../../dictionaries";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: `${dict.admin?.global_orders_title || "Orders"} | ${dict.admin?.marketplace || "Marketplace"}`,
+  };
+}
 
 export default async function AdminOrdersPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

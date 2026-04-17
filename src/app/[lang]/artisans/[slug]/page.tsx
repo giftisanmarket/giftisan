@@ -59,7 +59,7 @@ async function getArtisanBySlug(slug: string) {
 }
 
 import { getDictionary, hasLocale } from "../../dictionaries";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, SITE_NAME } from "@/lib/constants";
 
 interface Props {
   params: Promise<{ slug: string, lang: string }>;
@@ -72,16 +72,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   const data = await getArtisanBySlug(slug);
   
-  if (!data || !data.artisanProfile) return { title: "Not Found" };
+  if (!data || !data.artisanProfile) return { title: lang === 'ar' ? "لم يتم العثور على الحرفي" : "Artisan Not Found" };
   const artisan = data.artisanProfile;
 
-  const description = artisan.bio || `${dict.home.category_desc_prefix} ${data.name}. Discover unique treasures made with passion.`;
-  const keywords = [data.name, artisan.studioName, artisan.location, "Artisan", "Handmade", "Giftisan"].filter(Boolean) as string[];
+  const description = artisan.bio || (lang === 'ar' 
+    ? `اكتشف عالم ${data.name}. استكشف كنوزاً فريدة مصنوعة بشغف.`
+    : `Discover the world of ${data.name}. Explore unique treasures made with passion.`);
+  const keywords = [data.name, artisan.studioName, artisan.location, lang === 'ar' ? "حرفي" : "Artisan", lang === 'ar' ? "صنع يدوي" : "Handmade", SITE_NAME].filter(Boolean) as string[];
   
   const ogImage = artisan.bannerImage || artisan.avatar || `${SITE_URL}/api/image/artisan/${artisan.id}`;
 
   return {
-    title: `${data.name} | Giftisan`,
+    title: data.name || "Artisan",
     description: description.slice(0, 160),
     keywords,
     alternates: {
@@ -92,13 +94,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     },
     openGraph: {
-      title: `${data.name} | Giftisan`,
+      title: data.name || SITE_NAME,
       description: description.slice(0, 160),
       images: [{
         url: ogImage,
         width: 1200,
         height: 630,
-        alt: `The ${data.name} Studio`
+        alt: lang === 'ar' ? `استوديو ${data.name || ""}` : `The ${data.name || ""} Studio`
       }],
       type: "profile",
     }
@@ -116,5 +118,38 @@ export default async function ArtisanPage({ params }: Props) {
     notFound();
   }
 
-  return <ArtisanClient artisan={data.artisanProfile} dict={dict} />;
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": dict.common?.home || "Home",
+        "item": SITE_URL
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": dict.common?.artisans || "Artisans",
+        "item": `${SITE_URL}/${lang}/artisans`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": data.name,
+        "item": `${SITE_URL}/${lang}/artisans/${slug}`
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ArtisanClient artisan={data.artisanProfile} dict={dict} />
+    </>
+  );
 }

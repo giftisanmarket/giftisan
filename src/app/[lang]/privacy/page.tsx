@@ -3,10 +3,14 @@ import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { ShieldCheck, Eye, Lock, Database, ChevronRight } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Giftisan",
-  description: "Learn how Giftisan protects your personal data and creative assets.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: dict.common?.privacy || "Privacy Policy",
+    description: "Learn how Giftisan protects your personal data and creative assets.",
+  };
+}
 
 import { getDictionary } from "../dictionaries";
 

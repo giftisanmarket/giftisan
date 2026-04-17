@@ -9,8 +9,12 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   
   return {
-    title: `${dict.home.favorites_title || "Your Favorites"} | Giftisan`,
+    title: dict.home.favorites_title || "Your Favorites",
     description: "Your curated collection of artisanal treasures.",
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

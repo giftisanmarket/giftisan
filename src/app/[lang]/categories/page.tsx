@@ -1,16 +1,19 @@
 import { CategoriesClient } from "@/components/categories-client";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Browse Categories",
-  description: "Explore our diverse range of artisanal categories, from handcrafted ceramics to bespoke jewelry.",
-};
-
-export const dynamic = "force-dynamic";
-
 import { getDictionary, hasLocale } from "../dictionaries";
 import { notFound } from "next/navigation";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as any);
+  return {
+    title: dict.common.all_categories || "Browse Categories",
+    description: dict.home.category_desc || "Explore our diverse range of artisanal categories.",
+  };
+}
+
+export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;

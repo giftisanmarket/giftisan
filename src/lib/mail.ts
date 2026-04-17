@@ -39,7 +39,7 @@ const emailStyles = `
 const emailHeader = `
   ${emailStyles}
   <div style="text-align: center; padding: 40px 20px 30px 20px; background-color: ${PRIMARY_COLOR}; border-radius: 24px 24px 0 0;">
-    <img src="${LOGO_URL}" alt="Giftisan" width="56" height="56" align="center" style="display: block; margin: 0 auto 14px auto; border: 0; outline: none;">
+    <img src="${LOGO_URL}" alt="Giftisan" width="56" height="56" align="center" style="display: block; margin: 0 auto 14px auto; border: 0; outline: none; border-radius: 5px;">
     <div class="heading" style="font-size: 26px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
     <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 5px; text-align: center;">Handcrafted Mastery</div>
   </div>

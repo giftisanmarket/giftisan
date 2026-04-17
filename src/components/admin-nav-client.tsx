@@ -9,6 +9,7 @@ import {
   Package, 
   LayoutDashboard,
   Mail,
+  Send,
   ArrowLeft
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ const getNavItems = (dict: any) => [
   { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
   { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
   { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
+  { label: "Outreach", href: "/admin/outreach", icon: Send },
 ];
 
 export function AdminNavClient({ 
@@ -91,8 +93,8 @@ export function AdminNavClient({
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl">
-        {navItems.slice(0, 4).map((item) => {
+      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl overflow-x-auto">
+        {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link 
@@ -109,22 +111,6 @@ export function AdminNavClient({
             </Link>
           );
         })}
-        {(() => {
-          const isActive = pathname === "/admin/subscribers";
-          return (
-             <Link 
-              href="/admin/subscribers" 
-              className={cn(
-                "flex flex-col items-center gap-1 p-2 transition-all transition-transform active:scale-125",
-                isActive ? "text-accent scale-110" : "text-white/40 hover:text-white"
-              )}
-            >
-               <Mail className="w-5 h-5" />
-               <span className="text-[6px] font-black uppercase tracking-widest">{dict.admin.subs}</span>
-               {isActive && <div className="w-1 h-1 rounded-full bg-accent mt-0.5 animate-pulse" />}
-            </Link>
-          );
-        })()}
       </nav>
 
       {/* Main Content */}

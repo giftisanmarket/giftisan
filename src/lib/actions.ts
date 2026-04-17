@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies } from "next/headers";
 
@@ -1370,5 +1370,18 @@ export async function submitInquiry(data: { name: string; email: string; message
   } catch (error: any) {
     console.error("Inquiry submission error:", error);
     return { success: false, error: "Failed to send message. Please try again later." };
+  }
+}
+
+export async function sendOutreachAction(data: { name: string; email: string; product: string; subject: string; lang: 'ar' | 'en' }) {
+  try {
+    const result = await sendArtisanOutreachEmail(data.email, data.name, data.product, data.subject, data.lang);
+    if (!result.success) {
+      return { success: false, error: "Failed to send email via Resend" };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Outreach Action Error:", error);
+    return { success: false, error: "Internal Server Error" };
   }
 }

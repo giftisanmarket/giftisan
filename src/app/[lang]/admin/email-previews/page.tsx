@@ -23,7 +23,7 @@ export default async function EmailPreviewsPage({ params }: { params: Promise<{ 
 
   const emailHeader = `
     <div style="text-align: center; padding: 40px 0 30px 0; background-color: ${PRIMARY_COLOR}; border-radius: 24px 24px 0 0;">
-      <img src="${SITE_URL}/icon.png" alt="Giftisan" style="width: 64px; height: 64px; margin-bottom: 15px;">
+      <img src="${SITE_URL}/icon.png" alt="Giftisan" style="width: 64px; height: 64px; display: block; margin: 0 auto 15px auto;">
       <div style="font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; font-family: sans-serif;">Giftisan</div>
       <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; tracking: 0.2em; margin-top: 5px; font-family: sans-serif;">${dict.admin.handcrafted_mastery}</div>
     </div>
@@ -175,6 +175,94 @@ export default async function EmailPreviewsPage({ params }: { params: Promise<{ 
                 <div style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase;">Secure My Account</div>
               </div>
               <p style="color: #9ca3af; font-size: 12px; font-style: italic;">Recovery link expires in 60 minutes.</p>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `
+    },
+    {
+      name: "Artisan Outreach (Arabic)",
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;" dir="rtl">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;">
+            ${emailHeader}
+            <div style="padding: 40px 40px; text-align: right;">
+              <p style="color: ${PRIMARY_COLOR}; font-size: 22px; font-weight: bold; margin-bottom: 25px;">أهلاً يا [الاسم]،</p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 20px;">
+                شفت شغل الـ <strong style="color: ${ACCENT_COLOR};">[Product]</strong> بتاعك النهاردة، وبجد حاجة تشرف ومستواها عالي جداً. ده بالظبط نوع الفن اللي نفسنا نعرضه ونكبره في "جيفتيزان".
+              </p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 20px;">
+                إحنا بنأسس منصة حصرية قائمة على الدعوات الخاصة، معمول مخصوص عشان يريح "الحرفيين" والفنانين من دوشة المبيعات واللوجستيات. بمجرد انضمامك، بنوفرلك لوحة تحكم <strong>برو استوديو</strong> متكاملة تقدر من خلالها تعرض منتجاتك، تتابع أرباحك وتدير طلباتك بكل سهولة، بالإضافة لرسائل التواصل المباشر مع العملاء. والأهم إن النظام بيتولى إرسال كل إيميلات التأكيد والشحن أوتوماتيك، عشان تفضل "رايق" ومركز بس في فنك ومساحتك الإبداعية. 🏺✨
+              </p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">
+                والأهم من ده كله، إحنا شغالين دلوقتي على تفعيل أنظمة دفع وشحن مباشر متكاملة على الموقع، وبنعمل حملات تسويق مخصوص لكل استوديو عشان نضمن إن فنك ياخد "اللقطة" والتقدير اللي يستاهله بجد. 🏛️
+              </p>
+
+              <div style="background-color: #f9fafb; padding: 25px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 30px;">
+                <p style="color: ${PRIMARY_COLOR}; font-size: 16px; font-weight: bold; line-height: 1.8; margin: 0;">
+                  إحنا بنختار مجموعة صغيرة وشاطرة جداً من المبدعين عشان نبدأ بيهم، وعاوزينك بجد تكون واحد منهم. تحب تدردش ونشوف هنعمل إيه سوا؟
+                </p>
+              </div>
+
+              <p style="color: #4b5563; font-size: 16px; margin-bottom: 10px;">مستني ردك،</p>
+              <p style="color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; margin-bottom: 40px;">حازم — مؤسس جيفتيزان</p>
+
+              <div style="text-align: center;">
+                <a href="${SITE_URL}" style="text-decoration: none;">
+                  <div style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 16px; display: inline-block;">
+                    لقطة سريعة من هنا
+                  </div>
+                </a>
+              </div>
+
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `
+    },
+    {
+      name: "Artisan Outreach (English)",
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'Inter', Helvetica, Arial, sans-serif;">
+            ${emailHeader}
+            <div style="padding: 40px 40px; text-align: left;">
+              <p style="color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; margin-bottom: 25px;">Hello [Name],</p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 20px;">
+                I came across your work on <strong style="color: ${ACCENT_COLOR};">[Product]</strong> today, and I have to say — it's genuinely impressive. It's exactly the kind of craft we want to celebrate and showcase on <strong>Giftisan</strong>.
+              </p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 20px;">
+                We're building an invite-only platform designed specifically to free artisans and creators from the noise of selling, logistics, and marketing. Once you join, we give you a fully-equipped <strong>Pro Studio Dashboard</strong> where you can list your products, track your earnings, manage orders effortlessly, and message customers directly — while our system handles all confirmation and shipping emails automatically. 🏺✨
+              </p>
+
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 25px;">
+                We're also actively building integrated payment and shipping systems, and we run dedicated marketing campaigns for each studio to make sure your art gets the recognition it truly deserves. 🏛️
+              </p>
+
+              <div style="background-color: #f9fafb; padding: 25px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 30px;">
+                <p style="color: ${PRIMARY_COLOR}; font-size: 16px; font-weight: bold; line-height: 1.8; margin: 0;">
+                  We're curating a small, exceptional group of creators to launch with — and we'd genuinely love for you to be one of them. Would you be open to a quick chat about what we could build together?
+                </p>
+              </div>
+
+              <p style="color: #4b5563; font-size: 16px; margin-bottom: 10px;">Looking forward to hearing from you,</p>
+              <p style="color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; margin-bottom: 40px;">Hazem — Giftisan Founder</p>
+
+              <div style="text-align: center;">
+                <a href="${SITE_URL}" style="text-decoration: none;">
+                  <div style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 16px; display: inline-block;">
+                    Take a Quick Look
+                  </div>
+                </a>
+              </div>
+
             </div>
             ${emailFooter}
           </div>

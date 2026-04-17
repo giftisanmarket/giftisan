@@ -36,7 +36,7 @@ export const MOCK_PRODUCTS: Product[] = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena",
       bio: "Working from my garden studio, I focus on minimalist forms and organic textures. Every piece I make carries the rhythm of the wheel."
     },
-    images: ["/hero.png"],
+    images: ["/hero.webp"],
     category: "Ceramics",
     canPersonalize: true,
     tags: ["Minimalist", "Home Decor", "Handmade"],
@@ -61,7 +61,7 @@ export const MOCK_PRODUCTS: Product[] = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
       bio: "Master bookbinder with a passion for traditional techniques and sustainable materials."
     },
-    images: ["/journal.png"],
+    images: ["/journal.webp"],
     category: "Stationery",
     canPersonalize: true,
     tags: ["Personalized", "Gift", "Craft"],
@@ -79,7 +79,7 @@ export const MOCK_PRODUCTS: Product[] = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sia",
       bio: "Third-generation jeweler focused on geometric simplicity and ethical gold sourcing."
     },
-    images: ["/earrings.png"],
+    images: ["/earrings.webp"],
     category: "Jewelry",
     tags: ["Luxury", "Gold", "Handmade"],
     reviews: []
@@ -95,7 +95,7 @@ export const MOCK_PRODUCTS: Product[] = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arthur",
       bio: "Restorer of antique instruments and maker of historical scientific replicas."
     },
-    images: ["/hero.png"],
+    images: ["/hero.webp"],
     category: "Vintage",
     tags: ["History", "Collectibles", "Decor"],
     reviews: []
@@ -111,7 +111,7 @@ export const MOCK_PRODUCTS: Product[] = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ingrid",
       bio: "Keeping the Nordic weaving tradition alive through sustainable, farm-to-loom textiles."
     },
-    images: ["/hero.png"],
+    images: ["/hero.webp"],
     category: "Home",
     tags: ["Sustainable", "Winter", "Craft"],
     reviews: []

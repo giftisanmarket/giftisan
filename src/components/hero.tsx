@@ -64,8 +64,8 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
         >
           <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
             <BespokeImage
-              src="/hero.png"
-              alt="Artisanal Gifts"
+              src="/hero.webp"
+              alt={dict.seo.title}
               fill
               className="object-cover"
               priority
@@ -79,9 +79,9 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
           
           <div className="absolute bottom-4 end-4 md:-bottom-8 md:-end-8 glass p-6 rounded-2xl shadow-xl max-w-[200px] border border-white/50">
             <p className="text-sm font-medium text-charcoal/80">
-              "The quality of the handcrafted journal is better than anything I've found in high-end boutiques."
+              {dict.home.testimonial_quote}
             </p>
-            <p className="text-xs font-bold text-accent mt-2">— Nour E., Cairo</p>
+            <p className="text-xs font-bold text-accent mt-2">— {dict.home.testimonial_author}</p>
           </div>
         </motion.div>
       </div>

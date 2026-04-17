@@ -208,7 +208,6 @@ export default function LandingPage({ dict }: { dict: any }) {
           </motion.div>
         </motion.div>
 
-        {/* Hero Visuals */}
         <div className="absolute top-1/2 start-0 w-full -translate-y-1/2 pointer-events-none -z-10 flex justify-between px-10 opacity-10 md:opacity-100">
           <motion.div
             initial={{ x: -100, opacity: 0, rotate: -10 }}
@@ -216,7 +215,7 @@ export default function LandingPage({ dict }: { dict: any }) {
             transition={{ duration: 1.5, delay: 0.5 }}
             className="relative w-40 h-56 md:w-56 md:h-80 rounded-3xl overflow-hidden shadow-2xl hidden lg:block"
           >
-            <Image src="/marketing/artisan-working.png" alt="Artisan" fill className="object-cover" />
+            <Image src="/marketing/artisan-working.webp" alt="Artisan" fill className="object-cover" />
           </motion.div>
           <motion.div
             initial={{ x: 100, opacity: 0, rotate: 10 }}
@@ -224,7 +223,7 @@ export default function LandingPage({ dict }: { dict: any }) {
             transition={{ duration: 1.5, delay: 0.7 }}
             className="relative w-40 h-56 md:w-56 md:h-80 rounded-3xl overflow-hidden shadow-2xl hidden lg:block"
           >
-            <Image src="/marketing/gift-box.png" alt="Gift" fill className="object-cover" />
+            <Image src="/marketing/gift-box.webp" alt="Gift" fill className="object-cover" />
           </motion.div>
         </div>
       </section>
@@ -305,7 +304,7 @@ export default function LandingPage({ dict }: { dict: any }) {
 
           <FadeInView delay={0.2}>
             <div className="relative aspect-square md:aspect-[4/5] lg:h-[700px] rounded-[3rem] overflow-hidden shadow-2xl border border-white/5">
-              <Image src="/marketing/artisan-working.png" alt="Artisan Studio" fill className="object-cover" />
+              <Image src="/marketing/artisan-working.webp" alt="Artisan Studio" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
               <div className="absolute bottom-6 start-6 end-6 md:bottom-12 md:start-12 md:end-12 flex flex-col md:flex-row gap-6 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[2rem]">
                 <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center shrink-0 shadow-xl">
@@ -341,9 +340,9 @@ export default function LandingPage({ dict }: { dict: any }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full">
             {[
-              { img: "/marketing/jewelry.png", title: dict.home.bespoke_jewelry, tag: dict.home.handmade_tag, link: "/category/jewelry" },
-              { img: "/marketing/gift-box.png", title: dict.home.luxury_gift_sets, tag: dict.home.exclusive_tag, link: "/category/personalized" },
-              { img: "/marketing/home-decor.png", title: dict.home.unique_home_decor, tag: dict.home.limited_tag, link: "/category/ceramics" },
+              { img: "/marketing/jewelry.webp", title: dict.home.bespoke_jewelry, tag: dict.home.handmade_tag, link: "/category/jewelry" },
+              { img: "/marketing/gift-box.webp", title: dict.home.luxury_gift_sets, tag: dict.home.exclusive_tag, link: "/category/personalized" },
+              { img: "/marketing/home-decor.webp", title: dict.home.unique_home_decor, tag: dict.home.limited_tag, link: "/category/ceramics" },
             ].map((item, i) => (
               <FadeInView key={i} delay={i * 0.1}>
                 <Link href={item.link}>

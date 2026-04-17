@@ -204,6 +204,8 @@
     "hero_search_placeholder": "ابحث عن كنوز...",
     "hero_search_button": "بحث",
     "hero_join_artisans": "انضم إلى {count} من كبار الحرفيين",
+    "testimonial_quote": "\"جودة المجلة المصنوعة يدويًا أفضل من أي شيء وجدته في المتاجر الراقية.\"",
+    "testimonial_author": "نور ع.، القاهرة",
     "treasures_week": "كنوز الأسبوع",
     "treasures_desc": "مختارة بعناية من قبل حرفيينا الخبراء لتكون الهدية المثالية.",
     "shop_all_collections": "تسوق جميع المجموعات",
@@ -594,7 +596,8 @@
     "subtotal": "المجموع الفرعي",
     "shipping_info": "الشحن والضرائب تُحسب عند الدفع",
     "proceed_to_checkout": "المتابعة لإتمام الشراء",
-    "review_unavailable": "يرجى مراجعة العناصر غير المتوفرة"
+    "review_unavailable": "يرجى مراجعة العناصر غير المتوفرة",
+    "added_to_cart": "تمت الإضافة إلى السلة!"
   },
   "checkout": {
     "shipping_gallery": "معرض الشحن",

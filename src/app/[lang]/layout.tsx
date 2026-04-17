@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, EB_Garamond, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Outfit, EB_Garamond, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
 import { FavoritesProvider } from "@/context/favorites-context";
 import { CartDrawer } from "@/components/cart-drawer";
 import Script from "next/script";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 const outfit = Outfit({
   variable: "--font-heading",
@@ -58,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       card: "summary_large_image",
       title: dict.seo.title,
       description: lang === 'ar' ? "اكتشف كنوزاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted treasures from local artisans.",
-      images: ["/hero.png"],
+      images: ["/hero.webp"],
       creator: "@giftisan",
     },
     openGraph: {
@@ -70,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       description: dict.seo.description,
       images: [
         {
-          url: "/hero.png",
+          url: "/hero.webp",
           width: 1200,
           height: 630,
           alt: lang === 'ar' ? "سوق جيفتيزان - صنع بكل فخر وبحب" : `${SITE_NAME} Marketplace - Proudly Handcrafted with Heart`,
@@ -110,7 +105,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${inter.variable} ${outfit.variable} ${ebGaramond.variable} ${ibmPlexArabic.variable} font-sans text-charcoal bg-white antialiased selection:bg-accent/20 ${lang === 'ar' ? 'font-arabic' : ''}`}
+        className={`${outfit.variable} ${ebGaramond.variable} ${ibmPlexArabic.variable} font-heading text-charcoal bg-white antialiased selection:bg-accent/20 ${lang === 'ar' ? 'font-arabic' : ''}`}
         suppressHydrationWarning
       >
         <Toaster position="bottom-right" />

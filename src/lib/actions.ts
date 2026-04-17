@@ -34,6 +34,10 @@ async function processImage(imageSource: string | null | undefined): Promise<str
   if (imageSource.startsWith('data:')) {
     const res = await uploadImage(imageSource);
     if (res.success && res.url) return res.url;
+    // CRITICAL: If upload fails, DO NOT return the original base64 string
+    // This prevents 1MB+ strings from bloating the database and crashing the frontend
+    console.error("Failed to upload base64 image to Cloudinary, discarding to prevent DB bloat");
+    return null; 
   }
   return imageSource;
 }

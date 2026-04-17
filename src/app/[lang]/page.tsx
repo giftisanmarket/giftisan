@@ -1,8 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import HomeClient from "@/components/home-client";
-import LandingPage from "@/components/landing-page";
+import dynamic from "next/dynamic";
+const HomeClient = dynamic(() => import("@/components/home-client"), {
+  loading: () => <Loading />
+});
+const LandingPage = dynamic(() => import("@/components/landing-page"), {
+  loading: () => <Loading />
+});
 import { Metadata } from "next";
 import { auth } from "@/auth";
+import Loading from "./loading";
 
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 

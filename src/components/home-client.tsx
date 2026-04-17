@@ -113,7 +113,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                         e.preventDefault();
                         e.stopPropagation();
                         addToCart(product, undefined, true);
-                        toast.success(`${product.name} added to cart!`, {
+                        toast.success(`${product.name} ${dict.cart.added_to_cart}`, {
                           icon: '🏺',
                           style: {
                             borderRadius: '1rem',
@@ -268,7 +268,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     </p>
 
                     <div className="pt-6 border-t border-primary/5 flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Master Artisan</span>
+                      <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.product.master_artisan}</span>
                       <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
                         <ArrowRight className="w-5 h-5" />
                       </div>

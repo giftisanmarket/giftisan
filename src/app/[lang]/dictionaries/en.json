@@ -203,6 +203,8 @@
     "hero_search_placeholder": "Search for treasures...",
     "hero_search_button": "Search",
     "hero_join_artisans": "Join {count} Master Artisans",
+    "testimonial_quote": "\"The quality of the handcrafted journal is better than anything I've found in high-end boutiques.\"",
+    "testimonial_author": "Nour E., Cairo",
     "treasures_week": "Treasures of the Week",
     "treasures_desc": "Curated by our expert artisans for the perfect gift.",
     "shop_all_collections": "Shop All Collections",
@@ -532,7 +534,8 @@
     "subtotal": "Subtotal",
     "shipping_info": "Shipping & taxes calculated at checkout",
     "proceed_to_checkout": "Proceed to Checkout",
-    "review_unavailable": "Please Review Sold Out Items"
+    "review_unavailable": "Please Review Sold Out Items",
+    "added_to_cart": "Added to cart!"
   },
   "checkout": {
     "shipping_gallery": "Shipping Gallery",

@@ -23,17 +23,25 @@ const CREAM_BG = "#fcf9f1";
 const emailStyles = `
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap');
-    body { font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; }
     .heading { font-family: 'Outfit', sans-serif; }
+    .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 30px; box-sizing: border-box; }
+    .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
+    .email-body { padding: 40px; }
+    @media only screen and (max-width: 600px) {
+      .email-wrapper { padding: 12px !important; }
+      .email-card { border-radius: 16px !important; }
+      .email-body { padding: 24px 20px !important; }
+    }
   </style>
 `;
 
 const emailHeader = `
   ${emailStyles}
   <div style="text-align: center; padding: 40px 0 30px 0; background-color: ${PRIMARY_COLOR}; border-radius: 24px 24px 0 0;">
-    <img src="${LOGO_URL}" alt="Giftisan" style="width: 64px; height: 64px; display: block; margin: 0 auto 15px auto;">
-    <div class="heading" style="font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em;">Giftisan</div>
-    <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; tracking: 0.2em; margin-top: 5px;">Handcrafted Mastery</div>
+    <img src="${LOGO_URL}" alt="Giftisan" style="width: 56px; height: 56px; display: block; margin: 0 auto 14px auto;">
+    <div class="heading" style="font-size: 26px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em;">Giftisan</div>
+    <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 5px;">Handcrafted Mastery</div>
   </div>
 `;
 
@@ -395,10 +403,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
   }
 
   const arHtml = `
-    <div style="background-color: ${CREAM_BG}; padding: 30px;" dir="rtl">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;">
+    <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="rtl">
+      <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;">
         ${emailHeader}
-        <div style="padding: 40px 40px; text-align: right;">
+        <div class="email-body" style="padding: 40px; text-align: right;">
           <p style="color: ${PRIMARY_COLOR}; font-size: 22px; font-weight: bold; margin-bottom: 25px;">أهلاً يا ${name}،</p>
           <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 20px;">
             شفت شغل الـ <strong style="color: ${ACCENT_COLOR};">${product}</strong> بتاعك النهاردة، وبجد حاجة تشرف ومستواها عالي جداً. ده بالظبط نوع الفن اللي نفسنا نعرضه ونكبره في "جيفتيزان".
@@ -430,10 +438,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
   `;
 
   const enHtml = `
-    <div style="background-color: ${CREAM_BG}; padding: 30px;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'Inter', Helvetica, Arial, sans-serif;">
+    <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;">
+      <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: 'Inter', Helvetica, Arial, sans-serif;">
         ${emailHeader}
-        <div style="padding: 40px 40px; text-align: left;">
+        <div class="email-body" style="padding: 40px; text-align: left;">
           <p style="color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; margin-bottom: 25px;">Hello ${name},</p>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 20px;">
             I came across your work on <strong style="color: ${ACCENT_COLOR};">${product}</strong> today, and I have to say — it's genuinely impressive. It's exactly the kind of craft we want to celebrate and showcase on <strong>Giftisan</strong>.

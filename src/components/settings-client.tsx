@@ -314,8 +314,12 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
                   disabled={isDeleting}
                   className="h-14 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 group text-sm uppercase tracking-widest"
                 >
-                  {isDeleting ? dict.profile.deleting_action : dict.profile.erase_data_action}
-                  {!isDeleting && <Trash2 className="w-4 h-4 group-hover:shake" />}
+                  {isDeleting ? (dict.profile.deleting_action || "Deleting...") : (dict.profile.erase_data_action || "Erase Nothing")}
+                  {isDeleting ? (
+                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 group-hover:shake" />
+                  )}
                 </button>
               </div>
             </motion.div>

@@ -45,7 +45,12 @@ export function VerifyArtisanButton({
     const res = await updateArtisanStatus(artisanId, newStatus);
     if (res.success) {
       setStatus(newStatus);
-      toast.success(dict.admin.studio_status_updated.replace('{status}', newStatus), {
+      const statusLabel = 
+        newStatus === "APPROVED" ? dict.admin.approve :
+        newStatus === "PENDING" ? dict.admin.pending :
+        dict.admin.reject;
+
+      toast.success(dict.admin.studio_status_updated.replace('{status}', statusLabel), {
         style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
       });
     } else {

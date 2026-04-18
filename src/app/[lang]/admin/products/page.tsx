@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { ShoppingBag, Star, TrendingUp, Tag, User } from "lucide-react";
+import { ShoppingBag, Star, TrendingUp, Tag, User, Clock, CheckCircle2, X } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../../dictionaries";
 import { Metadata } from "next";
+import { ProductModerationActions } from "@/components/admin/product-moderation-actions";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -46,14 +47,15 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
 
       <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
         <div className="overflow-x-auto no-scrollbar scrollbar-hide">
-          <table className="w-full text-left min-w-[800px] lg:min-w-full">
+          <table className="w-full text-left min-w-[1000px] lg:min-w-full">
             <thead>
               <tr className="bg-primary/5 border-b border-primary/5">
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.treasure}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.artisan}</th>
+                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.status}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.category}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.inventory}</th>
-                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-right">{dict.admin.performance}</th>
+                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-right">{dict.admin.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-primary/5">
@@ -79,6 +81,18 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
                     </div>
                   </td>
                   <td className="px-6 md:px-8 py-4 md:py-6">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border",
+                      p.status === "APPROVED" ? "bg-green-50 text-green-600 border-green-100" :
+                      p.status === "REJECTED" ? "bg-red-50 text-red-600 border-red-100" :
+                      "bg-amber-50 text-amber-600 border-amber-100"
+                    )}>
+                      {p.status === "APPROVED" ? dict.admin.approved : 
+                       p.status === "REJECTED" ? dict.admin.rejected : 
+                       dict.admin.pending}
+                    </span>
+                  </td>
+                  <td className="px-6 md:px-8 py-4 md:py-6">
                     <div className="flex items-center gap-2">
                       <Tag className="w-3 h-3 text-primary/20" />
                       <span className="text-[10px] md:text-xs font-bold text-primary/60">{p.category}</span>
@@ -99,12 +113,12 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
                     </div>
                   </td>
                   <td className="px-6 md:px-8 py-4 md:py-6 text-right">
-                    <div className="flex items-center justify-end gap-2 md:gap-4">
-                      <div className="flex items-center gap-1.5">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-[10px] md:text-xs font-black text-primary">{p.reviews?.length || 0}</span>
-                      </div>
-                    </div>
+                    <ProductModerationActions 
+                      productId={p.id} 
+                      initialStatus={p.status} 
+                      slug={p.slug}
+                      dict={dict}
+                    />
                   </td>
                 </tr>
               ))}

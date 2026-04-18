@@ -3,6 +3,7 @@ import { getArtisanData, getArtisanSales, getArtisanReviews } from "@/lib/action
 import { StudioClient } from "@/components/studio-client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
 
 
 import { getDictionary, hasLocale } from "../dictionaries";
@@ -56,7 +57,22 @@ export default async function StudioPage({
     ? artisanUserId 
     : session.user.id;
 
-  const artisan = await getArtisanData(targetUserId as string);
+  let artisan = await getArtisanData(targetUserId as string);
+
+  // If role is ARTISAN but profile is missing, create it on the fly
+  if (!artisan && isArtisan && !isAdmin) {
+    console.log(`[Studio] Auto-creating missing profile for Artisan: ${targetUserId}`);
+    await prisma.artisanProfile.create({
+      data: {
+        userId: targetUserId as string,
+        bio: "A master artisan in the Giftisan community.",
+        location: "Artisan Member",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.name || targetUserId}`
+      }
+    });
+    // Fetch again
+    artisan = await getArtisanData(targetUserId as string);
+  }
 
   if (!artisan) {
     redirect(isAdmin ? `/${lang}/admin/users` : `/${lang}/profile`);
@@ -80,6 +96,7 @@ export default async function StudioPage({
         reviews={reviews} 
         isAdminPreview={!!(isAdmin && artisanUserId)}
         dict={dict}
+        lang={lang}
       />
     </div>
   );

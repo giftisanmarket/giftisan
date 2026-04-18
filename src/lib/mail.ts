@@ -361,28 +361,53 @@ export const sendArtisanApprovalEmail = async (email: string, name: string) => {
     await resend.emails.send({
       from: SENDER,
       to: email,
-      subject: 'Welcome to the Guild: Your Studio is Live! | Giftisan',
+      subject: 'Welcome to the Guild: Your Studio is Live! | مرحباً بك في الدائرة: استوديو جيفتيزان الخاص بك جاهز!',
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
             ${emailHeader}
             <div style="padding: 40px 30px; text-align: center;">
-              <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 32px; margin-bottom: 20px;">Your Studio is Approved!</h1>
-              <p style="color: #4b5563; font-size: 17px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, our curators have reviewed your portfolio and we're thrilled to welcome you officially to the Giftisan Guild. Your studio is now live and ready to be discovered by collectors worldwide.</p>
-              
-              <div style="background-color: #f9fafb; padding: 30px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 40px;">
-                <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 15px;">Next steps for your journey:</p>
-                <ul style="text-align: left; color: #4b5563; font-size: 14px; margin-top: 15px; line-height: 2;">
-                  <li>Verify your inventory levels</li>
-                  <li>Complete your brand story in Studio Settings</li>
-                  <li>Share your link with your social community</li>
-                </ul>
+              <!-- English Section -->
+              <div dir="ltr">
+                <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 28px; margin-bottom: 20px;">Your Studio is Approved!</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, our curators have reviewed your portfolio and we're thrilled to welcome you officially to the Giftisan Guild. Your studio is now live and ready to be discovered by collectors worldwide.</p>
+                
+                <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 30px; text-align: left;">
+                  <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">Next steps for your journey:</p>
+                  <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 1.8;">
+                    <li>Verify your inventory levels</li>
+                    <li>Complete your brand story in Studio Settings</li>
+                    <li>Share your link with your social community</li>
+                  </ul>
+                </div>
+
+                <div style="margin: 30px 0;">
+                  <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Enter Your Studio</a>
+                </div>
               </div>
 
-              <div style="margin: 40px 0;">
-                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Enter Your Studio</a>
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <!-- Arabic Section -->
+              <div dir="rtl">
+                <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 28px; margin-bottom: 20px;">تمت الموافقة على الاستوديو الخاص بك!</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 30px;">أهلاً يا ${name}، لقد قام فريقنا بمراجعة أعمالك ويسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان". الاستوديو الخاص بك الآن متاح للجمهور وجاهز لاستقبال مقتني الكنوز من كل مكان.</p>
+                
+                <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 30px; text-align: right;">
+                  <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">الخطوات التالية في رحلتك:</p>
+                  <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 2;">
+                    <li>تأكد من تحديث كميات المخزون</li>
+                    <li>أكمل قصة مشروعك في إعدادات الاستوديو</li>
+                    <li>شارك رابط الاستوديو مع متابعيك على السوشيال ميديا</li>
+                  </ul>
+                </div>
+
+                <div style="margin: 30px 0;">
+                  <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">دخول الاستوديو</a>
+                </div>
               </div>
-              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic;">We can't wait to see what you create.</p>
+
+              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic; margin-top: 40px;">We can't wait to see what you create | نحن متشوقون لرؤية إبداعاتك.</p>
             </div>
             ${emailFooter}
           </div>
@@ -482,6 +507,73 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
     return { success: true };
   } catch (error) {
     console.error('Error sending outreach email:', error);
+    return { success: false, error };
+  }
+};
+
+export const sendProductStatusUpdateEmail = async (email: string, name: string, productName: string, status: "APPROVED" | "REJECTED" | "PENDING", reason?: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: PRODUCT STATUS UPDATE ---\nTarget: ${email}\nProduct: ${productName}\nStatus: ${status}\nReason: ${reason || 'N/A'}\n-------------------------------------\n`);
+    return { success: true };
+  }
+
+  const isApproved = status === "APPROVED";
+  const subject = isApproved 
+    ? `Treasure Unveiled: ${productName} is now live! | كنز جديد: منتجك الآن متاح للجميع!`
+    : `Curator Update: Status changed for ${productName} | تحديث من فريق التقييم: تم تغيير حالة منتجك`;
+
+  const enMessage = isApproved
+    ? `Great news! Our curators have approved <strong>${productName}</strong>. It is now visible to all collectors and ready to be claimed.`
+    : status === "REJECTED" 
+      ? `Our curators have reviewed <strong>${productName}</strong> and decided not to list it at this time.${reason ? `<br/><br/><strong>Feedback from Curators:</strong><br/>${reason}` : ' Please review our quality guidelines or contact support for more details.'}`
+      : `<strong>${productName}</strong> has been moved back to the review queue. We will notify you once the status changes.`;
+
+  const arMessage = isApproved
+    ? `خبر رائع! لقد وافق فريق التقييم على <strong>${productName}</strong>. منتجك الآن متاح لجميع مقتني الكنوز وجاهز للشراء.`
+    : status === "REJECTED"
+      ? `لقد راجع فريق التقييم <strong>${productName}</strong> وتقرر عدم عرضه في الوقت الحالي.${reason ? `<br/><br/><strong>ملاحظات المنسقين:</strong><br/>${reason}` : ' يرجى مراجعة معايير الجودة الخاصة بنا أو التواصل مع الدعم لمزيد من التفاصيل.'}`
+      : `تمت إعادة <strong>${productName}</strong> إلى قائمة المراجعة. سنقوم بإخطارك فور تغيير الحالة.`;
+
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: email,
+      subject: subject,
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <div dir="ltr">
+                <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 28px; margin-bottom: 20px;">
+                  ${isApproved ? 'Treasure Approved!' : 'Product Status Update'}
+                </h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, ${enMessage}</p>
+              </div>
+
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <div dir="rtl">
+                <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 28px; margin-bottom: 20px;">
+                  ${isApproved ? 'تمت الموافقة على منتجك!' : 'تحديث حالة المنتج'}
+                </h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 30px;">أهلاً يا ${name}، ${arMessage}</p>
+              </div>
+
+              <div style="margin: 40px 0;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                  ${isApproved ? 'View in Studio' : 'Go to Studio'}
+                </a>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending product status email:', error);
     return { success: false, error };
   }
 };

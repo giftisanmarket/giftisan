@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import dynamic from "next/dynamic";
-const HomeClient = dynamic(() => import("@/components/home-client"), {
+import nextDynamic from "next/dynamic";
+const HomeClient = nextDynamic(() => import("@/components/home-client"), {
   loading: () => <Loading />
 });
-const LandingPage = dynamic(() => import("@/components/landing-page"), {
+const LandingPage = nextDynamic(() => import("@/components/landing-page"), {
   loading: () => <Loading />
 });
 import { Metadata } from "next";
@@ -14,6 +14,9 @@ import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 
 import { getDictionary, hasLocale } from "./dictionaries";
 import { notFound } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -43,6 +46,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   // If user is logged in, show the marketplace home page
   const products = await prisma.product.findMany({
     where: {
+      status: "APPROVED",
       artisan: {
         status: "APPROVED"
       }
@@ -86,6 +90,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             equals: name,
             mode: 'insensitive'
           },
+          status: "APPROVED",
           artisan: {
             status: "APPROVED"
           }

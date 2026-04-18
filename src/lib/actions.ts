@@ -2,12 +2,12 @@
 
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { signIn } from "@/auth";
+import { signIn, auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies } from "next/headers";
 
@@ -73,8 +73,8 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
       await prisma.artisanProfile.create({
         data: {
           userId: user.id,
-          bio: "A new artisan in the Giftisan community.",
-          location: "Artisan Member",
+          bio: "",
+          location: "",
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
         },
       });
@@ -233,24 +233,17 @@ export async function searchProducts(query: string) {
   try {
     const products = await prisma.product.findMany({
       where: {
-        AND: [
-          query ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" } },
-              { description: { contains: query, mode: "insensitive" } },
-              { category: { contains: query, mode: "insensitive" } },
-              {
-                artisan: {
-                  user: {
-                    name: { contains: query, mode: "insensitive" }
-                  }
-                }
-              }
-            ]
-          } : {},
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { description: { contains: query, mode: "insensitive" } },
+          { category: { contains: query, mode: "insensitive" } },
           {
             artisan: {
-              status: "APPROVED"
+              studioName: { contains: query, mode: "insensitive" },
             }
           }
         ]
@@ -260,20 +253,15 @@ export async function searchProducts(query: string) {
           include: {
             user: true
           }
-        }
+        },
+        reviews: true
       },
-      take: 10
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
-    return products.map(p => ({
-      ...p,
-      images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
-      artisan: {
-        ...p.artisan,
-        avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar,
-        user: { name: p.artisan.user?.name }
-      }
-    }));
+    return products;
   } catch (error) {
     console.error("Search error:", error);
     return [];
@@ -290,6 +278,7 @@ export async function getProductsByCategory(category: string) {
           equals: category,
           mode: "insensitive"
         },
+        status: "APPROVED",
         artisan: {
           status: "APPROVED"
         }
@@ -299,7 +288,8 @@ export async function getProductsByCategory(category: string) {
           include: {
             user: true
           }
-        }
+        },
+        reviews: true
       },
       orderBy: {
         createdAt: "desc"
@@ -312,6 +302,109 @@ export async function getProductsByCategory(category: string) {
     return [];
   }
 }
+
+export async function getFeaturedProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
+      },
+      take: 8,
+      include: {
+        artisan: {
+          include: {
+            user: true
+          }
+        },
+        reviews: true
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+    return products;
+  } catch (error) {
+    console.error("Get featured products error:", error);
+    return [];
+  }
+}
+
+export async function getAllProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
+      },
+      include: {
+        artisan: {
+          include: {
+            user: true
+          }
+        },
+        reviews: true
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+    return products;
+  } catch (error) {
+    console.error("Get all products error:", error);
+    return [];
+  }
+}
+
+export async function getProductBySlug(slug: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { 
+        slug
+      },
+      include: {
+        artisan: {
+          include: {
+            user: true
+          }
+        },
+        reviews: {
+          include: {
+            user: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        }
+      }
+    });
+
+    // Check if product exists and is approved (and artisan is approved)
+    if (!product) return null;
+
+    const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
+
+    if (!isApproved) {
+      const session = await auth();
+      const isAdmin = session?.user?.role === "ADMIN";
+      const isOwner = session?.user?.id === product.artisan.userId;
+
+      if (!isAdmin && !isOwner) {
+        return null;
+      }
+    }
+
+    return product;
+  } catch (error) {
+    console.error("Get product by slug error:", error);
+    return null;
+  }
+}
+
 
 export async function toggleFavoriteAction(productId: string, userId: string) {
   try {
@@ -545,7 +638,11 @@ export async function getAllArtisans() {
       },
       include: {
         user: true,
-        products: true
+        products: {
+          where: {
+            status: "APPROVED"
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -683,6 +780,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
         personalizationPrompt: data.personalizationPrompt || null,
         badge: data.badge,
         stock: parseInt(data.stock) || 0,
+        status: "PENDING"
       }
     });
 
@@ -897,6 +995,7 @@ export async function updateProduct(productId: string, formData: FormData) {
         canPersonalize: data.canPersonalize,
         badge: data.badge || null,
         stock: parseInt(data.stock) || 0,
+        status: "PENDING" // Reset to pending on update for re-approval
       }
     });
 
@@ -942,8 +1041,8 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       data: {
         userId,
         studioName: studioData.studioName,
-        bio: studioData.bio,
-        location: studioData.location || "Artisan Member",
+        bio: studioData.bio || "",
+        location: studioData.location || "",
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
       }
     });
@@ -1081,6 +1180,53 @@ export async function updateArtisanStatus(artisanId: string, status: "PENDING" |
   }
 }
 
+export async function updateProductStatus(productId: string, status: "PENDING" | "APPROVED" | "REJECTED" | "DRAFT", reason?: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        artisan: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    if (!product) {
+      return { error: "Treasure not found" };
+    }
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: { 
+        status,
+        rejectionReason: status === "REJECTED" ? reason : null
+      }
+    });
+
+    // Send notification email
+    if (status !== "DRAFT" && product.artisan.user.email) {
+      sendProductStatusUpdateEmail(
+        product.artisan.user.email,
+        product.artisan.user.name || "Artisan",
+        product.name,
+        status as "APPROVED" | "REJECTED" | "PENDING",
+        reason
+      ).catch(err => console.error("Failed to send product status email:", err));
+    }
+
+    revalidatePath("/");
+    revalidatePath("/categories");
+    revalidatePath("/artisans");
+    revalidatePath("/admin/products");
+    return { success: true };
+  } catch (error) {
+    console.error("Update product status error:", error);
+    return { error: "Failed to update treasure status" };
+  }
+}
+
 export async function toggleArtisanVerification(artisanId: string, isVerified: boolean) {
   try {
     await prisma.artisanProfile.update({
@@ -1097,11 +1243,27 @@ export async function toggleArtisanVerification(artisanId: string, isVerified: b
 
 export async function updateUserRole(userId: string, role: "CLIENT" | "ARTISAN" | "ADMIN") {
   try {
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id: userId },
       data: { role }
     });
+
+    // If role is ARTISAN, ensure an ArtisanProfile exists
+    if (role === "ARTISAN") {
+      await prisma.artisanProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          bio: "",
+          location: "",
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name || userId}`
+        },
+        update: {} // Do nothing if it already exists
+      });
+    }
+
     revalidatePath("/admin/users");
+    revalidatePath("/studio");
     return { success: true };
   } catch (error) {
     console.error("Update user role error:", error);

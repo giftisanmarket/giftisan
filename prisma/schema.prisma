@@ -128,6 +128,7 @@ model ArtisanProfile {
   facebook   String?
   brandColor String?  @default("#da7b5a")
   bannerImage String? @db.Text
+  rejectionReason String? @db.Text
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
@@ -137,6 +138,13 @@ model ArtisanProfile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DRAFT
 }
 
 model Product {
@@ -152,6 +160,8 @@ model Product {
   personalizationPrompt String? // Instruction for the buyer (e.g. "Enter name for engraving")
   badge          String?
   stock          Int      @default(1)
+  status         ProductStatus @default(PENDING)
+  rejectionReason String? @db.Text
   
   artisanId      String
   artisan        ArtisanProfile @relation(fields: [artisanId], references: [id], onDelete: Cascade)

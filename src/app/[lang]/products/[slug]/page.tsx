@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { ProductClient } from "@/components/product-client";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 
 interface Props {
   params: Promise<{ slug: string; lang: string }>;
@@ -16,18 +17,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, lang } = await params;
   let product = await prisma.product.findFirst({
     where: {
-      AND: [
-        {
-          OR: [
-            { id: { equals: slug, mode: "insensitive" } },
-            { slug: { equals: slug, mode: "insensitive" } }
-          ]
-        },
-        {
-          artisan: {
-            status: "APPROVED"
-          }
-        }
+      OR: [
+        { id: { equals: slug, mode: "insensitive" } },
+        { slug: { equals: slug, mode: "insensitive" } }
       ]
     },
     select: {
@@ -36,11 +28,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: true,
       category: true,
       images: true,
-      slug: true
+      slug: true,
+      status: true,
+      artisan: {
+        select: {
+          userId: true,
+          status: true
+        }
+      }
     }
   });
 
   if (!product) return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
+
+  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
+  if (!isApproved) {
+    const session = await auth();
+    const isAdmin = session?.user?.role === "ADMIN";
+    const isOwner = session?.user?.id === product.artisan.userId;
+    if (!isAdmin && !isOwner) {
+      return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
+    }
+  }
 
   const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `${SITE_URL}/api/image/product/${product.id}`;
   const description = product.description.slice(0, 160);
@@ -114,7 +123,16 @@ export default async function ProductPage({ params }: Props) {
     });
   }
   
-  if (!product || product.artisan.status !== "APPROVED") {
+  if (!product) {
+    notFound();
+  }
+
+  const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
+  const isOwner = session?.user?.id === product.artisan.userId;
+  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
+  
+  if (!isApproved && !isAdmin && !isOwner) {
     notFound();
   }
 
@@ -126,6 +144,7 @@ export default async function ProductPage({ params }: Props) {
     where: { 
       category: product.category, 
       id: { not: product.id },
+      status: "APPROVED",
       artisan: {
         status: "APPROVED"
       }
@@ -216,7 +235,14 @@ export default async function ProductPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <ProductClient product={sanitizedProduct as any} relatedProducts={sanitizedRelated} dict={dict} lang={lang} />
+      <ProductClient 
+        product={sanitizedProduct as any} 
+        relatedProducts={sanitizedRelated} 
+        dict={dict} 
+        lang={lang} 
+        isAdmin={isAdmin || false}
+        isOwner={isOwner || false}
+      />
     </>
   );
 }

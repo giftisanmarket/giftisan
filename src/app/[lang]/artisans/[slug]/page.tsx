@@ -14,6 +14,9 @@ async function getArtisanBySlug(slug: string) {
     },
     include: {
       products: {
+        where: {
+          status: "APPROVED"
+        },
         include: {
           reviews: true,
           orderItems: true
@@ -40,6 +43,9 @@ async function getArtisanBySlug(slug: string) {
       artisanProfile: {
         include: {
           products: {
+            where: {
+              status: "APPROVED"
+            },
             include: {
               reviews: true,
               orderItems: true

@@ -25,15 +25,15 @@ export function LoginClient({ dict }: { dict: any }) {
 
   useEffect(() => {
     if (loginError) {
-      toast.error(loginError === "CredentialsSignin" ? "Invalid email or password." : loginError, { id: "url-error" });
+      toast.error(loginError === "CredentialsSignin" ? dict.auth.toast_invalid_credentials : loginError, { id: "url-error" });
     }
     if (signupSuccess) {
-      toast.success("Welcome to the Circle! Your studio is ready.", { id: "url-signup" });
+      toast.success(dict.auth.toast_welcome_studio, { id: "url-signup" });
     }
     if (emailVerified) {
-      toast.success("Identity verified. Your account is now active.", { id: "url-verified" });
+      toast.success(dict.auth.toast_email_verified, { id: "url-verified" });
     }
-  }, [loginError, signupSuccess, emailVerified]);
+  }, [loginError, signupSuccess, emailVerified, dict.auth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useNotifications } from "./notification-provider";
@@ -62,7 +62,7 @@ export function Navbar({ dict }: { dict?: any }) {
 
   useEffect(() => {
     if (searchParams.get("success") === "EmailVerified") {
-      toast.success(d.home.verified_toast || "Identity verified! Your account is now fully active.", {
+      toast.success(d.auth?.toast_email_verified || "Identity verified! Your account is now fully active.", {
         id: "global-verified",
         duration: 5000
       });
@@ -338,6 +338,14 @@ export function Navbar({ dict }: { dict?: any }) {
                   </Link>
                 )}
 
+                <Link
+                  href="/contact"
+                  className="hidden lg:flex items-center gap-1.5 px-3 h-9 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-all active:scale-95"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  {d.common.support}
+                </Link>
+
                 {/* Consolidated Profile Hub (Desktop only) */}
                 <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 ps-3">
                   <Link
@@ -522,6 +530,14 @@ export function Navbar({ dict }: { dict?: any }) {
                       <span className="text-xs font-black uppercase tracking-widest">{d.common.sell}</span>
                     </Link>
                   )}
+                  <Link
+                    href="/contact"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center active:scale-95 transition-transform"
+                  >
+                    <HelpCircle className="w-5 h-5 text-primary/40 mb-2" />
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.support}</span>
+                  </Link>
                 </div>
               </div>
             ) : (

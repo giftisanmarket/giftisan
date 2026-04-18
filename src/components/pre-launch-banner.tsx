@@ -8,10 +8,10 @@ import { usePathname } from "next/navigation";
 export function PreLaunchBanner({ dict }: { dict?: any }) {
   const d = dict || {
     common: {
-      prelaunch_protocol: "Pre-Launch Protocol",
-      soft_launch_in_progress: "Soft-Launch in Progress:",
-      complete_first_order: "Complete your first order today!",
-      manual_shipping_note: "We're currently enabling manual shipping and payments as we finalize our automated systems."
+      prelaunch_protocol: "Platform Announcement",
+      soft_launch_in_progress: "This is a new website and everyone should be prepared.",
+      complete_first_order: "Collectors are making their accounts and artisans are preparing their studios.",
+      manual_shipping_note: "We are currently working on applying the shipping and payment systems."
     }
   };
   const [isVisible, setIsVisible] = useState(true);
@@ -20,13 +20,13 @@ export function PreLaunchBanner({ dict }: { dict?: any }) {
   // Reset visibility when navigating if it was dismissed? 
   // No, let's keep it dismissed for the session if they close it.
   useEffect(() => {
-    const isDismissed = sessionStorage.getItem("prelaunch-banner-v3");
+    const isDismissed = sessionStorage.getItem("giftisan-announcement-v1");
     if (isDismissed) setIsVisible(false);
   }, []);
 
   const handleDismiss = () => {
     setIsVisible(false);
-    sessionStorage.setItem("prelaunch-banner-v3", "true");
+    sessionStorage.setItem("giftisan-announcement-v1", "true");
   };
 
   return (
@@ -38,15 +38,15 @@ export function PreLaunchBanner({ dict }: { dict?: any }) {
           exit={{ height: 0, opacity: 0 }}
           className="relative z-[60] bg-primary text-white overflow-hidden shadow-2xl"
         >
-          <div className="container mx-auto px-4 py-3 md:py-2.5 flex flex-col items-center justify-center text-center relative">
-            <div className="flex items-center gap-2 text-accent-light mb-1">
+          <div className="container mx-auto px-4 py-3 md:py-3.5 flex flex-col items-center justify-center text-center relative">
+            <div className="flex items-center gap-2 text-accent-light mb-1.5">
               <Sparkles className="w-3 h-3 animate-pulse shrink-0" />
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em]">{d.common.prelaunch_protocol}</span>
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">{d.common.prelaunch_protocol}</span>
             </div>
             
-            <p className="text-[10px] md:text-xs font-medium text-white/90 max-w-3xl leading-relaxed pe-8 md:pe-0">
+            <p className="text-[11px] md:text-sm font-medium text-white/95 max-w-4xl leading-relaxed pe-8 md:pe-0">
               <span className="font-bold">{d.common.soft_launch_in_progress}</span> {d.common.complete_first_order} 
-              <span className="text-accent-light/80 italic hidden md:inline"> {d.common.manual_shipping_note}</span>
+              <span className="text-accent-light italic"> {d.common.manual_shipping_note}</span>
             </p>
 
             <button 

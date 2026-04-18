@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare } from "lucide-react";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import { BespokeImage } from "./bespoke-image";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 
-export function ProductClient({ product, relatedProducts, dict, lang }: { product: any, relatedProducts: any[], dict: any, lang: string }) {
+export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, isOwner }: { product: any, relatedProducts: any[], dict: any, lang: string, isAdmin?: boolean, isOwner?: boolean }) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -139,6 +139,40 @@ export function ProductClient({ product, relatedProducts, dict, lang }: { produc
       <Navbar dict={dict} />
 
       <div className="container mx-auto px-4 py-8 md:py-16">
+        {/* Status Banner for Owner/Admin */}
+        {product.status !== "APPROVED" && (isAdmin || isOwner) && (
+          <div className={cn(
+            "mb-12 p-6 md:p-8 rounded-[2rem] border-2 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-8",
+            product.status === "REJECTED" ? "bg-red-50 border-red-100" : "bg-amber-50 border-amber-100"
+          )}>
+            <div className={cn(
+              "w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shrink-0 shadow-lg",
+              product.status === "REJECTED" ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+            )}>
+              {product.status === "REJECTED" ? <XCircle className="w-6 h-6 md:w-8 md:h-8" /> : <Clock className="w-6 h-6 md:w-8 md:h-8" />}
+            </div>
+            <div className="flex-1 text-center md:text-start">
+              <h3 className={cn(
+                "text-xl md:text-2xl font-heading font-black mb-2 tracking-tight",
+                product.status === "REJECTED" ? "text-red-700" : "text-amber-700"
+              )}>
+                {product.status === "REJECTED" ? dict.admin.rejected : dict.admin.pending}
+              </h3>
+              <p className="text-sm md:text-base text-charcoal/60 leading-relaxed font-bold">
+                {product.status === "REJECTED" 
+                  ? (lang === 'ar' ? "تم رفض هذا الكنز. يرجى مراجعة تفاصيل المنتج أو التواصل مع الإدارة." : "This treasure has been rejected. Please review the details or contact support.")
+                  : (lang === 'ar' ? "هذا الكنز قيد المراجعة حالياً ولن يظهر للجمهور حتى يتم قبوله." : "This treasure is currently under review and won't be visible to the public until approved.")
+                }
+              </p>
+            </div>
+            {isAdmin && (
+               <Link href="/admin/products" className="px-8 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl hover:bg-primary-light transition-all">
+                 {dict.admin.overview}
+               </Link>
+            )}
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 min-w-0">
           {/* Image Gallery */}
           <div className="space-y-6 min-w-0">

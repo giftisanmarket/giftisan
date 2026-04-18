@@ -141,7 +141,7 @@ export default function MaintenancePage() {
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/30">Follow the Journey</p>
             <div className="flex justify-center gap-6 md:gap-8">
               {[
-                { icon: FaInstagram, href: "https://www.instagram.com/giftisanmarket/" },
+                { icon: FaInstagram, href: "https://www.instagram.com/gifttisan/" },
                 { icon: FaFacebook, href: "https://www.facebook.com/profile.php?id=61570726340692" },
                 { icon: FaTiktok, href: "https://www.tiktok.com/@giftisanmarket" },
                 { icon: FaPinterest, href: "https://pin.it/6f6NNG46N" }

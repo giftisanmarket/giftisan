@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       title: dict.seo.title,
       description: lang === 'ar' ? "اكتشف كنوزاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted treasures from local artisans.",
       images: ["/hero.webp"],
-      creator: "@giftisan",
+      creator: "@gifttisan",
     },
     openGraph: {
       type: "website",

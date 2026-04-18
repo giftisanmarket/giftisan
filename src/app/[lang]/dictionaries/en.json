@@ -38,6 +38,16 @@
     "scanning_workshop": "Scanning the workshop...",
     "see_all_results": "See All Results",
     "account": "Account",
+    "cancel": "Cancel",
+    "save": "Save",
+    "done": "Done",
+    "ceramics": "Ceramics",
+    "jewelry": "Jewelry",
+    "wedding": "Wedding",
+    "personalized": "Personalized",
+    "art": "Art & Collectibles",
+    "vintage": "Vintage",
+    "stationery": "Stationery",
     "find_treasure": "Find a Treasure",
     "your_studio_hub": "Your Studio Hub",
     "profile": "Profile",
@@ -874,7 +884,7 @@
     "the_essentials": "The Essentials",
     "product_title_label": "Product Title *",
     "product_title_placeholder": "e.g. Hand-Thrown Midnight Glaze Vase",
-    "price_label": "Price (USD) *",
+    "price_label": "Price (EGP) *",
     "price_placeholder": "95.00",
     "category_label": "Category *",
     "select_category": "Select Category",
@@ -899,7 +909,16 @@
     "initial_stock_placeholder": "e.g. 10",
     "listing_treasure": "Listing Treasure...",
     "list_product_btn": "List Product in Gallery",
-    "validation_error": "Please fill in all required fields (Name, Price, and at least one Image)."
+    "validation_error": "Please fill in all required fields (Name, Price, and at least one Image).",
+    "product_removed": "Product removed successfully"
+  },
+  "edit_product": {
+    "edit_treasure": "Edit Treasure",
+    "refine_details": "Refine your handcrafted masterpiece details",
+    "core_details": "Core Details",
+    "saving_changes": "Saving Changes...",
+    "update_success": "Treasure updated successfully",
+    "update_failed": "Failed to update treasure"
   },
   "contact_artisan": {
     "message_artisan": "Message Artisan",

@@ -233,7 +233,33 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                           const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
-                            reader.onloadend = () => setBannerImage(reader.result as string);
+                            reader.onloadend = () => {
+                              const img = new (window as any).Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_SIZE = 2500; // Larger for banners
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                  if (width > MAX_SIZE) {
+                                    height *= MAX_SIZE / width;
+                                    width = MAX_SIZE;
+                                  }
+                                } else {
+                                  if (height > MAX_SIZE) {
+                                    width *= MAX_SIZE / height;
+                                    height = MAX_SIZE;
+                                  }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) ctx.imageSmoothingQuality = 'high';
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setBannerImage(canvas.toDataURL('image/webp', 0.9));
+                              };
+                              img.src = reader.result as string;
+                            };
                             reader.readAsDataURL(file);
                           }
                         }}
@@ -291,7 +317,33 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                             const file = e.target.files?.[0];
                             if (file) {
                               const reader = new FileReader();
-                              reader.onloadend = () => setAvatar(reader.result as string);
+                              reader.onloadend = () => {
+                                const img = new (window as any).Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  const MAX_SIZE = 1000; // Smaller for avatars
+                                  let width = img.width;
+                                  let height = img.height;
+                                  if (width > height) {
+                                    if (width > MAX_SIZE) {
+                                      height *= MAX_SIZE / width;
+                                      width = MAX_SIZE;
+                                    }
+                                  } else {
+                                    if (height > MAX_SIZE) {
+                                      width *= MAX_SIZE / height;
+                                      height = MAX_SIZE;
+                                    }
+                                  }
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  if (ctx) ctx.imageSmoothingQuality = 'high';
+                                  ctx?.drawImage(img, 0, 0, width, height);
+                                  setAvatar(canvas.toDataURL('image/webp', 0.9));
+                                };
+                                img.src = reader.result as string;
+                              };
                               reader.readAsDataURL(file);
                             }
                           }}

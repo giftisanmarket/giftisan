@@ -22,6 +22,7 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
   const handleImageClick = () => {
@@ -31,6 +32,7 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsCompressing(true);
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new (window as any).Image();
@@ -40,8 +42,8 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
           let width = img.width;
           let height = img.height;
 
-          // Max dimensions (e.g., 400x400 for avatars)
-          const MAX_SIZE = 400;
+          // Max dimensions (e.g., 800x800 for avatars)
+          const MAX_SIZE = 800;
           if (width > height) {
             if (width > MAX_SIZE) {
               height *= MAX_SIZE / width;
@@ -57,13 +59,15 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+          if (ctx) ctx.imageSmoothingQuality = 'high';
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Export as highly compressed JPEG
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          // Export as optimized WebP
+          const compressedDataUrl = canvas.toDataURL('image/webp', 0.9);
           setImage(compressedDataUrl);
+          setIsCompressing(false);
         };
-        img.src = reader.result;
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -213,9 +217,13 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
                       className="hidden"
                       onChange={handleFileChange}
                     />
-                    <div className="h-14 md:h-16 px-6 md:px-8 bg-accent text-white font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20 text-xs md:text-base active:scale-95">
-                      <Camera className="w-5 h-5" />
-                      {dict.profile.upload_action}
+                    <div className="h-14 md:h-16 px-6 md:px-8 bg-accent text-white font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20 text-xs md:text-base active:scale-95 disabled:opacity-50">
+                      {isCompressing ? (
+                        <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      ) : (
+                        <Camera className="w-5 h-5" />
+                      )}
+                      {isCompressing ? "Processing..." : dict.profile.upload_action}
                     </div>
                   </label>
                 </div>

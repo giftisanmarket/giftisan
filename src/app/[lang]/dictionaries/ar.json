@@ -38,6 +38,16 @@
     "scanning_workshop": "جاري فحص الورشة...",
     "see_all_results": "مشاهدة جميع النتائج",
     "account": "الحساب",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "done": "تم",
+    "ceramics": "سيراميك",
+    "jewelry": "مجوهرات",
+    "wedding": "زفاف",
+    "personalized": "مخصص",
+    "art": "فن ومقتنيات",
+    "vintage": "عتیق",
+    "stationery": "قرطاسية",
     "find_treasure": "ابحث عن كنز",
     "your_studio_hub": "مركز الاستوديو الخاص بك",
     "profile": "الملف الشخصي",
@@ -960,7 +970,17 @@
     "initial_stock_placeholder": "مثال: 10",
     "listing_treasure": "جاري إضافة الكنز...",
     "list_product_btn": "عرض المنتج في المعرض",
-    "validation_error": "يرجى ملء جميع الحقول المطلوبة (الاسم، السعر، وصورة واحدة على الأقل)."
+    "validation_error": "يرجى ملء جميع الحقول المطلوبة (الاسم، السعر، وصورة واحدة على الأقل).",
+    "product_removed": "تم حذف المنتج بنجاح"
+  },
+  "edit_product": {
+    "edit_treasure": "تعديل",
+    "treasure_accent": "الكنز",
+    "refine_details": "قم بتحسين تفاصيل تحفتك اليدوية",
+    "core_details": "تفاصيل أساسية",
+    "saving_changes": "جاري حفظ التغييرات...",
+    "update_success": "تم تحديث الكنز بنجاح",
+    "update_failed": "فشل تحديث الكنز"
   },
   "contact_artisan": {
     "message_artisan": "مراسلة الحرفي",

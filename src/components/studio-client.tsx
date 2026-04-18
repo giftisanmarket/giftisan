@@ -1189,6 +1189,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 setSelectedProductForEdit(null);
               }}
               readOnly={isAdminPreview}
+              dict={dict}
             />
           </div>
         )}

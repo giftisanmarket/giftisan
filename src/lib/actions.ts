@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
+import sharp from "sharp";
 import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies } from "next/headers";
@@ -17,7 +18,26 @@ export async function uploadImage(base64Data: string) {
       return { success: true, url: base64Data };
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(base64Data, {
+    let uploadPayload: string | Buffer = base64Data;
+
+    // Convert to WebP if it's an image and NOT already WebP
+    if (base64Data.startsWith('data:image/') && !base64Data.startsWith('data:image/webp') && !base64Data.includes('svg+xml')) {
+      try {
+        const base64Image = base64Data.split(';base64,').pop();
+        if (base64Image) {
+          const buffer = Buffer.from(base64Image, 'base64');
+          uploadPayload = await sharp(buffer)
+            .webp({ quality: 90 })
+            .toBuffer();
+          
+          console.log(`[Image Optimization] Converted image to WebP (Buffer size: ${uploadPayload.length})`);
+        }
+      } catch (sharpError) {
+        console.error("Sharp conversion error, falling back to original:", sharpError);
+      }
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(uploadPayload as any, {
       folder: "giftisan",
       resource_type: "auto", // Essential for videos
     });
@@ -773,7 +793,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
         name: data.name,
         slug,
         description: data.description,
-        price: parseFloat(data.price) || 0,
+        price: parseFloat(data.price.replace(/,/g, '.')) || 0,
         category: data.category,
         images: finalImages,
         canPersonalize: data.canPersonalize,
@@ -969,6 +989,7 @@ export async function updateProduct(productId: string, formData: FormData) {
       price: formData.get("price") as string,
       category: formData.get("category") as string,
       canPersonalize: formData.get("canPersonalize") === "true",
+      personalizationPrompt: formData.get("personalizationPrompt") as string,
       badge: formData.get("badge") as string,
       stock: formData.get("stock") as string,
     };
@@ -989,10 +1010,11 @@ export async function updateProduct(productId: string, formData: FormData) {
       data: {
         name: data.name,
         description: data.description,
-        price: parseFloat(data.price),
+        price: parseFloat(data.price.replace(/,/g, '.')) || 0,
         category: data.category,
         images: finalImages,
         canPersonalize: data.canPersonalize,
+        personalizationPrompt: data.personalizationPrompt || null,
         badge: data.badge || null,
         stock: parseInt(data.stock) || 0,
         status: "PENDING" // Reset to pending on update for re-approval
@@ -1371,11 +1393,12 @@ export async function updateUser(userId: string, formData: FormData) {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const image = formData.get("image") as string;
+    const imageUrl = await processImage(image);
 
     const currentUser = await prisma.user.findUnique({ where: { id: userId } });
     const emailChanged = email && currentUser && currentUser.email !== email;
 
-    const data: any = { name, image };
+    const data: any = { name, image: imageUrl };
     if (emailChanged) {
       // Check if email is already taken
       const existing = await prisma.user.findUnique({ where: { email } });

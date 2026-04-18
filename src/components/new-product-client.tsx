@@ -15,7 +15,8 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   ChevronDown,
-  Video
+  Video,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
@@ -42,6 +43,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     stock: "1"
   });
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
 
@@ -90,6 +93,13 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
+    if (!value) {
+      setResolutions(prev => {
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,6 +319,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            setIsCompressing(prev => ({ ...prev, [idx]: true }));
                             const reader = new FileReader();
                             reader.onloadend = () => {
                               const dataUrl = reader.result as string;
@@ -321,6 +332,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                 video.onloadedmetadata = () => {
                                   setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
                                 };
+                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
                               } else {
                                 // Handle Image
                                 const img = new (window as any).Image();
@@ -329,7 +341,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                   let width = img.width;
                                   let height = img.height;
 
-                                  const MAX_SIZE = 1200;
+                                  const MAX_SIZE = 2400;
                                   if (width > height) {
                                     if (width > MAX_SIZE) {
                                       height *= MAX_SIZE / width;
@@ -345,11 +357,13 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                   canvas.width = width;
                                   canvas.height = height;
                                   const ctx = canvas.getContext('2d');
+                                  if (ctx) ctx.imageSmoothingQuality = 'high';
                                   ctx?.drawImage(img, 0, 0, width, height);
 
-                                  const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                  const compressedDataUrl = canvas.toDataURL('image/webp', 0.9);
                                   handleImageChange(idx, compressedDataUrl);
                                   setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
+                                  setIsCompressing(prev => ({ ...prev, [idx]: false }));
                                 };
                                 img.src = dataUrl;
                               }
@@ -358,9 +372,15 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                           }
                         }}
                       />
-                      <div className="px-4 py-2 bg-white text-primary text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
-                        {img ? dict.new_product.change : dict.new_product.upload}
-                      </div>
+                      {isCompressing[idx] ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
+                          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2 bg-white text-primary text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
+                          {img ? dict.new_product.change : dict.new_product.upload}
+                        </div>
+                      )}
                     </label>
                   </div>
                   <div className="flex justify-between items-center px-1">

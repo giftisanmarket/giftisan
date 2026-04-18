@@ -1,24 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video } from "lucide-react";
+import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateProduct } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface EditProductModalProps {
   product: any;
   isOpen: boolean;
   onClose: () => void;
   readOnly?: boolean;
+  dict: any;
 }
 
-export function EditProductModal({ product, isOpen, onClose, readOnly = false }: EditProductModalProps) {
+export function EditProductModal({ product, isOpen, onClose, readOnly = false, dict }: EditProductModalProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: product.name,
     description: product.description,
@@ -30,6 +33,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
     stock: (product.stock || 0).toString()
   });
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
+  const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
 
   // Detect resolutions for existing media
   useEffect(() => {
@@ -85,10 +89,11 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
     const res = await updateProduct(product.id, form);
 
     if (res.success) {
+      toast.success(dict.edit_product.update_success || "Treasure updated successfully");
       router.refresh(); // Use router refresh instead of hard reload
       onClose();
     } else {
-      setError(res.error || "Failed to update product.");
+      setError(res.error || dict.edit_product.update_failed || "Failed to update product.");
       setIsLoading(false);
     }
   };
@@ -97,6 +102,14 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
+    // Clear resolution if image is removed
+    if (!value) {
+      setResolutions(prev => {
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
+    }
   };
 
   return (
@@ -116,12 +129,15 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-4xl max-h-[90vh] bg-cream rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
             {/* Header */}
             <div className="p-8 border-b border-primary/5 flex justify-between items-center bg-white">
               <div>
-                <h2 className="text-3xl font-heading font-bold text-primary">Edit <span className="serif italic font-normal text-accent">Treasure</span></h2>
-                <p className="text-charcoal/40 text-sm mt-1">Refine your handcrafted masterpiece details</p>
+                <h2 className={cn("text-3xl font-heading font-bold text-primary", isRTL && "font-black")}>
+                  {dict.edit_product.edit_treasure} <span className="serif italic font-normal text-accent">{dict.edit_product.treasure_accent || "Treasure"}</span>
+                </h2>
+                <p className="text-charcoal/40 text-sm mt-1">{dict.edit_product.refine_details}</p>
               </div>
               <button onClick={onClose} className="p-3 hover:bg-primary/5 rounded-full transition-colors">
                 <X className="w-6 h-6 text-primary" />
@@ -135,12 +151,12 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                 <section className="space-y-8">
                   <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
                     <Sparkles className="w-5 h-5 text-accent" />
-                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">Core Details</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">{dict.edit_product.core_details}</h3>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Product Title *</label>
+                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.product_title_label}</label>
                       <input 
                         type="text" 
                         required
@@ -156,7 +172,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Price (USD)</label>
+                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.price_label}</label>
                         <input 
                           type="number" 
                           required
@@ -170,17 +186,18 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Category</label>
+                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.category_label}</label>
                         <CategoryDropdown 
                             value={formData.category} 
                             onChange={(val) => setFormData({...formData, category: val})} 
                             disabled={readOnly}
+                            dict={dict}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Description</label>
+                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.description_label}</label>
                       <textarea 
                         required
                         value={formData.description}
@@ -199,13 +216,13 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                 <section className="space-y-8">
                   <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
                     <ImageIcon className="w-5 h-5 text-accent" />
-                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">Media Gallery</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">{dict.new_product.media_gallery}</h3>
                   </div>
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <p className="text-xs text-charcoal/40 italic">Showcase your masterpiece with high-res photos and cinematic videos.</p>
+                    <p className="text-xs text-charcoal/40 italic">{dict.new_product.media_desc}</p>
                     <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full">
                        <Sparkles className="w-3 h-3 text-accent" />
-                       <span className="text-[9px] font-black uppercase tracking-widest text-accent">Optimal: 1080×1080 | Max: 100MB</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-accent">{dict.new_product.optimal_size}</span>
                     </div>
                   </div>
                   
@@ -251,9 +268,11 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                 type="file" 
                                 accept="image/*,video/*"
                                 className="hidden"
+                                id={`image-${idx}`}
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file) {
+                                    setIsCompressing(prev => ({ ...prev, [idx]: true }));
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                       const dataUrl = reader.result as string;
@@ -261,11 +280,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                       if (file.type.startsWith('video/')) {
                                         // Handle Video
                                         handleImageChange(idx, dataUrl);
-                                        const video = document.createElement('video');
-                                        video.src = dataUrl;
-                                        video.onloadedmetadata = () => {
-                                          setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
-                                        };
+                                        setIsCompressing(prev => ({ ...prev, [idx]: false }));
                                       } else {
                                         // Handle Image
                                         const img = new (window as any).Image();
@@ -274,7 +289,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                           let width = img.width;
                                           let height = img.height;
                                           
-                                          const MAX_SIZE = 1200;
+                                          const MAX_SIZE = 2400;
                                           if (width > height) {
                                             if (width > MAX_SIZE) {
                                               height *= MAX_SIZE / width;
@@ -290,11 +305,13 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                           canvas.width = width;
                                           canvas.height = height;
                                           const ctx = canvas.getContext('2d');
+                                          if (ctx) ctx.imageSmoothingQuality = 'high';
                                           ctx?.drawImage(img, 0, 0, width, height);
                                           
-                                          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                          const compressedDataUrl = canvas.toDataURL('image/webp', 0.9);
                                           handleImageChange(idx, compressedDataUrl);
                                           setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
+                                          setIsCompressing(prev => ({ ...prev, [idx]: false }));
                                         };
                                         img.src = dataUrl;
                                       }
@@ -303,9 +320,15 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                   }
                                 }}
                               />
-                              <div className="px-4 py-2 bg-white text-primary text-[9px] font-black uppercase rounded-full shadow-lg">
-                                {img ? "Change" : "Upload"}
-                              </div>
+                              {isCompressing[idx] ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
+                                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                </div>
+                              ) : (
+                                <div className="px-4 py-2 bg-white text-primary text-[9px] font-black uppercase rounded-full shadow-lg">
+                                  {img ? dict.new_product.change : dict.new_product.upload}
+                                </div>
+                              )}
                             </label>
                           )}
                         </div>
@@ -319,7 +342,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                                onClick={() => handleImageChange(idx, "")}
                                className="text-[9px] font-black uppercase text-red-400 hover:text-red-500"
                              >
-                               Remove
+                               {dict.new_product.remove}
                              </button>
                            )}
                         </div>
@@ -332,13 +355,13 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                 <section className="space-y-8 pb-10">
                   <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
                     <CheckCircle2 className="w-5 h-5 text-accent" />
-                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">Inventory & Meta</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">{dict.new_product.special_details}</h3>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Current Stock</label>
+                        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.initial_stock_label}</label>
                         <input 
                           type="number" 
                           value={formData.stock}
@@ -360,12 +383,12 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                           className="w-4 h-4 rounded text-accent focus:ring-accent"
                         />
                         <label htmlFor="edit-personalize" className="text-xs font-bold text-primary cursor-pointer">
-                          Allow Personalization
+                          {dict.new_product.allow_personalization}
                         </label>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Promotion Badge</label>
+                      <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
                       <input 
                         type="text" 
                         value={formData.badge}
@@ -387,19 +410,19 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
 
             {/* Footer */}
             <div className="p-8 bg-white/50 backdrop-blur-xl border-t border-primary/5 flex justify-end gap-6">
-              <button 
+                  <button 
                 type="button"
                 onClick={onClose}
                 className="px-8 h-12 text-primary font-bold hover:bg-primary/5 rounded-full transition-all"
               >
-                Cancel
+                {dict.common.cancel}
               </button>
               {readOnly ? (
                 <button 
                   onClick={onClose}
                   className="px-12 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20"
                 >
-                  Done Reviewing
+                  {dict.common.done || "Done Reviewing"}
                 </button>
               ) : (
                 <button 
@@ -407,7 +430,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
                   disabled={isLoading}
                   className="px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
                 >
-                  {isLoading ? "Saving Changes..." : "Save Changes"}
+                  {isLoading ? dict.edit_product.saving_changes : dict.profile.save_changes}
                   <Save className="w-4 h-4" />
                 </button>
               )}
@@ -419,9 +442,9 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false }:
   );
 }
 
-function CategoryDropdown({ value, onChange, disabled = false }: { value: string, onChange: (val: string) => void, disabled?: boolean }) {
+function CategoryDropdown({ value, onChange, disabled = false, dict }: { value: string, onChange: (val: string) => void, disabled?: boolean, dict: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const categories = ["Ceramics", "Jewelry", "Wedding", "Personalized", "Art & Collectibles", "Vintage", "Stationery"];
+  const categories = [dict.common.ceramics || "Ceramics", dict.common.jewelry || "Jewelry", dict.common.wedding || "Wedding", dict.common.personalized || "Personalized", dict.common.art || "Art & Collectibles", dict.common.vintage || "Vintage", dict.common.stationery || "Stationery"];
 
   return (
     <div className="relative">

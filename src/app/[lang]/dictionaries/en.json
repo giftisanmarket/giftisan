@@ -634,6 +634,7 @@
     "founding_desc": "As a founding artisan, you have early access to the Pro Studio Dashboard. We are currently finalizing automated payments and worldwide shipping integrations. Chat us if you have your own shipping/payment system to activate your storefront now.",
     "studio_settings": "Studio Settings",
     "add_treasure": "Add New Treasure",
+    "resolve_feedback": "Resolve Feedback",
     "management_locked": "Management Locked",
     "empty_studio_title": "Your studio is currently quiet",
     "empty_studio_desc": "Share your first creation with the Giftisan community to start your craftsman journey.",
@@ -914,11 +915,14 @@
   },
   "edit_product": {
     "edit_treasure": "Edit Treasure",
-    "refine_details": "Refine your handcrafted masterpiece details",
+    "refine_details": "Refine your handcrafted details",
     "core_details": "Core Details",
     "saving_changes": "Saving Changes...",
-    "update_success": "Treasure updated successfully",
-    "update_failed": "Failed to update treasure"
+    "update_success": "Treasure refined and resubmitted!",
+    "update_failed": "Workshop error: Failed to refine treasure.",
+    "feedback_title": "Admin Feedback",
+    "feedback_desc": "Please address the points below and resubmit your treasure for re-approval.",
+    "resolve_and_resubmit": "Resolve & Resubmit"
   },
   "contact_artisan": {
     "message_artisan": "Message Artisan",

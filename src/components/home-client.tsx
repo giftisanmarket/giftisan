@@ -78,6 +78,8 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
               <Link href={`/products/${product.slug || product.id}`}>
                 <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
                   <BespokeImage
+                    type="product"
+                    id={product.id}
                     src={product.images[0]}
                     alt={product.name}
                     fill
@@ -254,7 +256,14 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     <div className="relative w-24 h-24 mb-6">
                       <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                       <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
-                        <BespokeImage src={artisan.avatar} alt={artisan.user.name} fill className="object-cover" />
+                        <BespokeImage 
+                          type="artisan"
+                          id={artisan.id}
+                          src={artisan.avatar} 
+                          alt={artisan.user.name} 
+                          fill 
+                          className="object-cover" 
+                        />
                       </div>
                     </div>
 

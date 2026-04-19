@@ -95,16 +95,16 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
       setProductToDelete(null);
     }
   };
-  
+
   const handleJoinWaitlist = async () => {
     if (isAdminPreview) return;
     setIsJoiningWaitlist(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     setHasJoinedWaitlist(true);
     setIsJoiningWaitlist(false);
-    
+
     toast.success("You're on the list! We'll notify you when Phase 2 starts.", {
       icon: <Sparkles className="w-5 h-5 text-accent" />,
       style: {
@@ -226,7 +226,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   {dict.studio.under_review_desc}
                 </p>
 
-                <Link 
+                <Link
                   href="/contact"
                   className="inline-flex items-center gap-2 px-8 py-3 bg-amber-600 text-white text-xs font-black uppercase tracking-widest rounded-full hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/20 active:scale-95"
                 >
@@ -246,28 +246,28 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
                 <div className="space-y-4">
                   {[
-                    { 
-                      label: dict.studio.checklist_story, 
+                    {
+                      label: dict.studio.checklist_story,
                       done: !!artisan.bio && artisan.bio.trim().length > 0,
                       link: "/studio/settings"
                     },
-                    { 
-                      label: dict.studio.checklist_location, 
+                    {
+                      label: dict.studio.checklist_location,
                       done: !!artisan.location && artisan.location.trim().length > 0,
                       link: "/studio/settings"
                     },
-                    { 
-                      label: dict.studio.checklist_products.replace('{count}', artisan.products.length.toString()), 
+                    {
+                      label: dict.studio.checklist_products.replace('{count}', artisan.products.length.toString()),
                       done: artisan.products.length >= 3,
                       link: "#inventory"
                     },
-                    { 
-                      label: dict.studio.checklist_email, 
+                    {
+                      label: dict.studio.checklist_email,
                       done: !!artisan.user?.emailVerified,
                       link: "/profile/settings"
                     }
                   ].map((item, idx) => (
-                    <Link 
+                    <Link
                       key={idx}
                       href={item.link}
                       onClick={(e) => {
@@ -282,15 +282,15 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       }}
                       className={cn(
                         "flex items-center gap-3 p-3 rounded-xl transition-all border",
-                        item.done 
-                          ? "bg-green-50 border-green-100 text-green-700 opacity-60" 
+                        item.done
+                          ? "bg-green-50 border-green-100 text-green-700 opacity-60"
                           : "bg-white border-amber-100 text-amber-900 hover:border-amber-300"
                       )}
                     >
                       <div className={cn(
                         "w-5 h-5 rounded-full flex items-center justify-center shrink-0 border",
-                        item.done 
-                          ? "bg-green-500 border-green-600 text-white" 
+                        item.done
+                          ? "bg-green-500 border-green-600 text-white"
                           : "bg-white border-amber-300 text-transparent"
                       )}>
                         <CheckCircle2 className="w-3.5 h-3.5" />
@@ -331,11 +331,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             className="mb-8 p-6 bg-primary text-white rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-primary/20 relative overflow-hidden group"
           >
             <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/30 transition-all duration-1000" />
-            
+
             <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
               <ShieldCheck className="w-8 h-8 text-accent-light" />
             </div>
-            
+
             <div className="flex-1 text-center md:text-start relative z-10">
               <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-2">
                 <h3 className="text-xl font-heading font-black">{dict.studio.founding_member}</h3>
@@ -346,11 +346,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               <p className="text-sm text-white/60 leading-relaxed max-w-2xl mb-3">
                 {dict.studio.founding_desc}
               </p>
-              <Link 
+              <Link
                 href="/contact"
                 className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-accent-light hover:text-white transition-colors group/link"
               >
-                {dict.common.support} 
+                {dict.common.support}
                 <ArrowUpRight className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
               </Link>
             </div>
@@ -373,7 +373,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
               <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-start">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
-                  <BespokeImage src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
+                  <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                 </div>
                 <div>
                   <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">{dict.studio.master_studio}</p>
@@ -404,27 +404,27 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
           <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
             {(
               [
-                  { id: "overview", label: dict.studio.overview, icon: BarChart3 },
-                  { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
-                  { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
-                  { id: "growth", label: dict.studio.growth, icon: TrendingUp },
-                  { id: "logistics", label: dict.studio.logistics, icon: Truck },
-                  { id: "reviews", label: dict.studio.community, icon: Star },
-                ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0",
-                    activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
-                  )}
-                >
-                  {tab.id === "logistics" && (
-                    <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
-                      {dict.studio.soon}
-                    </div>
-                  )}
+                { id: "overview", label: dict.studio.overview, icon: BarChart3 },
+                { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
+                { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+                { id: "growth", label: dict.studio.growth, icon: TrendingUp },
+                { id: "logistics", label: dict.studio.logistics, icon: Truck },
+                { id: "reviews", label: dict.studio.community, icon: Star },
+              ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0",
+                  activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
+                )}
+              >
+                {tab.id === "logistics" && (
+                  <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
+                    {dict.studio.soon}
+                  </div>
+                )}
                 {activeTab === tab.id && (
                   <motion.div
                     layoutId="activeTabPill"
@@ -461,17 +461,17 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 <div className="space-y-12">
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                      { 
-                        label: dict.studio.stats_impressions, 
-                        value: totalViews.toLocaleString(), 
-                        icon: MousePointer2, 
+                      {
+                        label: dict.studio.stats_impressions,
+                        value: totalViews.toLocaleString(),
+                        icon: MousePointer2,
                         color: "bg-purple-500",
                         tooltip: dict.studio.tooltip_impressions
                       },
-                      { 
-                        label: dict.studio.stats_loves, 
-                        value: totalFavorites, 
-                        icon: Heart, 
+                      {
+                        label: dict.studio.stats_loves,
+                        value: totalFavorites,
+                        icon: Heart,
                         color: "bg-red-500",
                         tooltip: dict.studio.tooltip_loves
                       },
@@ -482,10 +482,10 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         color: "bg-indigo-500",
                         tooltip: dict.studio.tooltip_success
                       },
-                      { 
-                        label: dict.studio.stats_revenue, 
-                        value: `${dict.product.currency} ${totalRevenue.toLocaleString()}`, 
-                        icon: BarChart3, 
+                      {
+                        label: dict.studio.stats_revenue,
+                        value: `${dict.product.currency} ${totalRevenue.toLocaleString()}`,
+                        icon: BarChart3,
                         color: "bg-green-500",
                         tooltip: dict.studio.tooltip_revenue
                       },
@@ -511,16 +511,16 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             <span className={cn(
                               "text-[8px] font-black uppercase px-2 py-0.5 rounded-full border",
                               parseFloat(stat.value) === 0 ? "bg-cream text-primary/40 border-primary/5" :
-                              parseFloat(stat.value) < 2 ? "bg-blue-50 text-blue-600 border-blue-100" :
-                              parseFloat(stat.value) <= 5 ? "bg-green-50 text-green-600 border-green-100" :
-                              parseFloat(stat.value) <= 10 ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
-                              "bg-accent/10 text-accent border-accent/20"
+                                parseFloat(stat.value) < 2 ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                  parseFloat(stat.value) <= 5 ? "bg-green-50 text-green-600 border-green-100" :
+                                    parseFloat(stat.value) <= 10 ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                                      "bg-accent/10 text-accent border-accent/20"
                             )}>
                               {parseFloat(stat.value) === 0 ? dict.studio.status_building :
-                               parseFloat(stat.value) < 2 ? dict.studio.status_rising :
-                               parseFloat(stat.value) <= 5 ? dict.studio.status_healthy :
-                               parseFloat(stat.value) <= 10 ? dict.studio.status_exceptional :
-                               dict.studio.status_legendary}
+                                parseFloat(stat.value) < 2 ? dict.studio.status_rising :
+                                  parseFloat(stat.value) <= 5 ? dict.studio.status_healthy :
+                                    parseFloat(stat.value) <= 10 ? dict.studio.status_exceptional :
+                                      dict.studio.status_legendary}
                             </span>
                           )}
                         </div>
@@ -583,89 +583,89 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     </div>
                   </div>
 
-                    <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
-                      <div className="flex justify-between items-center mb-10">
-                        <div>
-                          <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
-                          <p className="text-charcoal/40 mt-1">{dict.studio.daily_revenue_desc}</p>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs font-bold text-accent px-4 py-2 bg-accent/10 rounded-full">
-                          <ArrowUpRight className="w-4 h-4" />
-                          {dict.studio.live_data}
-                        </div>
+                  <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+                    <div className="flex justify-between items-center mb-10">
+                      <div>
+                        <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
+                        <p className="text-charcoal/40 mt-1">{dict.studio.daily_revenue_desc}</p>
                       </div>
-                      <SalesChart sales={sales} tickFormatter={(value) => `EGP ${value}`} />
+                      <div className="flex items-center gap-2 text-xs font-bold text-accent px-4 py-2 bg-accent/10 rounded-full">
+                        <ArrowUpRight className="w-4 h-4" />
+                        {dict.studio.live_data}
+                      </div>
+                    </div>
+                    <SalesChart sales={sales} tickFormatter={(value) => `EGP ${value}`} />
+                  </div>
+
+                  {/* Recent Activity Feed */}
+                  <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+                    <div className="flex justify-between items-center mb-10">
+                      <div>
+                        <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
+                        <p className="text-charcoal/40 mt-1">{dict.studio.no_activity_desc || "Insights from your workshop's pulse."}</p>
+                      </div>
                     </div>
 
-                    {/* Recent Activity Feed */}
-                    <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
-                      <div className="flex justify-between items-center mb-10">
-                        <div>
-                          <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
-                          <p className="text-charcoal/40 mt-1">{dict.studio.no_activity_desc || "Insights from your workshop's pulse."}</p>
+                    <div className="space-y-6">
+                      {activities.length === 0 ? (
+                        <div className="text-center py-20 bg-cream/20 rounded-[2rem] border border-dashed border-primary/10">
+                          <Clock className="w-10 h-10 text-primary/10 mx-auto mb-4" />
+                          <p className="text-charcoal/30 italic text-sm">{dict.studio.no_activity}</p>
                         </div>
-                      </div>
-                      
-                      <div className="space-y-6">
-                        {activities.length === 0 ? (
-                          <div className="text-center py-20 bg-cream/20 rounded-[2rem] border border-dashed border-primary/10">
-                            <Clock className="w-10 h-10 text-primary/10 mx-auto mb-4" />
-                            <p className="text-charcoal/30 italic text-sm">{dict.studio.no_activity}</p>
-                          </div>
-                        ) : (
-                          activities.map((activity) => (
-                            <div key={activity.id + activity.type} className="flex items-center gap-6 p-4 rounded-[2rem] hover:bg-cream/50 transition-all group border border-transparent hover:border-primary/5">
-                              <div className={cn(
-                                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
-                                activity.type === 'SALE' ? "bg-green-500 text-white shadow-green-500/20" :
+                      ) : (
+                        activities.map((activity) => (
+                          <div key={activity.id + activity.type} className="flex items-center gap-6 p-4 rounded-[2rem] hover:bg-cream/50 transition-all group border border-transparent hover:border-primary/5">
+                            <div className={cn(
+                              "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
+                              activity.type === 'SALE' ? "bg-green-500 text-white shadow-green-500/20" :
                                 activity.type === 'REVIEW' ? "bg-accent text-white shadow-accent/20" :
-                                activity.status === 'APPROVED' ? "bg-blue-500 text-white shadow-blue-500/20" :
-                                activity.status === 'REJECTED' ? "bg-red-500 text-white shadow-red-500/20" :
-                                "bg-amber-500 text-white shadow-amber-500/20"
-                              )}>
-                                {activity.type === 'SALE' ? <ShoppingBag className="w-5 h-5" /> :
-                                 activity.type === 'REVIEW' ? <Star className="w-5 h-5" /> :
-                                 activity.status === 'APPROVED' ? <CheckCircle2 className="w-5 h-5" /> :
-                                 activity.status === 'REJECTED' ? <X className="w-5 h-5" /> :
-                                 <Clock className="w-5 h-5" />}
-                              </div>
-                              
-                              <div className="flex-1">
-                                <h4 className="font-bold text-primary text-sm md:text-base">
-                                  {activity.type === 'SALE' ? dict.studio.activity_sale :
-                                   activity.type === 'REVIEW' ? dict.studio.activity_review :
-                                   activity.status === 'APPROVED' ? dict.studio.activity_product_approved :
-                                   activity.status === 'REJECTED' ? dict.studio.activity_product_rejected :
-                                   dict.studio.activity_product_pending}
-                                </h4>
-                                <p className="text-[10px] md:text-xs text-charcoal/60 leading-relaxed max-w-md">
-                                  {activity.type === 'SALE' ? dict.studio.activity_sale_desc.replace('{customer}', activity.customer).replace('{name}', activity.name) :
-                                   activity.type === 'REVIEW' ? dict.studio.activity_review_desc.replace('{name}', activity.name) :
-                                   activity.status === 'APPROVED' ? dict.studio.activity_product_approved_desc.replace('{name}', activity.name) :
-                                   activity.status === 'REJECTED' ? (
-                                     <>
-                                       {dict.studio.activity_product_rejected_desc.replace('{name}', activity.name)}
-                                       {activity.reason && (
-                                         <span className="block mt-1 font-bold text-red-500 italic">
-                                           "{activity.reason}"
-                                         </span>
-                                       )}
-                                     </>
-                                   ) :
-                                   dict.studio.activity_product_pending_desc.replace('{name}', activity.name)}
-                                </p>
-                              </div>
-                              
-                              <div className="text-end shrink-0">
-                                <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.1em] text-primary/20 whitespace-nowrap">{new Date(activity.date).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}</p>
-                                <p className="text-[8px] md:text-[9px] font-bold text-accent whitespace-nowrap">{new Date(activity.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                              </div>
+                                  activity.status === 'APPROVED' ? "bg-blue-500 text-white shadow-blue-500/20" :
+                                    activity.status === 'REJECTED' ? "bg-red-500 text-white shadow-red-500/20" :
+                                      "bg-amber-500 text-white shadow-amber-500/20"
+                            )}>
+                              {activity.type === 'SALE' ? <ShoppingBag className="w-5 h-5" /> :
+                                activity.type === 'REVIEW' ? <Star className="w-5 h-5" /> :
+                                  activity.status === 'APPROVED' ? <CheckCircle2 className="w-5 h-5" /> :
+                                    activity.status === 'REJECTED' ? <X className="w-5 h-5" /> :
+                                      <Clock className="w-5 h-5" />}
                             </div>
-                          ))
-                        )}
-                      </div>
+
+                            <div className="flex-1">
+                              <h4 className="font-bold text-primary text-sm md:text-base">
+                                {activity.type === 'SALE' ? dict.studio.activity_sale :
+                                  activity.type === 'REVIEW' ? dict.studio.activity_review :
+                                    activity.status === 'APPROVED' ? dict.studio.activity_product_approved :
+                                      activity.status === 'REJECTED' ? dict.studio.activity_product_rejected :
+                                        dict.studio.activity_product_pending}
+                              </h4>
+                              <p className="text-[10px] md:text-xs text-charcoal/60 leading-relaxed max-w-md">
+                                {activity.type === 'SALE' ? dict.studio.activity_sale_desc.replace('{customer}', activity.customer).replace('{name}', activity.name) :
+                                  activity.type === 'REVIEW' ? dict.studio.activity_review_desc.replace('{name}', activity.name) :
+                                    activity.status === 'APPROVED' ? dict.studio.activity_product_approved_desc.replace('{name}', activity.name) :
+                                      activity.status === 'REJECTED' ? (
+                                        <>
+                                          {dict.studio.activity_product_rejected_desc.replace('{name}', activity.name)}
+                                          {activity.reason && (
+                                            <span className="block mt-1 font-bold text-red-500 italic">
+                                              "{activity.reason}"
+                                            </span>
+                                          )}
+                                        </>
+                                      ) :
+                                        dict.studio.activity_product_pending_desc.replace('{name}', activity.name)}
+                              </p>
+                            </div>
+
+                            <div className="text-end shrink-0">
+                              <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.1em] text-primary/20 whitespace-nowrap">{new Date(activity.date).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })}</p>
+                              <p className="text-[8px] md:text-[9px] font-bold text-accent whitespace-nowrap">{new Date(activity.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
+                </div>
               )}
 
               {activeTab === "inventory" && (
@@ -710,7 +710,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                           className="group relative bg-cream/30 rounded-[2.5rem] border border-primary/5 overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal"
                         >
                           <div className="relative aspect-square overflow-hidden">
-                            <BespokeImage src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+                            <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
                             <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                               <button
                                 onClick={() => {
@@ -730,8 +730,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                   <Trash2 className="w-5 h-5" />
                                 </button>
                               )}
-                              <Link 
-                                href={`/products/${p.slug || p.id}`} 
+                              <Link
+                                href={`/products/${p.slug || p.id}`}
                                 className="w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-xl"
                               >
                                 <ArrowUpRight className="w-5 h-5" />
@@ -743,22 +743,38 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                               <h3 className="text-xl font-heading font-bold text-primary">{p.name}</h3>
                               <div className="flex flex-col items-end gap-1">
                                 <span className={cn(
-                                  "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap",
-                                  p.status === "APPROVED" ? "bg-green-100 text-green-700" :
-                                  p.status === "REJECTED" ? "bg-red-100 text-red-700" :
-                                  "bg-amber-100 text-amber-700"
+                                  "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap border",
+                                  p.status === "APPROVED" ? "bg-green-50 text-green-600 border-green-200" :
+                                    p.status === "REJECTED" ? "bg-red-50 text-red-600 border-red-200" :
+                                      "bg-amber-50 text-amber-600 border-amber-200"
                                 )}>
                                   {p.status === "APPROVED" ? dict.admin.treasure_approved :
-                                   p.status === "REJECTED" ? dict.admin.treasure_rejected :
-                                   p.status === "DRAFT" ? dict.admin.treasure_draft :
-                                   dict.admin.treasure_pending}
+                                    p.status === "REJECTED" ? dict.admin.treasure_rejected :
+                                      p.status === "DRAFT" ? dict.admin.treasure_draft :
+                                        dict.admin.treasure_pending}
                                 </span>
+                                {p.status === "REJECTED" && !isAdminPreview && (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedProductForEdit(p);
+                                      setIsEditModalOpen(true);
+                                    }}
+                                    className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-2 mt-2 border border-red-200/50 shadow-sm"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    {dict.studio.resolve_feedback}
+                                  </button>
+                                )}
                                 {p.status === "REJECTED" && p.rejectionReason && (
-                                  <div className="group/reason relative">
-                                     <Info className="w-3 h-3 text-red-400 cursor-help" />
-                                     <div className="absolute end-0 bottom-full mb-2 w-48 p-2 bg-red-900 text-[10px] text-white rounded-lg opacity-0 group-hover/reason:opacity-100 transition-opacity z-50 shadow-xl leading-relaxed text-center">
-                                       {p.rejectionReason}
-                                     </div>
+                                  <div className="group/reason relative mt-2">
+                                    <div className="text-[10px] text-charcoal/40 flex items-center gap-1.5 bg-cream/50 px-2 py-1 rounded-lg">
+                                      <Info className="w-3 h-3 text-red-400" />
+                                      {dict.edit_product.feedback_title}
+                                    </div>
+                                    <div className="absolute end-0 bottom-full mb-2 w-64 p-4 bg-primary text-white text-[11px] rounded-[1.5rem] opacity-0 group-hover/reason:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed whitespace-normal border border-white/10">
+                                      <div className="font-black uppercase tracking-widest text-accent mb-2 text-[9px]">{dict.edit_product.feedback_title}</div>
+                                      "{p.rejectionReason}"
+                                    </div>
                                   </div>
                                 )}
                                 <span className={cn(
@@ -804,7 +820,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       sales.map((item: any) => (
                         <div key={item.id} className="bg-white rounded-[2rem] border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-xl hover:shadow-primary/5 transition-all">
                           <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0">
-                            <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
+                            <BespokeImage type="product" id={item.product.id} src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                           </div>
 
                           <div className="flex-1 space-y-2 text-center md:text-start">
@@ -969,7 +985,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 <div className="space-y-12">
                   <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden relative">
                     <div className="absolute top-0 end-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
-                    
+
                     <div className="relative z-10">
                       <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
                         <div className="max-w-2xl">
@@ -1043,12 +1059,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         </div>
                         <h2 className="text-5xl md:text-7xl font-heading font-bold text-primary mb-8">{dict.studio.fulfillment_handsfree} <span className="serif italic font-normal text-accent">{dict.studio.fulfillment_handsfree_accent}</span></h2>
                         <p className="text-charcoal/40 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                          {dict.studio.logistics_desc.split('**').map((text: string, i: number) => 
+                          {dict.studio.logistics_desc.split('**').map((text: string, i: number) =>
                             i % 2 === 1 ? <strong key={i} className="text-primary font-bold">{text}</strong> : text
                           )}
                         </p>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-start mb-12">
                         {[
                           { label: dict.studio.direct_payments, icon: Coins, desc: dict.studio.egp_intl },
@@ -1066,13 +1082,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
                         <p className="relative z-10 font-bold mb-2">{dict.studio.beta_test_title}</p>
                         <p className="relative z-10 text-white/40 text-sm mb-6">{dict.studio.beta_test_desc}</p>
-                        <button 
+                        <button
                           onClick={handleJoinWaitlist}
                           disabled={isJoiningWaitlist || hasJoinedWaitlist}
                           className={cn(
                             "relative z-10 px-8 h-12 font-bold rounded-full transition-all flex items-center gap-2 mx-auto",
-                            hasJoinedWaitlist 
-                              ? "bg-green-500 text-white cursor-default" 
+                            hasJoinedWaitlist
+                              ? "bg-green-500 text-white cursor-default"
                               : "bg-white text-primary hover:bg-cream active:scale-95"
                           )}
                         >

@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       description: dict.seo.description,
       images: [
         {
-          url: "/hero.webp",
+          url: `${SITE_URL}/hero.webp`,
           width: 1200,
           height: 630,
           alt: lang === 'ar' ? "سوق جيفتيزان - صنع بكل فخر وبحب" : `${SITE_NAME} Marketplace - Proudly Handcrafted with Heart`,
@@ -104,6 +104,45 @@ export default async function RootLayout({
       dir={dir}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": SITE_NAME,
+              "url": SITE_URL,
+              "logo": `${SITE_URL}/icon.png`,
+              "sameAs": [
+                "https://instagram.com/giftisan",
+                "https://tiktok.com/@giftisan"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "hello@giftisan.shop",
+                "contactType": "customer service"
+              }
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": SITE_NAME,
+              "url": SITE_URL,
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": `${SITE_URL}/${lang}/search?q={search_term_string}`,
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+      </head>
       <body
         className={`${outfit.variable} ${ebGaramond.variable} ${ibmPlexArabic.variable} font-heading text-charcoal bg-white antialiased selection:bg-accent/20 ${lang === 'ar' ? 'font-arabic' : ''}`}
         suppressHydrationWarning

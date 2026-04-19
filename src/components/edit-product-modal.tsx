@@ -146,6 +146,24 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
 
             {/* Form Content */}
             <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-12 custom-scrollbar">
+              {product.status === "REJECTED" && product.rejectionReason && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-8 bg-red-50 border border-red-100 rounded-[2.5rem] flex items-start gap-6 mb-12"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-red-100">
+                    <X className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-heading font-bold text-red-900 mb-1">{dict.edit_product.feedback_title}</h3>
+                    <p className="text-red-700/80 text-sm italic font-medium leading-relaxed">"{product.rejectionReason}"</p>
+                    <p className="text-red-900/40 text-[10px] font-black uppercase tracking-widest mt-4 flex items-center gap-2">
+                       <CheckCircle2 className="w-3 h-3" /> {dict.edit_product.feedback_desc}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-14">
                 {/* Essentials */}
                 <section className="space-y-8">
@@ -428,9 +446,16 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                 <button 
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="px-8 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
+                  className={cn(
+                    "px-10 h-12 font-bold rounded-full transition-all shadow-xl flex items-center gap-2 disabled:opacity-50",
+                    product.status === "REJECTED" 
+                      ? "bg-accent text-white hover:bg-accent-light shadow-accent/20" 
+                      : "bg-primary text-white hover:bg-primary-light shadow-primary/20"
+                  )}
                 >
-                  {isLoading ? dict.edit_product.saving_changes : dict.profile.save_changes}
+                  {isLoading 
+                    ? dict.edit_product.saving_changes 
+                    : (product.status === "REJECTED" ? dict.edit_product.resolve_and_resubmit : dict.profile.save_changes)}
                   <Save className="w-4 h-4" />
                 </button>
               )}

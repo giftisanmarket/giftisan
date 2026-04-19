@@ -1017,7 +1017,8 @@ export async function updateProduct(productId: string, formData: FormData) {
         personalizationPrompt: data.personalizationPrompt || null,
         badge: data.badge || null,
         stock: parseInt(data.stock) || 0,
-        status: "PENDING" // Reset to pending on update for re-approval
+        status: "PENDING", // Reset to pending on update for re-approval
+        rejectionReason: null // Clear feedback once resubmitted
       }
     });
 

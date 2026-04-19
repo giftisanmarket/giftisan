@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 interface BespokeImageProps extends ImageProps {
   containerClassName?: string;
+  type?: "product" | "artisan" | "review";
+  id?: string;
 }
 
 export function BespokeImage({ 
@@ -14,10 +16,13 @@ export function BespokeImage({
   alt, 
   className, 
   containerClassName,
+  type,
+  id,
   ...props 
 }: BespokeImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const isFill = !!props.fill;
+  const isOptimized = !!(type && id);
 
   return (
     <div className={cn(
@@ -27,7 +32,10 @@ export function BespokeImage({
     )}>
       {isLoading && <Skeleton className="absolute inset-0 z-10" />}
       <Image
-        src={src}
+        loader={isOptimized ? ({ src, width, quality }) => {
+          return `/api/image/${type}/${id}?w=${width}&q=${quality || 85}`
+        } : undefined}
+        src={isOptimized ? `giftisan-${type}-${id}` : src}
         alt={alt}
         className={cn(
           "transition-all duration-700",

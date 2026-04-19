@@ -208,11 +208,6 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     priority
                   />
                 )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-end justify-end p-6 opacity-0 group-hover:opacity-100">
-                  <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur shadow-xl flex items-center justify-center text-primary translate-y-2 group-hover:translate-y-0 transition-all">
-                    <Camera className="w-6 h-6" />
-                  </div>
-                </div>
               </motion.div>
 
               {/* Slider Controls */}

@@ -469,7 +469,25 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
 
 function CategoryDropdown({ value, onChange, disabled = false, dict }: { value: string, onChange: (val: string) => void, disabled?: boolean, dict: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const categories = [dict.common.ceramics || "Ceramics", dict.common.jewelry || "Jewelry", dict.common.wedding || "Wedding", dict.common.personalized || "Personalized", dict.common.art || "Art & Collectibles", dict.common.vintage || "Vintage", dict.common.stationery || "Stationery"];
+  const categories = [
+    { id: "ceramics", label: dict.common.ceramics },
+    { id: "jewelry", label: dict.common.jewelry },
+    { id: "gift-boxes-sets", label: dict.common.categories_list?.["gift-boxes-sets"] || "Gift Boxes & Sets" },
+    { id: "textiles", label: dict.common.textiles },
+    { id: "woodwork", label: dict.common.woodwork },
+    { id: "leatherwork", label: dict.common.leatherwork },
+    { id: "culinary-arts", label: dict.common.categories_list?.["culinary-arts"] || "Culinary Arts" },
+    { id: "beauty-apothecary", label: dict.common.categories_list?.["beauty-apothecary"] || "Beauty & Apothecary" },
+    { id: "metalwork", label: dict.common.metalwork },
+    { id: "glasswork", label: dict.common.glasswork },
+    { id: "basketry", label: dict.common.basketry },
+    { id: "fashion", label: dict.common.fashion },
+    { id: "wedding", label: dict.common.wedding },
+    { id: "personalized", label: dict.common.personalized },
+    { id: "art-collectibles", label: dict.common.art_collectibles },
+    { id: "vintage", label: dict.common.vintage },
+    { id: "stationery", label: dict.common.stationery }
+  ];
 
   return (
     <div className="relative">
@@ -481,7 +499,9 @@ function CategoryDropdown({ value, onChange, disabled = false, dict }: { value: 
           disabled && "cursor-default"
         )}
       >
-        <span className="truncate">{value}</span>
+        <span className="truncate">
+          {categories.find(c => c.id === value)?.label || value}
+        </span>
         <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
@@ -501,24 +521,24 @@ function CategoryDropdown({ value, onChange, disabled = false, dict }: { value: 
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 5, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute start-0 end-0 top-full bg-white border border-primary/10 rounded-2xl shadow-2xl z-[120] py-2 overflow-hidden overflow-y-auto max-h-[200px] custom-scrollbar border-b-4 border-b-accent/20"
+              className="absolute start-0 end-0 top-full bg-white border border-primary/10 rounded-2xl shadow-2xl z-[120] py-2 overflow-y-auto max-h-72 scrollbar-thin scrollbar-thumb-primary/10 border-b-4 border-b-accent/20"
             >
               {categories.map((cat) => (
                 <button
-                  key={cat}
+                  key={cat.id}
                   type="button"
                   onClick={() => {
-                    onChange(cat);
+                    onChange(cat.id);
                     setIsOpen(false);
                   }}
                   className={cn(
                     "w-full px-5 py-3 text-start text-[13px] font-bold transition-all",
-                    value === cat 
+                    value === cat.id 
                         ? "bg-primary text-white" 
                         : "text-primary hover:bg-cream/50"
                   )}
                 >
-                  {cat}
+                  {cat.label}
                 </button>
               ))}
             </motion.div>

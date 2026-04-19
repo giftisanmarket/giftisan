@@ -6,9 +6,12 @@ import Link from "next/link";
 import {
   Heart, ArrowRight, CheckCircle2,
   Leaf, Trophy, Palette,
-  Gem, PencilLine, Radio,
+  Gem, PencilLine, History,
   Scissors, Hammer, Shapes,
-  Sparkles, ShoppingBag
+  Sparkles, ShoppingBag, Package,
+  Shirt, Brush, Utensils,
+  Flame, Grid, Briefcase,
+  Wand2, Lightbulb
 } from "lucide-react";
 import { useFavorites } from "@/context/favorites-context";
 import { useCart } from "@/context/cart-context";
@@ -162,17 +165,25 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {categoryCounts.slice(0, 6).map((cat) => {
+          {categoryCounts.slice(0, 12).map((cat) => {
             const icons: Record<string, any> = {
               "Ceramics": Shapes,
               "Jewelry": Gem,
+              "Gift Boxes & Sets": Package,
               "Stationery": PencilLine,
-              "Vintage": Radio,
+              "Vintage": History,
               "Textiles": Scissors,
               "Woodwork": Hammer,
+              "Leatherwork": Briefcase,
+              "Culinary Arts": Utensils,
+              "Beauty & Apothecary": Sparkles,
+              "Metalwork": Flame,
+              "Glasswork": Lightbulb,
+              "Basketry": Grid,
+              "Fashion": Shirt,
               "Wedding": Heart,
-              "Personalized": Sparkles,
-              "Art & Collectibles": ShoppingBag,
+              "Personalized": Wand2,
+              "Art & Collectibles": Brush,
             };
             const Icon = icons[cat.name] || ShoppingBag;
 

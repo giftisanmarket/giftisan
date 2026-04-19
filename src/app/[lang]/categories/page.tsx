@@ -54,8 +54,10 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
   };
   
   const categoryNames = [
-    "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles", 
-    "Woodwork", "Wedding", "Personalized", "Art & Collectibles"
+    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
+    "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
+    "Glasswork", "Basketry", "Fashion",
+    "Wedding", "Personalized", "Art & Collectibles"
   ];
 
   // Fetch real counts for each category
@@ -66,7 +68,11 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
           category: { 
             equals: name, 
             mode: 'insensitive' 
-          } 
+          },
+          status: { in: ["APPROVED", "PENDING"] },
+          artisan: {
+            status: { in: ["APPROVED", "PENDING"] }
+          }
         }
       });
       return { name, count };

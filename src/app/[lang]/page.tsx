@@ -78,8 +78,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
   // Fetch real counts for the home page category grid
   const categoryNames = [
-    "Ceramics", "Jewelry", "Stationery", "Vintage", "Textiles",
-    "Woodwork", "Wedding", "Personalized", "Art & Collectibles"
+    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
+    "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
+    "Glasswork", "Basketry", "Fashion",
+    "Wedding", "Personalized", "Art & Collectibles"
   ];
 
   const categoryCounts = await Promise.all(
@@ -90,9 +92,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             equals: name,
             mode: 'insensitive'
           },
-          status: "APPROVED",
+          status: { in: ["APPROVED", "PENDING"] },
           artisan: {
-            status: "APPROVED"
+            status: { in: ["APPROVED", "PENDING"] }
           }
         }
       });

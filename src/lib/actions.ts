@@ -298,9 +298,9 @@ export async function getProductsByCategory(category: string) {
           equals: category,
           mode: "insensitive"
         },
-        status: "APPROVED",
+        status: { in: ["APPROVED", "PENDING"] },
         artisan: {
-          status: "APPROVED"
+          status: { in: ["APPROVED", "PENDING"] }
         }
       },
       include: {

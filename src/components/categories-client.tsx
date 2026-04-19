@@ -4,27 +4,38 @@ import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { 
   Shapes, Gem, PencilLine, 
-  Radio, Scissors, Hammer, 
+  History, Scissors, Hammer, 
   Heart, Sparkles, ShoppingBag,
-  IconNode
+  Package, Shirt, Brush, 
+  Utensils, Flame, Grid, 
+  Briefcase, Wand2, Lightbulb
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const iconMap: Record<string, any> = {
   "Ceramics": Shapes,
   "Jewelry": Gem,
+  "Gift Boxes & Sets": Package,
   "Stationery": PencilLine,
-  "Vintage": Radio,
+  "Vintage": History,
   "Textiles": Scissors,
   "Woodwork": Hammer,
+  "Leatherwork": Briefcase,
+  "Culinary Arts": Utensils,
+  "Beauty & Apothecary": Sparkles,
+  "Metalwork": Flame,
+  "Glasswork": Lightbulb,
+  "Basketry": Grid,
+  "Fashion": Shirt,
   "Wedding": Heart,
-  "Personalized": Sparkles,
-  "Art & Collectibles": ShoppingBag
+  "Personalized": Wand2,
+  "Art & Collectibles": Brush
 };
 
 const colorMap: Record<string, string> = {
   "Ceramics": "bg-blue-50",
   "Jewelry": "bg-amber-50",
+  "Gift Boxes & Sets": "bg-cyan-50",
   "Stationery": "bg-emerald-50",
   "Vintage": "bg-rose-50",
   "Textiles": "bg-indigo-50",
@@ -37,6 +48,7 @@ const colorMap: Record<string, string> = {
 const descMap: Record<string, string> = {
   "Ceramics": "Hand-thrown pottery and clay treasures.",
   "Jewelry": "Bespoke adornments crafted from gold and gems.",
+  "Gift Boxes & Sets": "Curated collections and beautifully packaged gift boxes.",
   "Stationery": "Fine papers and elegant writing instruments.",
   "Vintage": "Timeless finds with a story to tell.",
   "Textiles": "Woven heritage and handcrafted fabrics.",

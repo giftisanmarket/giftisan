@@ -80,13 +80,23 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   }, []);
 
   const categories = [
-    { id: "ceramics", label: dict.common.ceramics },
-    { id: "jewelry", label: dict.common.jewelry },
-    { id: "wedding", label: dict.common.wedding },
-    { id: "personalized", label: dict.common.personalized },
-    { id: "art-collectibles", label: dict.common.art_collectibles },
-    { id: "vintage", label: dict.common.vintage },
-    { id: "stationery", label: dict.common.stationery }
+    { id: "ceramics", label: dict.common.categories_list?.["ceramics"] || dict.common.ceramics },
+    { id: "jewelry", label: dict.common.categories_list?.["jewelry"] || dict.common.jewelry },
+    { id: "gift-boxes-sets", label: dict.common.categories_list?.["gift-boxes-sets"] || "Gift Boxes & Sets" },
+    { id: "textiles", label: dict.common.categories_list?.["textiles"] || dict.common.textiles },
+    { id: "woodwork", label: dict.common.categories_list?.["woodwork"] || dict.common.woodwork },
+    { id: "leatherwork", label: dict.common.categories_list?.["leatherwork"] || dict.common.leatherwork },
+    { id: "culinary-arts", label: dict.common.categories_list?.["culinary-arts"] || "Culinary Arts" },
+    { id: "beauty-apothecary", label: dict.common.categories_list?.["beauty-apothecary"] || "Beauty & Apothecary" },
+    { id: "metalwork", label: dict.common.categories_list?.["metalwork"] || dict.common.metalwork },
+    { id: "glasswork", label: dict.common.categories_list?.["glasswork"] || dict.common.glasswork },
+    { id: "basketry", label: dict.common.categories_list?.["basketry"] || dict.common.basketry },
+    { id: "fashion", label: dict.common.categories_list?.["fashion"] || dict.common.fashion },
+    { id: "wedding", label: dict.common.categories_list?.["wedding"] || dict.common.wedding },
+    { id: "personalized", label: dict.common.categories_list?.["personalized"] || dict.common.personalized },
+    { id: "art-collectibles", label: dict.common.categories_list?.["art-collectibles"] || dict.common.art_collectibles },
+    { id: "vintage", label: dict.common.categories_list?.["vintage"] || dict.common.vintage },
+    { id: "stationery", label: dict.common.categories_list?.["stationery"] || dict.common.stationery }
   ];
 
   const handleImageChange = (index: number, value: string) => {
@@ -220,7 +230,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-50 top-full start-0 end-0 mt-2 bg-white border border-primary/10 rounded-[2rem] shadow-2xl p-4 space-y-1"
+                        className="absolute z-50 top-full start-0 end-0 mt-2 bg-white border border-primary/10 rounded-[2rem] shadow-2xl p-4 space-y-1 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/10"
                       >
                         {categories.map(cat => (
                           <button

@@ -431,22 +431,28 @@ export function Navbar({ dict }: { dict?: any }) {
         <div className="hidden md:block border-t border-primary/5 py-3">
           <div className="container mx-auto px-4 flex justify-between">
             {[
-              { id: "ceramics", label: d.common.ceramics },
-              { id: "jewelry", label: d.common.jewelry },
-              { id: "wedding", label: d.common.wedding },
-              { id: "personalized", label: d.common.personalized },
-              { id: "art-collectibles", label: d.common.art_collectibles },
-              { id: "vintage", label: d.common.vintage },
-              { id: "stationery", label: d.common.stationery }
+              { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+              { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
+              { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
+              { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
+              { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+              { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+              { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
             ].map((cat) => (
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
-                className="text-sm font-medium text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all"
+                className="text-sm font-bold text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all uppercase tracking-wide"
               >
                 {cat.label}
               </Link>
             ))}
+            <Link
+              href="/categories"
+              className="text-sm font-black text-accent hover:text-primary transition-all uppercase tracking-widest border-s border-primary/10 ps-6"
+            >
+              {d.common.all_categories || "View All"} →
+            </Link>
           </div>
         </div>
       </nav>
@@ -559,13 +565,15 @@ export function Navbar({ dict }: { dict?: any }) {
               <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.categories}</p>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  { id: "ceramics", label: d.common.ceramics },
-                  { id: "jewelry", label: d.common.jewelry },
-                  { id: "wedding", label: d.common.wedding },
-                  { id: "personalized", label: d.common.personalized },
-                  { id: "art-collectibles", label: d.common.art_collectibles },
-                  { id: "vintage", label: d.common.vintage },
-                  { id: "stationery", label: d.common.stationery }
+                  { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                  { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
+                  { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
+                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
+                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                  { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                  { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles },
+                  { id: "stationery", label: d.common.categories_list?.stationery || d.common.stationery },
+                  { id: "vintage", label: d.common.categories_list?.vintage || d.common.vintage }
                 ].map((cat) => (
                   <Link
                     key={cat.id}

@@ -10,12 +10,12 @@ async function getArtisanBySlug(slug: string) {
   const artisanBySlug = await prisma.artisanProfile.findFirst({
     where: { 
       slug: slug,
-      status: "APPROVED"
+      status: { in: ["APPROVED", "PENDING"] }
     },
     include: {
       products: {
         where: {
-          status: "APPROVED"
+          status: { in: ["APPROVED", "PENDING"] }
         },
         include: {
           reviews: true,
@@ -36,7 +36,7 @@ async function getArtisanBySlug(slug: string) {
     where: { 
       role: 'ARTISAN',
       artisanProfile: {
-        status: 'APPROVED'
+        status: { in: ["APPROVED", "PENDING"] }
       }
     },
     include: {
@@ -44,7 +44,7 @@ async function getArtisanBySlug(slug: string) {
         include: {
           products: {
             where: {
-              status: "APPROVED"
+              status: { in: ["APPROVED", "PENDING"] }
             },
             include: {
               reviews: true,

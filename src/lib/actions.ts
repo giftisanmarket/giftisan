@@ -298,9 +298,9 @@ export async function getProductsByCategory(category: string) {
           equals: category,
           mode: "insensitive"
         },
-        status: { in: ["APPROVED", "PENDING"] },
+        status: "APPROVED",
         artisan: {
-          status: { in: ["APPROVED", "PENDING"] }
+          status: "APPROVED"
         }
       },
       include: {
@@ -403,12 +403,13 @@ export async function getProductBySlug(slug: string) {
       }
     });
 
-    // Check if product exists and is approved (and artisan is approved)
+    // Check if product exists
     if (!product) return null;
 
-    const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
+    const isPublic = product.status === "APPROVED" || product.status === "PENDING";
+    const isArtisanPublic = product.artisan.status === "APPROVED" || product.artisan.status === "PENDING";
 
-    if (!isApproved) {
+    if (!isPublic || !isArtisanPublic) {
       const session = await auth();
       const isAdmin = session?.user?.role === "ADMIN";
       const isOwner = session?.user?.id === product.artisan.userId;

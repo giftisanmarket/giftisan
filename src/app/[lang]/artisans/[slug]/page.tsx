@@ -15,7 +15,7 @@ async function getArtisanBySlug(slug: string) {
     include: {
       products: {
         where: {
-          status: { in: ["APPROVED", "PENDING"] }
+          status: "APPROVED"
         },
         include: {
           reviews: true,
@@ -44,7 +44,7 @@ async function getArtisanBySlug(slug: string) {
         include: {
           products: {
             where: {
-              status: { in: ["APPROVED", "PENDING"] }
+              status: "APPROVED"
             },
             include: {
               reviews: true,

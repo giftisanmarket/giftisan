@@ -41,8 +41,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
 
-  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
-  if (!isApproved) {
+  const isVisible = (product.status === "APPROVED" || product.status === "PENDING") && 
+                    (product.artisan.status === "APPROVED" || product.artisan.status === "PENDING");
+  
+  if (!isVisible) {
     const session = await auth();
     const isAdmin = session?.user?.role === "ADMIN";
     const isOwner = session?.user?.id === product.artisan.userId;
@@ -130,9 +132,10 @@ export default async function ProductPage({ params }: Props) {
   const session = await auth();
   const isAdmin = session?.user?.role === "ADMIN";
   const isOwner = session?.user?.id === product.artisan.userId;
-  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
+  const isVisible = (product.status === "APPROVED" || product.status === "PENDING") && 
+                    (product.artisan.status === "APPROVED" || product.artisan.status === "PENDING");
   
-  if (!isApproved && !isAdmin && !isOwner) {
+  if (!isVisible && !isAdmin && !isOwner) {
     notFound();
   }
 

@@ -92,9 +92,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             equals: name,
             mode: 'insensitive'
           },
-          status: { in: ["APPROVED", "PENDING"] },
+          status: "APPROVED",
           artisan: {
-            status: { in: ["APPROVED", "PENDING"] }
+            status: "APPROVED"
           }
         }
       });

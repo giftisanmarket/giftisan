@@ -28,6 +28,8 @@
     "explore": "Explore Treasures",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
+    "shipping": "Shipping Policy",
+    "refund": "Refund Policy",
     "discovery_mode": "Discovery mode",
     "popular_collections": "Popular Collections",
     "gifts_for_you": "Gifts for You",
@@ -1010,6 +1012,50 @@
     "section5_title": "5. Intellectual Property",
     "section5_desc": "Artisans retain ownership of their designs. By listing products, artisans grant Giftisan a license to use product photos for marketing and promotional purposes. Users may not copy or redistribute content without permission."
   },
+  "shipping": {
+    "title_base": "Shipping",
+    "title_accent": "Policy",
+    "delivery_status": "Delivery Status",
+    "description": "Giftisan is currently in a manual fulfillment phase. We are committed to ensuring your artisanal treasures reach you safely and efficiently.",
+    "more_details": "Shipping Questions?",
+    "more_details_desc": "If you have specific questions about a shipment or international delivery, our team is ready to assist.",
+    "contact_support": "Contact Support",
+    "footer_copyright": "© 2026 Giftisan | All Rights Reserved",
+    "home": "Home",
+    "terms": "Terms of Service",
+    "section1_title": "1. Manual Fulfillment",
+    "section1_desc": "Since we are in our launch phase, shipping is currently handled manually by our artisans. Once you place an order, the artisan will contact you to coordinate the best delivery method.",
+    "section2_title": "2. Shipping Zones",
+    "section2_desc": "We primarily serve all major cities in Egypt. For international shipping inquiries, please contact the artisan directly through the 'Message Artisan' feature on their product page.",
+    "section3_title": "3. Processing Time",
+    "section3_desc": "Each treasure is handcrafted. Processing times vary depending on the item's complexity and the artisan's current workload, typically ranging from 3 to 10 business days.",
+    "section4_title": "4. Packaging",
+    "section4_desc": "We encourage all our artisans to use sustainable, eco-friendly packaging that protects your treasure while respecting the environment.",
+    "section5_title": "5. Future Integration",
+    "section5_desc": "We are actively working on integrating automated shipping and tracking systems to provide a seamless experience for both collectors and creators in the near future."
+  },
+  "refund": {
+    "title_base": "Refund",
+    "title_accent": "Policy",
+    "refund_status": "Refund Status",
+    "description": "At Giftisan, we stand by the quality of our master craftsmanship. Our refund policy is designed to be fair to both collectors and creators.",
+    "more_details": "Refund Questions?",
+    "more_details_desc": "If you have specific questions about a return or a refund request, our support team is here to help.",
+    "contact_support": "Contact Support",
+    "footer_copyright": "© 2026 Giftisan | All Rights Reserved",
+    "home": "Home",
+    "terms": "Terms of Service",
+    "section1_title": "1. Handcrafted Excellence",
+    "section1_desc": "Because each item is handcrafted specifically for you, we only offer refunds for items that arrive damaged or significantly different from their description. Change-of-mind returns are generally not accepted.",
+    "section2_title": "2. Damaged Items",
+    "section2_desc": "If your treasure arrives damaged, please contact the artisan through the platform within 48 hours of delivery. Please include clear photos of the damage and the packaging.",
+    "section3_title": "3. Resolution Process",
+    "section3_desc": "Once a claim is verified, the artisan may offer a repair, a replacement, or a partial/full refund. Giftisan will assist in mediating if a direct resolution between the buyer and artisan cannot be reached.",
+    "section4_title": "4. Return Shipping",
+    "section4_desc": "If a return is required for a refund, the buyer is typically responsible for return shipping costs unless the item was damaged upon arrival or significantly misrepresented.",
+    "section5_title": "5. Refund Timeline",
+    "section5_desc": "Approved refunds are processed back to the original payment method within 5-10 business days of the return being received or the claim being finalized."
+  },
   "contact": {
     "title_base": "Let's",
     "title_accent": "Connect",
@@ -1037,6 +1083,7 @@
     "help_placeholder": "Tell us about your inquiry...",
     "fill_fields": "Please fill in all fields.",
     "error_generic": "Something went wrong.",
-    "send_inquiry": "Send Inquiry"
+    "send_inquiry": "Send Inquiry",
+    "call_us": "Call Us Directly"
   }
 }

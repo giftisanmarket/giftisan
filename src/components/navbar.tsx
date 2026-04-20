@@ -43,7 +43,9 @@ export function Navbar({ dict }: { dict?: any }) {
       menu: "Menu",
       explore: "Explore Treasures",
       terms: "Terms of Service",
-      privacy: "Privacy Policy"
+      privacy: "Privacy Policy",
+      shipping: "Shipping Policy",
+      refund: "Refund Policy"
     }
   };
   const { data: session, update } = useSession();

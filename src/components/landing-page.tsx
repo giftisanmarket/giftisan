@@ -450,6 +450,8 @@ export default function LandingPage({ dict }: { dict: any }) {
           <div className="flex flex-wrap justify-center md:justify-end gap-8">
             <Link href="/contact" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.support}</Link>
             <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.terms}</Link>
+            <Link href="/shipping" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.shipping?.title_base || 'Shipping'}</Link>
+            <Link href="/refund" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.refund?.title_base || 'Refund'}</Link>
             <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.privacy}</Link>
             <Link href="/become-artisan" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.open_studio.split(' ')[0]}</Link>
           </div>

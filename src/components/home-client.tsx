@@ -336,6 +336,8 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </p>
           <div className="flex justify-center gap-6">
             <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.terms || 'Terms'}</Link>
+            <Link href="/shipping" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.shipping || 'Shipping'}</Link>
+            <Link href="/refund" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.refund || 'Refund'}</Link>
             <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.privacy || 'Privacy'}</Link>
           </div>
         </div>

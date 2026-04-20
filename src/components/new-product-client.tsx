@@ -36,7 +36,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     description: "",
     price: "",
     category: "ceramics",
-    images: ["", "", ""],
+    images: ["", "", "", "", "", "", "", "", "", ""],
     canPersonalize: false,
     personalizationPrompt: "",
     badge: "",
@@ -285,7 +285,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
               {formData.images.map((img, idx) => (
                 <div key={idx} className="space-y-3 md:space-y-4">
                   <div className="relative aspect-square rounded-[1.5rem] md:rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">

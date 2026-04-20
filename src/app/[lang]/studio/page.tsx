@@ -57,21 +57,64 @@ export default async function StudioPage({
     ? artisanUserId 
     : session.user.id;
 
+  console.log(`[Studio] Accessing studio for targetUserId: ${targetUserId} (Session User ID: ${session.user.id}, isAdmin: ${isAdmin})`);
+
+  if (!targetUserId) {
+    console.error("[Studio] No targetUserId found in session or searchParams");
+    redirect(`/${lang}/profile`);
+  }
+
   let artisan = await getArtisanData(targetUserId as string);
 
   // If role is ARTISAN but profile is missing, create it on the fly
   if (!artisan && isArtisan && !isAdmin) {
-    console.log(`[Studio] Auto-creating missing profile for Artisan: ${targetUserId}`);
-    await prisma.artisanProfile.create({
-      data: {
-        userId: targetUserId as string,
-        bio: "A master artisan in the Giftisan community.",
-        location: "Artisan Member",
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.name || targetUserId}`
-      }
+    console.log(`[Studio] Profile missing for Artisan ${targetUserId}. Checking if User record exists...`);
+    
+    // Safety check: Does the user record actually exist?
+    const userExists = await prisma.user.findUnique({
+      where: { id: targetUserId as string },
+      select: { id: true, email: true }
     });
-    // Fetch again
-    artisan = await getArtisanData(targetUserId as string);
+
+    if (!userExists) {
+      console.error(`[Studio] CRITICAL: User record ${targetUserId} not found in database! Session might be stale.`);
+      // Sign out or redirect to login to refresh session
+      redirect(`/login?callbackUrl=/${lang}/studio`);
+    }
+
+    console.log(`[Studio] User record found: ${userExists.email}. Auto-creating/verifying profile...`);
+    try {
+      artisan = await prisma.artisanProfile.upsert({
+        where: { userId: targetUserId as string },
+        create: {
+          userId: targetUserId as string,
+          bio: "A master artisan in the Giftisan community.",
+          location: "Artisan Member",
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.name || targetUserId}`
+        },
+        update: {}, // Don't overwrite anything if it exists
+        include: {
+          products: {
+            include: {
+              _count: {
+                select: {
+                  reviews: true,
+                  favoritedBy: true
+                }
+              }
+            },
+            orderBy: {
+              createdAt: 'desc'
+            }
+          },
+          user: true
+        }
+      });
+    } catch (createError: any) {
+      console.error(`[Studio] Failed to auto-create/upsert profile:`, createError.message);
+      // Fallback redirect
+      redirect(`/${lang}/profile`);
+    }
   }
 
   if (!artisan) {

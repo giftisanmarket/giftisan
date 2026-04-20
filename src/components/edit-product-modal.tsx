@@ -27,7 +27,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
     description: product.description,
     price: product.price.toString(),
     category: product.category,
-    images: product.images.length >= 3 ? [...product.images] : [...product.images, ...Array(3 - product.images.length).fill("")],
+    images: product.images.length >= 10 ? [...product.images] : [...product.images, ...Array(10 - product.images.length).fill("")],
     canPersonalize: product.canPersonalize,
     badge: product.badge || "",
     stock: (product.stock || 0).toString()
@@ -244,7 +244,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                     {formData.images.map((img, idx) => (
                       <div key={idx} className="space-y-3">
                         <div className="relative aspect-square rounded-[1.5rem] bg-cream/30 overflow-hidden border border-primary/10 group shadow-inner">

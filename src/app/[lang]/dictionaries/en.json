@@ -1084,6 +1084,8 @@
     "fill_fields": "Please fill in all fields.",
     "error_generic": "Something went wrong.",
     "send_inquiry": "Send Inquiry",
-    "call_us": "Call Us Directly"
+    "call_us": "Call Us Directly",
+    "location_label": "Our Location",
+    "location_value": "Cairo, Egypt"
   }
 }

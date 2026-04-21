@@ -1154,6 +1154,8 @@
     "fill_fields": "يرجى ملء جميع الحقول.",
     "error_generic": "حدث خطأ ما.",
     "send_inquiry": "إرسال الاستفسار",
-    "call_us": "اتصل بنا مباشرة"
+    "call_us": "اتصل بنا مباشرة",
+    "location_label": "موقعنا",
+    "location_value": "القاهرة، مصر"
   }
 }

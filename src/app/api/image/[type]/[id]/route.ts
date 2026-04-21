@@ -57,6 +57,16 @@ export async function GET(
       }
       contentType = matches[1];
       buffer = Buffer.from(matches[2], "base64");
+    } else if (imageData.startsWith("/")) {
+      // Local path from public directory
+      const filePath = require("path").join(process.cwd(), "public", imageData);
+      try {
+        buffer = require("fs").readFileSync(filePath);
+        const ext = imageData.split(".").pop()?.toLowerCase();
+        contentType = ext === "png" ? "image/png" : ext === "svg" ? "image/svg+xml" : "image/jpeg";
+      } catch (e) {
+        return new NextResponse("Local file not found", { status: 404 });
+      }
     } else {
       return new NextResponse("Unknown image source", { status: 400 });
     }

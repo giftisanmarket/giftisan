@@ -139,7 +139,7 @@ export default function LandingPage({ dict }: { dict: any }) {
               )}
             </div>
             <div className="mt-auto flex justify-center gap-8 pb-10">
-              <a href="https://www.instagram.com/gifttisan/" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.instagram.com/giftisan.eg/" target="_blank" rel="noopener noreferrer">
                 <FaInstagram className="w-6 h-6 text-primary/40 hover:text-accent transition-colors" />
               </a>
               <a href="https://www.facebook.com/profile.php?id=61570726340692" target="_blank" rel="noopener noreferrer">
@@ -402,7 +402,7 @@ export default function LandingPage({ dict }: { dict: any }) {
               {dict.home.premier_marketplace}
             </p>
             <div className="flex gap-4">
-              <a href="https://www.instagram.com/gifttisan/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
+              <a href="https://www.instagram.com/giftisan.eg/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
                 <FaInstagram className="w-5 h-5" />
               </a>
               <a href="https://www.facebook.com/profile.php?id=61570726340692" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">

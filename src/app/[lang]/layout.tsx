@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       title: dict.seo.title,
       description: lang === 'ar' ? "اكتشف كنوزاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted treasures from local artisans.",
       images: ["/hero.webp"],
-      creator: "@gifttisan",
+      creator: "@giftisan.eg",
     },
     openGraph: {
       type: "website",
@@ -115,7 +115,7 @@ export default async function RootLayout({
               "url": SITE_URL,
               "logo": `${SITE_URL}/icon.png`,
               "sameAs": [
-                "https://instagram.com/giftisan",
+                "https://instagram.com/giftisan.eg",
                 "https://tiktok.com/@giftisan"
               ],
               "contactPoint": {

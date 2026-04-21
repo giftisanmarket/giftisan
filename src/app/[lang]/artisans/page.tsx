@@ -24,6 +24,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       title: dict.home.artisans_registry,
       description: dict.home.artisans_desc,
       images: [`${SITE_URL}/hero.webp`],
+      url: `${SITE_URL}/${lang}/artisans`,
+      siteName: SITE_NAME,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.home.artisans_registry,
+      description: dict.home.artisans_desc,
+      images: [`${SITE_URL}/hero.webp`],
     }
   };
 }

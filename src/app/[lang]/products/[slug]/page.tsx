@@ -53,7 +53,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
-  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : `${SITE_URL}/api/image/product/${product.id}`;
+  const getAbsoluteUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const firstImage = getAbsoluteUrl(Array.isArray(product.images) && product.images[0] ? product.images[0] : null) || `${SITE_URL}/api/image/product/${product.id}`;
   const description = product.description.slice(0, 160);
 
   return {

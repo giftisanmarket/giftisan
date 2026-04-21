@@ -9,7 +9,7 @@ async function getArtisanBySlug(slug: string) {
   // Try to find by the new slug field first
   const artisanBySlug = await prisma.artisanProfile.findFirst({
     where: { 
-      slug: slug,
+      slug: { equals: slug, mode: "insensitive" },
       status: { in: ["APPROVED", "PENDING"] }
     },
     include: {
@@ -86,7 +86,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `Discover the world of ${data.name}. Explore unique treasures made with passion.`);
   const keywords = [data.name, artisan.studioName, artisan.location, lang === 'ar' ? "حرفي" : "Artisan", lang === 'ar' ? "صنع يدوي" : "Handmade", SITE_NAME].filter(Boolean) as string[];
   
-  const ogImage = artisan.bannerImage || artisan.avatar || `${SITE_URL}/api/image/artisan/${artisan.id}`;
+  const getAbsoluteUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+  
+  const ogImage = getAbsoluteUrl(artisan.bannerImage || artisan.avatar) || `${SITE_URL}/hero.webp`;
 
   return {
     title: data.name || "Artisan",
@@ -100,8 +106,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     },
     openGraph: {
-      title: data.name || SITE_NAME,
+      title: data.name ? `${data.name} | ${SITE_NAME}` : SITE_NAME,
       description: description.slice(0, 160),
+      url: `${SITE_URL}/${lang}/artisans/${slug}`,
+      siteName: SITE_NAME,
       images: [{
         url: ogImage,
         width: 1200,
@@ -109,6 +117,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         alt: lang === 'ar' ? `استوديو ${data.name || ""}` : `The ${data.name || ""} Studio`
       }],
       type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: data.name ? `${data.name} | ${SITE_NAME}` : SITE_NAME,
+      description: description.slice(0, 160),
+      images: [ogImage],
     }
   };
 }

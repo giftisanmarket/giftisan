@@ -166,7 +166,7 @@ export default function MaintenancePage() {
             </div>
             <div className="flex items-center gap-3 text-primary/40 font-bold text-sm">
               <Globe className="w-4 h-4 text-accent" />
-              <span>Studio: <span className="text-primary italic">Giftisan Native Marketplace</span></span>
+              <span>Studio: <span className="text-primary italic">Giftisan Native Platform</span></span>
             </div>
           </div>
         </motion.div>

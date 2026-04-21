@@ -43,7 +43,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     return <LandingPage dict={dict} />;
   }
 
-  // If user is logged in, show the marketplace home page
+  // If user is logged in, show the community platform home page
   const products = await prisma.product.findMany({
     where: {
       status: "APPROVED",

@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { lang } = await params;
   const dict = await getDictionary(lang as any);
   return {
-    title: `${dict.admin?.overview || "Admin Overview"} | ${dict.admin?.marketplace || "Marketplace"}`,
+    title: `${dict.admin?.overview || "Admin Overview"} | ${dict.admin?.marketplace || "Platform"}`,
   };
 }
 

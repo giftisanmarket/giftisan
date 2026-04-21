@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
           url: `${SITE_URL}/hero.webp`,
           width: 1200,
           height: 630,
-          alt: lang === 'ar' ? "سوق جيفتيزان - صنع بكل فخر وبحب" : `${SITE_NAME} Marketplace - Proudly Handcrafted with Heart`,
+          alt: lang === 'ar' ? "منصة جيفتيزان - صنع بكل فخر وبحب" : `${SITE_NAME} Platform - Proudly Handcrafted with Heart`,
         },
       ],
     },

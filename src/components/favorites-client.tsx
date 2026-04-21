@@ -34,7 +34,7 @@ export default function FavoritesClient({ dict }: { dict: any }) {
                 <Heart className="w-10 h-10 text-primary/20" />
               </div>
               <h2 className="text-2xl font-heading font-bold text-primary">{dict.home.favorites_empty || "Your list is currently empty"}</h2>
-              <p className="text-charcoal/60 mt-2 mb-8">{dict.home.favorites_empty_desc || "Start exploring the marketplace to find treasures you love."}</p>
+              <p className="text-charcoal/60 mt-2 mb-8">{dict.home.favorites_empty_desc || "Start exploring the collection to find treasures you love."}</p>
               <Link 
                 href="/" 
                 className="h-14 px-10 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center w-fit mx-auto group"

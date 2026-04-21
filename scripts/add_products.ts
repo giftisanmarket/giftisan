@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ProductStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
@@ -44,7 +44,7 @@ async function main() {
       images: ["/muski-vase.png"],
       category: "Glasswork",
       tags: ["Handmade", "Traditional", "Home Decor"],
-      status: "APPROVED",
+      status: ProductStatus.APPROVED,
       stock: 5,
     },
     {
@@ -55,7 +55,7 @@ async function main() {
       images: ["/inlaid-box.png"],
       category: "Woodwork",
       tags: ["Luxury", "Traditional", "Gift"],
-      status: "APPROVED",
+      status: ProductStatus.APPROVED,
       stock: 3,
     },
     {
@@ -66,7 +66,7 @@ async function main() {
       images: ["/kilim-rug.png"],
       category: "Textiles",
       tags: ["Sustainable", "Handmade", "Home Decor"],
-      status: "APPROVED",
+      status: ProductStatus.APPROVED,
       stock: 2,
     }
   ];

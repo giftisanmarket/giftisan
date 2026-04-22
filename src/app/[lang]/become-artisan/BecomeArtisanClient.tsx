@@ -8,12 +8,12 @@ import { promoteToArtisan } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 export default function BecomeArtisanClient({ dict }: { dict: any }) {
   const { data: session, update, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     studioName: "",
     bio: "",
@@ -29,16 +29,15 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     if (!(session?.user as any)?.emailVerified) {
-      setError(dict.home.verify_email_error);
+      toast.error(dict.home.verify_email_error);
       setIsLoading(false);
       return;
     }
 
     if (!formData.studioName || !formData.bio) {
-      setError(dict.home.form_error);
+      toast.error(dict.home.form_error);
       setIsLoading(false);
       return;
     }
@@ -46,6 +45,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     const res = await promoteToArtisan(session?.user?.id as string, formData);
 
     if (res.success) {
+      toast.success(dict.home.onboarding_success || "Welcome to the circle!");
       // Force session update so the role reflects in the UI
       await update({
         ...session,
@@ -55,7 +55,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
         }
       });
     } else {
-      setError(res.error || "Something went wrong.");
+      toast.error(res.error || "Something went wrong.");
       setIsLoading(false);
     }
   };
@@ -291,12 +291,6 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
                   />
                 </div>
               </div>
-
-              {error && (
-                <div className="p-4 bg-red-50 text-red-500 rounded-xl text-center text-xs md:text-sm font-bold">
-                  {error}
-                </div>
-              )}
 
               <div className="pt-6 md:pt-8 flex flex-col items-center gap-6">
                 <button

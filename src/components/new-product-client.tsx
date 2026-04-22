@@ -16,21 +16,26 @@ import {
   CheckCircle2,
   ChevronDown,
   Video,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 interface NewProductClientProps {
   artisanId: string;
   dict: any;
 }
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_VIDEO_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_VIDEO_DURATION = 30; // 30 seconds
+
 export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -43,7 +48,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     stock: "1"
   });
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
@@ -115,11 +119,9 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
-    // Validation
     if (!formData.name || !formData.price || !formData.images[0]) {
-      setError(dict.new_product.validation_error);
+      toast.error(dict.new_product.validation_error);
       setIsLoading(false);
       return;
     }
@@ -141,9 +143,10 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     const res = await createProduct(artisanId, form);
 
     if (res.success) {
+      toast.success(dict.new_product.success_message || "Treasure listed successfully!");
       window.location.href = "/studio";
     } else {
-      setError(res.error || "Failed to create product.");
+      toast.error(res.error || "Failed to create product.");
       setIsLoading(false);
     }
   };
@@ -172,7 +175,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-10">
-          {/* Main Info */}
           <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
             <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
               <Sparkles className="w-6 h-6 text-accent" />
@@ -271,17 +273,34 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
             </div>
           </section>
 
-          {/* Gallery */}
           <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
               <ImageIcon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
               <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">{dict.new_product.media_gallery}</h2>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <p className="text-xs md:text-sm text-charcoal/40 italic">{dict.new_product.media_desc}</p>
-              <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full w-fit">
-                <Sparkles className="w-3 h-3 text-accent" />
-                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-accent">{dict.new_product.optimal_size}</span>
+            
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <p className="text-xs md:text-sm text-charcoal/40 italic">{dict.new_product.media_desc}</p>
+                <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full w-fit">
+                  <Sparkles className="w-3 h-3 text-accent" />
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-accent">{dict.new_product.optimal_size}</span>
+                </div>
+              </div>
+              
+              {/* No Logos Warning */}
+              <div className="flex items-center gap-3 px-5 py-3 bg-red-50/50 border border-red-100 rounded-2xl">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] md:text-xs font-bold text-red-600 uppercase tracking-wide">
+                    {dict.home.upload_rules.no_logos_note}
+                  </p>
+                  <p className="text-[9px] md:text-[10px] text-red-400 font-medium">
+                    {dict.home.upload_rules.clean_media_note}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -291,14 +310,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   <div className="relative aspect-square rounded-[1.5rem] md:rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
                     {img ? (
                       img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
-                        <video
-                          src={img}
-                          className="w-full h-full object-cover"
-                          muted
-                          loop
-                          onMouseOver={e => e.currentTarget.play()}
-                          onMouseOut={e => e.currentTarget.pause()}
-                        />
+                        <video src={img} className="w-full h-full object-cover" muted loop onMouseOver={e => e.currentTarget.play()} onMouseOut={e => e.currentTarget.pause()} />
                       ) : (
                         <Image src={img} alt="Preview" fill className="object-cover" />
                       )
@@ -315,68 +327,74 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       </div>
                     )}
 
-                    {img && (img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i)) && (
-                      <div className="absolute top-3 end-3 md:top-4 md:end-4 z-20 w-5 h-5 md:w-6 md:h-6 bg-accent rounded-full flex items-center justify-center shadow-lg">
-                        <Video className="w-2.5 h-2.5 md:w-3 h-3 text-white" />
-                      </div>
-                    )}
-
                     <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all active:scale-[0.98]">
                       <input
                         type="file"
-                        accept="image/*,video/*"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            setIsCompressing(prev => ({ ...prev, [idx]: true }));
+                          if (!file) return;
+                          
+                          // Rule 1: Format Validation
+                          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
+                          if (!allowedTypes.includes(file.type)) {
+                            toast.error(dict.home.upload_rules.format_error);
+                            return;
+                          }
+
+                          // Rule 2: Size Validation
+                          if (file.type.startsWith('image/') && file.size > MAX_IMAGE_SIZE) {
+                            toast.error(dict.home.upload_rules.image_size_error);
+                            return;
+                          }
+                          if (file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE) {
+                            toast.error(dict.home.upload_rules.video_size_error);
+                            return;
+                          }
+
+                          setIsCompressing(prev => ({ ...prev, [idx]: true }));
+                          
+                          if (file.type.startsWith('video/')) {
+                            // Rule 3: Video Duration Validation
+                            const videoElement = document.createElement('video');
+                            videoElement.preload = 'metadata';
+                            videoElement.onloadedmetadata = () => {
+                              window.URL.revokeObjectURL(videoElement.src);
+                              if (videoElement.duration > MAX_VIDEO_DURATION) {
+                                toast.error(dict.home.upload_rules.video_duration_error);
+                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
+                                return;
+                              }
+
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                handleImageChange(idx, reader.result as string);
+                                setResolutions(prev => ({ ...prev, [idx]: `${videoElement.videoWidth}×${videoElement.videoHeight}` }));
+                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
+                              };
+                              reader.readAsDataURL(file);
+                            };
+                            videoElement.src = URL.createObjectURL(file);
+                          } else {
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                              const dataUrl = reader.result as string;
-
-                              if (file.type.startsWith('video/')) {
-                                // Handle Video
-                                handleImageChange(idx, dataUrl);
-                                const video = document.createElement('video');
-                                video.src = dataUrl;
-                                video.onloadedmetadata = () => {
-                                  setResolutions(prev => ({ ...prev, [idx]: `${video.videoWidth}×${video.videoHeight}` }));
-                                };
+                              const img = new (window as any).Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_RES = 2400;
+                                if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                                else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                                handleImageChange(idx, canvas.toDataURL('image/webp', 0.85));
+                                setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
                                 setIsCompressing(prev => ({ ...prev, [idx]: false }));
-                              } else {
-                                // Handle Image
-                                const img = new (window as any).Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  let width = img.width;
-                                  let height = img.height;
-
-                                  const MAX_SIZE = 2400;
-                                  if (width > height) {
-                                    if (width > MAX_SIZE) {
-                                      height *= MAX_SIZE / width;
-                                      width = MAX_SIZE;
-                                    }
-                                  } else {
-                                    if (height > MAX_SIZE) {
-                                      width *= MAX_SIZE / height;
-                                      height = MAX_SIZE;
-                                    }
-                                  }
-
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  if (ctx) ctx.imageSmoothingQuality = 'high';
-                                  ctx?.drawImage(img, 0, 0, width, height);
-
-                                  const compressedDataUrl = canvas.toDataURL('image/webp', 0.9);
-                                  handleImageChange(idx, compressedDataUrl);
-                                  setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
-                                  setIsCompressing(prev => ({ ...prev, [idx]: false }));
-                                };
-                                img.src = dataUrl;
-                              }
+                              };
+                              img.src = reader.result as string;
                             };
                             reader.readAsDataURL(file);
                           }
@@ -393,26 +411,26 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       )}
                     </label>
                   </div>
-                  <div className="flex justify-between items-center px-1">
-                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/20">
-                      {idx === 0 ? dict.new_product.main_cover : dict.new_product.angle.replace('{count}', (idx + 1).toString())}
-                    </span>
-                    {img && (
-                      <button
-                        type="button"
-                        onClick={() => handleImageChange(idx, "")}
-                        className="text-[8px] md:text-[9px] font-black uppercase text-red-400 hover:text-red-500 active:scale-90"
-                      >
-                        {dict.new_product.remove}
-                      </button>
-                    )}
+                  <div className="flex flex-col gap-1 px-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/20">
+                        {idx === 0 ? dict.new_product.main_cover : dict.new_product.angle.replace('{count}', (idx + 1).toString())}
+                      </span>
+                      {img && (
+                        <button type="button" onClick={() => handleImageChange(idx, "")} className="text-[8px] md:text-[9px] font-black uppercase text-red-400 hover:text-red-500 active:scale-90">
+                          {dict.new_product.remove}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[7px] text-charcoal/30 font-bold uppercase tracking-tighter">
+                      {idx % 2 === 0 ? dict.home.upload_rules.resolution_note : dict.home.upload_rules.video_note}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Customization & Details */}
           <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
               <CheckCircle2 className="w-5 md:w-6 h-5 md:h-6 text-accent" />
@@ -438,59 +456,27 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
               <AnimatePresence>
                 {formData.canPersonalize && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="col-span-full space-y-2 overflow-hidden"
-                  >
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-2 overflow-hidden">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
-                    <textarea
-                      value={formData.personalizationPrompt}
-                      onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })}
-                      placeholder={dict.new_product.personalization_prompt_placeholder}
-                      className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm"
-                    />
+                    <textarea value={formData.personalizationPrompt} onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })} placeholder={dict.new_product.personalization_prompt_placeholder} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
                   </motion.div>
                 )}
               </AnimatePresence>
 
               <div className="space-y-2">
                 <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
-                <input
-                  type="text"
-                  value={formData.badge}
-                  onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                  placeholder={dict.new_product.promo_badge_placeholder}
-                  className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
-                />
+                <input type="text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder={dict.new_product.promo_badge_placeholder} className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm" />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.initial_stock_label}</label>
-                <input
-                  type="number"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  placeholder={dict.new_product.initial_stock_placeholder}
-                  className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
-                />
+                <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm" />
               </div>
             </div>
           </section>
 
-          {error && (
-            <div className="p-5 md:p-6 bg-red-50 text-red-500 rounded-2xl md:rounded-[2rem] text-center font-bold animate-pulse text-sm">
-              {error}
-            </div>
-          )}
-
           <div className="flex justify-end pt-8">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="h-16 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200"
-            >
+            <button type="submit" disabled={isLoading} className="h-16 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200">
               {isLoading ? dict.new_product.listing_treasure : dict.new_product.list_product_btn}
               <Sparkles className="w-5 h-5" />
             </button>
@@ -500,4 +486,3 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     </main>
   );
 }
-

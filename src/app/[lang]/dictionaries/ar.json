@@ -399,6 +399,16 @@
     "category_desc_suffix": "الحرفية المصنوعة بشغف وتراث من قبل صناع محليين عالمياً.",
     "no_category_treasures": "لا توجد كنوز {name} بعد",
     "no_category_desc": "صناعنا المهرة مشغولون حالياً في ورشهم بصنع قطع جديدة. ارجع قريباً لرؤية أحدث الواصلين.",
+    "upload_rules": {
+      "image_size_error": "يجب أن تكون الصورة أقل من 5 ميجابايت",
+      "video_size_error": "يجب أن يكون الفيديو أقل من 20 ميجابايت",
+      "video_duration_error": "يجب أن يكون الفيديو 30 ثانية أو أقل",
+      "format_error": "صيغة الملف غير مدعومة",
+      "resolution_note": "الأمثل: 1080x1080 بكسل (بحد أقصى 5 ميجابايت)",
+      "video_note": "بحد أقصى 30 ثانية (20 ميجابايت)",
+      "no_logos_note": "ممنوع وجود شعارات أو علامات مائية",
+      "clean_media_note": "يجب أن تكون الوسائط نظيفة تماماً من أي نصوص أو شعارات"
+    },
     "artisans_tab": "الحرفيون",
     "artisans_registry": "سجل كبار الحرفيين",
     "artisans_meet_masters_prefix": "قابل",
@@ -407,7 +417,8 @@
     "artisan_made": "بأيدي حرفية",
     "artisan_onboarding": {
       "why_join_title": "لماذا تنضم إلى جيفتيزان الآن؟",
-      "founding_member_badge": "برنامج الأعضاء المؤسسين",
+      "founding_member_badge": "برنامج العضو المؤسس",
+      "onboarding_success": "أهلاً بك في الدائرة! جاري توجيهك إلى الاستوديو الخاص بك...",
       "benefits": {
         "commission_title": "0% عمولة",
         "commission_desc": "احتفظ بـ 100% من أرباحك. لا توجد رسوم إدراج أو رسوم خفية لأول 6 أشهر.",
@@ -442,7 +453,7 @@
     "shop_collection": "تسوق المجموعة كاملة",
     "personalize_treasure": "خصص كنزك",
     "personalization_desc": "اسمح للمشترين بإضافة نقوش أو تفاصيل مخصصة.",
-    "personalize_placeholder": "أضف رسالتك المخصصة أو طلبك...",
+    "personalize_placeholder": "أضد رسالتك المخصصة أو طلبك...",
     "visit_studio": "زيارة الاستوديو",
     "story_behind": "القصة وراء الكنز",
     "posting_discovery": "جاري نشر اكتشافك...",
@@ -1036,8 +1047,9 @@
     "promo_badge_placeholder": "مثال: الأكثر مبيعاً",
     "initial_stock_label": "المخزون الأولي",
     "initial_stock_placeholder": "مثال: 10",
-    "listing_treasure": "جاري إضافة الكنز...",
-    "list_product_btn": "عرض المنتج في المعرض",
+    "listing_treasure": "جاري إدراج الكنز...",
+    "list_product_btn": "إدراج المنتج في الجاليري",
+    "success_message": "تم إدراج كنزك بنجاح!",
     "validation_error": "يرجى ملء جميع الحقول المطلوبة (الاسم، السعر، وصورة واحدة على الأقل).",
     "product_removed": "تم حذف المنتج بنجاح"
   },

@@ -398,6 +398,16 @@
     "category_desc_suffix": "crafted with passion and heritage by local makers globally.",
     "no_category_treasures": "No {name} treasures yet",
     "no_category_desc": "Our master makers are currently busy in their workshops crafting new pieces. Check back soon for fresh arrivals.",
+    "upload_rules": {
+      "image_size_error": "Image must be less than 5MB",
+      "video_size_error": "Video must be less than 20MB",
+      "video_duration_error": "Videos must be 30 seconds or less",
+      "format_error": "Unsupported file format",
+      "resolution_note": "Optimal: 1080x1080px (Max 5MB)",
+      "video_note": "Max 30s (Max 20MB)",
+      "no_logos_note": "No logos or watermarks allowed",
+      "clean_media_note": "Media must be clean of any text or logos"
+    },
     "artisans_tab": "Artisans",
     "artisans_registry": "The Master Registry",
     "artisans_meet_masters_prefix": "Meet the",
@@ -407,6 +417,7 @@
     "artisan_onboarding": {
       "why_join_title": "Why Join Giftisan Now?",
       "founding_member_badge": "Founding Member Program",
+      "onboarding_success": "Welcome to the circle! Redirecting to your studio...",
       "benefits": {
         "commission_title": "0% Commission",
         "commission_desc": "Keep 100% of your earnings. No listing fees or hidden charges for your first 6 months.",
@@ -966,6 +977,7 @@
     "initial_stock_placeholder": "e.g. 10",
     "listing_treasure": "Listing Treasure...",
     "list_product_btn": "List Product in Gallery",
+    "success_message": "Your treasure has been listed successfully!",
     "validation_error": "Please fill in all required fields (Name, Price, and at least one Image).",
     "product_removed": "Product removed successfully"
   },

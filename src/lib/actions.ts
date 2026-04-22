@@ -537,6 +537,8 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         clientPhone: shippingData?.phone,
         clientEmail: shippingData?.email,
         orderNotes: shippingData?.orderNotes,
+        isGift: shippingData?.isGift || false,
+        giftMessage: shippingData?.giftMessage || null,
         items: {
           create: items.map(item => ({
             productId: item.id,

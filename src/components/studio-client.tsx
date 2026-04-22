@@ -904,6 +904,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             <p className="text-sm text-charcoal/60">
                               Ordered by <span className="font-bold text-primary">{item.order.user.name}</span> • {new Date(item.order.createdAt).toLocaleDateString()}
                             </p>
+                            {item.order.isGift && (
+                              <div className="bg-accent/10 border border-accent/20 px-3 py-1 rounded-full inline-flex items-center gap-2 mt-2">
+                                <Sparkles className="w-3 h-3 text-accent" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</span>
+                              </div>
+                            )}
+
                             {item.variant && (
                               <div className="bg-primary/5 border border-primary/10 p-3 rounded-xl inline-block mt-2 me-2">
                                 <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">{dict.edit_product.variant_name}:</p>
@@ -1365,6 +1372,20 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       </div>
                     </div>
                   </div>
+
+                  {selectedItem.order.isGift && (
+                    <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
+                      <div className="flex items-center gap-2 mb-2 md:mb-3">
+                        <Sparkles className="w-4 h-4 text-accent" />
+                        <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</h3>
+                      </div>
+                      {selectedItem.order.giftMessage && (
+                        <p className="text-xs md:text-sm italic text-charcoal/60 leading-relaxed">
+                          "{selectedItem.order.giftMessage}"
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {selectedItem.order.orderNotes && (
                     <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">

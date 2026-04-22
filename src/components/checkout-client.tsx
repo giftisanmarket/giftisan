@@ -28,7 +28,9 @@ export function CheckoutClient({ dict }: { dict: any }) {
     zip: "",
     country: "Egypt",
     phone: "",
-    email: session?.user?.email || ""
+    email: session?.user?.email || "",
+    isGift: false,
+    giftMessage: ""
   });
 
   // Smart-clear error state
@@ -282,6 +284,36 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         : "border-primary/20 focus:ring-accent/20 focus:border-accent"
                     )}
                   />
+                </div>
+
+                <div className="pt-8 space-y-6 border-t border-primary/5">
+                  <div className="flex items-center gap-4 group cursor-pointer" onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}>
+                    <div className={cn(
+                      "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
+                      shippingData.isGift ? "bg-accent border-accent shadow-lg shadow-accent/20" : "border-primary/20 bg-white"
+                    )}>
+                      {shippingData.isGift && <CheckCircle2 className="w-4 h-4 text-white" />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm md:text-base font-bold text-primary">{dict.checkout.mark_as_gift}</h4>
+                    </div>
+                  </div>
+
+                  {shippingData.isGift && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-2"
+                    >
+                      <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.gift_message_label}</label>
+                      <textarea
+                        placeholder={dict.checkout.gift_message_placeholder}
+                        value={shippingData.giftMessage}
+                        onChange={(e) => updateShippingField("giftMessage", e.target.value)}
+                        className="w-full h-32 p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base resize-none"
+                      />
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-primary/5">

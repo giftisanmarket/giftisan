@@ -238,6 +238,10 @@ model Order {
   clientEmail     String?
   orderNotes      String?   @db.Text
   
+  // Gift details
+  isGift      Boolean  @default(false)
+  giftMessage String?  @db.Text
+  
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   items       OrderItem[]
 

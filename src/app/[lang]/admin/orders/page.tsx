@@ -1,5 +1,5 @@
 import { getAllOrders } from "@/lib/actions";
-import { Package, Truck, CheckCircle2, Clock, User, ArrowRight } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../../dictionaries";
@@ -54,6 +54,12 @@ export default async function AdminOrdersPage({ params }: { params: Promise<{ la
                       <p className="text-[8px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </p>
+                      {order.isGift && (
+                        <div className="flex items-center gap-1.5 mt-2 px-2 py-0.5 bg-accent/10 border border-accent/20 rounded-full w-fit">
+                          <Sparkles className="w-2.5 h-2.5 text-accent" />
+                          <span className="text-[8px] font-black uppercase text-accent tracking-widest">{dict.checkout.mark_as_gift}</span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 md:px-8 py-4 md:py-6">

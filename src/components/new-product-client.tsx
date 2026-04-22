@@ -17,7 +17,9 @@ import {
   ChevronDown,
   Video,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  X,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
@@ -33,6 +35,278 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_VIDEO_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_VIDEO_DURATION = 30; // 30 seconds
 
+const VariationsSection = ({ dict, options, setOptions, variants, setVariants, basePrice }: any) => {
+  const [newOptionName, setNewOptionName] = useState("");
+
+  const addOption = () => {
+    if (newOptionName.trim()) {
+      setOptions([...options, { name: newOptionName.trim(), values: [] }]);
+      setNewOptionName("");
+    }
+  };
+
+  const addValue = (optIdx: number, val: string) => {
+    if (!val.trim()) return;
+    const newOptions = [...options];
+    if (!newOptions[optIdx].values.includes(val.trim())) {
+      newOptions[optIdx].values.push(val.trim());
+      setOptions(newOptions);
+    }
+  };
+
+  const removeValue = (optIdx: number, valIdx: number) => {
+    const newOptions = [...options];
+    newOptions[optIdx].values.splice(valIdx, 1);
+    setOptions(newOptions);
+  };
+
+  const generateVariants = () => {
+    const combos = options.reduce((acc: any[], opt: any) => {
+      if (opt.values.length === 0) return acc;
+      const nextCombos: any[] = [];
+      opt.values.forEach((val: string) => {
+        if (acc.length === 0) {
+          nextCombos.push({ [opt.name]: val });
+        } else {
+          acc.forEach((combo: any) => {
+            nextCombos.push({ ...combo, [opt.name]: val });
+          });
+        }
+      });
+      return nextCombos;
+    }, [] as any[]);
+
+    const newVariants = combos.map((combo: any) => {
+      const name = Object.values(combo).join(" / ");
+      return {
+        name,
+        price: basePrice,
+        stock: "0",
+        sku: "",
+        options: combo
+      };
+    });
+    setVariants(newVariants);
+  };
+
+  return (
+    <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
+      <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
+        <Tag className="w-6 h-6 text-accent" />
+        <h2 className="text-2xl font-heading font-bold text-primary">{dict.edit_product.variations}</h2>
+      </div>
+
+      <div className="space-y-6">
+        <div className="flex gap-4">
+          <input 
+            type="text" 
+            placeholder={dict.edit_product.option_name_placeholder}
+            value={newOptionName}
+            onChange={(e) => setNewOptionName(e.target.value)}
+            className="flex-1 h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:border-accent font-bold shadow-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addOption();
+              }
+            }}
+          />
+          <button 
+            type="button"
+            onClick={addOption}
+            className="px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95"
+          >
+            {dict.edit_product.add_option}
+          </button>
+        </div>
+        <p className="text-[10px] font-bold text-accent/60 uppercase tracking-widest px-2">{dict.edit_product.enter_to_add}</p>
+
+        <div className="space-y-4">
+          {options.map((opt: any, optIdx: number) => (
+            <div key={optIdx} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-xs font-black uppercase tracking-widest text-primary">{opt.name}</h4>
+                <button 
+                  type="button" 
+                  onClick={() => setOptions(options.filter((_: any, i: number) => i !== optIdx))}
+                  className="text-[10px] font-bold text-red-500 uppercase hover:text-red-600"
+                >
+                  {dict.common.remove}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {opt.values.map((val: string, valIdx: number) => (
+                  <span key={valIdx} className="px-3 py-1 bg-white border border-primary/10 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm animate-in zoom-in-50">
+                    {val}
+                    <button type="button" onClick={() => removeValue(optIdx, valIdx)} className="text-red-400 hover:text-red-500 transition-colors"><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+                <input 
+                  type="text" 
+                  placeholder={dict.edit_product.add_value}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addValue(optIdx, (e.target as HTMLInputElement).value);
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }}
+                  className="bg-transparent border-none focus:outline-none text-xs font-bold min-w-[120px] placeholder:text-primary/20"
+                />
+                <span className="text-[9px] font-bold text-accent/40 uppercase tracking-tighter">{dict.edit_product.enter_to_add}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {options.length > 0 && (
+          <div className="flex gap-4">
+            <button 
+              type="button"
+              onClick={generateVariants}
+              className="flex-1 h-14 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-2xl hover:bg-accent/5 transition-all active:scale-[0.99]"
+            >
+              {dict.edit_product.generate_variants}
+            </button>
+            {variants.length > 0 && (
+              <button 
+                type="button"
+                onClick={() => {
+                  const newVariants = variants.map((v: any) => ({ ...v, price: basePrice }));
+                  setVariants(newVariants);
+                  toast.success(dict.edit_product.prices_synced);
+                }}
+                className="px-8 h-14 bg-cream text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream/50 transition-all flex items-center gap-2"
+              >
+                <DollarSign className="w-5 h-5 text-accent" />
+                {dict.edit_product.apply_base_price}
+              </button>
+            )}
+          </div>
+        )}
+
+        {variants.length > 0 && (
+          <div className="overflow-x-auto rounded-[2rem] border border-primary/10 shadow-inner">
+            <table className="w-full text-start text-xs">
+              <thead className="bg-primary/5 text-primary/40 font-black uppercase tracking-tighter">
+                <tr>
+                  <th className="px-6 py-4 text-start w-12"></th>
+                  <th className="px-6 py-4 text-start">{dict.edit_product.variant_name}</th>
+                  <th className="px-6 py-4 text-start">{dict.new_product.price_label}</th>
+                  <th className="px-6 py-4 text-start">{dict.new_product.initial_stock_label}</th>
+                  <th className="px-6 py-4 text-start">{dict.edit_product.variant_badge}</th>
+                  <th className="px-6 py-4 text-start">{dict.edit_product.sku_label}</th>
+                  <th className="px-4 py-4 text-end"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-primary/5">
+                {variants.map((v: any, i: number) => (
+                  <tr key={i} className="hover:bg-cream/20 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="relative w-12 h-12 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center group/img">
+                        {v.image ? (
+                          <img src={v.image} className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="w-5 h-5 text-primary/20" />
+                        )}
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const newVariants = [...variants];
+                                newVariants[i].image = reader.result as string;
+                                setVariants(newVariants);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-bold text-primary">{v.name}</td>
+                    <td className="px-6 py-4">
+                      <input 
+                        type="number" 
+                        value={v.price}
+                        onChange={(e) => {
+                          const newVariants = [...variants];
+                          newVariants[i].price = e.target.value;
+                          setVariants(newVariants);
+                        }}
+                        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <input 
+                          type="number" 
+                          value={v.stock}
+                          onChange={(e) => {
+                            const newVariants = [...variants];
+                            newVariants[i].stock = e.target.value;
+                            setVariants(newVariants);
+                          }}
+                          className={cn(
+                            "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
+                            parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
+                          )}
+                        />
+                        {parseInt(v.stock) < 5 && (
+                          <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <input 
+                        type="text" 
+                        value={v.badge || ""}
+                        onChange={(e) => {
+                          const newVariants = [...variants];
+                          newVariants[i].badge = e.target.value;
+                          setVariants(newVariants);
+                        }}
+                        placeholder="e.g. Rare"
+                        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <input 
+                        type="text" 
+                        value={v.sku}
+                        onChange={(e) => {
+                          const newVariants = [...variants];
+                          newVariants[i].sku = e.target.value;
+                          setVariants(newVariants);
+                        }}
+                        placeholder={dict.checkout.optional}
+                        className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-end">
+                      <button 
+                        type="button"
+                        onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
+                        className="text-red-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +321,9 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     badge: "",
     stock: "1"
   });
+
+  const [options, setOptions] = useState<any[]>([]);
+  const [variants, setVariants] = useState<any[]>([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -139,6 +416,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     formData.images.forEach((img, i) => {
       if (img) form.append(`image-${i}`, img);
     });
+
+    form.append("variants", JSON.stringify(variants));
 
     const res = await createProduct(artisanId, form);
 
@@ -272,6 +551,14 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </div>
             </div>
           </section>
+          <VariationsSection 
+            options={options}
+            setOptions={setOptions}
+            variants={variants}
+            setVariants={setVariants}
+            basePrice={formData.price}
+            dict={dict}
+          />
 
           <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">

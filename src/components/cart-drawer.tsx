@@ -65,15 +65,23 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id + (item.personalization || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
+                  <div key={item.id + (item.personalization || "") + (item.variantId || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
                     <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
-                      <BespokeImage src={item.images[0]} alt={item.name} fill className="object-cover" />
+                      <BespokeImage src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0 flex-1">
                           <h3 className="font-heading font-bold text-sm md:text-base text-primary leading-tight line-clamp-2 md:line-clamp-1">{item.name}</h3>
-                          <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{item.artisan.name}</p>
+                          <div className="flex flex-wrap gap-1 items-center">
+                            <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{item.artisan.studioName || item.artisan.name}</p>
+                            {item.variantName && (
+                              <>
+                                <span className="text-[10px] text-primary/20">•</span>
+                                <span className="text-[9px] md:text-xs text-primary/60 font-bold">{item.variantName}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                         <div className="text-end shrink-0">
                           <p className="font-bold text-primary text-sm md:text-base">{dict.product.currency} {item.price * item.quantity}</p>
@@ -93,7 +101,7 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center border border-primary/5 rounded-full h-8 md:h-9 px-3 gap-3 md:gap-4 bg-white shadow-sm">
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization, item.variantId)}
                             className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
                             <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -102,14 +110,14 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                             {item.quantity}
                           </span>
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization, item.variantId)}
                             className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
                             <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </div>
                         <button 
-                          onClick={() => removeFromCart(item.id, item.personalization)}
+                          onClick={() => removeFromCart(item.id, item.personalization, item.variantId)}
                           className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95"
                         >
                           {dict.cart.remove}

@@ -6,13 +6,16 @@ import { Product } from '@/lib/data';
 interface CartItem extends Product {
   quantity: number;
   personalization?: string;
+  variantId?: string | null;
+  variantName?: string | null;
+  image?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, personalization?: string, skipOpen?: boolean) => void;
-  removeFromCart: (productId: string, personalization?: string) => void;
-  updateQuantity: (productId: string, quantity: number, personalization?: string) => void;
+  addToCart: (product: any, personalization?: string, skipOpen?: boolean) => void;
+  removeFromCart: (productId: string, personalization?: string, variantId?: string | null) => void;
+  updateQuantity: (productId: string, quantity: number, personalization?: string, variantId?: string | null) => void;
   totalItems: number;
   totalPrice: number;
   isCartOpen: boolean;
@@ -39,14 +42,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('giftisan-cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product, personalization?: string, skipOpen = false) => {
+  const addToCart = (product: any, personalization?: string, skipOpen = false) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
-        (item) => item.id === product.id && item.personalization === personalization
+        (item) => 
+          item.id === product.id && 
+          item.personalization === personalization && 
+          item.variantId === product.variantId
       );
       if (existingItem) {
         return prevCart.map((item) =>
-          item.id === product.id && item.personalization === personalization
+          item.id === product.id && 
+          item.personalization === personalization && 
+          item.variantId === product.variantId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -56,15 +64,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!skipOpen) setIsCartOpen(true);
   };
 
-  const removeFromCart = (productId: string, personalization?: string) => {
-    setCart((prevCart) => prevCart.filter((item) => !(item.id === productId && item.personalization === personalization)));
+  const removeFromCart = (productId: string, personalization?: string, variantId?: string | null) => {
+    setCart((prevCart) => prevCart.filter((item) => !(
+      item.id === productId && 
+      item.personalization === personalization && 
+      item.variantId === variantId
+    )));
   };
 
-  const updateQuantity = (productId: string, quantity: number, personalization?: string) => {
+  const updateQuantity = (productId: string, quantity: number, personalization?: string, variantId?: string | null) => {
     if (quantity < 1) return;
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === productId && item.personalization === personalization ? { ...item, quantity } : item
+        item.id === productId && 
+        item.personalization === personalization && 
+        item.variantId === variantId 
+          ? { ...item, quantity } 
+          : item
       )
     );
   };

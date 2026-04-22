@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { updateOrderItemStatus, deleteProduct } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
@@ -73,6 +73,28 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   const [carrier, setCarrier] = useState("");
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
+
+  // Variant Analytics
+  const topVariants = useMemo(() => {
+    return sales.reduce((acc: any[], sale: any) => {
+      if (!sale.variantId) return acc;
+      const existing = acc.find((v: any) => v.id === sale.variantId);
+      if (existing) {
+        existing.quantity += sale.quantity;
+        existing.revenue += sale.quantity * sale.price;
+      } else {
+        acc.push({
+          id: sale.variantId,
+          name: sale.variant?.name || dict.edit_product.standard_variant,
+          productName: sale.product.name,
+          quantity: sale.quantity,
+          revenue: sale.quantity * sale.price,
+          image: sale.variant?.image || sale.product.images[0]
+        });
+      }
+      return acc;
+    }, []).sort((a: any, b: any) => b.quantity - a.quantity).slice(0, 5);
+  }, [sales, dict.edit_product]);
 
   const handleDelete = async () => {
     if (!productToDelete || isAdminPreview) return;
@@ -583,6 +605,47 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     </div>
                   </div>
 
+                  {/* Variant Performance */}
+                  {topVariants.length > 0 && (
+                    <div className="bg-white p-10 rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest">
+                          <BarChart3 className="w-3 h-3" />
+                          {dict.edit_product.variant_performance}
+                        </div>
+                        <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Top 5 Favorites</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                        {topVariants.map((v: any, i: number) => (
+                          <div key={i} className="flex flex-col gap-4 group cursor-default">
+                            <div className="relative aspect-square rounded-2xl overflow-hidden border border-primary/5 shrink-0 transition-transform group-hover:scale-105">
+                              <BespokeImage src={v.image} alt="" fill className="object-cover" />
+                              <div className="absolute top-2 start-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[9px] font-black text-indigo-600 shadow-sm">
+                                #{i+1}
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <h5 className="text-xs font-bold text-primary truncate">{v.productName}</h5>
+                              <p className="text-[10px] font-medium text-charcoal/40 uppercase tracking-widest truncate">
+                                {v.name}
+                              </p>
+                              <div className="flex items-center gap-2 pt-1">
+                                <span className="text-[10px] font-black text-indigo-600">
+                                  {dict.edit_product.sold_count.replace('{count}', v.quantity.toString())}
+                                </span>
+                                <span className="text-[10px] text-charcoal/20">•</span>
+                                <span className="text-[10px] font-bold text-primary/40">
+                                  {dict.product.currency} {v.revenue.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                     <div className="flex justify-between items-center mb-10">
                       <div>
@@ -778,10 +841,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                   </div>
                                 )}
                                 <span className={cn(
-                                  "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap opacity-60",
-                                  (p.stock || 0) > 0 ? "bg-primary/5 text-primary/40" : "bg-red-50 text-red-400"
+                                  "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight whitespace-nowrap",
+                                  (p.stock || 0) <= 0 ? "bg-red-50 text-red-500 border border-red-100" : 
+                                  (p.stock || 0) < 5 ? "bg-orange-50 text-orange-600 border border-orange-100 animate-pulse" :
+                                  "bg-primary/5 text-primary/40 opacity-60"
                                 )}>
                                   {dict.studio.in_stock.replace('{count}', (p.stock || 0).toString())}
+                                  {(p.stock || 0) > 0 && (p.stock || 0) < 5 && ` — ${dict.edit_product.low_stock}`}
                                 </span>
                               </div>
                             </div>
@@ -838,6 +904,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             <p className="text-sm text-charcoal/60">
                               Ordered by <span className="font-bold text-primary">{item.order.user.name}</span> • {new Date(item.order.createdAt).toLocaleDateString()}
                             </p>
+                            {item.variant && (
+                              <div className="bg-primary/5 border border-primary/10 p-3 rounded-xl inline-block mt-2 me-2">
+                                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">{dict.edit_product.variant_name}:</p>
+                                <p className="text-sm font-bold text-accent">{item.variant.name}</p>
+                              </div>
+                            )}
+
                             {item.personalization && (
                               <div className="bg-accent/5 border border-accent/10 p-3 rounded-xl inline-block mt-2">
                                 <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{dict.studio.bespoke_request}:</p>
@@ -1255,6 +1328,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         <div className="min-w-0">
                           <p className="font-bold text-primary text-sm md:text-base leading-tight truncate md:whitespace-normal">{selectedItem.product.name}</p>
                           <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.studio.qty_label}: {selectedItem.quantity} • {dict.product.currency} {selectedItem.price}</p>
+                          {selectedItem.variant && (
+                            <p className="text-[10px] md:text-xs font-bold text-accent mt-1">
+                              {dict.edit_product.variant_name}: {selectedItem.variant.name}
+                            </p>
+                          )}
                           <p className="text-base md:text-lg font-heading font-bold mt-1 md:mt-2 text-accent">{dict.product.currency} {selectedItem.price.toFixed(2)}</p>
                         </div>
                       </div>
@@ -1491,7 +1569,19 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             </thead>
             <tbody>
               <tr className="border-b">
-                <td className="py-6 font-bold text-primary">{itemToPrint.product.name}</td>
+                <td className="py-6">
+                  <p className="font-bold text-primary">{itemToPrint.product.name}</p>
+                  {itemToPrint.variant && (
+                    <p className="text-[10px] font-bold text-accent mt-1">
+                      {dict.edit_product.variant_name}: {itemToPrint.variant.name}
+                    </p>
+                  )}
+                  {itemToPrint.personalization && (
+                    <p className="text-[10px] italic text-charcoal/40 mt-1">
+                      "{itemToPrint.personalization}"
+                    </p>
+                  )}
+                </td>
                 <td className="py-6 text-center font-bold text-charcoal/60">{itemToPrint.quantity}</td>
                 <td className="py-6 text-end font-bold text-primary">EGP {itemToPrint.price.toFixed(2)}</td>
               </tr>

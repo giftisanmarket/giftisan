@@ -96,6 +96,7 @@ export default async function StudioPage({
         include: {
           products: {
             include: {
+              variants: true,
               _count: {
                 select: {
                   reviews: true,

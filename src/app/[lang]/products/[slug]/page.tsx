@@ -111,6 +111,7 @@ export default async function ProductPage({ params }: Props) {
           user: true
         }
       },
+      variants: true,
       reviews: {
         include: {
           user: true
@@ -126,6 +127,7 @@ export default async function ProductPage({ params }: Props) {
       where: { slug: { equals: cleanSlug, mode: "insensitive" } },
       include: {
         artisan: { include: { user: true } },
+        variants: true,
         reviews: { include: { user: true } }
       }
     });
@@ -161,7 +163,8 @@ export default async function ProductPage({ params }: Props) {
     include: { 
       artisan: { 
         include: { user: true } 
-      } 
+      },
+      variants: true
     },
     take: 3
   });
@@ -169,6 +172,7 @@ export default async function ProductPage({ params }: Props) {
   // Sanitize data to prevent serialization crashes
   const sanitizedProduct = {
     ...product,
+    variants: product.variants || [],
     images: Array.isArray(product.images) ? product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
     artisan: {
       ...product.artisan,

@@ -27,9 +27,10 @@ export async function uploadImage(base64Data: string) {
         if (base64Image) {
           const buffer = Buffer.from(base64Image, 'base64');
           uploadPayload = await sharp(buffer)
-            .webp({ quality: 90 })
+            .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 80 })
             .toBuffer();
-          
+
           console.log(`[Image Optimization] Converted image to WebP (Buffer size: ${uploadPayload.length})`);
         }
       } catch (sharpError) {
@@ -57,7 +58,7 @@ async function processImage(imageSource: string | null | undefined): Promise<str
     // CRITICAL: If upload fails, DO NOT return the original base64 string
     // This prevents 1MB+ strings from bloating the database and crashing the frontend
     console.error("Failed to upload base64 image to Cloudinary, discarding to prevent DB bloat");
-    return null; 
+    return null;
   }
   return imageSource;
 }
@@ -197,12 +198,12 @@ export async function getUserInfo(userId: string) {
 
 export async function sendPasswordResetEmailAction(email: string) {
   try {
-    const user = await prisma.user.findUnique({ 
+    const user = await prisma.user.findUnique({
       where: { email },
       include: { accounts: true }
     });
     if (!user) return { error: "If an account exists with this email, we've sent a reset link." };
-    
+
     // Check if it's a social account (no password)
     if (user.accounts.length > 0 && !user.password) {
       return { error: "This account was created with Google. Please use Google Sign-in." };
@@ -224,24 +225,24 @@ export async function resetPasswordAction(token: string, password: any) {
   try {
     const existingToken = await prisma.passwordResetToken.findUnique({ where: { token } });
     if (!existingToken) return { error: "This link is invalid or has already been used." };
-    
+
     const hasExpired = new Date(existingToken.expires) < new Date();
     if (hasExpired) {
       await prisma.passwordResetToken.delete({ where: { id: existingToken.id } });
       return { error: "This link has expired. Please request a new one." };
     }
-    
+
     const user = await prisma.user.findUnique({ where: { email: existingToken.email } });
     if (!user) return { error: "Something went wrong. User not found." };
-    
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await prisma.user.update({
       where: { id: user.id },
       data: { password: hashedPassword }
     });
-    
+
     await prisma.passwordResetToken.delete({ where: { id: existingToken.id } });
-    
+
     return { success: true };
   } catch (error) {
     console.error("Reset password error:", error);
@@ -274,7 +275,8 @@ export async function searchProducts(query: string) {
             user: true
           }
         },
-        reviews: true
+        reviews: true,
+        variants: true
       },
       orderBy: {
         createdAt: "desc"
@@ -309,7 +311,8 @@ export async function getProductsByCategory(category: string) {
             user: true
           }
         },
-        reviews: true
+        reviews: true,
+        variants: true
       },
       orderBy: {
         createdAt: "desc"
@@ -339,7 +342,8 @@ export async function getFeaturedProducts() {
             user: true
           }
         },
-        reviews: true
+        reviews: true,
+        variants: true
       },
       orderBy: {
         createdAt: "desc"
@@ -367,7 +371,8 @@ export async function getAllProducts() {
             user: true
           }
         },
-        reviews: true
+        reviews: true,
+        variants: true
       },
       orderBy: {
         createdAt: "desc"
@@ -383,7 +388,7 @@ export async function getAllProducts() {
 export async function getProductBySlug(slug: string) {
   try {
     const product = await prisma.product.findUnique({
-      where: { 
+      where: {
         slug
       },
       include: {
@@ -392,6 +397,7 @@ export async function getProductBySlug(slug: string) {
             user: true
           }
         },
+        variants: true,
         reviews: {
           include: {
             user: true
@@ -495,15 +501,27 @@ export async function createOrder(userId: string, totalAmount: number, items: an
   try {
     // 🛡️ Final Inventory Guard: Verify stock for all items before processing
     for (const item of items) {
-      const product = await prisma.product.findUnique({
-        where: { id: item.id },
-        select: { stock: true, name: true }
-      });
+      if (item.variantId) {
+        const variant = await prisma.productVariant.findUnique({
+          where: { id: item.variantId },
+          select: { stock: true, name: true }
+        });
+        if (!variant || variant.stock < item.quantity) {
+          return {
+            error: `The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`
+          };
+        }
+      } else {
+        const product = await prisma.product.findUnique({
+          where: { id: item.id },
+          select: { stock: true, name: true }
+        });
 
-      if (!product || product.stock < item.quantity) {
-        return { 
-          error: `The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.` 
-        };
+        if (!product || product.stock < item.quantity) {
+          return {
+            error: `The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`
+          };
+        }
       }
     }
 
@@ -522,6 +540,7 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         items: {
           create: items.map(item => ({
             productId: item.id,
+            variantId: item.variantId || null,
             quantity: item.quantity,
             price: item.price,
             personalization: item.personalization
@@ -532,14 +551,25 @@ export async function createOrder(userId: string, totalAmount: number, items: an
 
     // Decrement stock for each item
     for (const item of items) {
-      await prisma.product.update({
-        where: { id: item.id },
-        data: {
-          stock: {
-            decrement: item.quantity
+      if (item.variantId) {
+        await prisma.productVariant.update({
+          where: { id: item.variantId },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
           }
-        }
-      });
+        });
+      } else {
+        await prisma.product.update({
+          where: { id: item.id },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
     }
 
     // Send notification emails to artisans (asynchronously)
@@ -630,6 +660,7 @@ export async function getArtisanData(userId: string) {
       include: {
         products: {
           include: {
+            variants: true,
             _count: {
               select: {
                 reviews: true,
@@ -682,10 +713,10 @@ export async function checkSlugAvailability(slug: string, currentUserId: string)
       where: { slug },
       select: { userId: true }
     });
-    
+
     // Available if no one has it OR the current user already has it
-    return { 
-      available: !existing || existing.userId === currentUserId 
+    return {
+      available: !existing || existing.userId === currentUserId
     };
   } catch (error) {
     console.error("Slug check error:", error);
@@ -696,10 +727,10 @@ export async function checkSlugAvailability(slug: string, currentUserId: string)
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
     // Only generate slug if it's not manually provided OR it's a new profile
-    const slug = data.slug 
+    const slug = data.slug
       ? slugify(data.slug)
-      : data.studioName 
-        ? `${slugify(data.studioName)}-${userId.slice(-4)}` 
+      : data.studioName
+        ? `${slugify(data.studioName)}-${userId.slice(-4)}`
         : null;
 
     const avatarUrl = await processImage(data.avatar);
@@ -737,13 +768,13 @@ export async function updateArtisanProfile(userId: string, data: any) {
         bannerImage: bannerUrl || null
       }
     });
-    
+
     revalidatePath("/studio");
     revalidatePath("/studio/settings");
     revalidatePath("/");
     revalidatePath("/artisans");
-    return { 
-      success: true, 
+    return {
+      success: true,
       artisan: {
         id: updated.id,
         studioName: updated.studioName,
@@ -751,7 +782,7 @@ export async function updateArtisanProfile(userId: string, data: any) {
         location: updated.location,
         avatar: updated.avatar,
         slug: updated.slug
-      } 
+      }
     };
   } catch (error: any) {
     console.error("Update artisan error:", error);
@@ -778,8 +809,8 @@ export async function createProduct(artisanId: string, formData: FormData) {
 
     const images: string[] = [];
     for (let i = 0; i < 10; i++) {
-        const img = formData.get(`image-${i}`);
-        if (img) images.push(img as string);
+      const img = formData.get(`image-${i}`);
+      if (img) images.push(img as string);
     }
 
     const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
@@ -801,7 +832,18 @@ export async function createProduct(artisanId: string, formData: FormData) {
         personalizationPrompt: data.personalizationPrompt || null,
         badge: data.badge,
         stock: parseInt(data.stock) || 0,
-        status: "PENDING"
+        status: "PENDING",
+        variants: {
+          create: JSON.parse(formData.get("variants") as string || "[]").map((v: any) => ({
+            name: v.name,
+            price: parseFloat(v.price) || 0,
+            stock: parseInt(v.stock) || 0,
+            sku: v.sku || null,
+            options: v.options || null,
+            image: v.image || null,
+            badge: v.badge || null
+          }))
+        }
       }
     });
 
@@ -831,7 +873,8 @@ export async function getArtisanSales(artisanId: string) {
             user: true
           }
         },
-        product: true
+        product: true,
+        variant: true
       },
       orderBy: {
         order: {
@@ -903,7 +946,7 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
         updatedItem.product.slug || undefined
       ).catch(err => console.error("Failed to send order status email:", err));
     }
-    
+
     revalidatePath("/studio");
     revalidatePath("/profile");
     return { success: true };
@@ -997,8 +1040,8 @@ export async function updateProduct(productId: string, formData: FormData) {
 
     const images: string[] = [];
     for (let i = 0; i < 10; i++) {
-        const img = formData.get(`image-${i}`);
-        if (img) images.push(img as string);
+      const img = formData.get(`image-${i}`);
+      if (img) images.push(img as string);
     }
 
     const uploadedImages = await Promise.all(
@@ -1023,6 +1066,28 @@ export async function updateProduct(productId: string, formData: FormData) {
       }
     });
 
+    // Update variants (Sync approach: delete existing and recreate)
+    const variantsData = JSON.parse(formData.get("variants") as string || "[]");
+    
+    await prisma.productVariant.deleteMany({ 
+      where: { productId } 
+    });
+
+    if (variantsData.length > 0) {
+      await prisma.productVariant.createMany({
+        data: variantsData.map((v: any) => ({
+          productId,
+          name: v.name,
+          price: parseFloat(v.price) || 0,
+          stock: parseInt(v.stock) || 0,
+          sku: v.sku || null,
+          options: v.options || null,
+          image: v.image || null,
+          badge: v.badge || null
+        }))
+      });
+    }
+
     revalidatePath(`/products/${productId}`);
     revalidatePath("/studio");
     revalidatePath("/");
@@ -1041,7 +1106,7 @@ export async function deleteProduct(productId: string) {
     await prisma.product.delete({
       where: { id: productId }
     });
-    
+
     revalidatePath("/studio");
     revalidatePath("/");
     revalidatePath("/artisans");
@@ -1100,7 +1165,7 @@ export async function addReview(data: { productId: string, userId: string, ratin
         user: true
       }
     });
-    
+
     revalidatePath(`/products/${data.productId}`);
     return { success: true, review };
   } catch (error: any) {
@@ -1223,7 +1288,7 @@ export async function updateProductStatus(productId: string, status: "PENDING" |
 
     await prisma.product.update({
       where: { id: productId },
-      data: { 
+      data: {
         status,
         rejectionReason: status === "REJECTED" ? reason : null
       }
@@ -1332,8 +1397,8 @@ export async function sendMessage(senderId: string, receiverId: string, content:
 
       if (hasUnreadFromSender === 0) {
         sendMessageNotification(
-          message.receiver.email, 
-          message.receiver.name || "Artisan", 
+          message.receiver.email,
+          message.receiver.name || "Artisan",
           message.sender.name || "A customer"
         ).catch(err => console.error("Failed to send message notification:", err));
       }
@@ -1405,7 +1470,7 @@ export async function updateUser(userId: string, formData: FormData) {
       // Check if email is already taken
       const existing = await prisma.user.findUnique({ where: { email } });
       if (existing) return { error: "Email is already in use by another account." };
-      
+
       data.email = email;
       data.emailVerified = null;
     }
@@ -1420,8 +1485,8 @@ export async function updateUser(userId: string, formData: FormData) {
       await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       emailChanged,
       user: {
         id: user.id,
@@ -1429,7 +1494,7 @@ export async function updateUser(userId: string, formData: FormData) {
         email: user.email,
         image: user.image,
         emailVerified: user.emailVerified
-      } 
+      }
     };
   } catch (error) {
     console.error("Update user error:", error);
@@ -1481,7 +1546,7 @@ export async function checkFollowStatus(artisanId: string, userId: string) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { 
+      include: {
         following: {
           where: { id: artisanId }
         }

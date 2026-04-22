@@ -30,7 +30,67 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [personalizationError, setPersonalizationError] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const personalizationRef = useRef<HTMLTextAreaElement>(null);
+
+  // Extract unique options from variants
+  const options = product.variants?.reduce((acc: any[], v: any) => {
+    if (v.options) {
+      // Safety: Handle both object and stringified JSON
+      const vOptions = typeof v.options === 'string' ? JSON.parse(v.options) : v.options;
+      Object.entries(vOptions).forEach(([name, value]) => {
+        const existing = acc.find(o => o.name === name);
+        if (existing) {
+          if (!existing.values.includes(value)) existing.values.push(value as string);
+        } else {
+          acc.push({ name, values: [value as string] });
+        }
+      });
+    }
+    return acc;
+  }, []) || [];
+
+  useEffect(() => {
+    if (options.length > 0 && Object.keys(selectedOptions).length === 0) {
+      const initial: Record<string, string> = {};
+      options.forEach((opt: any) => {
+        initial[opt.name] = opt.values[0];
+      });
+      setSelectedOptions(initial);
+    }
+  }, [options]);
+
+  useEffect(() => {
+    if (product.variants?.length > 0) {
+      const match = product.variants.find((v: any) => {
+        const vOptions = typeof v.options === 'string' ? JSON.parse(v.options) : v.options;
+        return Object.entries(selectedOptions).every(([name, val]) => vOptions[name] === val);
+      });
+      setSelectedVariant(match || null);
+    }
+  }, [selectedOptions, product.variants]);
+
+  const isOptionValueAvailable = (optionName: string, value: string) => {
+    if (!product.variants || product.variants.length === 0) return true;
+    
+    // Check if there is any variant that matches the currently selected options 
+    // PLUS the value we are checking for this specific option
+    return product.variants.some((v: any) => {
+      const vOptions = typeof v.options === 'string' ? JSON.parse(v.options) : v.options;
+      
+      // We only care about matching the other selected options
+      const matchesOtherSelections = Object.entries(selectedOptions).every(([name, val]) => {
+        if (name === optionName) return true; // Skip the one we are checking
+        return vOptions[name] === val;
+      });
+
+      return matchesOtherSelections && vOptions[optionName] === value && v.stock > 0;
+    });
+  };
+
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const displayStock = selectedVariant ? selectedVariant.stock : product.stock;
 
   useEffect(() => {
     if (product.id) {
@@ -178,7 +238,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
           <div className="space-y-6 min-w-0">
             <div className="relative group">
               <motion.div
-                key={selectedImage}
+                key={selectedVariant?.image || selectedImage}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -189,9 +249,9 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 }}
                 className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-transparent cursor-zoom-in"
               >
-                {isVideo(product.images[selectedImage]) ? (
+                {isVideo(selectedVariant?.image || product.images[selectedImage]) ? (
                   <video
-                    src={product.images[selectedImage]}
+                    src={selectedVariant?.image || product.images[selectedImage]}
                     className="w-full h-full object-contain"
                     autoPlay
                     loop
@@ -200,7 +260,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   />
                 ) : (
                   <BespokeImage
-                    src={product.images[selectedImage]}
+                    src={selectedVariant?.image || product.images[selectedImage]}
                     alt={product.name}
                     fill
                     className="object-contain transition-transform duration-700 group-hover:scale-105"
@@ -300,23 +360,79 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </div>
             </div>
 
+            {/* Variant Badge Display */}
+            <AnimatePresence mode="wait">
+              {selectedVariant?.badge && (
+                <motion.div
+                  key={selectedVariant.badge}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] font-black uppercase tracking-widest mb-4 w-fit"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  {selectedVariant.badge}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="flex items-center justify-between mb-8">
               <p className="text-3xl font-heading font-bold text-primary">
-                {dict.product.currency} {product.price}.00
+                {dict.product.currency} {displayPrice}.00
               </p>
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-2 h-2 rounded-full",
-                  (product.stock || 0) > 5 ? "bg-green-500" : (product.stock || 0) > 0 ? "bg-yellow-500" : "bg-red-500"
+                  (displayStock || 0) > 5 ? "bg-green-500" : (displayStock || 0) > 0 ? "bg-orange-500" : "bg-red-500"
                 )} />
                 <span className={cn(
                   "text-xs font-black uppercase tracking-widest",
-                  (product.stock || 0) > 0 ? "text-primary/60" : "text-red-500"
+                  (displayStock || 0) > 0 ? "text-primary/60" : "text-red-500"
                 )}>
-                  {(product.stock || 0) > 0 ? dict.product.in_stock.replace('{count}', product.stock.toString()) : dict.product.sold_out}
+                  {(displayStock || 0) > 0 ? (
+                    (displayStock || 0) < 5 
+                      ? `${dict.product.in_stock.replace('{count}', displayStock.toString())} — ${dict.edit_product.low_stock_alert}` 
+                      : dict.product.in_stock.replace('{count}', displayStock.toString())
+                  ) : dict.product.sold_out}
                 </span>
               </div>
             </div>
+
+            {/* Options Selection */}
+            {options.length > 0 && (
+              <div className="space-y-6 mb-8">
+                {options.map((opt: any, i: number) => (
+                  <div key={i} className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary/40">
+                      {opt.name}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {opt.values.map((val: string, j: number) => (
+                        <button
+                          key={j}
+                          onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.name]: val }))}
+                          disabled={!isOptionValueAvailable(opt.name, val)}
+                          className={cn(
+                            "px-4 py-2 rounded-xl text-xs font-bold border transition-all relative overflow-hidden",
+                            selectedOptions[opt.name] === val 
+                              ? "bg-primary text-white border-primary shadow-lg shadow-primary/10" 
+                              : "bg-white text-primary border-primary/10 hover:border-accent",
+                            !isOptionValueAvailable(opt.name, val) && "opacity-20 cursor-not-allowed pointer-events-auto grayscale"
+                          )}
+                        >
+                          {val}
+                          {!isOptionValueAvailable(opt.name, val) && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-full h-[1px] bg-primary/20 -rotate-45" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 ps-6 py-2 break-words">
               {product.description}
@@ -333,7 +449,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">{dict.product.handcrafted_by || "Handcrafted by"}</p>
+                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">{dict.product.handcrafted_by}</p>
                     {product.artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent" />}
                   </div>
                   <h3 className="text-lg md:text-xl font-heading font-bold text-primary truncate">{product.artisan.studioName || product.artisan.user.name}</h3>
@@ -395,17 +511,30 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
                       return;
                     }
-                    addToCart(product, personalization.trim());
+                    if (options.length > 0 && !selectedVariant) {
+                       toast.error("Please select a variation first");
+                       return;
+                    }
+                    
+                    const productToCart = {
+                      ...product,
+                      price: displayPrice,
+                      image: selectedVariant?.image || product.images[0],
+                      stock: displayStock,
+                      variantId: selectedVariant?.id || null,
+                      variantName: selectedVariant?.name || null
+                    };
+                    addToCart(productToCart, personalization.trim());
                   }}
-                  disabled={(product.stock || 0) <= 0}
+                  disabled={(displayStock || 0) <= 0}
                   className={cn(
                     "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
-                    (product.stock || 0) > 0 
+                    (displayStock || 0) > 0 
                       ? "hover:bg-primary-light shadow-primary/20" 
                       : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
                   )}
                 >
-                  {(product.stock || 0) > 0 ? `${dict.product.add_to_cart} — ${dict.product.currency} ${product.price}` : dict.product.sold_out}
+                  {(displayStock || 0) > 0 ? `${dict.product.add_to_cart} — ${dict.product.currency} ${displayPrice}` : dict.product.sold_out}
                 </button>
                 <button
                   onClick={() => toggleFavorite(product)}
@@ -427,18 +556,31 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
                     return;
                   }
-                  addToCart(product, personalization.trim(), true);
+                  if (options.length > 0 && !selectedVariant) {
+                    toast.error("Please select a variation first");
+                    return;
+                  }
+
+                  const productToCart = {
+                    ...product,
+                    price: displayPrice,
+                    image: selectedVariant?.image || product.images[0],
+                    stock: displayStock,
+                    variantId: selectedVariant?.id || null,
+                    variantName: selectedVariant?.name || null
+                  };
+                  addToCart(productToCart, personalization.trim(), true);
                   window.location.href = "/checkout";
                 }}
-                disabled={(product.stock || 0) <= 0}
+                disabled={(displayStock || 0) <= 0}
                 className={cn(
                   "w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95",
-                  (product.stock || 0) > 0 
+                  (displayStock || 0) > 0 
                   ? "hover:bg-primary/5 shadow-xl shadow-primary/5" 
                   : "opacity-30 grayscale !cursor-not-allowed pointer-events-auto"
                 )}
               >
-                {(product.stock || 0) > 0 ? dict.product.buy_now : dict.product.sold_out}
+                {(displayStock || 0) > 0 ? dict.product.buy_now : dict.product.sold_out}
               </button>
             </div>
 

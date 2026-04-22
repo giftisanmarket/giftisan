@@ -124,10 +124,11 @@ export function CheckoutClient({ dict }: { dict: any }) {
                   <div key={item.id + (item.personalization || "")} className="animate-in slide-in-from-end-4 duration-300">
                     <div className="flex gap-4 items-center">
                       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 shadow-lg shadow-black/20">
-                        <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
+                        <Image src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-heading font-bold text-xs md:text-sm line-clamp-1">{item.name}</h4>
+                        {item.variantName && <p className="text-accent-light text-[8px] md:text-[10px] font-bold uppercase tracking-widest leading-none mb-1">{item.variantName}</p>}
                         <p className="text-white/60 text-[9px] md:text-xs font-medium uppercase tracking-widest">{dict.checkout.qty}: {item.quantity}</p>
                       </div>
                       <p className="font-bold text-sm md:text-base whitespace-nowrap">EGP {item.price * item.quantity}</p>

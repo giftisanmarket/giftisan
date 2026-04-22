@@ -5,6 +5,7 @@ export interface Product {
   description: string;
   artisan: {
     name: string;
+    studioName?: string;
     location: string;
     avatar: string;
     bio: string;

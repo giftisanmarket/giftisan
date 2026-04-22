@@ -33,7 +33,7 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang as any);
-  
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -52,9 +52,9 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
       }
     ]
   };
-  
+
   const categoryNames = [
-    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
+    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles",
     "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
     "Glasswork", "Basketry", "Fashion",
     "Wedding", "Personalized", "Art & Collectibles"
@@ -64,10 +64,10 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
   const categories = await Promise.all(
     categoryNames.map(async (name) => {
       const count = await prisma.product.count({
-        where: { 
-          category: { 
-            equals: name, 
-            mode: 'insensitive' 
+        where: {
+          category: {
+            equals: name,
+            mode: 'insensitive'
           },
           status: { in: ["APPROVED", "PENDING"] },
           artisan: {

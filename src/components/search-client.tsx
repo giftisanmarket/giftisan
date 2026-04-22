@@ -118,7 +118,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
             <p className="text-charcoal/40 text-xs md:text-base leading-relaxed">{dict.home.no_treasures_desc}</p>
           </div>
           <div className="flex flex-wrap gap-2 justify-center pt-4">
-            {["Vase", "Jewelry", "Handmade", "Wedding"].map(tag => (
+            {Object.values(dict.common.trending_tags).slice(0, 4).map((tag: any) => (
               <Link
                 key={tag}
                 href={`/search?q=${tag}`}

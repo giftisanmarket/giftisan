@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2 } from "lucide-react";
+import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function BecomeArtisanClient({ dict }: { dict: any }) {
@@ -68,6 +68,47 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     );
   }
 
+  const benefits = [
+    {
+      title: dict.home.artisan_onboarding?.benefits?.commission_title || "0% Commission",
+      desc: dict.home.artisan_onboarding?.benefits?.commission_desc || "Keep 100% of your earnings for 6 months.",
+      icon: <Rocket className="w-6 h-6 text-accent" />,
+    },
+    {
+      title: dict.home.artisan_onboarding?.benefits?.photography_title || "Pro Photography",
+      desc: dict.home.artisan_onboarding?.benefits?.photography_desc || "Free professional product shoots for your gallery.",
+      icon: <Camera className="w-6 h-6 text-accent" />,
+    },
+    {
+      title: dict.home.artisan_onboarding?.benefits?.marketing_title || "Priority Spotlight",
+      desc: dict.home.artisan_onboarding?.benefits?.marketing_desc || "Permanent priority in our search results and homepage.",
+      icon: <Sparkles className="w-6 h-6 text-accent" />,
+    },
+    {
+      title: dict.home.artisan_onboarding?.benefits?.badge_title || "Founding Badge",
+      desc: dict.home.artisan_onboarding?.benefits?.badge_desc || "A permanent mark of excellence on your studio profile.",
+      icon: <BadgeCheck className="w-6 h-6 text-accent" />,
+    },
+  ];
+
+  const steps = [
+    {
+      title: dict.home.artisan_onboarding?.steps?.step_1_title || "Apply",
+      desc: dict.home.artisan_onboarding?.steps?.step_1_desc || "Tell us your story.",
+      icon: <Users className="w-5 h-5" />,
+    },
+    {
+      title: dict.home.artisan_onboarding?.steps?.step_2_title || "Curate",
+      desc: dict.home.artisan_onboarding?.steps?.step_2_desc || "Upload your treasures.",
+      icon: <Store className="w-5 h-5" />,
+    },
+    {
+      title: dict.home.artisan_onboarding?.steps?.step_3_title || "Sell",
+      desc: dict.home.artisan_onboarding?.steps?.step_3_desc || "Connect with collectors.",
+      icon: <Rocket className="w-5 h-5" />,
+    },
+  ];
+
   if (!session) {
     return (
       <main className="min-h-screen bg-cream">
@@ -128,15 +169,15 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
       <Navbar dict={dict} />
 
-      <div className="container mx-auto px-4 pt-24 md:pt-32 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 md:pt-32 max-w-6xl">
         <div className="text-center mb-10 md:mb-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6"
           >
-            <Sparkles className="w-3 h-3" />
-            {dict.home.empowering_craftsmanship}
+            <BadgeCheck className="w-3 h-3" />
+            {dict.home.artisan_onboarding?.founding_member_badge || "Founding Member Program"}
           </motion.div>
           <h1 className="text-4xl md:text-6xl font-heading font-bold text-primary mb-4 md:mb-6 leading-[1.1]">
             {(dict.home.become_artisan_title_base || dict.home.become_artisan_title?.split(' ')[0])}{" "}
@@ -149,12 +190,63 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-12">
-          {/* Form */}
-          <div className="lg:col-span-12">
-            <motion.form
+        {/* Benefits Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          {benefits.map((benefit, i) => (
+            <motion.div
+              key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 group hover:border-accent/30 transition-all"
+            >
+              <div className="w-14 h-14 bg-accent/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                {benefit.icon}
+              </div>
+              <h3 className="text-xl font-heading font-bold text-primary mb-3">{benefit.title}</h3>
+              <p className="text-charcoal/40 text-sm leading-relaxed">{benefit.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-16 items-start">
+          {/* How it Works */}
+          <div className="lg:col-span-5 space-y-12">
+            <div>
+              <h2 className="text-3xl font-heading font-bold text-primary mb-8">
+                {dict.home.artisan_onboarding?.how_it_works_title || "How it Works"}
+              </h2>
+              <div className="space-y-8">
+                {steps.map((step, i) => (
+                  <div key={i} className="flex gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm">
+                      {i + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-primary mb-1">{step.title}</h4>
+                      <p className="text-charcoal/40 text-sm">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-8 bg-primary rounded-[2rem] text-white space-y-4">
+              <h4 className="font-heading font-bold text-xl">Need Help?</h4>
+              <p className="text-white/60 text-sm">
+                Our curation team is here to help you set up your studio and shoot your first products.
+              </p>
+              <a href="mailto:support@giftisan.com" className="inline-flex items-center gap-2 text-accent font-bold hover:gap-3 transition-all">
+                Contact Curation <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="lg:col-span-7">
+            <motion.form
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               onSubmit={handleSubmit}
               className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8"
             >
@@ -212,7 +304,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
                   disabled={isLoading}
                   className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base md:text-lg active:scale-95 group"
                 >
-                  {isLoading ? dict.home.launch_loading : dict.home.launch_button}
+                  {isLoading ? dict.home.launch_loading : (dict.home.launch_button || "Open Your Studio")}
                   <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                 </button>
                 <div className="flex items-center gap-2 text-[10px] md:text-xs text-charcoal/40 font-medium">

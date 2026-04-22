@@ -403,7 +403,30 @@
     "artisans_meet_masters_prefix": "Meet the",
     "artisans_meet_masters_suffix": "Masters",
     "artisans_desc": "Discover the independent studios and skilled artisans behind the world's most unique handcrafted treasures.",
-    "artisan_made": "Artisan Made"
+    "artisan_made": "Artisan Made",
+    "artisan_onboarding": {
+      "why_join_title": "Why Join Giftisan Now?",
+      "founding_member_badge": "Founding Member Program",
+      "benefits": {
+        "commission_title": "0% Commission",
+        "commission_desc": "Keep 100% of your earnings. No listing fees or hidden charges for your first 6 months.",
+        "photography_title": "Pro Photography",
+        "photography_desc": "Get free professional product shoots to make your treasures shine (Available in Cairo/Giza).",
+        "marketing_title": "Priority Spotlight",
+        "marketing_desc": "Early artisans get permanent priority in search results and homepage features.",
+        "badge_title": "Founding Badge",
+        "badge_desc": "A permanent 'Founding Artisan' seal of trust on your public studio profile."
+      },
+      "how_it_works_title": "Three Steps to Launch",
+      "steps": {
+        "step_1_title": "Apply in Minutes",
+        "step_1_desc": "Tell us about your craft and your studio's story.",
+        "step_2_title": "Curate Your Gallery",
+        "step_2_desc": "Upload your best handcrafted treasures to your studio.",
+        "step_3_title": "Connect & Sell",
+        "step_3_desc": "Collectors find you directly. We handle the discovery, you handle the art."
+      }
+    }
   },
   "product": {
     "currency": "EGP",

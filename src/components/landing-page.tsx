@@ -466,13 +466,13 @@ export default function LandingPage({ dict }: { dict: any }) {
         </div>
         <div className="max-w-7xl mx-auto mt-32 pt-10 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <p className="text-[10px] md:text-xs font-black text-primary/30 uppercase tracking-[0.4em] text-center md:text-start">© 2026 Giftisan. {dict.home.every_gift_story}</p>
-          <div className="flex flex-wrap justify-center md:justify-end gap-8">
-            <Link href="/contact" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.support}</Link>
-            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.terms}</Link>
-            <Link href="/shipping" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.shipping?.title_base || 'Shipping'}</Link>
-            <Link href="/refund" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.refund?.title_base || 'Refund'}</Link>
-            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.privacy}</Link>
-            <Link href="/become-artisan" className="text-[10px] font-bold text-primary/30 uppercase tracking-[0.4em] hover:text-primary transition-colors">{dict.common.open_studio.split(' ')[0]}</Link>
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-4 md:gap-x-10 gap-y-3">
+            <Link href="/contact" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.support}</Link>
+            <Link href="/terms" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.terms}</Link>
+            <Link href="/shipping" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.shipping?.title_base || 'Shipping'}</Link>
+            <Link href="/refund" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.refund?.title_base || 'Refund'}</Link>
+            <Link href="/privacy" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.privacy}</Link>
+            <Link href="/become-artisan" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.open_studio.split(' ')[0]}</Link>
           </div>
         </div>
       </footer>

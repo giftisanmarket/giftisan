@@ -334,11 +334,11 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           <p className="text-charcoal/40 text-sm mb-4">
             © 2026 Giftisan. {dict.home.proudly_handcrafted}. {dict.home.rights_reserved}
           </p>
-          <div className="flex justify-center gap-6">
-            <Link href="/terms" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.terms || 'Terms'}</Link>
-            <Link href="/shipping" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.shipping || 'Shipping'}</Link>
-            <Link href="/refund" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.refund || 'Refund'}</Link>
-            <Link href="/privacy" className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.privacy || 'Privacy'}</Link>
+          <div className="flex flex-wrap justify-center items-center gap-x-4 md:gap-x-8 gap-y-3">
+            <Link href="/terms" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.terms || 'Terms'}</Link>
+            <Link href="/shipping" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.shipping || 'Shipping'}</Link>
+            <Link href="/refund" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.refund || 'Refund'}</Link>
+            <Link href="/privacy" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.privacy || 'Privacy'}</Link>
           </div>
         </div>
       </footer>

@@ -27,7 +27,7 @@ import { SITE_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   const dict = await getDictionary(lang as any);
-  
+
   return {
     metadataBase: new URL(SITE_URL),
     title: {
@@ -112,16 +112,22 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": SITE_NAME,
+              "description": "Giftisan is the premier Egyptian marketplace for authentic, handcrafted gifts, connecting independent artisans with collectors. Specializing in traditional Egyptian crafts, bespoke jewelry, and unique heritage treasures.",
               "url": SITE_URL,
               "logo": `${SITE_URL}/icon.png`,
+              "foundingDate": "2024",
+              "knowsAbout": ["Egyptian Handicrafts", "Artisanal Gifts", "Handmade Jewelry", "Egyptian Heritage"],
               "sameAs": [
                 "https://instagram.com/giftisan.eg",
-                "https://tiktok.com/@giftisan"
+                "https://tiktok.com/@giftisan.eg",
+                "https://facebook.com/giftisan.eg"
               ],
               "contactPoint": {
                 "@type": "ContactPoint",
-                "email": "hello@giftisan.shop",
-                "contactType": "customer service"
+                "email": "support@giftisan.shop",
+                "contactType": "customer support",
+                "areaServed": "EG",
+                "availableLanguage": ["English", "Arabic"]
               }
             })
           }}
@@ -139,6 +145,49 @@ export default async function RootLayout({
                 "target": `${SITE_URL}/${lang}/search?q={search_term_string}`,
                 "query-input": "required name=search_term_string"
               }
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": dict.faq.q1,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": dict.faq.a1
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": dict.faq.q2,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": dict.faq.a2
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": dict.faq.q3,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": dict.faq.a3
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": dict.faq.q4,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": dict.faq.a4
+                  }
+                }
+              ]
             })
           }}
         />

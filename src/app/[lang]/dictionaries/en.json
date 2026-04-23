@@ -1141,5 +1141,21 @@
     "call_us": "Call Us Directly",
     "location_label": "Our Location",
     "location_value": "Cairo, Egypt"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "What is Giftisan?",
+    "a1": "Giftisan is Egypt's premiere marketplace for unique, handcrafted gifts. We connect independent Egyptian artisans with collectors who appreciate authentic, soulful craftsmanship.",
+    "q2": "Where do the products come from?",
+    "a2": "Every piece on Giftisan is handmade by local independent artisans across Egypt, from Cairo and Alexandria to Fayoum and Upper Egypt.",
+    "q3": "Does Giftisan ship nationwide?",
+    "a3": "Yes, we facilitate shipping to all governorates within Egypt, ensuring your handcrafted treasures reach you safely.",
+    "q4": "How can I join as an artisan?",
+    "a4": "Independent Egyptian makers can apply to open their own studio through our Artisan Portal. We look for authentic, high-quality handcrafted work."
+  },
+  "brand_story": {
+    "title": "Our Heart & Soul",
+    "subtitle": "Connecting the threads of Egyptian heritage with modern collectors.",
+    "description": "Giftisan was born out of a deep respect for the master makers of Egypt. Our mission is to provide a premiere digital home for the independent artisans who keep our culture alive. Every treasure found here is a testament to the skill, patience, and passion of an Egyptian maker. When you shop on Giftisan, you aren't just buying a product—you are supporting a dream and preserving a legacy."
   }
 }

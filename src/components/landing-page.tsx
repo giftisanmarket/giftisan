@@ -388,6 +388,25 @@ export default function LandingPage({ dict }: { dict: any }) {
         </div>
       </section>
 
+      {/* Brand Story Section - GEO Optimized */}
+      <section className="relative z-10 py-24 md:py-40 px-6 bg-white overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center">
+          <FadeInView>
+            <h2 className="text-4xl md:text-6xl font-heading font-black text-primary mb-8 tracking-tight">
+              {dict.brand_story.title}
+            </h2>
+            <p className="text-accent italic serif text-xl md:text-2xl mb-12">
+              &quot;{dict.brand_story.subtitle}&quot;
+            </p>
+            <div className="h-px w-24 bg-primary/10 mx-auto mb-12" />
+            <p className="text-lg md:text-2xl text-primary/60 font-medium leading-relaxed max-w-3xl mx-auto">
+              {dict.brand_story.description}
+            </p>
+          </FadeInView>
+        </div>
+        <div className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-full bg-[radial-gradient(circle,rgba(var(--primary-rgb),0.02)_1px,transparent_1px)] bg-[size:60px_60px] -z-10" />
+      </section>
+
       {/* Footer */}
       <footer className="relative z-10 py-24 md:py-40 px-6 bg-cream border-t border-primary/5">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-20">

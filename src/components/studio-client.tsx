@@ -232,12 +232,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-8 md:p-12 bg-amber-50 border-2 border-amber-200 rounded-[2.5rem] flex flex-col lg:flex-row items-stretch gap-10 shadow-xl shadow-amber-500/5"
+              className="mb-8 p-6 md:p-12 bg-amber-50 border-2 border-amber-200 rounded-[2rem] md:rounded-[2.5rem] flex flex-col lg:flex-row items-stretch gap-8 md:gap-10 shadow-xl shadow-amber-500/5"
             >
-              <div className="flex-1 space-y-6">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
-                    <Clock className="w-8 h-8 text-white" />
+              <div className="flex-1 space-y-4 md:space-y-6">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
+                    <Clock className="w-6 h-6 md:w-8 md:h-8 text-white" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-heading font-black text-amber-900 mb-1">{dict.studio.under_review_title}</h3>
@@ -332,18 +332,18 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-8 bg-red-50 border-2 border-red-200 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-xl shadow-red-500/5"
+              className="mb-8 p-6 md:p-8 bg-red-50 border-2 border-red-200 rounded-[2rem] md:rounded-[2.5rem] flex flex-col md:flex-row items-center gap-6 md:gap-8 shadow-xl shadow-red-500/5"
             >
-              <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
-                <X className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-red-500 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
+                <X className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
               <div className="flex-1 text-center md:text-start">
-                <h3 className="text-2xl font-heading font-black text-red-900 mb-2">{dict.studio.action_required}</h3>
-                <p className="text-red-700/80 leading-relaxed font-medium">
+                <h3 className="text-xl md:text-2xl font-heading font-black text-red-900 mb-1 md:mb-2">{dict.studio.action_required}</h3>
+                <p className="text-red-700/80 leading-relaxed font-medium text-sm md:text-base">
                   {dict.studio.rejected_desc}
                 </p>
               </div>
-              <div className="px-6 py-2 bg-white rounded-full border border-red-200 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm">
+              <div className="px-5 py-1.5 md:px-6 md:py-2 bg-white rounded-full border border-red-200 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm">
                 {dict.studio.action_required}
               </div>
             </motion.div>
@@ -394,30 +394,30 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             </div>
           </motion.div>
 
-          <div className="relative bg-primary text-white rounded-[3rem] p-8 md:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
-              <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-start">
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
+          <div className="relative bg-primary text-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12">
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-start">
+                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-lg">
                   <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                 </div>
                 <div>
-                  <p className="text-accent-light font-black uppercase tracking-widest text-xs mb-2">{dict.studio.master_studio}</p>
-                  <h1 className="text-4xl md:text-6xl font-heading font-bold mb-4">
+                  <p className="text-accent-light font-black uppercase tracking-widest text-[10px] md:text-xs mb-1 md:mb-2">{dict.studio.master_studio}</p>
+                  <h1 className="text-3xl md:text-6xl font-heading font-bold mb-2 md:mb-4">
                     {artisan.studioName || `${artisan.user.name}'s Studio`}
                   </h1>
-                  <p className="text-white/60 max-w-xl italic">"{artisan.bio}"</p>
+                  <p className="text-white/60 text-sm md:text-base max-w-xl italic">"{artisan.bio}"</p>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full md:w-auto justify-center">
                 {isAdminPreview ? (
-                  <div className="h-14 px-8 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/20 flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-accent-light" />
+                  <div className="h-12 md:h-14 px-6 md:px-8 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/20 flex items-center gap-2 text-sm">
+                    <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-accent-light" />
                     {dict.studio.auditor_access}
                   </div>
                 ) : (
-                  <Link href="/studio/settings" className="h-14 px-8 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
+                  <Link href="/studio/settings" className="h-12 md:h-14 px-6 md:px-8 bg-white text-primary font-bold rounded-full hover:bg-cream transition-all flex items-center gap-2 text-sm">
+                    <Settings className="w-4 h-4 md:w-5 md:h-5" />
                     {dict.studio.studio_settings}
                   </Link>
                 )}
@@ -426,25 +426,26 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
           </div>
 
-          <div className="flex gap-4 mb-8 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20">
-            {(
-              [
-                { id: "overview", label: dict.studio.overview, icon: BarChart3 },
-                { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
-                { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
-                { id: "growth", label: dict.studio.growth, icon: TrendingUp },
-                { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
-                { id: "reviews", label: dict.studio.community, icon: Star },
-              ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "px-8 h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0",
-                  activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
-                )}
-              >
+          <div className="relative mb-8">
+            <div className="flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20 mask-fade-right">
+              {(
+                [
+                  { id: "overview", label: dict.studio.overview, icon: BarChart3 },
+                  { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
+                  { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+                  { id: "growth", label: dict.studio.growth, icon: TrendingUp },
+                  { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
+                  { id: "reviews", label: dict.studio.community, icon: Star },
+                ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "px-5 md:px-8 h-10 md:h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0 text-xs md:text-sm",
+                    activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
+                  )}
+                >
                 {tab.id === "logistics" && (
                   <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
                     {dict.studio.soon}
@@ -471,6 +472,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 </span>
               </button>
             ))}
+            </div>
           </div>
 
           <AnimatePresence mode="wait">
@@ -484,7 +486,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             >
               {activeTab === "overview" && (
                 <div className="space-y-12">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     {[
                       {
                         label: dict.studio.stats_impressions,
@@ -515,9 +517,9 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         tooltip: dict.studio.tooltip_revenue
                       },
                     ].map((stat, i) => (
-                      <div key={i} className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6", stat.color)}>
-                          <stat.icon className="w-6 h-6" />
+                      <div key={i} className="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
+                        <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white mb-4 md:mb-6", stat.color)}>
+                          <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
                         <div className="flex items-center gap-2 mb-1 group relative">
                           <p className="text-xs font-black text-primary/40 uppercase tracking-widest">{stat.label}</p>
@@ -530,8 +532,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             </>
                           )}
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-3xl font-heading font-bold text-primary">{stat.value}</p>
+                        <div className="flex items-baseline gap-1 md:gap-2">
+                          <p className="text-xl md:text-3xl font-heading font-bold text-primary">{stat.value}</p>
                           {stat.label === dict.studio.stats_success && (
                             <span className={cn(
                               "text-[8px] font-black uppercase px-2 py-0.5 rounded-full border",
@@ -672,28 +674,28 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                       {activities.length === 0 ? (
-                        <div className="text-center py-20 bg-cream/20 rounded-[2rem] border border-dashed border-primary/10">
-                          <Clock className="w-10 h-10 text-primary/10 mx-auto mb-4" />
+                        <div className="text-center py-12 md:py-20 bg-cream/20 rounded-[1.5rem] md:rounded-[2rem] border border-dashed border-primary/10">
+                          <Clock className="w-8 h-8 md:w-10 md:h-10 text-primary/10 mx-auto mb-4" />
                           <p className="text-charcoal/30 italic text-sm">{dict.studio.no_activity}</p>
                         </div>
                       ) : (
                         activities.map((activity) => (
-                          <div key={activity.id + activity.type} className="flex items-center gap-6 p-4 rounded-[2rem] hover:bg-cream/50 transition-all group border border-transparent hover:border-primary/5">
+                          <div key={activity.id + activity.type} className="flex items-center gap-4 md:gap-6 p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] hover:bg-cream/50 transition-all group border border-transparent hover:border-primary/5">
                             <div className={cn(
-                              "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
+                              "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
                               activity.type === 'SALE' ? "bg-green-500 text-white shadow-green-500/20" :
                                 activity.type === 'REVIEW' ? "bg-accent text-white shadow-accent/20" :
                                   activity.status === 'APPROVED' ? "bg-blue-500 text-white shadow-blue-500/20" :
                                     activity.status === 'REJECTED' ? "bg-red-500 text-white shadow-red-500/20" :
                                       "bg-amber-500 text-white shadow-amber-500/20"
                             )}>
-                              {activity.type === 'SALE' ? <ShoppingBag className="w-5 h-5" /> :
-                                activity.type === 'REVIEW' ? <Star className="w-5 h-5" /> :
-                                  activity.status === 'APPROVED' ? <CheckCircle2 className="w-5 h-5" /> :
-                                    activity.status === 'REJECTED' ? <X className="w-5 h-5" /> :
-                                      <Clock className="w-5 h-5" />}
+                              {activity.type === 'SALE' ? <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" /> :
+                                activity.type === 'REVIEW' ? <Star className="w-4 h-4 md:w-5 md:h-5" /> :
+                                  activity.status === 'APPROVED' ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> :
+                                    activity.status === 'REJECTED' ? <X className="w-4 h-4 md:w-5 md:h-5" /> :
+                                      <Clock className="w-4 h-4 md:w-5 md:h-5" />}
                             </div>
 
                             <div className="flex-1">
@@ -736,7 +738,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
               {activeTab === "inventory" && (
                 /* Inventory Section */
-                <div id="inventory" className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+                <div id="inventory" className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                   <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
                       <h2 className="text-4xl font-heading font-bold text-primary">{dict.studio.studio_inventory} <span className="serif italic font-normal text-accent">{dict.studio.studio_inventory_accent}</span></h2>
@@ -887,8 +889,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       </div>
                     ) : (
                       sales.map((item: any) => (
-                        <div key={item.id} className="bg-white rounded-[2rem] border border-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 hover:shadow-xl hover:shadow-primary/5 transition-all">
-                          <div className="relative w-24 h-24 rounded-2xl overflow-hidden shrink-0">
+                        <div key={item.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 p-5 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 hover:shadow-xl hover:shadow-primary/5 transition-all">
+                          <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden shrink-0">
                             <BespokeImage type="product" id={item.product.id} src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                           </div>
 
@@ -1133,15 +1135,15 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               )}
 
               {activeTab === "logistics" && (
-                <div className="space-y-12">
-                  <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 text-center relative overflow-hidden">
-                    <div className="relative z-10 max-w-2xl mx-auto py-20">
+                <div className="space-y-8 md:space-y-12">
+                  <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 border border-primary/5 shadow-2xl shadow-primary/5 text-center relative overflow-hidden">
+                    <div className="relative z-10 max-w-2xl mx-auto py-10 md:py-20">
                       <div className="text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[10px] font-black uppercase tracking-widest mb-10 border border-accent/20">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-6 md:mb-10 border border-accent/20">
                           {dict.studio.logistics_phase_2}
                         </div>
-                        <h2 className="text-5xl md:text-7xl font-heading font-bold text-primary mb-8">{dict.studio.fulfillment_handsfree} <span className="serif italic font-normal text-accent">{dict.studio.fulfillment_handsfree_accent}</span></h2>
-                        <p className="text-charcoal/40 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                        <h2 className="text-3xl md:text-7xl font-heading font-bold text-primary mb-6 md:mb-8">{dict.studio.fulfillment_handsfree} <span className="serif italic font-normal text-accent">{dict.studio.fulfillment_handsfree_accent}</span></h2>
+                        <p className="text-charcoal/40 text-base md:text-xl max-w-2xl mx-auto leading-relaxed">
                           {dict.studio.logistics_desc.split('**').map((text: string, i: number) =>
                             i % 2 === 1 ? <strong key={i} className="text-primary font-bold">{text}</strong> : text
                           )}
@@ -1200,7 +1202,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {reviews.length === 0 ? (
-                      <div className="col-span-full py-20 px-10 text-center bg-white rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5">
+                      <div className="col-span-full py-12 md:py-20 px-6 md:px-10 text-center bg-white rounded-[2rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5">
                         <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
                           <Star className="w-10 h-10 text-accent" />
                         </div>
@@ -1214,7 +1216,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         <motion.div
                           layout
                           key={review.id}
-                          className="bg-white p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all"
+                          className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all"
                         >
                           <div>
                             <div className="flex justify-between items-start mb-6">
@@ -1312,7 +1314,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               className="relative w-full max-w-2xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[90vh] flex flex-col"
             >
               <div className="overflow-y-auto custom-scrollbar">
-                <div className="p-6 md:p-16 space-y-8 md:space-y-10">
+                <div className="p-5 md:p-16 space-y-6 md:space-y-10">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4">

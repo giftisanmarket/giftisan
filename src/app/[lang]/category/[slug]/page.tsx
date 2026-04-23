@@ -28,5 +28,46 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const dict = await getDictionary(lang as any);
   const products = await getProductsByCategory(slug);
 
-  return <CategoryClient slug={slug} initialProducts={products} dict={dict} />;
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": dict.common?.home || "Home",
+        "item": `${SITE_URL}/${lang}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": (dict.common?.categories_list as any)?.[slug] || slug,
+        "item": `${SITE_URL}/${lang}/category/${slug}`
+      }
+    ]
+  };
+
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": products.map((p, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `${SITE_URL}/${lang}/products/${p.slug || p.id}`
+    }))
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
+      <CategoryClient slug={slug} initialProducts={products} dict={dict} />
+    </>
+  );
 }

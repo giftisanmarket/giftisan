@@ -17,9 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     { url: "", priority: 1.0, changeFrequency: "daily" as const },
     { url: "/artisans", priority: 0.9, changeFrequency: "daily" as const },
-    { url: "/categories", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/become-artisan", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/contact", priority: 0.5, changeFrequency: "monthly" as const },
+    { url: "/categories", priority: 0.9, changeFrequency: "weekly" as const },
+    { url: "/become-artisan", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/contact", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/privacy", priority: 0.3, changeFrequency: "monthly" as const },
+    { url: "/terms", priority: 0.3, changeFrequency: "monthly" as const },
   ].flatMap(page => 
     locales.map(lang => ({
       url: `${baseUrl}/${lang}${page.url}`,
@@ -44,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     locales.map(lang => ({
       url: `${baseUrl}/${lang}/artisans/${a.slug}`,
       lastModified: a.updatedAt,
-      changeFrequency: "weekly" as const,
+      changeFrequency: "daily" as const,
       priority: 0.7,
     }))
   );
@@ -58,8 +60,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     locales.map(lang => ({
       url: `${baseUrl}/${lang}/category/${cat}`,
       lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     }))
   );
 

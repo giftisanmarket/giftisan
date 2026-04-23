@@ -189,28 +189,59 @@ export default async function ProductPage({ params }: Props) {
     }
   }));
 
+  const getAbsoluteUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.name,
-    "image": product.images,
+    "image": Array.isArray(product.images) ? product.images.map(img => getAbsoluteUrl(img)) : [getAbsoluteUrl(product.images as any)],
     "description": product.description,
     "sku": product.id,
+    "mpn": product.id,
     "brand": {
       "@type": "Brand",
       "name": product.artisan.studioName || SITE_NAME
     },
+    "category": product.category,
     "offers": {
       "@type": "Offer",
-      "url": `${baseUrl}/products/${product.slug || product.id}`,
+      "url": `${baseUrl}/${lang}/products/${product.slug || product.id}`,
       "priceCurrency": "EGP",
       "price": product.price,
-      "availability": "https://schema.org/InStock",
+      "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition",
       "seller": {
         "@type": "Organization",
-        "name": SITE_NAME
+        "name": product.artisan.studioName || SITE_NAME
       }
-    }
+    },
+    ...(product.reviews.length > 0 ? {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length,
+        "reviewCount": product.reviews.length,
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": product.reviews.map(r => ({
+        "@type": "Review",
+        "author": { "@type": "Person", "name": r.user.name || "Anonymous" },
+        "datePublished": r.createdAt.toISOString().split('T')[0],
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": r.rating,
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "reviewBody": r.comment
+      }))
+    } : {})
   };
 
   const breadcrumbJsonLd = {
@@ -221,19 +252,19 @@ export default async function ProductPage({ params }: Props) {
         "@type": "ListItem",
         "position": 1,
         "name": dict.common?.home || "Home",
-        "item": baseUrl
+        "item": `${baseUrl}/${lang}`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": (dict.common?.categories_list as any)?.[product.category.toLowerCase().replace(/ /g, '-')] || product.category,
-        "item": `${baseUrl}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
+        "item": `${baseUrl}/${lang}/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": product.name,
-        "item": `${baseUrl}/products/${product.slug || product.id}`
+        "item": `${baseUrl}/${lang}/products/${product.slug || product.id}`
       }
     ]
   };

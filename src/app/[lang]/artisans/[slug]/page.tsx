@@ -138,6 +138,40 @@ export default async function ArtisanPage({ params }: Props) {
     notFound();
   }
 
+  const artisan = data.artisanProfile;
+
+  const description = artisan.bio || (lang === 'ar' 
+    ? `اكتشف عالم ${data.name}. استكشف كنوزاً فريدة مصنوعة بشغف.`
+    : `Discover the world of ${data.name}. Explore unique treasures made with passion.`);
+  
+  const getAbsoluteUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+  
+  const ogImage = getAbsoluteUrl(artisan.bannerImage || artisan.avatar) || `${SITE_URL}/hero.webp`;
+
+  const storeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": data.name,
+    "description": description.slice(0, 160),
+    "image": ogImage,
+    "url": `${SITE_URL}/${lang}/artisans/${slug}`,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": artisan.location || "Egypt",
+      "addressCountry": "EG"
+    },
+    "priceRange": "$$",
+    "seller": {
+      "@type": "Organization",
+      "name": SITE_NAME,
+      "url": SITE_URL
+    }
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -146,7 +180,7 @@ export default async function ArtisanPage({ params }: Props) {
         "@type": "ListItem",
         "position": 1,
         "name": dict.common?.home || "Home",
-        "item": SITE_URL
+        "item": `${SITE_URL}/${lang}`
       },
       {
         "@type": "ListItem",
@@ -165,6 +199,10 @@ export default async function ArtisanPage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

@@ -112,22 +112,28 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": SITE_NAME,
-              "description": "Giftisan is the premier Egyptian marketplace for authentic, handcrafted gifts, connecting independent artisans with collectors. Specializing in traditional Egyptian crafts, bespoke jewelry, and unique heritage treasures.",
+              "description": SITE_DESCRIPTION,
               "url": SITE_URL,
               "logo": `${SITE_URL}/icon.png`,
               "foundingDate": "2024",
-              "knowsAbout": ["Egyptian Handicrafts", "Artisanal Gifts", "Handmade Jewelry", "Egyptian Heritage"],
+              "knowsAbout": ["Egyptian Handicrafts", "Artisanal Gifts", "Handmade Jewelry", "Egyptian Heritage", "Eco-friendly Products"],
               "sameAs": [
                 "https://instagram.com/giftisan.eg",
                 "https://tiktok.com/@giftisan.eg",
-                "https://facebook.com/giftisan.eg"
+                "https://facebook.com/giftisan.eg",
+                "https://pinterest.com/giftisaneg"
               ],
               "contactPoint": {
                 "@type": "ContactPoint",
-                "email": "support@giftisan.shop",
+                "email": "support@giftisan.com",
                 "contactType": "customer support",
                 "areaServed": "EG",
                 "availableLanguage": ["English", "Arabic"]
+              },
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "EG",
+                "addressLocality": "Cairo"
               }
             })
           }}
@@ -142,7 +148,10 @@ export default async function RootLayout({
               "url": SITE_URL,
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": `${SITE_URL}/${lang}/search?q={search_term_string}`,
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `${SITE_URL}/${lang}/search?q={search_term_string}`
+                },
                 "query-input": "required name=search_term_string"
               }
             })

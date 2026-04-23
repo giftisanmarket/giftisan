@@ -437,10 +437,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
             شفت شغل الـ <strong style="color: ${ACCENT_COLOR};">${product}</strong> بتاعك النهاردة، وبجد حاجة تشرف ومستواها عالي جداً. ده بالظبط نوع الفن اللي نفسنا نعرضه ونكبره في "جيفتيزان".
           </p>
           <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 20px;">
-            إحنا بنأسس منصة حصرية قائمة على الدعوات الخاصة، معمول مخصوص عشان يريح "الحرفيين" والفنانين من دوشة المبيعات واللوجستيات. بمجرد انضمامك، بنوفرلك لوحة تحكم <strong>برو استوديو</strong> متكاملة تقدر من خلالها تعرض منتجاتك، تتابع أرباحك وتدير طلباتك بكل سهولة، بالإضافة لرسائل التواصل المباشر مع العملاء. والأهم إن النظام بيتولى إرسال كل إيميلات التأكيد والشحن أوتوماتيك، عشان تفضل "رايق" ومركز بس في فنك ومساحتك الإبداعية.
+            إحنا بنأسس منصة حصرية قائمة على الدعوات الخاصة، معمول مخصوص عشان يريح "الحرفيين" والفنانين من دوشة المبيعات واللوجستيات. بمجرد انضمامك، بنوفرلك لوحة تحكم <strong>برو استوديو</strong> متكاملة تقدر من خلالها تعرض منتجاتك، تتابع أرباحك وتدير طلباتك بكل سهولة، بالإضافة لرسائل التواصل المباشر مع العملاء. والأهم إن النظام بيتولى إرسال كل إيميلات التأكيد أوتوماتيك، عشان تفضل "رايق" ومركز بس في فنك ومساحتك الإبداعية.
           </p>
           <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">
-            والأهم من ده كله، إحنا شغالين دلوقتي على تفعيل أنظمة دفع وشحن مباشر متكاملة على الموقع، وبنعمل حملات تسويق مخصوص لكل استوديو عشان نضمن إن فنك ياخد "اللقطة" والتقدير اللي يستاهله بجد.
+            والأهم من ده كله، إحنا شغالين دلوقتي على تفعيل أنظمة دفع مباشر متكاملة على الموقع، وبنعمل حملات تسويق مخصوص لكل استوديو عشان نضمن إن فنك ياخد "اللقطة" والتقدير اللي يستاهله بجد.
           </p>
           <div style="background-color: #f9fafb; padding: 25px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 30px;">
             <p style="color: ${PRIMARY_COLOR}; font-size: 16px; font-weight: bold; line-height: 1.8; margin: 0;">
@@ -472,10 +472,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
             I came across your work on <strong style="color: ${ACCENT_COLOR};">${product}</strong> today, and I have to say — it's genuinely impressive. It's exactly the kind of craft we want to celebrate and showcase on <strong>Giftisan</strong>.
           </p>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 20px;">
-            We're building an invite-only platform designed specifically to free artisans and creators from the noise of selling, logistics, and marketing. Once you join, we give you a fully-equipped <strong>Pro Studio Dashboard</strong> where you can list your products, track your earnings, manage orders effortlessly, and message customers directly — while our system handles all confirmation and shipping emails automatically.
+            We're building an invite-only platform designed specifically to free artisans and creators from the noise of selling, logistics, and marketing. Once you join, we give you a fully-equipped <strong>Pro Studio Dashboard</strong> where you can list your products, track your earnings, manage orders effortlessly, and message customers directly — while our system handles all confirmation emails automatically.
           </p>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.9; margin-bottom: 25px;">
-            We're also actively building integrated payment and shipping systems, and we run dedicated marketing campaigns for each studio to make sure your art gets the recognition it truly deserves.
+            We're also actively building integrated payment systems, and we run dedicated marketing campaigns for each studio to make sure your art gets the recognition it truly deserves.
           </p>
           <div style="background-color: #f9fafb; padding: 25px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 30px;">
             <p style="color: ${PRIMARY_COLOR}; font-size: 16px; font-weight: bold; line-height: 1.8; margin: 0;">

@@ -36,7 +36,10 @@ import {
   TrendingUp,
   Megaphone,
   Eye,
-  MessageCircle
+  MessageCircle,
+  CreditCard,
+  Banknote,
+  Wallet
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -430,7 +433,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
                 { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
                 { id: "growth", label: dict.studio.growth, icon: TrendingUp },
-                { id: "logistics", label: dict.studio.logistics, icon: Truck },
+                { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
                 { id: "reviews", label: dict.studio.community, icon: Star },
               ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
             ).map((tab) => (
@@ -1148,8 +1151,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-start mb-12">
                         {[
                           { label: dict.studio.direct_payments, icon: Coins, desc: dict.studio.egp_intl },
-                          { label: dict.studio.smart_shipping, icon: Truck, desc: dict.studio.one_click_labels },
-                          { label: dict.studio.insured_transit, icon: ShieldCheck, desc: dict.studio.peace_of_mind },
+                          { label: dict.studio.smart_shipping, icon: Banknote, desc: dict.studio.one_click_labels },
+                          { label: dict.studio.insured_transit, icon: Wallet, desc: dict.studio.peace_of_mind },
                         ].map((item, i) => (
                           <div key={i} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 opacity-60">
                             <item.icon className="w-6 h-6 text-accent mb-4" />

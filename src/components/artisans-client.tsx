@@ -50,7 +50,7 @@ export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
                     <div className="relative w-28 h-28 mb-8">
                       <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                       <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
-                        <BespokeImage src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
+                        <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                       </div>
                     </div>
                     

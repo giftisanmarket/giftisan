@@ -124,7 +124,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
               transition={{ delay: 0.2 }}
               className="relative w-32 h-32 md:w-52 md:h-52 rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group mb-2 md:mb-0"
             >
-              <BespokeImage src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" sizes="(max-width: 768px) 128px, 208px" />
+              <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" sizes="(max-width: 768px) 128px, 208px" />
             </motion.div>
  
             {/* Info */}

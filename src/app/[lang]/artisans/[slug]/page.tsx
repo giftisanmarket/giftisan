@@ -92,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
   
-  const ogImage = getAbsoluteUrl(artisan.bannerImage || artisan.avatar) || `${SITE_URL}/hero.webp`;
+  const ogImage = getAbsoluteUrl(artisan.avatar || artisan.bannerImage) || `${SITE_URL}/hero.webp`;
 
   return {
     title: data.name || "Artisan",
@@ -150,7 +150,7 @@ export default async function ArtisanPage({ params }: Props) {
     return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
   
-  const ogImage = getAbsoluteUrl(artisan.bannerImage || artisan.avatar) || `${SITE_URL}/hero.webp`;
+  const ogImage = getAbsoluteUrl(artisan.avatar || artisan.bannerImage) || `${SITE_URL}/hero.webp`;
 
   const storeJsonLd = {
     "@context": "https://schema.org",

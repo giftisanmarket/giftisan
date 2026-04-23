@@ -26,9 +26,9 @@ export async function GET(
     } else if (type === "artisan") {
       const artisan = await prisma.artisanProfile.findUnique({
         where: { id },
-        select: { bannerImage: true, avatar: true }
+        select: { avatar: true, studioName: true, userId: true }
       });
-      imageData = artisan?.bannerImage || artisan?.avatar || null;
+      imageData = artisan?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${artisan?.studioName || artisan?.userId || id}`;
     } else if (type === "review") {
       const review = await prisma.review.findUnique({
         where: { id },

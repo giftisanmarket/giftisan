@@ -445,7 +445,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 className="flex items-center gap-4 p-5 md:p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1 active:scale-[0.98]"
               >
                 <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-cream shrink-0">
-                  <BespokeImage src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" sizes="64px" />
+                  <BespokeImage type="artisan" id={product.artisan.id} src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" sizes="64px" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
@@ -671,7 +671,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   <div className="absolute bottom-6 start-6 end-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-xl">
-                        <BespokeImage src={product.artisan.avatar} alt="" fill className="object-cover" />
+                        <BespokeImage type="artisan" id={product.artisan.id} src={product.artisan.avatar} alt="" fill className="object-cover" />
                       </div>
                       <div className="text-white">
                         <p className="text-[10px] font-black uppercase tracking-widest text-accent-light mb-0.5">The Studio</p>
@@ -701,7 +701,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               <div className="max-w-4xl">
                 <div className="flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-start">
                   <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl shrink-0">
-                    <BespokeImage src={product.artisan.avatar} alt={product.artisan.studioName || product.artisan.user.name} fill className="object-cover" />
+                    <BespokeImage type="artisan" id={product.artisan.id} src={product.artisan.avatar} alt={product.artisan.studioName || product.artisan.user.name} fill className="object-cover" />
                   </div>
                   <div className="space-y-6">
                     <div className="space-y-1">

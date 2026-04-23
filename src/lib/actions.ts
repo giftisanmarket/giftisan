@@ -753,7 +753,8 @@ export async function updateArtisanProfile(userId: string, data: any) {
         tiktok: data.tiktok || null,
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
-        bannerImage: bannerUrl || null
+        bannerImage: bannerUrl || null,
+        phoneNumber: data.phoneNumber || null
       },
       update: {
         studioName: data.studioName || null,
@@ -767,7 +768,8 @@ export async function updateArtisanProfile(userId: string, data: any) {
         tiktok: data.tiktok || null,
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
-        bannerImage: bannerUrl || null
+        bannerImage: bannerUrl || null,
+        phoneNumber: data.phoneNumber || null
       }
     });
 

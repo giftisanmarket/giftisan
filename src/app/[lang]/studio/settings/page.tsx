@@ -29,6 +29,7 @@ export default async function StudioSettingsPage({ params }: { params: Promise<{
     facebook: artisan.facebook,
     brandColor: artisan.brandColor,
     bannerImage: artisan.bannerImage,
+    phoneNumber: artisan.phoneNumber,
     user: {
       email: artisan.user.email
     }

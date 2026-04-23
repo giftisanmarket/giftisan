@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { VerifyArtisanButton } from "@/components/admin/verify-artisan-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { RoleManager } from "@/components/admin/role-manager";
+import ExportArtisansButton from "@/components/admin/export-artisans-button";
 
 import { getDictionary } from "../../dictionaries";
 import { Metadata } from "next";
@@ -32,9 +33,12 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ lan
           </h1>
           <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-md">{dict.admin.manage_members_desc}</p>
         </div>
-        <div className="bg-white px-5 py-3 rounded-2xl border border-primary/5 shadow-sm shrink-0 w-full md:w-auto">
-          <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">{dict.admin.total_members}</p>
-          <p className="text-xl md:text-2xl font-black text-primary leading-none">{users.length}</p>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+          <ExportArtisansButton users={users} dict={dict} />
+          <div className="bg-white px-5 py-3 rounded-2xl border border-primary/5 shadow-sm shrink-0">
+            <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">{dict.admin.total_members}</p>
+            <p className="text-xl md:text-2xl font-black text-primary leading-none">{users.length}</p>
+          </div>
         </div>
       </div>
 
@@ -66,6 +70,12 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ lan
                       <div>
                         <p className="font-bold text-primary text-sm md:text-base">{user.name}</p>
                         <p className="text-[10px] md:text-xs text-charcoal/40 truncate max-w-[150px]">{user.email}</p>
+                        {user.artisanProfile?.phoneNumber && (
+                          <p className="text-[10px] md:text-xs font-bold text-accent mt-1 flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-accent animate-pulse" />
+                            {user.artisanProfile.phoneNumber}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </td>

@@ -25,6 +25,7 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
   const [facebook, setFacebook] = useState(artisan.facebook || "");
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
+  const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [slug, setSlug] = useState(artisan.slug || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -70,7 +71,8 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
       tiktok,
       facebook,
       brandColor,
-      bannerImage
+      bannerImage,
+      phoneNumber
     });
 
     if (res.success) {
@@ -437,11 +439,29 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.primary_email}</label>
-                        <div className="w-full h-14 md:h-16 ps-12 pe-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
-                          <span className="truncate w-full">{artisan.user.email}</span>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {dict.checkout?.phone_number || "Phone Number"}
+                        </label>
+                        <div className="relative">
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                          </span>
+                          <input
+                            type="tel"
+                            value={phoneNumber || ""}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
+                            placeholder={dict.checkout?.phone_number || "Phone Number"}
+                          />
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.primary_email}</label>
+                      <div className="w-full h-14 md:h-16 ps-12 pe-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
+                        <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
+                        <span className="truncate w-full">{artisan.user.email}</span>
                       </div>
                     </div>
 

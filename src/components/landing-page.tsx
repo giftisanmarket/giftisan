@@ -148,7 +148,7 @@ export default function LandingPage({ dict }: { dict: any }) {
               <a href="https://www.tiktok.com/@giftisanmarket" target="_blank" rel="noopener noreferrer">
                 <FaTiktok className="w-6 h-6 text-primary/40 hover:text-accent transition-colors" />
               </a>
-              <a href="https://pin.it/6f6NNG46N" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.pinterest.com/giftisaneg" target="_blank" rel="noopener noreferrer">
                 <FaPinterest className="w-6 h-6 text-primary/40 hover:text-accent transition-colors" />
               </a>
             </div>
@@ -430,7 +430,7 @@ export default function LandingPage({ dict }: { dict: any }) {
               <a href="https://www.tiktok.com/@giftisanmarket" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
                 <FaTiktok className="w-5 h-5" />
               </a>
-              <a href="https://pin.it/6f6NNG46N" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
+              <a href="https://www.pinterest.com/giftisaneg" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:bg-primary hover:text-white transition-all">
                 <FaPinterest className="w-5 h-5" />
               </a>
             </div>

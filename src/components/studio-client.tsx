@@ -178,7 +178,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
   return (
     <>
-      <main className="min-h-screen bg-cream">
+      <main className="min-h-screen bg-cream overflow-x-hidden">
         <Navbar dict={dict} />
 
         <AnimatePresence>

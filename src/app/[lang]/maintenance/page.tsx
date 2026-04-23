@@ -142,7 +142,7 @@ export default function MaintenancePage() {
             <div className="flex justify-center gap-6 md:gap-8">
               {[
                 { icon: FaInstagram, href: "https://www.instagram.com/giftisan.eg/" },
-                { icon: FaFacebook, href: "https://www.facebook.com/profile.php?id=61570726340692" },
+                { icon: FaFacebook, href: "https://www.facebook.com/giftisan.eg" },
                 { icon: FaTiktok, href: "https://www.tiktok.com/@giftisanmarket" },
                 { icon: FaPinterest, href: "https://pin.it/6f6NNG46N" }
               ].map((social, i) => (

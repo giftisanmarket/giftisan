@@ -19,8 +19,10 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { Users, Store, ShieldCheck, Mail, Star } from "lucide-react";
 
 interface CategoryCount {
   name: string;
@@ -36,6 +38,7 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ products, artisans, categoryCounts, artisanCount, dict }: HomeClientProps) {
+  const { data: session } = useSession();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart } = useCart();
 
@@ -52,7 +55,13 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
   }, []);
 
   return (
-    <main className="min-h-screen bg-cream">
+    <main className="min-h-screen bg-cream relative overflow-hidden">
+      {/* Texture Layer */}
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] -z-10" />
+
+      {/* Decorative Grid Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
+
       <Navbar dict={dict} />
       <Hero artisanCount={artisanCount} dict={dict} />
 
@@ -209,7 +218,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       </section>
 
       {/* Trust Bar */}
-      <section className="bg-primary/5 py-16 border-y border-primary/5">
+      <section className="bg-primary/5 py-16 border-y border-primary/5 relative z-10">
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-12">
           {[
             {
@@ -236,6 +245,50 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
               <p className="text-charcoal/60 leading-relaxed text-sm">{item.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* How it Works Section (Ported from Landing Page) */}
+      <section className="relative z-10 py-24 md:py-32 px-6 bg-white/30 backdrop-blur-sm border-b border-primary/5">
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-4xl md:text-6xl font-heading font-bold text-primary mb-20 md:mb-32 tracking-tight">
+              {(dict.home.journey_title_base || dict.home.journey_title?.split('Journey')[0])}{' '}
+              <span className="serif italic text-accent font-normal">
+                {(dict.home.journey_title_accent || (dict.home.journey_title?.includes('Journey') ? 'Journey' : 'رحلة'))}
+              </span>
+            </h2>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12 lg:gap-24">
+            {[
+              { step: "01", title: dict.home.journey_discover, desc: dict.home.journey_discover_desc },
+              { step: "02", title: dict.home.journey_connect, desc: dict.home.journey_connect_desc },
+              { step: "03", title: dict.home.journey_cherish, desc: dict.home.journey_cherish_desc }
+            ].map((item, i) => (
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: i * 0.1 }}
+                className="flex flex-col items-center group"
+              >
+                <div className="relative mb-8 md:mb-12">
+                  <span className="text-[120px] md:text-[160px] font-heading font-black text-primary/[0.03] absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 select-none group-hover:text-accent/[0.05] transition-colors">{item.step}</span>
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[1.5rem] bg-white shadow-xl shadow-primary/5 border border-primary/5 flex items-center justify-center text-primary relative z-10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                    <span className="text-xl font-black">{item.step}</span>
+                  </div>
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold text-primary mb-5 relative z-10">{item.title}</h3>
+                <p className="text-primary/60 font-medium relative z-10 leading-relaxed max-w-xs">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -301,8 +354,53 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         </div>
       </section>
 
+      {/* For Artisans Pitch (Only for non-artisans/guests) */}
+      {!session?.user?.email?.includes('artisan') && (
+        <section id="artisans-pitch" className="relative z-10 py-24 md:py-32 px-6 bg-primary text-cream overflow-hidden">
+          <div className="absolute top-0 end-0 w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-8">
+                <Store className="w-4 h-4 text-accent-light" />
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-white">{dict.home.empowering_creators}</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-heading font-bold mb-10 leading-tight">
+                {(dict.home.scale_craft_base || dict.home.scale_craft?.split('Craft')[0])} <br /> 
+                <span className="serif italic text-accent-light font-normal text-5xl md:text-7xl">
+                  {(dict.home.scale_craft_accent || (dict.home.scale_craft?.includes('Craft') ? 'Craft.' : 'حرفتك.'))}
+                </span>
+              </h2>
+              <p className="text-lg text-white/70 mb-14 font-medium leading-relaxed">
+                {dict.home.artisan_desc}
+              </p>
+              <Link
+                href="/become-artisan"
+                className="inline-flex items-center gap-3 bg-accent text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-accent-light transition-all shadow-2xl shadow-black/30 w-full sm:w-auto justify-center group"
+              >
+                {dict.home.apply_join} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative aspect-square rounded-[2rem] overflow-hidden shadow-2xl border border-white/5"
+            >
+              <BespokeImage type="artisan" src="/marketing/artisan-working.webp" alt="Artisan Studio" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* Newsletter */}
-      <section id="newsletter" className="py-24 bg-primary text-white overflow-hidden relative">
+      <section id="newsletter" className="py-24 bg-primary text-white overflow-hidden relative border-t border-white/10">
         <div className="container mx-auto px-4 relative z-10 text-center space-y-8">
           <h2 className="text-4xl md:text-5xl font-heading font-bold">{dict.home.waitlist_title}</h2>
           <p className="text-white/70 max-w-xl mx-auto text-lg text-balance">

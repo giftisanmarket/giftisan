@@ -3,9 +3,6 @@ import nextDynamic from "next/dynamic";
 const HomeClient = nextDynamic(() => import("@/components/home-client"), {
   loading: () => <Loading />
 });
-const LandingPage = nextDynamic(() => import("@/components/landing-page"), {
-  loading: () => <Loading />
-});
 import { Metadata } from "next";
 import { auth } from "@/auth";
 import Loading from "./loading";
@@ -36,12 +33,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   if (!hasLocale(lang)) notFound();
   
   const dict = await getDictionary(lang as any);
-  const session = await auth();
-
-  // If user is not logged in, show the marketing landing page
-  if (!session) {
-    return <LandingPage dict={dict} />;
-  }
+  // Removed session check to show marketplace home to everyone
 
   // If user is logged in, show the community platform home page
   const products = await prisma.product.findMany({

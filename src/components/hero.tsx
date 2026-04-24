@@ -2,8 +2,9 @@
 
 import { BespokeImage } from "./bespoke-image";
 import { motion } from "framer-motion";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, Store } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: any }) {
   return (
@@ -27,26 +28,35 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
             {dict.home.hero_discover}
           </p>
           
-          <form 
-            action="/search"
-            className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 max-w-xl"
-          >
-            <div className="relative flex-1 group">
-              <Search className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-primary/30 group-focus-within:text-accent transition-colors" />
-              <input 
-                name="q"
-                type="text"
-                placeholder={dict.home.hero_search_placeholder}
-                className="w-full h-14 md:h-16 ps-12 md:ps-14 pe-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
-              />
-            </div>
-            <button 
-              type="submit"
-              className="h-14 md:h-16 px-8 md:px-10 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 shrink-0 text-sm md:text-base active:scale-95 duration-200"
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 max-w-xl">
+            <form 
+              action="/search"
+              className="flex-1 flex gap-2"
             >
-              {dict.home.hero_search_button}
-            </button>
-          </form>
+              <div className="relative flex-1 group">
+                <Search className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-primary/30 group-focus-within:text-accent transition-colors" />
+                <input 
+                  name="q"
+                  type="text"
+                  placeholder={dict.home.hero_search_placeholder}
+                  className="w-full h-14 md:h-16 ps-12 md:ps-14 pe-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="h-14 md:h-16 px-6 md:px-8 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 shrink-0 text-sm md:text-base active:scale-95 duration-200"
+              >
+                {dict.home.hero_search_button}
+              </button>
+            </form>
+            
+            <Link
+              href="/become-artisan"
+              className="h-14 md:h-16 px-6 md:px-8 bg-white text-primary border border-primary/10 font-bold rounded-xl md:rounded-full hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 text-sm md:text-base shrink-0"
+            >
+              {dict.common.open_studio} <Store className="w-4 h-4" />
+            </Link>
+          </div>
           
           <div className="flex flex-wrap gap-6 pt-2">
             <Link href="/artisans" className="text-[10px] md:text-xs font-bold text-charcoal/40 hover:text-accent transition-all flex items-center gap-2 group active:scale-95">

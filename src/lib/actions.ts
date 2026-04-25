@@ -345,9 +345,10 @@ export async function getFeaturedProducts() {
         reviews: true,
         variants: true
       },
-      orderBy: {
-        createdAt: "desc"
-      }
+      orderBy: [
+        { isFeatured: "desc" },
+        { createdAt: "desc" }
+      ]
     });
     return products;
   } catch (error) {
@@ -1317,6 +1318,21 @@ export async function updateProductStatus(productId: string, status: "PENDING" |
   } catch (error) {
     console.error("Update product status error:", error);
     return { error: "Failed to update treasure status" };
+  }
+}
+
+export async function toggleProductFeatured(productId: string, isFeatured: boolean) {
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { isFeatured }
+    });
+    revalidatePath("/");
+    revalidatePath("/admin/products");
+    return { success: true };
+  } catch (error) {
+    console.error("Toggle featured error:", error);
+    return { error: "Failed to update featured status" };
   }
 }
 

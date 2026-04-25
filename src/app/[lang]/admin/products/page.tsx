@@ -67,7 +67,10 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
                         <Image src={p.images[0]} alt={p.name} fill className="object-cover" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-primary group-hover:text-accent transition-colors truncate max-w-[200px] text-sm md:text-base">{p.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-primary group-hover:text-accent transition-colors truncate max-w-[200px] text-sm md:text-base">{p.name}</p>
+                          {p.isFeatured && <Star className="w-3 h-3 text-accent fill-accent shrink-0" />}
+                        </div>
                         <p className="text-[10px] md:text-xs text-accent font-bold">{dict.product.currency} {p.price}</p>
                       </div>
                     </div>
@@ -116,6 +119,7 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
                     <ProductModerationActions 
                       productId={p.id} 
                       initialStatus={p.status} 
+                      isFeatured={p.isFeatured}
                       slug={p.slug}
                       dict={dict}
                     />

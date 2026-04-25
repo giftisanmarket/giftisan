@@ -51,7 +51,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       }
     },
     take: 6,
-    orderBy: { createdAt: 'desc' }
+    orderBy: [
+      { isFeatured: 'desc' },
+      { createdAt: 'desc' }
+    ]
   });
 
   const artisans = await prisma.artisanProfile.findMany({

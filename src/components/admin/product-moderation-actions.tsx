@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Clock, X, ExternalLink } from "lucide-react";
-import { updateProductStatus } from "@/lib/actions";
+import { CheckCircle2, Clock, X, ExternalLink, Star } from "lucide-react";
+import { updateProductStatus, toggleProductFeatured } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -13,15 +13,18 @@ type ProductStatus = "PENDING" | "APPROVED" | "REJECTED" | "DRAFT";
 export function ProductModerationActions({ 
   productId, 
   initialStatus,
+  isFeatured: initialIsFeatured,
   slug,
   dict
 }: { 
   productId: string;
   initialStatus: ProductStatus;
+  isFeatured: boolean;
   slug?: string;
   dict: any;
 }) {
   const [status, setStatus] = useState<ProductStatus>(initialStatus);
+  const [isFeatured, setIsFeatured] = useState(initialIsFeatured);
   const [isLoading, setIsLoading] = useState(false);
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [reason, setReason] = useState("");
@@ -45,10 +48,44 @@ export function ProductModerationActions({
     setIsLoading(false);
   };
 
+  const handleToggleFeatured = async () => {
+    setIsLoading(true);
+    const newFeatured = !isFeatured;
+    const res = await toggleProductFeatured(productId, newFeatured);
+    if (res.success) {
+      setIsFeatured(newFeatured);
+      toast.success(newFeatured ? "Featured on Home" : "Removed from Home", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
+      router.refresh();
+    } else {
+      toast.error(res.error || "Update failed", {
+        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      });
+    }
+    setIsLoading(false);
+  };
+
   return (
     <>
       <div className="flex items-center justify-end gap-2 text-charcoal">
         <div className="flex items-center gap-1.5 p-1 bg-primary/5 rounded-2xl w-fit">
+          <button
+            onClick={handleToggleFeatured}
+            disabled={isLoading}
+            className={cn(
+              "w-8 h-8 rounded-xl flex items-center justify-center transition-all",
+              isFeatured 
+                ? "bg-white text-accent shadow-sm" 
+                : "text-primary/20 hover:text-accent hover:bg-white/50"
+            )}
+            title={isFeatured ? "Featured" : "Show on Home"}
+          >
+            <Star className={cn("w-4 h-4", isFeatured && "fill-accent")} />
+          </button>
+          
+          <div className="w-[1px] h-4 bg-primary/10 mx-0.5" />
+
           <button
             onClick={() => handleUpdateStatus("APPROVED")}
             disabled={isLoading || status === "APPROVED"}

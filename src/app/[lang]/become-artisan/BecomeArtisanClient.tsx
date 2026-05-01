@@ -75,11 +75,6 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
       icon: <Rocket className="w-6 h-6 text-accent" />,
     },
     {
-      title: dict.home.artisan_onboarding?.benefits?.photography_title || "Pro Photography",
-      desc: dict.home.artisan_onboarding?.benefits?.photography_desc || "Free professional product shoots for your gallery.",
-      icon: <Camera className="w-6 h-6 text-accent" />,
-    },
-    {
       title: dict.home.artisan_onboarding?.benefits?.marketing_title || "Priority Spotlight",
       desc: dict.home.artisan_onboarding?.benefits?.marketing_desc || "Permanent priority in our search results and homepage.",
       icon: <Sparkles className="w-6 h-6 text-accent" />,
@@ -191,7 +186,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
         </div>
 
         {/* Benefits Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 max-w-5xl mx-auto">
           {benefits.map((benefit, i) => (
             <motion.div
               key={i}
@@ -234,7 +229,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
             <div className="p-8 bg-primary rounded-[2rem] text-white space-y-4">
               <h4 className="font-heading font-bold text-xl">Need Help?</h4>
               <p className="text-white/60 text-sm">
-                Our curation team is here to help you set up your studio and shoot your first products.
+                Our curation team is here to help you set up your studio and showcase your unique treasures.
               </p>
               <a href="mailto:support@giftisan.com" className="inline-flex items-center gap-2 text-accent font-bold hover:gap-3 transition-all">
                 Contact Curation <ArrowRight className="w-4 h-4" />

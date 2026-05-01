@@ -278,7 +278,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       e.stopPropagation();
                       setSelectedImage(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
                     }}
-                    className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10"
+                    className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
                   >
                     <ArrowRight className="w-6 h-6 rtl:rotate-0 ltr:rotate-180" />
                   </button>
@@ -287,7 +287,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       e.stopPropagation();
                       setSelectedImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
                     }}
-                    className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10"
+                    className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
                   >
                     <ArrowRight className="w-6 h-6 rtl:rotate-180 ltr:rotate-0" />
                   </button>
@@ -891,7 +891,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         {p.badge}
                       </div>
                     )}
-                    <div className="absolute top-4 end-4 p-3 rounded-full bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                    <div className="absolute top-4 end-4 p-3 rounded-full bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white transition-all scale-90 lg:group-hover:scale-100">
                       <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
                     </div>
                   </div>

@@ -779,7 +779,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         >
                           <div className="relative aspect-square overflow-hidden">
                             <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-                            <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <div className="absolute inset-0 bg-primary/40 opacity-0 lg:group-hover:opacity-100 transition-opacity hidden lg:flex items-center justify-center gap-3">
                               <button
                                 onClick={() => {
                                   setSelectedProductForEdit(p);
@@ -804,6 +804,34 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                               >
                                 <ArrowUpRight className="w-5 h-5" />
                               </Link>
+                            </div>
+
+                            {/* Mobile Actions - Always visible on touch devices */}
+                            <div className="lg:hidden absolute bottom-3 end-3 flex gap-2 z-20">
+                                <button
+                                  onClick={() => {
+                                    setSelectedProductForEdit(p);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                  className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                                >
+                                  {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+                                </button>
+                                {!isAdminPreview && (
+                                  <button
+                                    onClick={() => setProductToDelete(p.id)}
+                                    disabled={isDeleting === p.id}
+                                    className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-lg active:scale-90 transition-transform disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                                <Link
+                                  href={`/products/${p.slug || p.id}`}
+                                  className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                                >
+                                  <ArrowUpRight className="w-4 h-4" />
+                                </Link>
                             </div>
                           </div>
                           <div className="p-8">
@@ -839,8 +867,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                       <Info className="w-3 h-3 text-red-400" />
                                       {dict.edit_product.feedback_title}
                                     </div>
-                                    <div className="absolute end-0 bottom-full mb-2 w-64 p-4 bg-primary text-white text-[11px] rounded-[1.5rem] opacity-0 group-hover/reason:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed whitespace-normal border border-white/10">
+                                    {/* Desktop Tooltip */}
+                                    <div className="hidden lg:block absolute end-0 bottom-full mb-2 w-64 p-4 bg-primary text-white text-[11px] rounded-[1.5rem] opacity-0 group-hover/reason:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed whitespace-normal border border-white/10">
                                       <div className="font-black uppercase tracking-widest text-accent mb-2 text-[9px]">{dict.edit_product.feedback_title}</div>
+                                      "{p.rejectionReason}"
+                                    </div>
+                                    {/* Mobile Feedback - Always visible when rejected */}
+                                    <div className="lg:hidden mt-2 p-3 bg-red-50 text-red-700 text-[10px] rounded-xl border border-red-100 italic leading-relaxed">
                                       "{p.rejectionReason}"
                                     </div>
                                   </div>

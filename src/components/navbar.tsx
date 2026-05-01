@@ -429,29 +429,30 @@ export function Navbar({ dict }: { dict?: any }) {
             </div>
           </div>
         </div>
-        {/* Categories Bar - Desktop */}
         <div className="hidden md:block border-t border-primary/5 py-3">
-          <div className="container mx-auto px-4 flex justify-between">
-            {[
-              { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
-              { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
-              { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-              { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-              { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-              { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
-              { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
-            ].map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/category/${cat.id}`}
-                className="text-sm font-bold text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all uppercase tracking-wide"
-              >
-                {cat.label}
-              </Link>
-            ))}
+          <div className="container mx-auto px-4 flex items-center justify-between gap-8">
+            <div className="flex items-center gap-6 lg:gap-10 overflow-x-auto no-scrollbar whitespace-nowrap flex-1 py-1">
+              {[
+                { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
+                { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
+                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
+                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
+              ].map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/category/${cat.id}`}
+                  className="text-[11px] lg:text-sm font-bold text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all uppercase tracking-wide whitespace-nowrap"
+                >
+                  {cat.label}
+                </Link>
+              ))}
+            </div>
             <Link
               href="/categories"
-              className="text-sm font-black text-accent hover:text-primary transition-all uppercase tracking-widest border-s border-primary/10 ps-6"
+              className="text-[11px] lg:text-sm font-black text-accent hover:text-primary transition-all uppercase tracking-widest border-s border-primary/10 ps-6 whitespace-nowrap shrink-0"
             >
               {d.common.all_categories || "View All"} →
             </Link>

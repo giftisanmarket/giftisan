@@ -215,8 +215,10 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                       {bannerImage ? (
                         <>
                           <Image src={bannerImage} alt="Banner" fill className="object-cover" />
-                          <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Camera className="w-8 h-8 text-white" />
+                          <div className="absolute inset-0 bg-primary/40 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center justify-center opacity-100">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                              <Camera className="w-5 h-5 md:w-8 md:h-8 text-white" />
+                            </div>
                           </div>
                         </>
                       ) : (
@@ -310,7 +312,10 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                           alt="" fill className="object-cover"
                         />
                       </div>
-                      <label className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white">
+                      <label className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm lg:opacity-0 lg:group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white opacity-100">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
                         <input
                           type="file"
                           accept="image/*"
@@ -350,7 +355,6 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                             }
                           }}
                         />
-                        <Camera className="w-6 h-6 text-white" />
                       </label>
                     </div>
                     <div>

@@ -77,7 +77,7 @@ export function AdminNavClient({
                     : "hover:bg-white/10 text-white/60 hover:text-white"
                 )}
               >
-                <item.icon className={cn("w-5 h-5 transition-transform", isActive ? "scale-110 opacity-100" : "opacity-40 group-hover:opacity-100 group-hover:scale-110")} />
+                <item.icon className={cn("w-5 h-5 transition-transform", isActive ? "scale-110 opacity-100" : "opacity-100 lg:opacity-40 lg:group-hover:opacity-100 lg:group-hover:scale-110")} />
                 <span>{item.label}</span>
               </Link>
             );

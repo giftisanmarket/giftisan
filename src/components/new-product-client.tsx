@@ -97,7 +97,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
       </div>
 
       <div className="space-y-6">
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <input 
             type="text" 
             placeholder={dict.edit_product.option_name_placeholder}
@@ -114,7 +114,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
           <button 
             type="button"
             onClick={addOption}
-            className="px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95"
+            className="h-14 px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95 whitespace-nowrap"
           >
             {dict.edit_product.add_option}
           </button>
@@ -160,11 +160,11 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
         </div>
 
         {options.length > 0 && (
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button 
               type="button"
               onClick={generateVariants}
-              className="flex-1 h-14 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-2xl hover:bg-accent/5 transition-all active:scale-[0.99]"
+              className="flex-1 h-14 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-2xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[10px] md:text-sm"
             >
               {dict.edit_product.generate_variants}
             </button>
@@ -176,7 +176,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
                   setVariants(newVariants);
                   toast.success(dict.edit_product.prices_synced);
                 }}
-                className="px-8 h-14 bg-cream text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream/50 transition-all flex items-center gap-2"
+                className="px-8 h-14 bg-cream text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream/50 transition-all flex items-center justify-center gap-2 text-xs md:text-base"
               >
                 <DollarSign className="w-5 h-5 text-accent" />
                 {dict.edit_product.apply_base_price}
@@ -291,7 +291,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
                       <button 
                         type="button"
                         onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-                        className="text-red-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        className="text-red-400 hover:text-red-500 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -614,7 +614,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       </div>
                     )}
 
-                    <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all active:scale-[0.98]">
+                    <label className="absolute inset-0 z-30 cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all active:scale-[0.98]">
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
@@ -692,8 +692,11 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                           <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         </div>
                       ) : (
-                        <div className="px-4 py-2 bg-white text-primary text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
-                          {img ? dict.new_product.change : dict.new_product.upload}
+                        <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
+                          <div className="flex items-center gap-2">
+                             <Upload className="w-3 h-3 md:w-4 md:h-4" />
+                             {img ? dict.new_product.change : dict.new_product.upload}
+                          </div>
                         </div>
                       )}
                     </label>

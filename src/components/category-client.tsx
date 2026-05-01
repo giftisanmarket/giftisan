@@ -177,7 +177,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
                         "absolute top-2 end-2 md:top-6 md:end-6 p-2 md:p-4 rounded-full transition-all shadow-lg scale-90 md:scale-100 active:scale-75",
                         isFavorite(product.id)
                           ? "bg-red-50 text-red-500 opacity-100"
-                          : "bg-white/90 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
+                          : "bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white"
                       )}
                     >
                       <Heart className={cn("w-4 h-4 md:w-6 md:h-6", isFavorite(product.id) && "fill-current")} />

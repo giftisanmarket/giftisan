@@ -346,13 +346,13 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
       </div>
 
       <div className="space-y-6">
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <input 
             type="text" 
             placeholder={dict.edit_product.option_name_placeholder}
             value={newOptionName}
             onChange={(e) => setNewOptionName(e.target.value)}
-            className="flex-1 h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold"
+            className="flex-1 h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold text-sm md:text-base"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -363,7 +363,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
           <button 
             type="button" 
             onClick={addOption}
-            className="px-6 bg-primary text-white font-bold rounded-xl hover:bg-primary-light transition-all shadow-sm"
+            className="h-12 px-6 bg-primary text-white font-bold rounded-xl hover:bg-primary-light transition-all shadow-sm whitespace-nowrap text-sm md:text-base"
           >
             {dict.edit_product.add_option}
           </button>
@@ -409,11 +409,11 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
         </div>
 
         {options.length > 0 && (
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button 
               type="button"
               onClick={generateVariants}
-              className="flex-1 h-12 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-xl hover:bg-accent/5 transition-all active:scale-[0.99]"
+              className="flex-1 h-12 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[10px] md:text-xs"
             >
               {dict.edit_product.generate_variants}
             </button>
@@ -555,6 +555,8 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
     </section>
   );
 });
+
+VariationsSection.displayName = "VariationsSection";
 
 export function EditProductModal({ product, isOpen, onClose, readOnly = false, dict }: EditProductModalProps) {
   const router = useRouter();
@@ -745,32 +747,32 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-4xl max-h-[90vh] bg-cream rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] bg-cream rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {/* Header */}
-            <div className="p-8 border-b border-primary/5 flex justify-between items-center bg-white">
+            <div className="p-5 md:p-8 border-b border-primary/5 flex justify-between items-center bg-white">
               <div>
-                <h2 className={cn("text-3xl font-heading font-bold text-primary", isRTL && "font-black")}>
+                <h2 className={cn("text-xl md:text-3xl font-heading font-bold text-primary", isRTL && "font-black")}>
                   {dict.edit_product.edit_treasure} <span className="serif italic font-normal text-accent">{dict.edit_product.treasure_accent || "Treasure"}</span>
                 </h2>
-                <p className="text-charcoal/40 text-sm mt-1">{dict.edit_product.refine_details}</p>
+                <p className="text-charcoal/40 text-[10px] md:text-sm mt-1">{dict.edit_product.refine_details}</p>
               </div>
-              <button onClick={onClose} className="p-3 hover:bg-primary/5 rounded-full transition-colors">
-                <X className="w-6 h-6 text-primary" />
+              <button onClick={onClose} className="p-2 md:p-3 hover:bg-primary/5 rounded-full transition-colors">
+                <X className="w-5 h-5 md:w-6 md:h-6 text-primary" />
               </button>
             </div>
 
             {/* Form Content */}
-            <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-12 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 md:p-14 space-y-10 md:space-y-12 custom-scrollbar">
               {product.status === "REJECTED" && product.rejectionReason && (
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-8 bg-red-50 border border-red-100 rounded-[2.5rem] flex items-start gap-6 mb-12"
+                  className="p-5 md:p-8 bg-red-50 border border-red-100 rounded-[1.5rem] md:rounded-[2.5rem] flex items-start gap-4 md:gap-6 mb-8 md:mb-12"
                 >
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-red-100">
-                    <X className="w-6 h-6 text-red-500" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-red-100">
+                    <X className="w-5 h-5 md:w-6 md:h-6 text-red-500" />
                   </div>
                   <div>
                     <h3 className="text-lg font-heading font-bold text-red-900 mb-1">{dict.edit_product.feedback_title}</h3>
@@ -818,18 +820,18 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
             </div>
 
             {/* Footer */}
-            <div className="p-8 bg-white/50 backdrop-blur-xl border-t border-primary/5 flex justify-end gap-6">
+            <div className="p-5 md:p-8 bg-white/50 backdrop-blur-xl border-t border-primary/5 flex flex-col-reverse sm:flex-row justify-end gap-3 md:gap-6">
               <button 
                 type="button"
                 onClick={onClose}
-                className="px-8 h-12 text-primary font-bold hover:bg-primary/5 rounded-full transition-all"
+                className="px-8 h-12 text-primary font-bold hover:bg-primary/5 rounded-full transition-all text-sm md:text-base"
               >
                 {dict.common.cancel}
               </button>
               {readOnly ? (
                 <button 
                   onClick={onClose}
-                  className="px-12 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20"
+                  className="px-12 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
                 >
                   {dict.common.done || "Done Reviewing"}
                 </button>
@@ -838,7 +840,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                   onClick={handleSubmit}
                   disabled={isLoading}
                   className={cn(
-                    "px-10 h-12 font-bold rounded-full transition-all shadow-xl flex items-center gap-2 disabled:opacity-50",
+                    "px-10 h-12 font-bold rounded-full transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base",
                     product.status === "REJECTED" 
                       ? "bg-accent text-white hover:bg-accent-light shadow-accent/20" 
                       : "bg-primary text-white hover:bg-primary-light shadow-primary/20"

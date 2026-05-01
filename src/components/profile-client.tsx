@@ -60,10 +60,10 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                     className="flex items-center justify-between w-full p-3 md:p-4 bg-primary/5 rounded-2xl text-primary font-bold hover:bg-primary hover:text-white transition-all group text-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <Settings className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
+                      <Settings className="w-4 h-4 md:w-5 md:h-5 opacity-100" />
                       <span>{dict.profile.settings}</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                    <ChevronRight className="w-4 h-4 opacity-100 lg:opacity-40 lg:group-hover:opacity-100" />
                   </Link>
                   {user.role === "ADMIN" && (
                     <Link 
@@ -71,10 +71,10 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                       className="flex items-center justify-between w-full p-3 md:p-4 bg-accent/5 rounded-2xl text-accent font-bold hover:bg-accent hover:text-white transition-all group text-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
+                        <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 opacity-100 lg:opacity-40 lg:group-hover:opacity-100" />
                         <span>{dict.profile.admin}</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                      <ChevronRight className="w-4 h-4 opacity-100 lg:opacity-40 lg:group-hover:opacity-100" />
                     </Link>
                   )}
                   <button 
@@ -82,7 +82,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                     className="flex items-center justify-between w-full p-3 md:p-4 bg-red-50 rounded-2xl text-red-500 font-bold hover:bg-red-500 hover:text-white transition-all group text-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <LogOut className="w-4 h-4 md:w-5 md:h-5 opacity-40 group-hover:opacity-100" />
+                      <LogOut className="w-4 h-4 md:w-5 md:h-5 opacity-100 lg:opacity-40 lg:group-hover:opacity-100" />
                       <span>{dict.profile.sign_out}</span>
                     </div>
                   </button>

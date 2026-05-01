@@ -116,7 +116,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                         "p-3 rounded-full transition-all scale-90 active:scale-75 shadow-lg",
                         isFavorite(product.id)
                           ? "bg-red-50 text-red-500"
-                          : "bg-white/80 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
+                          : "bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white"
                       )}
                     >
                       <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
@@ -138,7 +138,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                           },
                         });
                       }}
-                      className="p-3 rounded-full bg-accent text-white shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-accent-light active:scale-75"
+                      className="p-3 rounded-full bg-accent text-white shadow-lg lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-2 lg:group-hover:translate-y-0 opacity-100 translate-y-0 transition-all duration-300 hover:bg-accent-light active:scale-75"
                     >
                       <ShoppingBag className="w-5 h-5" />
                     </button>
@@ -342,7 +342,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
                     <div className="pt-6 border-t border-primary/5 flex items-center justify-between">
                       <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.product.master_artisan}</span>
-                      <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
+                      <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm lg:opacity-0 lg:group-hover:opacity-100 opacity-100 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
                         <ArrowRight className="w-5 h-5" />
                       </div>
                     </div>

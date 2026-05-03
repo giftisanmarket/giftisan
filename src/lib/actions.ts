@@ -1657,3 +1657,47 @@ export async function sendOutreachAction(data: { name: string; email: string; pr
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function bulkDeleteProducts(ids: string[]) {
+  try {
+    await prisma.product.deleteMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+
+    revalidatePath("/studio");
+    revalidatePath("/");
+    revalidatePath("/artisans");
+    revalidatePath("/categories");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Bulk delete error:", error);
+    return { error: "Failed to remove treasures" };
+  }
+}
+
+export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" | "APPROVED" | "REJECTED" | "DRAFT") {
+  try {
+    await prisma.product.updateMany({
+      where: {
+        id: { in: ids }
+      },
+      data: {
+        status,
+        rejectionReason: null
+      }
+    });
+
+    revalidatePath("/");
+    revalidatePath("/categories");
+    revalidatePath("/artisans");
+    revalidatePath("/admin/products");
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error) {
+    console.error("Bulk update status error:", error);
+    return { error: "Failed to update treasures status" };
+  }
+}

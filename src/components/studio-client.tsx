@@ -46,7 +46,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
-import { updateOrderItemStatus, deleteProduct } from "@/lib/actions";
+import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
 import { SalesChart } from "@/components/sales-chart";
@@ -56,6 +56,7 @@ import { SalesTab } from "./studio/sales-tab";
 import { GrowthTab } from "./studio/growth-tab";
 import { LogisticsTab } from "./studio/logistics-tab";
 import { ReviewsTab } from "./studio/reviews-tab";
+import { SettingsTab } from "./studio/settings-tab";
 
 interface StudioClientProps {
   artisan: any;
@@ -68,7 +69,8 @@ interface StudioClientProps {
 
 export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, dict, lang }: StudioClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics">("overview");
+  const [showMask, setShowMask] = useState(true);
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings">("overview");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -147,6 +149,64 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
         border: '1px solid rgba(255,255,255,0.1)'
       }
     });
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isRTL = lang === 'ar';
+    
+    if (isRTL) {
+      // In RTL, scrollLeft is usually negative or starts at 0 and goes negative
+      const isAtEnd = Math.abs(target.scrollLeft) >= target.scrollWidth - target.clientWidth - 10;
+      setShowMask(!isAtEnd);
+    } else {
+      const isAtEnd = target.scrollLeft >= target.scrollWidth - target.clientWidth - 10;
+      setShowMask(!isAtEnd);
+    }
+  };
+  const handleBulkDelete = async (ids: string[]) => {
+    if (isAdminPreview) return;
+    
+    const confirm = window.confirm(dict.studio.remove_desc);
+    if (!confirm) return;
+
+    const loadingToast = toast.loading("Removing treasures...", {
+      style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
+    });
+
+    const res = await bulkDeleteProducts(ids);
+
+    toast.dismiss(loadingToast);
+
+    if (res.success) {
+      toast.success(`${ids.length} Treasures removed`, {
+        icon: <Trash2 className="w-5 h-5 text-red-500" />,
+      });
+      router.refresh();
+    } else {
+      toast.error(res.error || "Failed to delete items");
+    }
+  };
+
+  const handleBulkStatusUpdate = async (ids: string[], status: string) => {
+    if (isAdminPreview) return;
+
+    const loadingToast = toast.loading("Updating status...", {
+      style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
+    });
+
+    const res = await bulkUpdateProductStatus(ids, status as any);
+
+    toast.dismiss(loadingToast);
+
+    if (res.success) {
+      toast.success(`${ids.length} Treasures updated`, {
+        icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
+      });
+      router.refresh();
+    } else {
+      toast.error(res.error || "Failed to update items");
+    }
   };
 
   const products = artisan.products || [];
@@ -404,6 +464,16 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
           <div className="relative bg-primary text-white rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-12 lg:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/20 opacity-40" />
+            
+            {!isAdminPreview && (
+              <button 
+                onClick={() => setActiveTab("settings")}
+                className="absolute top-6 end-6 md:top-10 md:end-10 z-20 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white hover:text-primary transition-all shadow-xl group active:scale-90"
+                title={dict.studio.studio_settings}
+              >
+                <Settings className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:rotate-90 duration-500" />
+              </button>
+            )}
 
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-12">
               <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 text-center md:text-start w-full md:w-auto">
@@ -422,19 +492,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               </div>
 
               <div className="flex gap-4 w-full md:w-auto justify-center pt-2 md:pt-0">
-                {isAdminPreview ? (
+                {isAdminPreview && (
                   <div className="h-12 md:h-16 px-8 bg-white/10 backdrop-blur-xl text-white font-bold rounded-2xl md:rounded-full border border-white/20 flex items-center gap-3 text-sm md:text-base shadow-xl">
                     <ShieldCheck className="w-5 h-5 text-accent-light" />
                     {dict.studio.auditor_access}
                   </div>
-                ) : (
-                  <Link
-                    href="/studio/settings"
-                    className="w-full md:w-auto h-14 md:h-16 px-10 bg-white text-primary font-bold rounded-xl md:rounded-full hover:bg-cream transition-all flex items-center justify-center gap-3 text-sm md:text-base shadow-2xl active:scale-95 duration-200"
-                  >
-                    <Settings className="w-5 h-5 animate-spin-slow" />
-                    {dict.studio.studio_settings}
-                  </Link>
                 )}
               </div>
             </div>
@@ -442,7 +504,13 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
           </div>
 
           <div className="relative mb-8">
-            <div className="flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20 mask-fade-right">
+            <div 
+              onScroll={handleScroll}
+              className={cn(
+                "flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
+                showMask ? "mask-fade-right" : ""
+              )}
+            >
               {(
                 [
                   { id: "overview", label: dict.studio.overview, icon: BarChart3 },
@@ -451,7 +519,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   { id: "growth", label: dict.studio.growth, icon: TrendingUp },
                   { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
                   { id: "reviews", label: dict.studio.community, icon: Star },
-                ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics"; label: string; icon: any; badge?: number }[]
+                  { id: "settings", label: dict.studio.studio_settings, icon: Settings },
+                ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings"; label: string; icon: any; badge?: number }[]
               ).map((tab) => (
                 <button
                   key={tab.id}
@@ -469,7 +538,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="activeTabPill"
-                      className="absolute inset-0 bg-primary rounded-full"
+                      className="absolute inset-0 bg-primary rounded-full z-0 shadow-[0_10px_30px_-5px_rgba(6,78,59,0.3)]"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -523,6 +592,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   setIsEditModalOpen={setIsEditModalOpen}
                   setProductToDelete={setProductToDelete}
                   isDeleting={isDeleting}
+                  onBulkDelete={handleBulkDelete}
+                  onBulkStatusUpdate={handleBulkStatusUpdate}
                 />
               )}
 
@@ -557,6 +628,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               )}
 
               {activeTab === "reviews" && <ReviewsTab reviews={reviews} dict={dict} />}
+              {activeTab === "settings" && <SettingsTab artisan={artisan} dict={dict} />}
             </motion.div>
           </AnimatePresence>
         </div>

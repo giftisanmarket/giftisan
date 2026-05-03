@@ -322,19 +322,20 @@ export function Navbar({ dict }: { dict?: any }) {
                   <Link
                     href="/studio"
                     className={cn(
-                      "hidden lg:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm active:scale-95",
+                      "hidden md:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm active:scale-95",
                       pathname === "/studio"
                         ? "bg-primary text-white"
                         : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
                     )}
                   >
                     <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", pathname === "/studio" ? "bg-white" : "bg-accent")} />
-                    {d.common.pro_studio}
+                    <span className="hidden xl:inline">{d.common.pro_studio}</span>
+                    <span className="xl:hidden">Studio</span>
                   </Link>
                 ) : (
                   <Link
                     href="/become-artisan"
-                    className="hidden lg:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 active:scale-95"
+                    className="hidden md:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 active:scale-95"
                   >
                     {d.common.sell}
                   </Link>
@@ -342,17 +343,17 @@ export function Navbar({ dict }: { dict?: any }) {
 
                 <Link
                   href="/contact"
-                  className="hidden lg:flex items-center gap-1.5 px-3 h-9 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-all active:scale-95"
+                  className="hidden xl:flex items-center gap-1.5 px-3 h-9 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-all active:scale-95"
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
                   {d.common.support}
                 </Link>
 
                 {/* Consolidated Profile Hub (Desktop only) */}
-                <div className="hidden lg:flex items-center gap-2 border-l border-primary/10 ps-3">
+                <div className="hidden md:flex items-center gap-2 border-l border-primary/10 ps-3">
                   <Link
                     href="/profile"
-                    className="group flex items-center gap-3 ps-1 pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
+                    className="group flex items-center lg:gap-3 ps-1 lg:pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
                   >
                     <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
                       {session.user?.image ? (
@@ -371,7 +372,7 @@ export function Navbar({ dict }: { dict?: any }) {
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
 
-                    <div>
+                    <div className="hidden lg:block">
                       <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">{d.common.account}</p>
                       <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
                         {session.user?.name?.split(' ')[0]}

@@ -779,7 +779,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         >
                           <div className="relative aspect-square overflow-hidden">
                             <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-                            <div className="absolute inset-0 bg-primary/40 opacity-0 lg:group-hover:opacity-100 transition-opacity hidden lg:flex items-center justify-center gap-3">
+                            <div className="absolute inset-0 bg-primary/40 opacity-0 xl:group-hover:opacity-100 transition-opacity hidden xl:flex items-center justify-center gap-3">
                               <button
                                 onClick={() => {
                                   setSelectedProductForEdit(p);
@@ -807,7 +807,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             </div>
 
                             {/* Mobile Actions - Always visible on touch devices */}
-                            <div className="lg:hidden absolute bottom-3 end-3 flex gap-2 z-20">
+                            <div className="xl:hidden absolute bottom-3 end-3 flex gap-2 z-20">
                                 <button
                                   onClick={() => {
                                     setSelectedProductForEdit(p);
@@ -868,12 +868,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                       {dict.edit_product.feedback_title}
                                     </div>
                                     {/* Desktop Tooltip */}
-                                    <div className="hidden lg:block absolute end-0 bottom-full mb-2 w-64 p-4 bg-primary text-white text-[11px] rounded-[1.5rem] opacity-0 group-hover/reason:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed whitespace-normal border border-white/10">
+                                    <div className="hidden xl:block absolute end-0 bottom-full mb-2 w-64 p-4 bg-primary text-white text-[11px] rounded-[1.5rem] opacity-0 group-hover/reason:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed whitespace-normal border border-white/10">
                                       <div className="font-black uppercase tracking-widest text-accent mb-2 text-[9px]">{dict.edit_product.feedback_title}</div>
                                       "{p.rejectionReason}"
                                     </div>
                                     {/* Mobile Feedback - Always visible when rejected */}
-                                    <div className="lg:hidden mt-2 p-3 bg-red-50 text-red-700 text-[10px] rounded-xl border border-red-100 italic leading-relaxed">
+                                    <div className="xl:hidden mt-2 p-3 bg-red-50 text-red-700 text-[10px] rounded-xl border border-red-100 italic leading-relaxed">
                                       "{p.rejectionReason}"
                                     </div>
                                   </div>

@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
@@ -71,6 +71,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   const router = useRouter();
   const [showMask, setShowMask] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings">("overview");
+  const contentRef = useRef<HTMLDivElement>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -467,7 +468,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             
             {!isAdminPreview && (
               <button 
-                onClick={() => setActiveTab("settings")}
+                onClick={() => {
+                  setActiveTab("settings");
+                  setTimeout(() => {
+                    contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                }}
                 className="absolute top-6 end-6 md:top-10 md:end-10 z-20 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white hover:text-primary transition-all shadow-xl group active:scale-90"
                 title={dict.studio.studio_settings}
               >
@@ -562,11 +568,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
+              ref={contentRef}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="relative z-10"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="scroll-mt-32 relative z-10"
             >
               {activeTab === "overview" && (
                 <OverviewTab

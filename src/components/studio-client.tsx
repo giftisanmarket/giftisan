@@ -228,7 +228,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
           )}
         </AnimatePresence>
 
-        <div className="container mx-auto px-4 pt-32 pb-20">
+        <div className="max-w-[1400px] mx-auto px-4 pt-24 md:pt-32 pb-20">
           {/* Verification Status Banner */}
           {artisan.status === "PENDING" && (
             <motion.div
@@ -406,7 +406,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 </div>
                 <div className="space-y-3 md:space-y-4">
                   <p className="text-accent-light font-black uppercase tracking-[0.25em] text-[9px] md:text-xs bg-white/5 w-fit px-3 py-1 rounded-full mx-auto md:mx-0 border border-white/10">{dict.studio.master_studio}</p>
-                  <h1 className="text-3xl md:text-5xl lg:text-7xl font-heading font-bold leading-[1.1] tracking-tight">
+                  <h1 className="text-3xl md:text-4xl lg:text-7xl font-heading font-bold leading-[1.1] tracking-tight">
                     {artisan.studioName || `${artisan.user.name}'s Studio`}
                   </h1>
                   <p className="text-white/60 text-sm md:text-lg max-w-xl italic font-medium leading-relaxed line-clamp-3 md:line-clamp-4">
@@ -566,7 +566,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
                   {/* Pro Insights */}
                   <div className="grid md:grid-cols-2 gap-6 md:gap-10">
-                    <div className="bg-primary text-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col items-center md:items-start text-center md:text-start">
+                    <div className="bg-primary text-white p-8 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col items-center md:items-start text-center md:text-start">
                       <div className="relative z-10 w-full flex flex-col items-center md:items-start">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
                           <Sparkles className="w-3.5 h-3.5" />
@@ -577,11 +577,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                           if (!topViewed) return <p className="text-white/40 italic">{dict.studio.gallery_empty}</p>;
                           return (
                             <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-3xl overflow-hidden border-2 border-white/10 shrink-0 shadow-2xl">
+                              <div className="relative w-24 h-24 md:w-20 lg:w-28 aspect-square rounded-3xl overflow-hidden border-2 border-white/10 shrink-0 shadow-2xl">
                                 <BespokeImage src={topViewed.images[0]} alt="" fill className="object-cover" />
                               </div>
                               <div className="space-y-1">
-                                <h4 className="text-2xl md:text-4xl font-heading font-bold tracking-tight">{topViewed.name}</h4>
+                                <h4 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold tracking-tight">{topViewed.name}</h4>
                                 <p className="text-white/40 text-sm md:text-lg font-medium">{dict.studio.visits_count.replace('{count}', (topViewed.views || 0).toString())}</p>
                               </div>
                             </div>
@@ -591,7 +591,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
                     </div>
 
-                    <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col items-center md:items-start text-center md:text-start">
+                    <div className="bg-white p-8 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col items-center md:items-start text-center md:text-start">
                       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         {dict.studio.best_selling_piece}
@@ -606,11 +606,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         const soldCount = sales.filter(s => s.productId === topSold.id).length;
                         return (
                           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                            <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-3xl overflow-hidden border border-primary/5 shrink-0 shadow-xl">
+                            <div className="relative w-24 h-24 md:w-20 lg:w-28 aspect-square rounded-3xl overflow-hidden border border-primary/5 shrink-0 shadow-xl">
                               <BespokeImage src={topSold.images[0]} alt="" fill className="object-cover" />
                             </div>
                             <div className="space-y-1">
-                              <h4 className="text-2xl md:text-4xl font-heading font-bold text-primary tracking-tight">{topSold.name}</h4>
+                              <h4 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-primary tracking-tight">{topSold.name}</h4>
                               <p className="text-charcoal/40 text-sm md:text-lg font-medium">{dict.studio.units_traveling.replace('{count}', soldCount.toString())}</p>
                             </div>
                           </div>
@@ -660,7 +660,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     </div>
                   )}
 
-                  <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+                  <div className="bg-white rounded-[3rem] p-6 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                     <div className="flex justify-between items-center mb-10">
                       <div>
                         <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
@@ -675,7 +675,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   </div>
 
                   {/* Recent Activity Feed */}
-                  <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+                  <div className="bg-white rounded-[3rem] p-6 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
                     <div className="flex justify-between items-center mb-10">
                       <div>
                         <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
@@ -962,7 +962,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                               <BespokeImage type="product" id={item.product.id} src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                             </div>
 
-                            <div className="flex-1 space-y-4 text-center md:text-start w-full">
+                            <div className="flex-1 min-w-0 space-y-4 text-center md:text-start">
                               <div className="flex flex-col md:flex-row md:items-center gap-2 justify-center md:justify-start">
                                 <h4 className="text-xl md:text-2xl font-heading font-bold text-primary truncate">{item.product.name}</h4>
                                 <span className={cn(
@@ -1011,7 +1011,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                             </div>
 
                             <div className="flex flex-col items-center md:items-end gap-3 shrink-0 pt-4 md:pt-0">
-                              <p className="text--[10px] font-black text-primary/20 uppercase tracking-[0.2em]">{dict.common.total_amount}</p>
+                               <p className="text-[10px] font-black text-primary/20 uppercase tracking-[0.2em]">{dict.common.total_amount}</p>
                               <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{dict.product.currency} {item.price * item.quantity}</p>
                             </div>
                           </div>

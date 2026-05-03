@@ -507,7 +507,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             <div 
               onScroll={handleScroll}
               className={cn(
-                "flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-4 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
+                "flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-12 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
                 showMask ? "mask-fade-right" : ""
               )}
             >

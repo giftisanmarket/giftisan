@@ -127,7 +127,7 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
 
         <div className="grid lg:grid-cols-[240px_1fr] gap-8 lg:gap-16">
           {/* Sub Navigation */}
-          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide">
+          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-12 lg:pb-0 scrollbar-hide">
             {navItems.map((item) => (
               <button
                 key={item.id}

@@ -153,7 +153,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
                         "absolute top-2 end-2 md:top-6 md:end-6 p-2 md:p-4 rounded-full transition-all active:scale-75 shadow-lg",
                         isFavorite(p.id)
                           ? "bg-red-50 text-red-500 opacity-100"
-                          : "bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white"
+                          : "bg-white/90 backdrop-blur text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 hover:bg-white"
                       )}
                     >
                       <Heart className={cn("w-4 h-4 md:w-6 md:h-6", isFavorite(p.id) && "fill-current")} />

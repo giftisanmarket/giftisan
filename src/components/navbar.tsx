@@ -133,7 +133,7 @@ export function Navbar({ dict }: { dict?: any }) {
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div ref={searchRef} className="hidden md:flex flex-1 max-w-2xl relative">
+          <div ref={searchRef} className="hidden md:flex flex-1 w-full max-w-2xl relative">
             <form onSubmit={handleSearch} className="w-full relative group">
               <input
                 type="text"
@@ -156,144 +156,147 @@ export function Navbar({ dict }: { dict?: any }) {
                 >
                   <X className="w-4 h-4" />
                 </button>
-              )}
-            </form>
-
-            {/* Quick Results Overlay */}
-            {showResults && (
-              <div className="absolute top-full start-0 w-full mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                {!searchQuery ? (
-                  /* Empty Search State - Trending discovered */
-                  <div className="p-6 space-y-6">
-                    <div className="flex justify-between items-center bg-accent/5 p-4 rounded-2xl border border-accent/10">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                          <Search className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
-                          <p className="text-sm font-bold text-primary">{d.common.explore_trending}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(d.common.trending_tags || {}).map(([key, label]) => (
-                          <button
-                            key={key}
-                            onClick={() => {
-                              const searchLabel = label as string;
-                              setSearchQuery(searchLabel);
-                              router.push(`/search?q=${encodeURIComponent(searchLabel)}`);
-                              setShowResults(false);
-                            }}
-                            className="px-4 py-2 rounded-full bg-cream text-primary/60 text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
-                          >
-                            {label as string}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-primary/5">
-                      <Link
-                        href="/categories"
-                        onClick={() => setShowResults(false)}
-                        className="flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center">
-                            <ShoppingCart className="w-4 h-4 text-primary" />
-                          </div>
-                          <span className="text-xs font-bold text-primary">{d.common.all_categories}</span>
-                        </div>
-                        <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
-                      <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
-                      <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
-                        {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
-                      </span>
-                    </div>
-
-                    <div className="max-h-[400px] overflow-y-auto">
-                      {searchResults.length > 0 ? (
-                        searchResults.map((p) => (
-                          <Link
-                            key={p.id}
-                            href={`/products/${p.slug}`}
-                            onClick={() => setShowResults(false)}
-                            className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
-                          >
-                            <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
-                              <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
-                                <span className="text-sm font-bold text-primary">EGP {p.price}</span>
-                              </div>
-                              <p className="text-xs text-charcoal/40 font-medium">
-                                {p.artisan.user?.name || p.artisan.studioName} • {p.category}
-                              </p>
-                            </div>
-                          </Link>
-                        ))
-                      ) : !isSearching ? (
-                        <div className="p-8 text-center space-y-6">
-                          <div className="space-y-2">
-                            <p className="text-charcoal/40 font-medium italic">"{d.common.nothing_matches.replace('{query}', searchQuery)}"</p>
-                          </div>
-                          <div className="space-y-3">
-                            <p className="text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
-                            <div className="flex flex-wrap justify-center gap-2">
-                              {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
-                                const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
-                                return (
-                                  <button
-                                    key={tagKey}
-                                    onClick={() => {
-                                      setSearchQuery(tagLabel);
-                                      router.push(`/search?q=${encodeURIComponent(tagLabel)}`);
-                                      setShowResults(false);
-                                    }}
-                                    className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
-                                  >
-                                    {tagLabel}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="p-8 text-center text-charcoal/40 animate-pulse">
-                          {d.common.scanning_workshop}
-                        </div>
-                      )}
-                    </div>
-
-                    {searchResults.length > 0 && (
-                      <div className="p-3 bg-primary/5 text-center">
-                        <button
-                          onClick={handleSearch}
-                          className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
-                        >
-                          {d.common.see_all_results} →
-                        </button>
-                      </div>
-                    )}
-                  </>
                 )}
-              </div>
-            )}
-          </div>
+
+                {/* Quick Results Overlay */}
+                {showResults && (
+                  <div className="hidden xl:block absolute top-full left-0 right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                    {!searchQuery ? (
+                      /* Empty Search State - Trending discovered */
+                      <div className="p-6 space-y-6">
+                        <div className="flex justify-between items-center bg-accent/5 p-4 rounded-2xl border border-accent/10">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                              <Search className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
+                              <p className="text-sm font-bold text-primary">{d.common.explore_trending}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(d.common.trending_tags || {}).map(([key, label]) => (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => {
+                                  const searchLabel = label as string;
+                                  setSearchQuery(searchLabel);
+                                  router.push(`/search?q=${encodeURIComponent(searchLabel)}`);
+                                  setShowResults(false);
+                                }}
+                                className="px-4 py-2 rounded-full bg-cream text-primary/60 text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
+                              >
+                                {label as string}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-primary/5">
+                          <Link
+                            href="/categories"
+                            onClick={() => setShowResults(false)}
+                            className="flex items-center justify-between group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center">
+                                <ShoppingCart className="w-4 h-4 text-primary" />
+                              </div>
+                              <span className="text-xs font-bold text-primary">{d.common.all_categories}</span>
+                            </div>
+                            <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
+                          <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
+                          <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
+                            {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
+                          </span>
+                        </div>
+
+                        <div className="max-h-[400px] overflow-y-auto">
+                          {searchResults.length > 0 ? (
+                            searchResults.map((p) => (
+                              <Link
+                                key={p.id}
+                                href={`/products/${p.slug}`}
+                                onClick={() => setShowResults(false)}
+                                className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
+                              >
+                                <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
+                                  <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex justify-between items-start">
+                                    <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
+                                    <span className="text-sm font-bold text-primary">EGP {p.price}</span>
+                                  </div>
+                                  <p className="text-xs text-charcoal/40 font-medium">
+                                    {p.artisan.user?.name || p.artisan.studioName} • {p.category}
+                                  </p>
+                                </div>
+                              </Link>
+                            ))
+                          ) : !isSearching ? (
+                            <div className="p-8 text-center space-y-6">
+                              <div className="space-y-2">
+                                <p className="text-charcoal/40 font-medium italic">"{d.common.nothing_matches.replace('{query}', searchQuery)}"</p>
+                              </div>
+                              <div className="space-y-3">
+                                <p className="text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
+                                <div className="flex flex-wrap justify-center gap-2">
+                                  {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
+                                    const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
+                                    return (
+                                      <button
+                                        key={tagKey}
+                                        type="button"
+                                        onClick={() => {
+                                          setSearchQuery(tagLabel);
+                                          router.push(`/search?q=${encodeURIComponent(tagLabel)}`);
+                                          setShowResults(false);
+                                        }}
+                                        className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
+                                      >
+                                        {tagLabel}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center text-charcoal/40 animate-pulse">
+                              {d.common.scanning_workshop}
+                            </div>
+                          )}
+                        </div>
+
+                        {searchResults.length > 0 && (
+                          <div className="p-3 bg-primary/5 text-center">
+                            <button
+                              type="button"
+                              onClick={handleSearch}
+                              className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
+                            >
+                              {d.common.see_all_results} →
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </form>
+            </div>
 
           {/* Actions */}
           <div className="flex items-center gap-1 md:gap-4">

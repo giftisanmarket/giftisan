@@ -1,0 +1,98 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BespokeImage } from "@/components/bespoke-image";
+
+interface ReviewsTabProps {
+  reviews: any[];
+  dict: any;
+}
+
+export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-10">
+        {reviews.length === 0 ? (
+          <div className="col-span-full py-20 md:py-32 px-6 md:px-10 text-center bg-white rounded-[2rem] md:rounded-[4rem] border border-primary/5 shadow-2xl shadow-primary/5 flex flex-col items-center justify-center">
+            <div className="w-24 h-24 md:w-32 md:h-32 bg-cream rounded-full flex items-center justify-center mb-10 shadow-inner ring-8 ring-primary/5">
+              <Star className="w-12 h-12 md:w-16 md:h-16 text-accent" />
+            </div>
+            <h3 className="text-3xl md:text-5xl font-heading font-bold text-primary mb-4">{dict.studio.no_reviews_title}</h3>
+            <p className="text-charcoal/40 max-w-md mx-auto leading-relaxed italic serif text-lg md:text-2xl">
+              "{dict.studio.no_reviews_desc}"
+            </p>
+          </div>
+        ) : (
+          reviews.map((review) => (
+            <motion.div
+              layout
+              key={review.id}
+              className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all hover:shadow-2xl hover:shadow-primary/10"
+            >
+              <div>
+                <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8 gap-4">
+                  <div className="flex items-center gap-4 text-center sm:text-start">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-cream shrink-0 border-2 border-white shadow-lg">
+                      <BespokeImage
+                        src={review.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user.name}`}
+                        alt={review.user.name}
+                        width={56}
+                        height={56}
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-black text-sm md:text-base text-primary uppercase tracking-tight">{review.user.name}</p>
+                      <p className="text-[10px] md:text-xs text-charcoal/30 font-black uppercase tracking-widest mt-1">
+                        {new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 bg-accent/5 px-3 py-1.5 rounded-full">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn("w-3.5 h-3.5 md:w-4 md:h-4", i < review.rating ? "fill-accent text-accent" : "text-primary/10")}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-charcoal/60 text-base md:text-lg leading-relaxed italic font-medium mb-8 text-center sm:text-start">
+                  "{review.comment}"
+                </p>
+
+                {review.images && review.images.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide no-scrollbar -mx-2 px-2">
+                    {review.images.map((img: string, i: number) => (
+                      <div key={i} className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-white shrink-0 shadow-md">
+                        <BespokeImage src={img} alt="Review" fill className="object-cover hover:scale-110 transition-transform duration-500" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Link
+                href={`/products/${review.product.slug || review.product.id}`}
+                className="mt-8 pt-8 border-t border-primary/5 flex items-center gap-5 group/p"
+              >
+                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-inner shrink-0 group-hover/p:scale-105 transition-transform">
+                  <BespokeImage src={review.product.images[0]} alt="" fill className="object-cover" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] md:text-[11px] text-primary/30 font-black uppercase tracking-widest mb-1 group-hover/p:text-accent transition-colors">Purchased Treasure</p>
+                  <p className="font-bold text-sm md:text-base text-primary group-hover/p:text-accent transition-colors truncate">{review.product.name}</p>
+                  <p className="text-xs font-black text-accent mt-1">{dict.product.currency} {review.product.price}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

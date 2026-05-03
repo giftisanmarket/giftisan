@@ -398,7 +398,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
           <div className="relative bg-primary text-white rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-12 lg:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/20 opacity-40" />
-            
+
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-12">
               <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 text-center md:text-start w-full md:w-auto">
                 <div className="relative w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden border-[6px] border-white/10 shadow-2xl shrink-0">
@@ -422,8 +422,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     {dict.studio.auditor_access}
                   </div>
                 ) : (
-                  <Link 
-                    href="/studio/settings" 
+                  <Link
+                    href="/studio/settings"
                     className="w-full md:w-auto h-14 md:h-16 px-10 bg-white text-primary font-bold rounded-xl md:rounded-full hover:bg-cream transition-all flex items-center justify-center gap-3 text-sm md:text-base shadow-2xl active:scale-95 duration-200"
                   >
                     <Settings className="w-5 h-5 animate-spin-slow" />
@@ -455,32 +455,32 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
                   )}
                 >
-                {tab.id === "logistics" && (
-                  <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
-                    {dict.studio.soon}
-                  </div>
-                )}
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="activeTabPill"
-                    className="absolute inset-0 bg-primary rounded-full"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-white" : "text-accent")} />
-                  {tab.label}
-                  {tab.badge ? (
-                    <span className={cn(
-                      "ms-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px]",
-                      activeTab === tab.id ? "bg-white text-primary" : "bg-accent text-white shadow-lg shadow-accent/20"
-                    )}>
-                      {tab.badge}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            ))}
+                  {tab.id === "logistics" && (
+                    <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
+                      {dict.studio.soon}
+                    </div>
+                  )}
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="activeTabPill"
+                      className="absolute inset-0 bg-primary rounded-full"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-white" : "text-accent")} />
+                    {tab.label}
+                    {tab.badge ? (
+                      <span className={cn(
+                        "ms-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px]",
+                        activeTab === tab.id ? "bg-white text-primary" : "bg-accent text-white shadow-lg shadow-accent/20"
+                      )}>
+                        {tab.badge}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -629,14 +629,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         </div>
                         <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Top 5 Favorites</span>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
                         {topVariants.map((v: any, i: number) => (
                           <div key={i} className="flex flex-col gap-4 group cursor-default">
                             <div className="relative aspect-square rounded-2xl overflow-hidden border border-primary/5 shrink-0 transition-transform group-hover:scale-105">
                               <BespokeImage src={v.image} alt="" fill className="object-cover" />
                               <div className="absolute top-2 start-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[9px] font-black text-indigo-600 shadow-sm">
-                                #{i+1}
+                                #{i + 1}
                               </div>
                             </div>
                             <div className="space-y-1">
@@ -794,7 +794,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                         >
                           <div className="relative aspect-square overflow-hidden shrink-0">
                             <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
-                            
+
                             {/* Status Overlay - Premium Look */}
                             <div className="absolute top-4 start-4 md:top-8 md:start-8 z-10 flex flex-col gap-2">
                               <span className={cn(
@@ -839,33 +839,33 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
                             {/* Mobile Actions - Refined */}
                             <div className="xl:hidden absolute bottom-4 end-4 flex gap-2 z-20">
+                              <button
+                                onClick={() => {
+                                  setSelectedProductForEdit(p);
+                                  setIsEditModalOpen(true);
+                                }}
+                                className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
+                              >
+                                {isAdminPreview ? <Eye className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
+                              </button>
+                              {!isAdminPreview && (
                                 <button
-                                  onClick={() => {
-                                    setSelectedProductForEdit(p);
-                                    setIsEditModalOpen(true);
-                                  }}
-                                  className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
+                                  onClick={() => setProductToDelete(p.id)}
+                                  disabled={isDeleting === p.id}
+                                  className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-xl active:scale-90 disabled:opacity-50"
                                 >
-                                  {isAdminPreview ? <Eye className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
+                                  <Trash2 className="w-5 h-5" />
                                 </button>
-                                {!isAdminPreview && (
-                                  <button
-                                    onClick={() => setProductToDelete(p.id)}
-                                    disabled={isDeleting === p.id}
-                                    className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-xl active:scale-90 disabled:opacity-50"
-                                  >
-                                    <Trash2 className="w-5 h-5" />
-                                  </button>
-                                )}
-                                <Link
-                                  href={`/products/${p.slug || p.id}`}
-                                  className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
-                                >
-                                  <ArrowUpRight className="w-5 h-5" />
-                                </Link>
+                              )}
+                              <Link
+                                href={`/products/${p.slug || p.id}`}
+                                className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
+                              >
+                                <ArrowUpRight className="w-5 h-5" />
+                              </Link>
                             </div>
                           </div>
-                          
+
                           <div className="p-6 md:p-10 flex-1 flex flex-col">
                             <div className="flex justify-between items-start mb-4 gap-4">
                               <div className="flex-1 min-w-0">
@@ -873,16 +873,16 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   <span className={cn(
                                     "px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                                    (p.stock || 0) <= 0 ? "bg-red-50 text-red-500 border-red-100" : 
-                                    (p.stock || 0) < 5 ? "bg-orange-50 text-orange-600 border-orange-100 animate-pulse" :
-                                    "bg-primary/5 text-primary/40 border-transparent"
+                                    (p.stock || 0) <= 0 ? "bg-red-50 text-red-500 border-red-100" :
+                                      (p.stock || 0) < 5 ? "bg-orange-50 text-orange-600 border-orange-100 animate-pulse" :
+                                        "bg-primary/5 text-primary/40 border-transparent"
                                   )}>
                                     {dict.studio.in_stock.replace('{count}', (p.stock || 0).toString())}
                                     {(p.stock || 0) > 0 && (p.stock || 0) < 5 && ` — ${dict.edit_product.low_stock}`}
                                   </span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-col items-end shrink-0">
                                 {p.status === "REJECTED" && !isAdminPreview && (
                                   <button
@@ -974,7 +974,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                   {item.status}
                                 </span>
                               </div>
-                              
+
                               <div className="flex flex-col md:flex-row flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-charcoal/60">
                                 <p className="flex items-center gap-1.5">
                                   <User className="w-3.5 h-3.5 opacity-40" />
@@ -1054,7 +1054,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                   {isUpdating === item.id ? dict.studio.updating : dict.studio.mark_delivered}
                                 </button>
                               )}
-                              
+
                               <div className="relative">
                                 <button
                                   onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
@@ -1130,7 +1130,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                       <div className="w-1.5 h-1.5 bg-accent rounded-full" />
                                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{dict.studio.delivery_destination}</p>
                                     </div>
-                                    
+
                                     <div className="grid md:grid-cols-2 gap-8">
                                       <div className="space-y-4">
                                         <div className="space-y-1">
@@ -1142,7 +1142,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                           <p className="font-bold text-accent text-base">{item.order.clientPhone || "—"}</p>
                                         </div>
                                       </div>
-                                      
+
                                       <div className="space-y-1">
                                         <p className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.studio.shipping_to}</p>
                                         <p className="font-bold text-primary text-sm md:text-base leading-relaxed">
@@ -1360,7 +1360,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                                 ))}
                               </div>
                             </div>
-                            
+
                             <p className="text-charcoal/60 text-base md:text-lg leading-relaxed italic font-medium mb-8 text-center sm:text-start">
                               "{review.comment}"
                             </p>

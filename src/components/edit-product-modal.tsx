@@ -435,50 +435,168 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
         )}
 
         {variants.length > 0 && (
-          <div className="overflow-x-auto rounded-2xl border border-primary/10 shadow-inner">
-            <table className="w-full text-start text-xs">
-              <thead className="bg-primary/5 text-primary/40 font-black uppercase tracking-tighter">
-                <tr>
-                  <th className="px-4 py-3 text-start w-12"></th>
-                  <th className="px-4 py-3 text-start">{dict.edit_product.variant_name}</th>
-                  <th className="px-4 py-3 text-start">{dict.new_product.price_label}</th>
-                  <th className="px-4 py-3 text-start">{dict.new_product.initial_stock_label}</th>
-                  <th className="px-4 py-3 text-start">{dict.edit_product.variant_badge}</th>
-                  <th className="px-4 py-3 text-start">{dict.edit_product.sku_label}</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-primary/5">
-                {variants.map((v: any, i: number) => (
-                  <tr key={i} className="hover:bg-cream/20 transition-colors group">
-                    <td className="px-4 py-3">
-                      <div className="relative w-10 h-10 bg-cream rounded-lg overflow-hidden border border-primary/5 flex items-center justify-center group/img">
-                        {v.image ? (
-                          <img src={v.image} className="w-full h-full object-cover" />
-                        ) : (
-                          <ImageIcon className="w-4 h-4 text-primary/20" />
-                        )}
+          <div className="space-y-4">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto rounded-2xl border border-primary/10 shadow-inner">
+              <table className="w-full text-start text-xs">
+                <thead className="bg-primary/5 text-primary/40 font-black uppercase tracking-tighter">
+                  <tr>
+                    <th className="px-4 py-3 text-start w-12"></th>
+                    <th className="px-4 py-3 text-start">{dict.edit_product.variant_name}</th>
+                    <th className="px-4 py-3 text-start">{dict.new_product.price_label}</th>
+                    <th className="px-4 py-3 text-start">{dict.new_product.initial_stock_label}</th>
+                    <th className="px-4 py-3 text-start">{dict.edit_product.variant_badge}</th>
+                    <th className="px-4 py-3 text-start">{dict.edit_product.sku_label}</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-primary/5">
+                  {variants.map((v: any, i: number) => (
+                    <tr key={i} className="hover:bg-cream/20 transition-colors group">
+                      <td className="px-4 py-3">
+                        <div className="relative w-10 h-10 bg-cream rounded-lg overflow-hidden border border-primary/5 flex items-center justify-center group/img">
+                          {v.image ? (
+                            <img src={v.image} className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon className="w-4 h-4 text-primary/20" />
+                          )}
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  const newVariants = [...variants];
+                                  newVariants[i].image = reader.result as string;
+                                  setVariants(newVariants);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-bold text-primary">{v.name}</td>
+                      <td className="px-4 py-3">
                         <input 
-                          type="file" 
-                          accept="image/*"
-                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          type="number" 
+                          value={v.price}
                           onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const newVariants = [...variants];
-                                newVariants[i].image = reader.result as string;
-                                setVariants(newVariants);
-                              };
-                              reader.readAsDataURL(file);
-                            }
+                            const newVariants = [...variants];
+                            newVariants[i].price = e.target.value;
+                            setVariants(newVariants);
                           }}
+                          className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
                         />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-bold text-primary">{v.name}</td>
-                    <td className="px-4 py-3">
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="space-y-1">
+                          <input 
+                            type="number" 
+                            value={v.stock}
+                            onChange={(e) => {
+                              const newVariants = [...variants];
+                              newVariants[i].stock = e.target.value;
+                              setVariants(newVariants);
+                            }}
+                            className={cn(
+                              "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
+                              parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
+                            )}
+                          />
+                          {parseInt(v.stock) < 5 && (
+                            <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <input 
+                          type="text" 
+                          value={v.badge || ""}
+                          onChange={(e) => {
+                            const newVariants = [...variants];
+                            newVariants[i].badge = e.target.value;
+                            setVariants(newVariants);
+                          }}
+                          placeholder="e.g. Rare"
+                          className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input 
+                          type="text" 
+                          value={v.sku || ""}
+                          onChange={(e) => {
+                            const newVariants = [...variants];
+                            newVariants[i].sku = e.target.value;
+                            setVariants(newVariants);
+                          }}
+                          placeholder={dict.checkout.optional}
+                          className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-end">
+                        <button 
+                          type="button"
+                          onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
+                          className="text-red-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {variants.map((v: any, i: number) => (
+                <div key={i} className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm space-y-5">
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-14 h-14 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center shrink-0">
+                      {v.image ? (
+                        <img src={v.image} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-6 h-6 text-primary/10" />
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const newVariants = [...variants];
+                              newVariants[i].image = reader.result as string;
+                              setVariants(newVariants);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-primary truncate">{v.name}</p>
+                      <button 
+                        type="button"
+                        onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
+                        className="text-[10px] font-black uppercase text-red-400 mt-1"
+                      >
+                        {dict.common.remove}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.price_label}</label>
                       <input 
                         type="number" 
                         value={v.price}
@@ -487,30 +605,27 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                           newVariants[i].price = e.target.value;
                           setVariants(newVariants);
                         }}
-                        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
                       />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="space-y-1">
-                        <input 
-                          type="number" 
-                          value={v.stock}
-                          onChange={(e) => {
-                            const newVariants = [...variants];
-                            newVariants[i].stock = e.target.value;
-                            setVariants(newVariants);
-                          }}
-                          className={cn(
-                            "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
-                            parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
-                          )}
-                        />
-                        {parseInt(v.stock) < 5 && (
-                          <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
+                      <input 
+                        type="number" 
+                        value={v.stock}
+                        onChange={(e) => {
+                          const newVariants = [...variants];
+                          newVariants[i].stock = e.target.value;
+                          setVariants(newVariants);
+                        }}
+                        className={cn(
+                          "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
+                          parseInt(v.stock) < 5 ? "border-orange-300" : "border-primary/5"
                         )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.variant_badge}</label>
                       <input 
                         type="text" 
                         value={v.badge || ""}
@@ -520,10 +635,11 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                           setVariants(newVariants);
                         }}
                         placeholder="e.g. Rare"
-                        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
                       />
-                    </td>
-                    <td className="px-4 py-3">
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.sku_label}</label>
                       <input 
                         type="text" 
                         value={v.sku || ""}
@@ -533,22 +649,13 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                           setVariants(newVariants);
                         }}
                         placeholder={dict.checkout.optional}
-                        className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
                       />
-                    </td>
-                    <td className="px-4 py-3 text-end">
-                      <button 
-                        type="button"
-                        onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-                        className="text-red-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

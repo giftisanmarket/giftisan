@@ -346,10 +346,10 @@ export function InventoryTab({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-2xl"
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-3xl"
           >
-            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 px-2 md:px-4">
+            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 min-w-0">
                 <button 
                   onClick={() => setSelectedIds([])}
                   className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -362,27 +362,27 @@ export function InventoryTab({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 md:gap-3 shrink-0">
                 <button
                   onClick={() => handleBulkStatus("DRAFT")}
                   className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
                 >
                   <EyeOff className="w-4 h-4" />
-                  <span className="hidden md:inline">{dict.studio.move_to_draft}</span>
+                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.move_to_draft}</span>
                 </button>
                 <button
                   onClick={() => handleBulkStatus("APPROVED")}
                   className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
                 >
                   <Check className="w-4 h-4" strokeWidth={3} />
-                  <span className="hidden md:inline">{dict.studio.make_active}</span>
+                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.make_active}</span>
                 </button>
                 <button
                   onClick={handleBulkDelete}
                   className="h-12 w-12 md:w-auto md:px-6 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-red-500/20"
                 >
                   <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
-                  <span className="hidden md:inline">{dict.studio.bulk_delete}</span>
+                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.bulk_delete}</span>
                 </button>
               </div>
             </div>

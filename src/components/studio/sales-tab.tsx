@@ -498,10 +498,10 @@ export function SalesTab({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-2xl"
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-3xl"
           >
-            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 px-2 md:px-4">
+            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 min-w-0">
                 <button 
                   onClick={() => setSelectedOrderIds([])}
                   className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -514,14 +514,14 @@ export function SalesTab({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 md:gap-3 shrink-0">
                 <button
                   disabled={isUpdating === "BULK"}
                   onClick={() => handleBulkStatusUpdate("DELIVERED")}
                   className="h-12 px-5 md:px-8 bg-green-500 text-white font-bold rounded-2xl hover:bg-green-600 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span className="hidden md:inline">Mark Delivered</span>
+                  <span className="hidden md:inline whitespace-nowrap">Mark Delivered</span>
                 </button>
                 <button
                   disabled={isUpdating === "BULK"}
@@ -529,7 +529,7 @@ export function SalesTab({
                   className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
                 >
                   <Truck className="w-4 h-4" />
-                  <span className="hidden md:inline">Mark Shipped</span>
+                  <span className="hidden md:inline whitespace-nowrap">Mark Shipped</span>
                 </button>
               </div>
             </div>

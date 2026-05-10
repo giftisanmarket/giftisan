@@ -21,6 +21,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
+export const revalidate = 60;
+
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string, lang: string }> }) {
   const { slug, lang } = await params;
   if (!hasLocale(lang)) notFound();

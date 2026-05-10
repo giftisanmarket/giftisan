@@ -346,43 +346,51 @@ export function InventoryTab({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-3xl"
+            className="fixed bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[92%] sm:w-[95%] max-w-3xl"
           >
-            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4">
-              <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 min-w-0">
+            <div className="bg-primary/95 backdrop-blur-2xl p-3 md:p-5 rounded-[1.8rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-3 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-4 px-1 md:px-3 min-w-0">
                 <button 
                   onClick={() => setSelectedIds([])}
-                  className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                  title={dict.common?.cancel || "Cancel"}
+                  className="w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
-                <div className="hidden sm:block">
-                  <p className="text-white font-bold text-lg">{selectedIds.length} {dict.studio.treasures_selected}</p>
-                  <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{dict.studio.selected_for_action}</p>
+                <div className="min-w-0">
+                  <p className="text-white font-bold text-xs sm:text-base md:text-lg leading-tight truncate">
+                    {selectedIds.length} <span className="font-medium text-[11px] sm:text-sm md:text-base opacity-80">{dict.studio.treasures_selected}</span>
+                  </p>
+                  <p className="hidden sm:block text-white/40 text-[9px] md:text-[10px] font-black uppercase tracking-widest truncate mt-0.5">
+                    {dict.studio.selected_for_action}
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
                 <button
                   onClick={() => handleBulkStatus("DRAFT")}
-                  className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
+                  title={dict.studio.move_to_draft}
+                  className="h-10 md:h-12 px-3 sm:px-4 md:px-6 bg-white/10 text-white font-bold rounded-xl md:rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
                 >
-                  <EyeOff className="w-4 h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.move_to_draft}</span>
+                  <EyeOff className="w-4 h-4 md:w-4 md:h-4 shrink-0" />
+                  <span className="hidden sm:inline whitespace-nowrap">{dict.studio.move_to_draft}</span>
                 </button>
                 <button
                   onClick={() => handleBulkStatus("APPROVED")}
-                  className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
+                  title={dict.studio.make_active}
+                  className="h-10 md:h-12 px-3 sm:px-4 md:px-6 bg-white/10 text-white font-bold rounded-xl md:rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm"
                 >
-                  <Check className="w-4 h-4" strokeWidth={3} />
-                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.make_active}</span>
+                  <Check className="w-4 h-4 md:w-4 md:h-4 shrink-0" strokeWidth={3} />
+                  <span className="hidden sm:inline whitespace-nowrap">{dict.studio.make_active}</span>
                 </button>
                 <button
                   onClick={handleBulkDelete}
-                  className="h-12 w-12 md:w-auto md:px-6 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-red-500/20"
+                  title={dict.studio.bulk_delete}
+                  className="h-10 md:h-12 w-10 sm:w-auto sm:px-4 md:px-6 bg-red-500 text-white font-bold rounded-xl md:rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-red-500/20"
                 >
-                  <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.bulk_delete}</span>
+                  <Trash2 className="w-4 h-4 shrink-0" />
+                  <span className="hidden sm:inline whitespace-nowrap">{dict.studio.bulk_delete}</span>
                 </button>
               </div>
             </div>

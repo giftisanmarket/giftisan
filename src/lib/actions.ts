@@ -293,11 +293,38 @@ export async function searchProducts(query: string) {
 export async function getProductsByCategory(category: string) {
   if (!category) return [];
 
+  // Map URL category slug back to official database name
+  const categoryNames = [
+    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
+    "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
+    "Glasswork", "Basketry", "Fashion",
+    "Wedding", "Personalized", "Art & Collectibles"
+  ];
+
+  const matchedName = categoryNames.find(name => {
+    const slug1 = name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+    const slug2 = name.toLowerCase().replace(/\s+/g, "-");
+    const slug3 = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    return slug1 === category.toLowerCase() || slug2 === category.toLowerCase() || slug3 === category.toLowerCase();
+  }) || category;
+
+  // Generate all possible variations of the category string formats stored in the DB (e.g. "Gift Boxes & Sets", "gift-boxes-sets", "gift-boxes-&-sets", "gift boxes & sets")
+  const variations = Array.from(new Set([
+    category,
+    category.toLowerCase(),
+    matchedName,
+    matchedName.toLowerCase(),
+    matchedName.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-"), // gift-boxes-&-sets
+    matchedName.toLowerCase().replace(/\s+/g, "-"), // gift-boxes-sets
+    matchedName.toLowerCase().replace(/ & /g, " ").replace(/ /g, " "), // gift boxes sets
+    matchedName.replace(/ & /g, " & ").replace(/  +/g, " ")
+  ]));
+
   try {
     const products = await prisma.product.findMany({
       where: {
         category: {
-          equals: category,
+          in: variations,
           mode: "insensitive"
         },
         status: "APPROVED",

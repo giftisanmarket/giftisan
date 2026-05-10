@@ -12,8 +12,8 @@ import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 import { getDictionary, hasLocale } from "./dictionaries";
 import { notFound } from "next/navigation";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
+
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -79,23 +79,53 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     "Wedding", "Personalized", "Art & Collectibles"
   ];
 
-  const categoryCounts = await Promise.all(
-    categoryNames.map(async (name) => {
-      const count = await prisma.product.count({
-        where: {
-          category: {
-            equals: name,
-            mode: 'insensitive'
-          },
-          status: "APPROVED",
-          artisan: {
-            status: "APPROVED"
-          }
-        }
-      });
-      return { name, count };
-    })
-  );
+  const categoryCountsRaw = await prisma.product.groupBy({
+    by: ['category'],
+    where: {
+      status: "APPROVED",
+      artisan: {
+        status: "APPROVED"
+      }
+    },
+    _count: {
+      _all: true
+    }
+  });
+
+  // Initialize a map with 0 counts for all official category names (case-insensitive keys)
+  const categoryCountsMap = new Map<string, number>();
+  categoryNames.forEach(name => {
+    categoryCountsMap.set(name.toLowerCase(), 0);
+  });
+
+  // Accumulate counts from the database grouping, translating various database formats back to official names
+  categoryCountsRaw.forEach(item => {
+    const rawCategory = item.category;
+    if (!rawCategory) return;
+    
+    const officialName = categoryNames.find(name => {
+      const slug1 = name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+      const slug2 = name.toLowerCase().replace(/\s+/g, "-");
+      const slug3 = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+      return slug1 === rawCategory.toLowerCase() || 
+             slug2 === rawCategory.toLowerCase() || 
+             slug3 === rawCategory.toLowerCase() || 
+             name.toLowerCase() === rawCategory.toLowerCase();
+    }) || rawCategory;
+
+    const currentCount = categoryCountsMap.get(officialName.toLowerCase()) || 0;
+    categoryCountsMap.set(officialName.toLowerCase(), currentCount + item._count._all);
+  });
+
+  const categoryCounts = categoryNames
+    .map(name => ({
+      name,
+      count: categoryCountsMap.get(name.toLowerCase()) || 0
+    }))
+    .sort((a, b) => b.count - a.count);
+
+
+
 
   // Sanitize data to prevent serialization crashes from oversized images in the DB
   const sanitizedProducts = products.map(p => ({

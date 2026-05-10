@@ -527,82 +527,83 @@ export async function getUserFavorites(userId: string) {
 
 export async function createOrder(userId: string, totalAmount: number, items: any[], shippingData?: any) {
   try {
-    // 🛡️ Final Inventory Guard: Verify stock for all items before processing
-    for (const item of items) {
-      if (item.variantId) {
-        const variant = await prisma.productVariant.findUnique({
-          where: { id: item.variantId },
-          select: { stock: true, name: true }
-        });
-        if (!variant || variant.stock < item.quantity) {
-          return {
-            error: `The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`
-          };
-        }
-      } else {
-        const product = await prisma.product.findUnique({
-          where: { id: item.id },
-          select: { stock: true, name: true }
-        });
+    const order = await prisma.$transaction(async (tx) => {
+      // 🛡️ Final Inventory Guard: Verify stock for all items before processing
+      for (const item of items) {
+        if (item.variantId) {
+          const variant = await tx.productVariant.findUnique({
+            where: { id: item.variantId },
+            select: { stock: true, name: true }
+          });
+          if (!variant || variant.stock < item.quantity) {
+            throw new Error(`The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
+          }
+        } else {
+          const product = await tx.product.findUnique({
+            where: { id: item.id },
+            select: { stock: true, name: true }
+          });
 
-        if (!product || product.stock < item.quantity) {
-          return {
-            error: `The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`
-          };
+          if (!product || product.stock < item.quantity) {
+            throw new Error(`The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
+          }
         }
       }
-    }
 
-    const order = await prisma.order.create({
-      data: {
-        userId,
-        totalAmount,
-        status: "PENDING",
-        shippingAddress: shippingData?.address,
-        shippingCity: shippingData?.city,
-        shippingZip: shippingData?.zip,
-        shippingCountry: shippingData?.country,
-        clientPhone: shippingData?.phone,
-        clientEmail: shippingData?.email,
-        orderNotes: shippingData?.orderNotes,
-        isGift: shippingData?.isGift || false,
-        giftMessage: shippingData?.giftMessage || null,
-        items: {
-          create: items.map(item => ({
-            productId: item.id,
-            variantId: item.variantId || null,
-            quantity: item.quantity,
-            price: item.price,
-            personalization: item.personalization
-          }))
+      // Create the order
+      const newOrder = await tx.order.create({
+        data: {
+          userId,
+          totalAmount,
+          status: "PENDING",
+          shippingAddress: shippingData?.address,
+          shippingCity: shippingData?.city,
+          shippingZip: shippingData?.zip,
+          shippingCountry: shippingData?.country,
+          clientPhone: shippingData?.phone,
+          clientEmail: shippingData?.email,
+          orderNotes: shippingData?.orderNotes,
+          isGift: shippingData?.isGift || false,
+          giftMessage: shippingData?.giftMessage || null,
+          items: {
+            create: items.map(item => ({
+              productId: item.id,
+              variantId: item.variantId || null,
+              quantity: item.quantity,
+              price: item.price,
+              personalization: item.personalization
+            }))
+          }
+        }
+      });
+
+      // Decrement stock for each item
+      for (const item of items) {
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: {
+              stock: {
+                decrement: item.quantity
+              }
+            }
+          });
+        } else {
+          await tx.product.update({
+            where: { id: item.id },
+            data: {
+              stock: {
+                decrement: item.quantity
+              }
+            }
+          });
         }
       }
+
+      return newOrder;
     });
 
-    // Decrement stock for each item
-    for (const item of items) {
-      if (item.variantId) {
-        await prisma.productVariant.update({
-          where: { id: item.variantId },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
-          }
-        });
-      } else {
-        await prisma.product.update({
-          where: { id: item.id },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
-          }
-        });
-      }
-    }
-
-    // Send notification emails to artisans (asynchronously)
+    // Send notification emails to artisans (asynchronously, OUTSIDE transaction block)
     try {
       const orderWithArtisans = await prisma.order.findUnique({
         where: { id: order.id },
@@ -647,9 +648,9 @@ export async function createOrder(userId: string, totalAmount: number, items: an
     }
 
     return { success: true, orderId: order.id };
-  } catch (error) {
-    console.error("Order creation error:", error);
-    return { error: "Failed to create order" };
+  } catch (error: any) {
+    console.error("Create order error:", error);
+    return { error: error.message || "Failed to complete your pre-launch order." };
   }
 }
 
@@ -756,6 +757,16 @@ export async function checkSlugAvailability(slug: string, currentUserId: string)
 
 export async function updateArtisanProfile(userId: string, data: any) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    if (!isAdmin && session.user.id !== userId) {
+      return { error: "You are not authorized to update this profile" };
+    }
+
     // Only generate slug if it's not manually provided OR it's a new profile
     const slug = data.slug
       ? slugify(data.slug)
@@ -828,6 +839,19 @@ export async function updateArtisanProfile(userId: string, data: any) {
 
 export async function createProduct(artisanId: string, formData: FormData) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { id: artisanId }
+    });
+
+    if (!artisan || artisan.userId !== session.user.id) {
+      return { error: "You are not authorized to list creations in this studio" };
+    }
+
     const data = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
@@ -950,6 +974,33 @@ export async function getArtisanReviews(artisanId: string) {
 
 export async function updateOrderItemStatus(itemId: string, status: string, trackingNumber?: string, carrier?: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const orderItem = await prisma.orderItem.findUnique({
+      where: { id: itemId },
+      include: {
+        product: {
+          select: { artisanId: true }
+        }
+      }
+    });
+
+    if (!orderItem) {
+      return { error: "Order item not found" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!isAdmin && (!artisan || orderItem.product.artisanId !== artisan.id)) {
+      return { error: "You are not authorized to update this order item" };
+    }
+
     const updatedItem = await prisma.orderItem.update({
       where: { id: itemId },
       data: {
@@ -1035,6 +1086,11 @@ export async function trackProductView(productId: string) {
 
 export async function getSubscribers() {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return [];
+    }
+
     return await prisma.newsletterSubscriber.findMany({
       orderBy: { createdAt: 'desc' }
     });
@@ -1046,6 +1102,11 @@ export async function getSubscribers() {
 
 export async function deleteSubscriber(id: string) {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
     await prisma.newsletterSubscriber.delete({
       where: { id }
     });
@@ -1135,6 +1196,29 @@ export async function updateProduct(productId: string, formData: FormData) {
 
 export async function deleteProduct(productId: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { artisanId: true }
+    });
+
+    if (!product) {
+      return { error: "Treasure not found" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!isAdmin && (!artisan || product.artisanId !== artisan.id)) {
+      return { error: "You are not authorized to remove this treasure" };
+    }
+
     await prisma.product.delete({
       where: { id: productId }
     });
@@ -1153,6 +1237,15 @@ export async function deleteProduct(productId: string) {
 
 export async function promoteToArtisan(userId: string, studioData: any) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    if (session.user.id !== userId) {
+      return { error: "You are not authorized to onboard this account" };
+    }
+
     await prisma.user.update({
       where: { id: userId },
       data: { role: "ARTISAN" }
@@ -1181,6 +1274,15 @@ export async function promoteToArtisan(userId: string, studioData: any) {
 
 export async function addReview(data: { productId: string, userId: string, rating: number, comment: string, images?: string[] }) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    if (session.user.id !== data.userId) {
+      return { error: "You are not authorized to submit this review" };
+    }
+
     const processedImages = await Promise.all(
       (data.images || []).map(img => processImage(img))
     );
@@ -1208,6 +1310,11 @@ export async function addReview(data: { productId: string, userId: string, ratin
 
 export async function getAdminStats() {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { userCount: 0, productCount: 0, orderCount: 0, revenue: 0 };
+    }
+
     const [userCount, productCount, orderCount, totalRevenue] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -1233,6 +1340,11 @@ export async function getAdminStats() {
 
 export async function getAllUsers() {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return [];
+    }
+
     return await prisma.user.findMany({
       include: {
         artisanProfile: true,
@@ -1248,6 +1360,11 @@ export async function getAllUsers() {
 
 export async function getAllOrders() {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return [];
+    }
+
     return await prisma.order.findMany({
       include: {
         user: true,
@@ -1267,6 +1384,11 @@ export async function getAllOrders() {
 
 export async function deleteUser(userId: string) {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
     await prisma.user.delete({
       where: { id: userId }
     });
@@ -1280,6 +1402,11 @@ export async function deleteUser(userId: string) {
 
 export async function updateArtisanStatus(artisanId: string, status: "PENDING" | "APPROVED" | "REJECTED") {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
     const profile = await prisma.artisanProfile.update({
       where: { id: artisanId },
       data: { status },
@@ -1303,6 +1430,11 @@ export async function updateArtisanStatus(artisanId: string, status: "PENDING" |
 
 export async function updateProductStatus(productId: string, status: "PENDING" | "APPROVED" | "REJECTED" | "DRAFT", reason?: string) {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized: Admin privileges required" };
+    }
+
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: {
@@ -1350,6 +1482,11 @@ export async function updateProductStatus(productId: string, status: "PENDING" |
 
 export async function toggleProductFeatured(productId: string, isFeatured: boolean) {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized: Admin privileges required" };
+    }
+
     await prisma.product.update({
       where: { id: productId },
       data: { isFeatured }
@@ -1687,6 +1824,35 @@ export async function sendOutreachAction(data: { name: string; email: string; pr
 
 export async function bulkDeleteProducts(ids: string[]) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    
+    if (!isAdmin) {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id }
+      });
+
+      if (!artisan) {
+        return { error: "You must be an artisan to perform this action" };
+      }
+
+      // Verify that all products belong to this artisan
+      const productsCount = await prisma.product.count({
+        where: {
+          id: { in: ids },
+          artisanId: artisan.id
+        }
+      });
+
+      if (productsCount !== ids.length) {
+        return { error: "You are not authorized to remove some of these treasures" };
+      }
+    }
+
     await prisma.product.deleteMany({
       where: {
         id: { in: ids }
@@ -1707,12 +1873,47 @@ export async function bulkDeleteProducts(ids: string[]) {
 
 export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" | "APPROVED" | "REJECTED" | "DRAFT") {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    let targetStatus = status;
+
+    if (!isAdmin) {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id }
+      });
+
+      if (!artisan) {
+        return { error: "You must be an artisan to perform this action" };
+      }
+
+      // Verify that all products belong to this artisan
+      const productsCount = await prisma.product.count({
+        where: {
+          id: { in: ids },
+          artisanId: artisan.id
+        }
+      });
+
+      if (productsCount !== ids.length) {
+        return { error: "You are not authorized to update some of these treasures" };
+      }
+
+      // Artisans can only transition products to DRAFT or PENDING
+      if (status === "APPROVED" || status === "REJECTED") {
+        targetStatus = "PENDING";
+      }
+    }
+
     await prisma.product.updateMany({
       where: {
         id: { in: ids }
       },
       data: {
-        status,
+        status: targetStatus,
         rejectionReason: null
       }
     });

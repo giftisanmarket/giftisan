@@ -91,12 +91,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       return session;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       // On initial login, add the role and verification status to the token
       if (user) {
         token.role = user.role;
+        token.name = user.name;
         // If they use Google/OAuth, they are verified by default
         token.emailVerified = (account?.type === "oauth") ? new Date() : user.emailVerified;
+      }
+
+      // Handle session updates (e.g. from update() on the client)
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
+        if (session.role) token.role = session.role;
       }
 
       // ⚠️ CRITICAL: Scrub the image data out of the token to prevent 431 errors
@@ -105,16 +112,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       if (!token.sub) return token;
       
-      // Fetch latest role and name, but avoid fetching the large image blob
-      const dbUser = await prisma.user.findUnique({
-        where: { id: token.sub },
-        select: { role: true, name: true, emailVerified: true } 
-      });
-      
-      if (dbUser) {
-        token.role = dbUser.role;
-        token.name = dbUser.name;
-        token.emailVerified = dbUser.emailVerified;
+      const now = Date.now();
+      const lastCheck = (token.lastChecked as number) || 0;
+
+      // Query database at most once every 30 seconds to fetch latest role/name
+      if (!token.role || now - lastCheck > 30000) {
+        try {
+          // Fetch latest role and name, but avoid fetching the large image blob
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { role: true, name: true, emailVerified: true } 
+          });
+          
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.name = dbUser.name;
+            token.emailVerified = dbUser.emailVerified;
+            token.lastChecked = now;
+          }
+        } catch (error) {
+          console.error("JWT database sync error:", error);
+        }
       }
       return token;
     }

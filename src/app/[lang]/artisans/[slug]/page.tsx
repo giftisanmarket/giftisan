@@ -2,10 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { ArtisanClient } from "@/components/artisan-client";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
-
-
-async function getArtisanBySlug(slug: string) {
+// Cached fetch to deduplicate queries between generateMetadata and page rendering
+const getArtisanBySlug = cache(async (slug: string) => {
   // Try to find by the new slug field first
   const artisanBySlug = await prisma.artisanProfile.findFirst({
     where: { 
@@ -62,7 +62,7 @@ async function getArtisanBySlug(slug: string) {
     artisanProfile: matchingUser.artisanProfile, 
     name: matchingUser.artisanProfile?.studioName || matchingUser.name 
   } : null;
-}
+});
 
 import { getDictionary, hasLocale } from "../../dictionaries";
 import { SITE_URL, SITE_NAME } from "@/lib/constants";

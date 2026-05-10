@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { ProductClient } from "@/components/product-client";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
+import { cache } from "react";
 
 interface Props {
   params: Promise<{ slug: string; lang: string }>;
@@ -13,8 +14,8 @@ import { getDictionary } from "@/app/[lang]/dictionaries";
 
 import { cookies } from "next/headers";
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug, lang } = await params;
+// Cached product fetch to deduplicate queries between metadata generation and page rendering
+const getProduct = cache(async (slug: string) => {
   let product = await prisma.product.findFirst({
     where: {
       OR: [
@@ -22,22 +23,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         { slug: { equals: slug, mode: "insensitive" } }
       ]
     },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      category: true,
-      images: true,
-      slug: true,
-      status: true,
+    include: {
       artisan: {
-        select: {
-          userId: true,
-          status: true
+        include: {
+          user: true
+        }
+      },
+      variants: true,
+      reviews: {
+        include: {
+          user: true
         }
       }
     }
   });
+
+  // RESILIENCE FALLBACK: If not found, try a hyphenated version
+  if (!product) {
+    const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
+    product = await prisma.product.findFirst({
+      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
+      include: {
+        artisan: { include: { user: true } },
+        variants: true,
+        reviews: { include: { user: true } }
+      }
+    });
+  }
+  
+  return product;
+});
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug, lang } = await params;
+  const product = await getProduct(slug);
 
   if (!product) return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
 
@@ -97,41 +116,7 @@ export default async function ProductPage({ params }: Props) {
   const { slug, lang } = await params;
   const dict = await getDictionary(lang as any);
   
-  // Try finding exactly what's in the URL
-  let product = await prisma.product.findFirst({
-    where: {
-      OR: [
-        { id: { equals: slug, mode: "insensitive" } },
-        { slug: { equals: slug, mode: "insensitive" } }
-      ]
-    },
-    include: {
-      artisan: {
-        include: {
-          user: true
-        }
-      },
-      variants: true,
-      reviews: {
-        include: {
-          user: true
-        }
-      }
-    }
-  });
-
-  // RESILIENCE FALLBACK: If not found, try a hyphenated version
-  if (!product) {
-    const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
-    product = await prisma.product.findFirst({
-      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
-      include: {
-        artisan: { include: { user: true } },
-        variants: true,
-        reviews: { include: { user: true } }
-      }
-    });
-  }
+  const product = await getProduct(slug);
   
   if (!product) {
     notFound();

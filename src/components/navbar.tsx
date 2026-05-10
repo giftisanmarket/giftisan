@@ -437,12 +437,12 @@ export function Navbar({ dict }: { dict?: any }) {
           <div className="container mx-auto px-4 flex items-center justify-between gap-8">
             <div className="flex items-center gap-6 lg:gap-10 overflow-x-auto no-scrollbar whitespace-nowrap flex-1 py-1">
               {[
-                { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
                 { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                 { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
                 { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
                 { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
               ].map((cat) => (
                 <Link
@@ -572,15 +572,15 @@ export function Navbar({ dict }: { dict?: any }) {
               <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.categories}</p>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                  { id: "vintage", label: d.common.categories_list?.vintage || d.common.vintage },
+                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
+                  { id: "stationery", label: d.common.categories_list?.stationery || d.common.stationery },
                   { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                   { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
                   { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
-                  { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles },
-                  { id: "stationery", label: d.common.categories_list?.stationery || d.common.stationery },
-                  { id: "vintage", label: d.common.categories_list?.vintage || d.common.vintage }
+                  { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                  { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
                 ].map((cat) => (
                   <Link
                     key={cat.id}

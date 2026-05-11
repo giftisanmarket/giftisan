@@ -94,7 +94,7 @@ export function ContactClient({ dict }: { dict: any }) {
                   <div className="flex gap-4 mt-4">
                      <a href="https://www.instagram.com/giftisan.eg/" target="_blank" rel="noopener noreferrer" className="text-primary/40 hover:text-accent transition-colors"><FaInstagram className="w-5 h-5" /></a>
                      <a href="https://www.facebook.com/giftisan.eg" target="_blank" rel="noopener noreferrer" className="text-primary/40 hover:text-accent transition-colors"><FaFacebook className="w-5 h-5" /></a>
-                     <a href="https://www.tiktok.com/@giftisanmarket" target="_blank" rel="noopener noreferrer" className="text-primary/40 hover:text-accent transition-colors"><FaTiktok className="w-5 h-5" /></a>
+                     <a href="https://www.tiktok.com/@giftisan.eg" target="_blank" rel="noopener noreferrer" className="text-primary/40 hover:text-accent transition-colors"><FaTiktok className="w-5 h-5" /></a>
                   </div>
                 </div>
               </div>

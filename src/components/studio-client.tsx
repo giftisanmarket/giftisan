@@ -46,7 +46,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus } from "@/lib/actions";
+import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus, subscribeToNewsletter } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
 import { SalesChart } from "@/components/sales-chart";
@@ -133,23 +133,30 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   };
 
   const handleJoinWaitlist = async () => {
-    if (isAdminPreview) return;
+    if (isAdminPreview || !artisan?.user?.email) return;
     setIsJoiningWaitlist(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    setHasJoinedWaitlist(true);
-    setIsJoiningWaitlist(false);
-
-    toast.success("You're on the list! We'll notify you when Phase 2 starts.", {
-      icon: <Sparkles className="w-5 h-5 text-accent" />,
-      style: {
-        borderRadius: '20px',
-        background: '#1a1a1a',
-        color: '#fff',
-        border: '1px solid rgba(255,255,255,0.1)'
+    try {
+      const res = await subscribeToNewsletter(artisan.user.email);
+      if (res.success || res.error?.includes("already")) {
+        setHasJoinedWaitlist(true);
+        toast.success("You're on the list! We'll notify you when Phase 2 starts.", {
+          icon: <Sparkles className="w-5 h-5 text-accent" />,
+          style: {
+            borderRadius: '20px',
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }
+        });
+      } else {
+        toast.error(res.error || "Failed to join waitlist");
       }
-    });
+    } catch (err) {
+      toast.error("Something went wrong joining waitlist");
+    } finally {
+      setIsJoiningWaitlist(false);
+    }
   };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

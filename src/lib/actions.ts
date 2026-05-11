@@ -1040,7 +1040,8 @@ export async function getArtisanSales(artisanId: string) {
       include: {
         order: {
           include: {
-            user: true
+            user: true,
+            coupon: true
           }
         },
         product: true,

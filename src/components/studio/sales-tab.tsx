@@ -326,9 +326,15 @@ export function SalesTab({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center md:items-end gap-3 shrink-0 pt-4 md:pt-0">
+                <div className="flex flex-col items-center md:items-end gap-1.5 shrink-0 pt-4 md:pt-0">
                   <p className="text-[10px] font-black text-primary/20 uppercase tracking-[0.2em]">{dict.common.total_amount}</p>
                   <p className="text-2xl md:text-3xl font-heading font-bold text-primary">{dict.product.currency} {item.price * item.quantity}</p>
+                  {item.order.discountApplied > 0 && (
+                    <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider border border-emerald-100">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                      <span>{item.order.coupon?.code || "PROMO"}: -{dict.product.currency} {item.order.discountApplied}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

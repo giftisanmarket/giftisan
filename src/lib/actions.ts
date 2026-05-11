@@ -2100,3 +2100,86 @@ export async function validateCouponAction(code: string, subtotal: number) {
     return { error: "An error occurred during coupon validation." };
   }
 }
+
+export async function getCouponsAdminAction() {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
+    const coupons = await prisma.coupon.findMany({
+      orderBy: { createdAt: "desc" }
+    });
+
+    return { success: true, coupons };
+  } catch (error: any) {
+    console.error("Get coupons admin error:", error);
+    return { error: error.message || "Failed to fetch coupons." };
+  }
+}
+
+export async function toggleCouponStatusAction(couponId: string, isActive: boolean) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
+    const updated = await prisma.coupon.update({
+      where: { id: couponId },
+      data: { isActive }
+    });
+
+    return { success: true, coupon: updated };
+  } catch (error: any) {
+    console.error("Toggle coupon error:", error);
+    return { error: error.message || "Failed to update coupon status." };
+  }
+}
+
+export async function createCouponAction(data: {
+  code: string;
+  discountType: "PERCENTAGE" | "FIXED";
+  discountValue: number;
+  minOrderAmount?: number;
+  maxDiscount?: number;
+  maxUses?: number;
+}) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized" };
+    }
+
+    if (!data.code || !data.code.trim()) {
+      return { error: "Coupon code is required" };
+    }
+
+    const exists = await prisma.coupon.findUnique({
+      where: { code: data.code.toUpperCase().trim() }
+    });
+
+    if (exists) {
+      return { error: "A coupon code with this name already exists" };
+    }
+
+    const newCoupon = await prisma.coupon.create({
+      data: {
+        code: data.code.toUpperCase().trim(),
+        discountType: data.discountType,
+        discountValue: Number(data.discountValue),
+        minOrderAmount: data.minOrderAmount ? Number(data.minOrderAmount) : null,
+        maxDiscount: data.maxDiscount ? Number(data.maxDiscount) : null,
+        maxUses: data.maxUses ? Number(data.maxUses) : null,
+        isActive: true,
+        usedCount: 0
+      }
+    });
+
+    return { success: true, coupon: newCoupon };
+  } catch (error: any) {
+    console.error("Create coupon error:", error);
+    return { error: error.message || "Failed to create coupon." };
+  }
+}

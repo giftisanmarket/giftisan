@@ -10,19 +10,24 @@ import {
   LayoutDashboard,
   Mail,
   Send,
-  ArrowLeft
+  ArrowLeft,
+  Tag
 } from "lucide-react";
 
 import Image from "next/image";
 
-const getNavItems = (dict: any) => [
-  { label: dict.admin.overview, href: "/admin", icon: LayoutDashboard },
-  { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
-  { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
-  { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
-  { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
-  { label: "Outreach", href: "/admin/outreach", icon: Send },
-];
+const getNavItems = (dict: any) => {
+  const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
+  return [
+    { label: dict.admin.overview, href: "/admin", icon: LayoutDashboard },
+    { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
+    { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
+    { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
+    { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
+    { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
+    { label: "Outreach", href: "/admin/outreach", icon: Send },
+  ];
+};
 
 export function AdminNavClient({ 
   children,

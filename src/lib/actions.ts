@@ -643,56 +643,96 @@ export async function createOrder(userId: string, totalAmount: number, items: an
       // We don't fail the order creation if Paymob fails to init, we just return the orderId
     }
 
-    // Send notification emails to artisans (asynchronously, OUTSIDE transaction block)
-    try {
-      const orderWithArtisans = await prisma.order.findUnique({
-        where: { id: order.id },
-        include: {
-          items: {
-            include: {
-              product: {
-                include: {
-                  artisan: {
-                    include: {
-                      user: true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      if (orderWithArtisans) {
-        // Collect unique artisans
-        const artisans = new Map();
-        orderWithArtisans.items.forEach(item => {
-          const artisan = item.product.artisan;
-          if (artisan.user.email) {
-            artisans.set(artisan.user.email, {
-              name: artisan.user.name || artisan.studioName,
-              email: artisan.user.email
-            });
-          }
-        });
-
-        // Send emails
-        artisans.forEach(artisan => {
-          sendOrderNotification(artisan.email, artisan.name, order.id, totalAmount)
-            .catch(err => console.error(`Failed to send order notification to ${artisan.email}:`, err));
-        });
-      }
-    } catch (err) {
-      console.error("Failed to process order notification emails:", err);
-    }
-
     return { success: true, orderId: order.id, paymentUrl };
   } catch (error: any) {
     console.error("Create order error:", error);
     return { error: error.message || "Failed to complete your pre-launch order." };
   }
 }
+
+export async function retryPaymentAction(orderId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        },
+        user: true
+      }
+    });
+
+    if (!order) {
+      return { error: "Order not found" };
+    }
+
+    if (order.userId !== session.user.id) {
+      return { error: "You are not authorized to retry payment for this order" };
+    }
+
+    if (order.status !== "PENDING") {
+      return { error: `This order is already ${order.status.toLowerCase()}` };
+    }
+
+    // Generate fresh Paymob Intention link
+    const amountCents = Math.round(order.totalAmount * 100);
+    
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const proto = headersList.get("x-forwarded-proto") || "http";
+    const origin = `${proto}://${host}`;
+
+    const itemsForPaymob = order.items.map(item => {
+      let imageUrl = item.product.images && item.product.images.length > 0 ? item.product.images[0] : "";
+      if (imageUrl && !imageUrl.startsWith("http")) {
+        imageUrl = `${origin}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+      }
+      return {
+        name: item.product.name || "Item",
+        price: item.price,
+        description: item.product.description || "Giftisan Product",
+        quantity: item.quantity,
+        image: imageUrl
+      };
+    });
+
+    const shippingData = {
+      firstName: order.user.name?.split(" ")[0] || "NA",
+      lastName: order.user.name?.split(" ").slice(1).join(" ") || "NA",
+      email: order.clientEmail || order.user.email || "test@test.com",
+      phone: order.clientPhone || "+201234567890",
+      address: order.shippingAddress || "NA",
+      city: order.shippingCity || "NA",
+      country: order.shippingCountry || "EG",
+      zip: order.shippingZip || ""
+    };
+
+    const clientSecret = await createPaymobIntention(
+      amountCents,
+      order.id, // using our internal order ID as special_reference
+      shippingData,
+      itemsForPaymob
+    );
+
+    if (clientSecret) {
+      const paymentUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${clientSecret}`;
+      return { success: true, paymentUrl };
+    } else {
+      return { error: "Failed to initialize payment gateway" };
+    }
+  } catch (error: any) {
+    console.error("Retry payment error:", error);
+    return { error: error.message || "Failed to regenerate payment session" };
+  }
+}
+
 
 export async function getUserOrders(userId: string) {
   try {

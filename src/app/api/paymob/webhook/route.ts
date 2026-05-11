@@ -2,19 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { PAYMOB_HMAC } from "@/lib/paymob";
+import { sendOrderNotification } from "@/lib/mail";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    // Verify HMAC if you have the secret
-    // Note: It's highly recommended to verify the HMAC signature here
-    // For simplicity, we are skipping full HMAC verification in this scaffold
-    // You should use the PAYMOB_HMAC from env to compute and verify it
-
     const hmacReceived = req.nextUrl.searchParams.get("hmac");
-    if (PAYMOB_HMAC && hmacReceived) {
+    const isProd = process.env.NODE_ENV === "production";
+    
+    if (PAYMOB_HMAC) {
+      if (!hmacReceived) {
+        console.error("Paymob Webhook HMAC missing");
+        return NextResponse.json({ error: "Unauthorized: Missing HMAC" }, { status: 401 });
+      }
+
       const obj = data.obj;
+      if (!obj) {
+        return NextResponse.json({ error: "Invalid payload: Missing obj" }, { status: 400 });
+      }
       
       const fieldsToHash = [
         obj.amount_cents,
@@ -30,22 +36,24 @@ export async function POST(req: NextRequest) {
         obj.is_refunded,
         obj.is_standalone_payment,
         obj.is_voided,
-        obj.order.id,
+        obj.order?.id,
         obj.owner,
         obj.pending,
-        obj.source_data.pan,
-        obj.source_data.sub_type,
-        obj.source_data.type,
+        obj.source_data?.pan,
+        obj.source_data?.sub_type,
+        obj.source_data?.type,
         obj.success
       ];
 
-      const hmacString = fieldsToHash.join("");
+      const hmacString = fieldsToHash.map(v => v === undefined || v === null ? "" : String(v)).join("");
       const hmacCalculated = crypto.createHmac("sha512", PAYMOB_HMAC).update(hmacString).digest("hex");
 
       if (hmacCalculated !== hmacReceived) {
         console.error("Paymob Webhook HMAC mismatch");
         return NextResponse.json({ error: "Invalid HMAC" }, { status: 401 });
       }
+    } else if (isProd) {
+      console.warn("PAYMOB_HMAC is not configured in production. Enforcing HMAC check is skipped but highly recommended.");
     }
 
     const { obj } = data;
@@ -57,14 +65,99 @@ export async function POST(req: NextRequest) {
     const isSuccess = obj.success === true && obj.pending === false;
 
     if (isSuccess) {
-      await prisma.order.update({
+      // Success flow: mark as PROCESSING and notify artisans
+      const order = await prisma.order.findUnique({
         where: { id: orderId },
-        data: { status: "PROCESSING" } // Or "PAID" depending on your logic
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  artisan: {
+                    include: {
+                      user: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       });
-      console.log(`Order ${orderId} marked as PROCESSING/PAID via Paymob webhook.`);
+
+      if (order && order.status === "PENDING") {
+        await prisma.order.update({
+          where: { id: orderId },
+          data: { status: "PROCESSING" }
+        });
+        console.log(`Order ${orderId} marked as PROCESSING via Paymob webhook.`);
+
+        // Send email notifications to artisans
+        try {
+          const artisans = new Map();
+          order.items.forEach(item => {
+            const artisan = item.product.artisan;
+            if (artisan.user.email) {
+              artisans.set(artisan.user.email, {
+                name: artisan.user.name || artisan.studioName,
+                email: artisan.user.email
+              });
+            }
+          });
+
+          // Send emails
+          artisans.forEach(artisan => {
+            sendOrderNotification(artisan.email, artisan.name, order.id, order.totalAmount)
+              .catch(err => console.error(`Failed to send order notification to ${artisan.email}:`, err));
+          });
+        } catch (err) {
+          console.error("Failed to process order notification emails inside webhook:", err);
+        }
+      } else if (order) {
+        console.log(`Order ${orderId} has status: ${order.status} (Skipped email/status update)`);
+      }
     } else {
-      // Handle failure (e.g., mark as FAILED)
-      console.log(`Payment failed for order ${orderId}.`);
+      // Failure flow: payment failed or cancelled
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { items: true }
+      });
+
+      if (order && order.status === "PENDING") {
+        await prisma.$transaction(async (tx) => {
+          // Mark order as CANCELLED
+          await tx.order.update({
+            where: { id: orderId },
+            data: { status: "CANCELLED" }
+          });
+
+          // Restore stock
+          for (const item of order.items) {
+            if (item.variantId) {
+              await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: {
+                  stock: {
+                    increment: item.quantity
+                  }
+                }
+              });
+            } else {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: {
+                  stock: {
+                    increment: item.quantity
+                  }
+                }
+              });
+            }
+          }
+        });
+        console.log(`Order ${orderId} payment failed. Marked as CANCELLED and restored stock.`);
+      } else if (order) {
+        console.log(`Order ${orderId} has status: ${order.status} (No stock restoration needed)`);
+      }
     }
 
     return NextResponse.json({ success: true });
@@ -73,3 +166,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+

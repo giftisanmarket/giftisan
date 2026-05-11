@@ -20,6 +20,8 @@ import {
 import { motion } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { retryPaymentAction } from "@/lib/actions";
 
 interface ProfileClientProps {
   user: any;
@@ -28,6 +30,28 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
+  const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
+  const [retryError, setRetryError] = useState<string | null>(null);
+
+  const handleRetryPayment = async (orderId: string) => {
+    setRetryingOrderId(orderId);
+    setRetryError(null);
+    try {
+      const res = await retryPaymentAction(orderId);
+      if (res.success && res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+      } else {
+        setRetryError(res.error || "Failed to regenerate payment session.");
+        alert(res.error || "Failed to regenerate payment session.");
+      }
+    } catch (err) {
+      setRetryError("An unexpected error occurred. Please try again.");
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setRetryingOrderId(null);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-cream">
       <Navbar dict={dict} />
@@ -165,6 +189,20 @@ Trace
                             </div>
                           )}
                         </div>
+
+                        {order.status === "PENDING" && (
+                          <button
+                            onClick={() => handleRetryPayment(order.id)}
+                            disabled={retryingOrderId !== null}
+                            className={cn(
+                              "flex items-center gap-2 px-5 py-2.5 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-accent/90 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0",
+                              retryingOrderId === order.id && "animate-pulse"
+                            )}
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            <span>{retryingOrderId === order.id ? dict.checkout.processing : dict.checkout.pay_now || "Pay Now"}</span>
+                          </button>
+                        )}
                       </div>
 
                       <div className="p-4 md:p-8 space-y-6">

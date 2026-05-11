@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, Sparkles, MessageSquare } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder } from "@/lib/actions";
@@ -329,16 +329,6 @@ export function CheckoutClient({ dict }: { dict: any }) {
               </form>
             </motion.section>
 
-            {/* Pre-Launch Protocol Alert */}
-            <div className="bg-accent/5 border-2 border-dashed border-accent/20 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 text-center group">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-accent" />
-              </div>
-              <h3 className="text-lg md:text-xl font-heading font-bold text-primary mb-2">{dict.checkout.prelaunch_alert_title}</h3>
-              <p className="text-[11px] md:text-sm text-charcoal/60 max-w-sm mx-auto leading-relaxed">
-                {dict.checkout.prelaunch_alert_desc}
-              </p>
-            </div>
           </div>
         </div>
       </div>

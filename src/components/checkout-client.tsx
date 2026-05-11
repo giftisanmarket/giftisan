@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 export function CheckoutClient({ dict }: { dict: any }) {
   // ⚙️ FEATURE FLAGS:
   const ENABLE_COUPONS = true;          // Keep this true to still show the promo input field
-  const APPLY_COUPON_DISCOUNTS = false; // Set this to false so that codes do NOT actually apply any discounts!
+  const APPLY_COUPON_DISCOUNTS = true;  // Set this to true to fully calculate and apply discounts at checkout!
 
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
@@ -213,6 +213,12 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         setCouponCode(e.target.value);
                         if (couponError) setCouponError("");
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
                       disabled={appliedCoupon !== null}
                       className="flex-1 h-12 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
                     />
@@ -301,14 +307,14 @@ export function CheckoutClient({ dict }: { dict: any }) {
                 </p>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-white/5 flex flex-col gap-3">
-                <div className="flex items-center gap-3 text-[10px] md:text-xs text-white/40">
-                  <ShieldCheck className="w-4 h-4 text-accent/40" />
-                  <span>{dict.checkout.secure_ssl}</span>
+              <div className="mt-8 pt-8 border-t border-white/5 flex flex-row flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                <div className="flex items-center gap-2.5 text-[10px] md:text-xs text-white/40">
+                  <ShieldCheck className="w-4 h-4 text-accent/40 shrink-0" />
+                  <span className="whitespace-nowrap">{dict.checkout.secure_ssl}</span>
                 </div>
-                <div className="flex items-center gap-3 text-[10px] md:text-xs text-white/40">
-                  <Truck className="w-4 h-4 text-accent/40" />
-                  <span>{dict.checkout.sustainable_packaging}</span>
+                <div className="flex items-center gap-2.5 text-[10px] md:text-xs text-white/40">
+                  <Truck className="w-4 h-4 text-accent/40 shrink-0" />
+                  <span className="whitespace-nowrap">{dict.checkout.sustainable_packaging}</span>
                 </div>
               </div>
             </section>

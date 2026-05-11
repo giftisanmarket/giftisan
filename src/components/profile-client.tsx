@@ -29,6 +29,18 @@ interface ProfileClientProps {
   dict: any;
 }
 
+const getTrackingUrl = (carrier?: string, trackingNumber?: string) => {
+  if (!carrier || !trackingNumber) return null;
+  const name = carrier.toLowerCase();
+  if (name.includes("aramex")) {
+    return `https://www.aramex.com/eg/en/track/results?shipmentNumber=${trackingNumber}`;
+  }
+  if (name.includes("bosta")) {
+    return `https://bosta.co/track/${trackingNumber}`;
+  }
+  return `https://www.google.com/search?q=${encodeURIComponent(carrier + " " + trackingNumber + " tracking")}`;
+};
+
 export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
@@ -206,6 +218,67 @@ Trace
                       </div>
 
                       <div className="p-4 md:p-8 space-y-6">
+                        {order.status !== "PENDING" && order.status !== "CANCELLED" && (
+                          <div className="mb-8 p-6 md:p-8 bg-cream/10 rounded-[2rem] border border-primary/5">
+                            {/* Stepper Steps wrapper */}
+                            <div className="relative flex justify-between items-center max-w-xl mx-auto">
+                              {/* Background Line */}
+                              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-primary/10 -z-10" />
+                              <div 
+                                className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-accent transition-all duration-500 -z-10" 
+                                style={{
+                                  width: order.status === "DELIVERED" ? "100%" : order.status === "SHIPPED" ? "50%" : "0%"
+                                }}
+                              />
+
+                              {/* Step 1: Confirmed */}
+                              <div className="flex flex-col items-center gap-2 bg-cream/5 px-2">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all shadow-sm",
+                                  order.status === "PROCESSING" || order.status === "SHIPPED" || order.status === "DELIVERED"
+                                    ? "bg-accent border-accent text-white"
+                                    : "bg-white border-primary/20 text-primary/40"
+                                )}>
+                                  ✓
+                                </div>
+                                <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
+                                  {dict.admin?.approved || "Paid"}
+                                </p>
+                              </div>
+
+                              {/* Step 2: Shipped */}
+                              <div className="flex flex-col items-center gap-2 bg-cream/5 px-2">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all shadow-sm",
+                                  order.status === "SHIPPED" || order.status === "DELIVERED"
+                                    ? "bg-accent border-accent text-white"
+                                    : "bg-white border-primary/20 text-primary/40"
+                                )}>
+                                  {order.status === "SHIPPED" || order.status === "DELIVERED" ? "✓" : "2"}
+                                </div>
+                                <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
+                                  {dict.profile?.shipped || "Shipped"}
+                                </p>
+                              </div>
+
+                              {/* Step 3: Delivered */}
+                              <div className="flex flex-col items-center gap-2 bg-cream/5 px-2">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all shadow-sm",
+                                  order.status === "DELIVERED"
+                                    ? "bg-accent border-accent text-white"
+                                    : "bg-white border-primary/20 text-primary/40"
+                                )}>
+                                  {order.status === "DELIVERED" ? "✓" : "3"}
+                                </div>
+                                <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
+                                  {dict.profile?.delivered || "Delivered"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {order.items.map((item: any) => (
                           <div key={item.id} className="border-b last:border-0 border-primary/5 pb-6 last:pb-0">
                             <div className="flex gap-4 md:gap-6 items-start md:items-center">
@@ -258,9 +331,22 @@ Trace
                                     <p className="text-xs md:text-sm font-bold text-primary">{item.carrier}</p>
                                   </div>
                                 </div>
-                                <div className="flex flex-col md:items-end w-full md:w-auto border-t md:border-t-0 border-primary/5 pt-3 md:pt-0">
-                                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-start md:text-end">{dict.profile.tracking_id}</p>
-                                  <p className="text-xs md:text-sm font-mono font-bold text-primary text-start md:text-end">{item.trackingNumber}</p>
+                                <div className="flex flex-wrap md:flex-nowrap items-center gap-4 justify-between w-full md:w-auto border-t md:border-t-0 border-primary/5 pt-3 md:pt-0">
+                                  <div className="flex flex-col md:items-end">
+                                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-start md:text-end">{dict.profile.tracking_id}</p>
+                                    <p className="text-xs md:text-sm font-mono font-bold text-primary text-start md:text-end">{item.trackingNumber}</p>
+                                  </div>
+                                  {getTrackingUrl(item.carrier, item.trackingNumber) && (
+                                    <a
+                                      href={getTrackingUrl(item.carrier, item.trackingNumber) || "#"}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-lg text-xs hover:bg-brand transition-colors shadow-sm active:scale-95"
+                                    >
+                                      <ExternalLink className="w-3.5 h-3.5" />
+                                      <span>Track</span>
+                                    </a>
+                                  )}
                                 </div>
                               </div>
                             )}

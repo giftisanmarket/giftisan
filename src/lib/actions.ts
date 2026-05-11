@@ -1106,7 +1106,9 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
         updatedItem.order.id,
         status,
         updatedItem.product.name,
-        updatedItem.product.slug || undefined
+        updatedItem.product.slug || undefined,
+        trackingNumber,
+        carrier
       ).catch(err => console.error("Failed to send order status email:", err));
     }
 

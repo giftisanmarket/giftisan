@@ -206,9 +206,18 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   }
 };
 
-export const sendOrderStatusUpdateEmail = async (email: string, name: string, orderId: string, status: string, productName: string, productSlug?: string) => {
+export const sendOrderStatusUpdateEmail = async (
+  email: string,
+  name: string,
+  orderId: string,
+  status: string,
+  productName: string,
+  productSlug?: string,
+  trackingNumber?: string,
+  carrier?: string
+) => {
   if (process.env.NODE_ENV === "development") {
-    console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\n----------------------------------\n`);
+    console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\nCarrier: ${carrier || 'None'}\nTracking: ${trackingNumber || 'None'}\n----------------------------------\n`);
     return { success: true };
   }
   const statusColors: Record<string, string> = {
@@ -252,6 +261,14 @@ export const sendOrderStatusUpdateEmail = async (email: string, name: string, or
                 <p style="margin: 0; font-size: 32px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
                 <p style="margin: 20px 0 0 0; font-size: 13px; font-weight: bold; color: #6b7280; font-family: monospace;">Ref: #${orderId.slice(0, 8)}</p>
               </div>
+
+              ${status === 'SHIPPED' && trackingNumber ? `
+                <div style="margin: 30px 0; padding: 25px; border-radius: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; text-align: left;">
+                  <h4 style="margin: 0 0 10px 0; color: #166534; font-size: 15px; font-weight: bold;">Shipment Information</h4>
+                  <p style="margin: 0 0 5px 0; color: #14532d; font-size: 13px;"><strong>Carrier:</strong> ${carrier || 'Local Shipping Partner'}</p>
+                  <p style="margin: 0; color: #14532d; font-size: 13px; font-family: monospace;"><strong>Tracking ID:</strong> ${trackingNumber}</p>
+                </div>
+              ` : ''}
 
               ${isDelivered ? `
                 <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">We hope this piece brings soul and beauty to your space. Artisans thrive on your feedback—would you take a moment to share your story or rate the craftsmanship?</p>

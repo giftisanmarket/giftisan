@@ -13,8 +13,9 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function CheckoutClient({ dict }: { dict: any }) {
-  // ⚙️ FEATURE FLAG: Set this to false to disable and hide the Coupon Code feature entirely!
-  const ENABLE_COUPONS = false;
+  // ⚙️ FEATURE FLAGS:
+  const ENABLE_COUPONS = true;          // Keep this true to still show the promo input field
+  const APPLY_COUPON_DISCOUNTS = false; // Set this to false so that codes do NOT actually apply any discounts!
 
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
@@ -68,6 +69,13 @@ export function CheckoutClient({ dict }: { dict: any }) {
 
   const handleApplyCoupon = async () => {
     if (!ENABLE_COUPONS || !couponCode.trim()) return;
+
+    if (!APPLY_COUPON_DISCOUNTS) {
+      setCouponError(isAr ? "أكواد الخصم معطلة مؤقتًا حاليًا." : "Promo codes are temporarily inactive.");
+      setAppliedCoupon(null);
+      return;
+    }
+
     setIsValidatingCoupon(true);
     setCouponError("");
     try {
@@ -111,13 +119,13 @@ export function CheckoutClient({ dict }: { dict: any }) {
     setIsProcessing(true);
     setError("");
 
-    const discountValue = ENABLE_COUPONS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
+    const discountValue = ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
     const finalPrice = Math.max(totalPrice - discountValue, 0);
 
     const res = await createOrder(session.user.id, finalPrice, cart, {
       ...shippingData,
       address: shippingData.address,
-      couponId: ENABLE_COUPONS && appliedCoupon ? appliedCoupon.id : null,
+      couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
       discountApplied: discountValue
     });
 

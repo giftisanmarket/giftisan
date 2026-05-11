@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 export function CheckoutClient({ dict }: { dict: any }) {
   // ⚙️ FEATURE FLAG: Set this to false to disable and hide the Coupon Code feature entirely!
-  const ENABLE_COUPONS = true;
+  const ENABLE_COUPONS = false;
 
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();

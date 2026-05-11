@@ -16,6 +16,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState("");
   const [validationErrors, setValidationErrors] = useState<(keyof typeof shippingData)[]>([]);
   const router = useRouter();
@@ -79,6 +80,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
     });
 
     if (res.success) {
+      setIsRedirecting(true);
       clearCart();
       if (res.paymentUrl) {
         window.location.href = res.paymentUrl;
@@ -91,7 +93,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
     }
   };
 
-  if (cart.length === 0) {
+  if (cart.length === 0 && !isRedirecting) {
     return (
       <main className="min-h-screen bg-cream">
         <Navbar dict={dict} />

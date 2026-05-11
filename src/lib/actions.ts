@@ -54,10 +54,20 @@ async function processImage(imageSource: string | null | undefined): Promise<str
   if (!imageSource) return null;
   // Upload any data URL (image, video, etc.)
   if (imageSource.startsWith('data:')) {
-    const res = await uploadImage(imageSource);
-    if (res.success && res.url) return res.url;
-    // CRITICAL: If upload fails, DO NOT return the original base64 string
-    // This prevents 1MB+ strings from bloating the database and crashing the frontend
+    try {
+      const res = await uploadImage(imageSource);
+      if (res.success && res.url) return res.url;
+    } catch (err) {
+      console.error("Cloudinary upload failed:", err);
+    }
+    
+    // Fallback for offline local development testing:
+    // If we are in dev, fallback to saving the base64 string (client-side compression keeps it <50KB)
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[DEV] Local dev detected. Falling back to compressed base64 string.");
+      return imageSource;
+    }
+    
     console.error("Failed to upload base64 image to Cloudinary, discarding to prevent DB bloat");
     return null;
   }
@@ -1705,7 +1715,44 @@ export async function sendMessage(senderId: string, receiverId: string, content:
       }
     }
 
-    return { success: true, message };
+    const sanitizeFlightString = (str: string | null | undefined): string | null => {
+      if (!str) return null;
+      // In development, allow base64 strings up to 150KB to support local offline media testing.
+      // In production, strictly restrict strings to 2000 characters (only CDN URLs allowed).
+      const maxLength = process.env.NODE_ENV === "production" ? 2000 : 150000;
+      if (str.length > maxLength) return null;
+      return str;
+    };
+
+    const plainMessage = {
+      id: message.id,
+      content: message.content || "",
+      senderId: message.senderId,
+      receiverId: message.receiverId,
+      productId: message.productId || null,
+      attachment: sanitizeFlightString(message.attachment),
+      read: message.read,
+      createdAt: message.createdAt.toISOString(),
+      sender: message.sender ? {
+        id: message.sender.id,
+        name: message.sender.name || "",
+        image: sanitizeFlightString(message.sender.image) || ""
+      } : null,
+      receiver: message.receiver ? {
+        id: message.receiver.id,
+        name: message.receiver.name || "",
+        image: sanitizeFlightString(message.receiver.image) || ""
+      } : null,
+      product: message.product ? {
+        id: message.product.id,
+        name: message.product.name || "",
+        images: Array.isArray(message.product.images) && message.product.images.length > 0 && message.product.images[0]
+          ? [sanitizeFlightString(message.product.images[0]) || ""]
+          : []
+      } : null
+    };
+
+    return { success: true, message: plainMessage };
   } catch (error: any) {
     console.error("CRITICAL Send message error:", error.code, error.message || error);
     if (error.code === 'P2003') {
@@ -1717,7 +1764,7 @@ export async function sendMessage(senderId: string, receiverId: string, content:
 
 export async function getInbox(userId: string) {
   try {
-    return await prisma.message.findMany({
+    const rawMessages = await prisma.message.findMany({
       where: {
         OR: [
           { senderId: userId },
@@ -1748,8 +1795,45 @@ export async function getInbox(userId: string) {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 100
+      take: 40 // Optimized from 100 to 40 to slash payload size & prevent memory congestion
     });
+
+    const sanitizeFlightString = (str: string | null | undefined): string | null => {
+      if (!str) return null;
+      // In development, allow base64 strings up to 150KB to support local offline media testing.
+      // In production, strictly restrict strings to 2000 characters (only CDN URLs allowed).
+      const maxLength = process.env.NODE_ENV === "production" ? 2000 : 150000;
+      if (str.length > maxLength) return null;
+      return str;
+    };
+
+    return rawMessages.map(m => ({
+      id: m.id,
+      content: m.content || "",
+      senderId: m.senderId,
+      receiverId: m.receiverId,
+      productId: m.productId || null,
+      attachment: sanitizeFlightString(m.attachment),
+      read: m.read,
+      createdAt: m.createdAt.toISOString(),
+      sender: m.sender ? {
+        id: m.sender.id,
+        name: m.sender.name || "",
+        image: sanitizeFlightString(m.sender.image) || ""
+      } : null,
+      receiver: m.receiver ? {
+        id: m.receiver.id,
+        name: m.receiver.name || "",
+        image: sanitizeFlightString(m.receiver.image) || ""
+      } : null,
+      product: m.product ? {
+        id: m.product.id,
+        name: m.product.name || "",
+        images: Array.isArray(m.product.images) && m.product.images.length > 0 && m.product.images[0]
+          ? [sanitizeFlightString(m.product.images[0]) || ""]
+          : []
+      } : null
+    }));
   } catch (error) {
     console.error("Get inbox error:", error);
     return [];

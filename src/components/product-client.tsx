@@ -463,6 +463,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   artisanName={product.artisan.studioName || product.artisan.user.name}
                   productId={product.id}
                   productName={product.name}
+                  productImage={product.images[0]}
                   artisanUserId={product.artisan.user.id}
                   dict={dict}
                 />

@@ -12,7 +12,7 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType>({
   unreadCount: 0,
-  refreshUnreadCount: async () => {},
+  refreshUnreadCount: async () => { },
 });
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const refreshUnreadCount = useCallback(async () => {
     if (!session?.user?.id) return;
     const count = await getUnreadMessageCount(session.user.id as string);
-    
+
     if (isFirstFetch.current && count > 0) {
       // Welcome toast for existing messages
       toast(`Welcome back! You have ${count} unread message${count > 1 ? 's' : ''}.`, {
@@ -36,7 +36,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         icon: <Mail className="w-5 h-5 text-accent" />,
       });
     }
-    
+
     setUnreadCount(count);
     lastCountRef.current = count;
     isFirstFetch.current = false;
@@ -45,7 +45,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (session?.user?.id) {
       refreshUnreadCount();
-      
+
       // Real-time polling every 60 seconds (optimized for network transfer)
       const interval = setInterval(() => {
         if (document.visibilityState === 'visible') {

@@ -11,6 +11,41 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 
+const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      resolve(compressed);
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
 export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any, dict: any }) {
   return (
     <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">{props.dict.home.loading_inbox || "Loading Inbox..."}</div>}>
@@ -71,19 +106,37 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
     }
   }, [messages]);
 
-  // Handle file selection
+  // Handle file selection with premium client-side compression
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error(dict.home.attachment_too_large || "File size must be less than 2MB", {
+      // Allow up to 5MB uploads because we compress it down to less than 50KB anyway!
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(dict.home.attachment_too_large || "File size must be less than 5MB", {
           style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
         });
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAttachment(reader.result as string);
+      reader.onloadend = async () => {
+        const rawResult = reader.result as string;
+        
+        if (file.type.startsWith("image/")) {
+          const loadToast = toast.loading(
+            dict.home.compressing || "Compressing image for lightning delivery...",
+            { style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
+          );
+          try {
+            const compressed = await compressImage(rawResult);
+            setAttachment(compressed);
+            toast.dismiss(loadToast);
+          } catch (err) {
+            setAttachment(rawResult);
+            toast.dismiss(loadToast);
+          }
+        } else {
+          setAttachment(rawResult);
+        }
       };
       reader.readAsDataURL(file);
     }

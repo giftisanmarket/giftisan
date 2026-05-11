@@ -59,6 +59,38 @@ async function main() {
     });
   }
 
+  // 4. Seed default Coupons
+  const defaultCoupons = [
+    {
+      code: "GIFT10",
+      discountType: "PERCENTAGE",
+      discountValue: 10,
+      minOrderAmount: 100,
+      maxDiscount: 500,
+    },
+    {
+      code: "WELCOME100",
+      discountType: "FIXED",
+      discountValue: 100,
+      minOrderAmount: 200,
+    }
+  ];
+
+  for (const coupon of defaultCoupons) {
+    await prisma.coupon.upsert({
+      where: { code: coupon.code },
+      update: {},
+      create: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        minOrderAmount: coupon.minOrderAmount,
+        maxDiscount: coupon.maxDiscount,
+        isActive: true
+      }
+    });
+  }
+
   console.log("Seeding complete!");
 }
 

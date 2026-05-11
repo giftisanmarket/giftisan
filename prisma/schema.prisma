@@ -261,6 +261,11 @@ model Order {
   user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items OrderItem[]
 
+  // Coupon / Discount Integration
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  discountApplied Float?      @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -301,4 +306,22 @@ model ContactInquiry {
   message   String   @db.Text
   status    String   @default("OPEN") // OPEN, RESOLVED
   createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id             String    @id @default(cuid())
+  code           String    @unique // e.g., "GIFT10", "WELCOME50"
+  discountType   String    // "PERCENTAGE" (like 10% off) or "FIXED" (like 50 EGP off)
+  discountValue  Float     // E.g., 10 for PERCENTAGE, 50 for FIXED
+  minOrderAmount Float?    @default(0) // Coupon only valid if subtotal is >= minOrderAmount
+  maxDiscount    Float?    // E.g., maximum cap for percentage discounts
+  expiresAt      DateTime? // Expiration boundary
+  maxUses        Int?      // Maximum times coupon can be used globally
+  usedCount      Int       @default(0) // Number of successful redemptions
+  isActive       Boolean   @default(true)
+
+  orders         Order[]   // Orders using this coupon
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

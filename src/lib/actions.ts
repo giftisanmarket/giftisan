@@ -566,6 +566,8 @@ export async function createOrder(userId: string, totalAmount: number, items: an
           orderNotes: shippingData?.orderNotes,
           isGift: shippingData?.isGift || false,
           giftMessage: shippingData?.giftMessage || null,
+          couponId: shippingData?.couponId || null,
+          discountApplied: shippingData?.discountApplied || 0,
           items: {
             create: items.map(item => ({
               productId: item.id,
@@ -577,6 +579,18 @@ export async function createOrder(userId: string, totalAmount: number, items: an
           }
         }
       });
+
+      // Update coupon usage count if used
+      if (shippingData?.couponId) {
+        await tx.coupon.update({
+          where: { id: shippingData.couponId },
+          data: {
+            usedCount: {
+              increment: 1
+            }
+          }
+        });
+      }
 
       // Decrement stock for each item
       for (const item of items) {
@@ -2009,5 +2023,60 @@ export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" |
   } catch (error) {
     console.error("Bulk update status error:", error);
     return { error: "Failed to update treasures status" };
+  }
+}
+
+export async function validateCouponAction(code: string, subtotal: number) {
+  try {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase().trim() }
+    });
+
+    if (!coupon) {
+      return { error: "This coupon code does not exist." };
+    }
+
+    if (!coupon.isActive) {
+      return { error: "This coupon is no longer active." };
+    }
+
+    if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+      return { error: "This coupon has expired." };
+    }
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      return { error: "This coupon has reached its maximum usage limit." };
+    }
+
+    if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
+      return { error: `This coupon is only valid for orders of EGP ${coupon.minOrderAmount} or more.` };
+    }
+
+    let appliedDiscount = 0;
+    if (coupon.discountType === "PERCENTAGE") {
+      appliedDiscount = subtotal * (coupon.discountValue / 100);
+      if (coupon.maxDiscount && appliedDiscount > coupon.maxDiscount) {
+        appliedDiscount = coupon.maxDiscount;
+      }
+    } else if (coupon.discountType === "FIXED") {
+      appliedDiscount = coupon.discountValue;
+    }
+
+    // Round to 2 decimal places and clamp to subtotal
+    appliedDiscount = Math.min(Math.round(appliedDiscount * 100) / 100, subtotal);
+
+    return {
+      success: true,
+      coupon: {
+        id: coupon.id,
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        appliedDiscount
+      }
+    };
+  } catch (error) {
+    console.error("Validate coupon error:", error);
+    return { error: "An error occurred during coupon validation." };
   }
 }

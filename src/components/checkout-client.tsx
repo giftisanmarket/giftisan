@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import { createOrder } from "@/lib/actions";
+import { createOrder, validateCouponAction } from "@/lib/actions";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,19 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const [error, setError] = useState("");
   const [validationErrors, setValidationErrors] = useState<(keyof typeof shippingData)[]>([]);
   const router = useRouter();
+
+  // Promo Coupon / Discount Code States
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  // Localization detector (Frictionless check for /ar)
+  const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
+  const promoPlaceholder = isAr ? "كود الخصم (مثال: GIFT10)" : "Promo Code (e.g. GIFT10)";
+  const promoApply = isAr ? "تطبيق" : "Apply";
+  const promoRemove = isAr ? "إزالة" : "Remove";
+  const promoDiscountLabel = isAr ? "خصم" : "Discount";
 
   const [shippingData, setShippingData] = useState({
     firstName: "",
@@ -50,6 +63,27 @@ export function CheckoutClient({ dict }: { dict: any }) {
     }
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsValidatingCoupon(true);
+    setCouponError("");
+    try {
+      const res = await validateCouponAction(couponCode, totalPrice);
+      if (res.success && res.coupon) {
+        setAppliedCoupon(res.coupon);
+        setCouponError("");
+      } else {
+        setCouponError(res.error || "Invalid coupon code.");
+        setAppliedCoupon(null);
+      }
+    } catch (err) {
+      setCouponError("Failed to apply coupon.");
+      setAppliedCoupon(null);
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
   const handlePurchase = async () => {
     if (!session?.user?.id) {
       setError(dict.checkout.error_signin);
@@ -74,9 +108,13 @@ export function CheckoutClient({ dict }: { dict: any }) {
     setIsProcessing(true);
     setError("");
 
-    const res = await createOrder(session.user.id, totalPrice, cart, {
+    const finalPrice = Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0), 0);
+
+    const res = await createOrder(session.user.id, finalPrice, cart, {
       ...shippingData,
-      address: shippingData.address
+      address: shippingData.address,
+      couponId: appliedCoupon?.id || null,
+      discountApplied: appliedCoupon?.appliedDiscount || 0
     });
 
     if (res.success) {
@@ -151,18 +189,86 @@ export function CheckoutClient({ dict }: { dict: any }) {
                 ))}
               </div>
 
+              {/* Promo Coupon Module */}
+              <div className="pt-6 pb-2 border-t border-white/10 mt-6">
+                <div className="flex gap-2.5">
+                  <input
+                    type="text"
+                    placeholder={promoPlaceholder}
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value);
+                      if (couponError) setCouponError("");
+                    }}
+                    disabled={appliedCoupon !== null}
+                    className="flex-1 h-12 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
+                  />
+                  {appliedCoupon ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppliedCoupon(null);
+                        setCouponCode("");
+                      }}
+                      className="px-4 h-12 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
+                    >
+                      {promoRemove}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isValidatingCoupon || !couponCode.trim()}
+                      className="px-5 h-12 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
+                    >
+                      {isValidatingCoupon ? "..." : promoApply}
+                    </button>
+                  )}
+                </div>
+
+                {couponError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider"
+                  >
+                    ⚠️ {couponError}
+                  </motion.p>
+                )}
+
+                {appliedCoupon && (
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-2.5 rounded-xl text-xs font-bold mt-3"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      🎉 {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
+                    </span>
+                  </motion.div>
+                )}
+              </div>
+
               <div className="space-y-3 md:space-y-4 pt-6 border-t border-white/10">
                 <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
                   <span>{dict.cart.subtotal}</span>
                   <span>{dict.product.currency} {totalPrice}.00</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-300 text-[10px] md:text-sm uppercase font-bold tracking-widest animate-in fade-in duration-300">
+                    <span>{promoDiscountLabel} ({appliedCoupon.code})</span>
+                    <span>-{dict.product.currency} {appliedCoupon.appliedDiscount}.00</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
                   <span>{dict.checkout.cairo_shipping}</span>
                   <span className="text-accent-light">{dict.checkout.free}</span>
                 </div>
                 <div className="flex justify-between font-heading font-bold pt-4 border-t border-white/10">
                   <span className="text-lg md:text-xl">{dict.checkout.total}</span>
-                  <span className="text-2xl md:text-3xl">{dict.product.currency} {totalPrice}.00</span>
+                  <span className="text-2xl md:text-3xl">
+                    {dict.product.currency} {Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0), 0)}.00
+                  </span>
                 </div>
               </div>
 

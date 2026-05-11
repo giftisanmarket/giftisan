@@ -613,7 +613,8 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         name: item.name || "Item",
         price: item.price,
         description: item.description || "Giftisan Product",
-        quantity: item.quantity
+        quantity: item.quantity,
+        image: item.image || (item.images && item.images.length > 0 ? item.images[0] : "")
       }));
 
       const clientSecret = await createPaymobIntention(

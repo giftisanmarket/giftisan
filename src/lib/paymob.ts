@@ -18,7 +18,8 @@ export async function createPaymobIntention(amountCents: number, orderId: string
         name: item.name || "Item",
         amount: item.amount_cents || item.price * 100, // Intention API usually expects amount in cents for items too
         description: item.description || "Giftisan Product",
-        quantity: item.quantity
+        quantity: item.quantity,
+        picture_url: item.image || "https://res.cloudinary.com/dlnnwqgob/image/upload/v1714488310/placeholder_d49hxw.jpg"
       })),
       billing_data: {
         first_name: billingData.firstName || "NA",

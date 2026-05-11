@@ -80,7 +80,16 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
                     <tr key={order.id} className="hover:bg-cream/30 transition-colors group">
                       <td className="px-5 md:px-8 py-4 md:py-5 font-mono text-[10px] md:text-xs font-bold text-primary">{order.id.slice(0, 8)}</td>
                       <td className="px-5 md:px-8 py-4 md:py-5 font-bold text-primary text-xs md:text-sm">{order.user.name}</td>
-                      <td className="px-5 md:px-8 py-4 md:py-5 font-bold text-accent text-xs md:text-sm">{dict.product.currency} {order.totalAmount}</td>
+                      <td className="px-5 md:px-8 py-4 md:py-5 font-bold text-accent text-xs md:text-sm">
+                        <div className="flex flex-col">
+                          <span>{dict.product.currency} {order.totalAmount}</span>
+                          {order.discountApplied > 0 && (
+                            <span className="text-[9px] font-bold text-emerald-600 mt-0.5 leading-none">
+                              -{dict.product.currency} {order.discountApplied}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-5 md:px-8 py-4 md:py-5 text-xs font-black">
                         <span className={cn(
                           "px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border",

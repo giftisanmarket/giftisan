@@ -102,6 +102,11 @@ export default async function AdminOrdersPage({ params }: { params: Promise<{ la
                   </td>
                   <td className="px-6 md:px-8 py-4 md:py-6 text-right">
                     <p className="text-base md:text-lg font-heading font-bold text-primary">{dict.product.currency} {order.totalAmount}</p>
+                    {order.discountApplied > 0 && (
+                      <p className="text-[10px] font-bold text-emerald-600 mt-0.5">
+                        -{dict.product.currency} {order.discountApplied}
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}

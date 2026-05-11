@@ -195,7 +195,14 @@ Trace
                           </div>
                           <div className="shrink-0">
                             <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">{dict.profile.total_paid}</p>
-                            <p className="text-xs md:text-sm font-bold text-primary shrink-0">{dict.product.currency} {order.totalAmount}</p>
+                            <div className="flex flex-col">
+                              <p className="text-xs md:text-sm font-bold text-primary shrink-0">{dict.product.currency} {order.totalAmount}</p>
+                              {order.discountApplied > 0 && (
+                                <span className="text-[8px] md:text-[9px] font-black text-emerald-600 bg-emerald-500/10 border border-emerald-500/10 px-1.5 py-0.5 rounded mt-1 w-fit uppercase tracking-wider">
+                                  {isAr ? "وفّرت:" : "Saved:"} {dict.product.currency} {order.discountApplied}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           {order.isGift && (
                             <div className="shrink-0 flex items-center gap-2">

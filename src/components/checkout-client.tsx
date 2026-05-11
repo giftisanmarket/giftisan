@@ -80,7 +80,11 @@ export function CheckoutClient({ dict }: { dict: any }) {
 
     if (res.success) {
       clearCart();
-      router.push("/checkout/success");
+      if (res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+      } else {
+        router.push("/checkout/success");
+      }
     } else {
       setError(res.error || "An error occurred during checkout.");
       setIsProcessing(false);

@@ -11,6 +11,7 @@ import sharp from "sharp";
 import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies } from "next/headers";
+import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
 
 export async function uploadImage(base64Data: string) {
   try {
@@ -603,6 +604,33 @@ export async function createOrder(userId: string, totalAmount: number, items: an
       return newOrder;
     });
 
+    // Generate Paymob Payment Link
+    let paymentUrl = null;
+    try {
+      const amountCents = Math.round(totalAmount * 100);
+      
+      const itemsForPaymob = items.map(item => ({
+        name: item.name || "Item",
+        price: item.price,
+        description: item.description || "Giftisan Product",
+        quantity: item.quantity
+      }));
+
+      const clientSecret = await createPaymobIntention(
+        amountCents,
+        order.id, // using our internal order ID as special_reference
+        shippingData || {},
+        itemsForPaymob
+      );
+
+      if (clientSecret) {
+        paymentUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${clientSecret}`;
+      }
+    } catch (paymobError) {
+      console.error("Paymob initialization error:", paymobError);
+      // We don't fail the order creation if Paymob fails to init, we just return the orderId
+    }
+
     // Send notification emails to artisans (asynchronously, OUTSIDE transaction block)
     try {
       const orderWithArtisans = await prisma.order.findUnique({
@@ -647,7 +675,7 @@ export async function createOrder(userId: string, totalAmount: number, items: an
       console.error("Failed to process order notification emails:", err);
     }
 
-    return { success: true, orderId: order.id };
+    return { success: true, orderId: order.id, paymentUrl };
   } catch (error: any) {
     console.error("Create order error:", error);
     return { error: error.message || "Failed to complete your pre-launch order." };

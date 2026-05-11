@@ -10,7 +10,7 @@ import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
 import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
 
 export async function uploadImage(base64Data: string) {
@@ -609,13 +609,24 @@ export async function createOrder(userId: string, totalAmount: number, items: an
     try {
       const amountCents = Math.round(totalAmount * 100);
       
-      const itemsForPaymob = items.map(item => ({
-        name: item.name || "Item",
-        price: item.price,
-        description: item.description || "Giftisan Product",
-        quantity: item.quantity,
-        image: item.image || (item.images && item.images.length > 0 ? item.images[0] : "")
-      }));
+      const headersList = await headers();
+      const host = headersList.get("host") || "localhost:3000";
+      const proto = headersList.get("x-forwarded-proto") || "http";
+      const origin = `${proto}://${host}`;
+
+      const itemsForPaymob = items.map(item => {
+        let imageUrl = item.image || (item.images && item.images.length > 0 ? item.images[0] : "");
+        if (imageUrl && !imageUrl.startsWith("http")) {
+          imageUrl = `${origin}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+        }
+        return {
+          name: item.name || "Item",
+          price: item.price,
+          description: item.description || "Giftisan Product",
+          quantity: item.quantity,
+          image: imageUrl
+        };
+      });
 
       const clientSecret = await createPaymobIntention(
         amountCents,

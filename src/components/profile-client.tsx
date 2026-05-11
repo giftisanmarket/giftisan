@@ -22,6 +22,7 @@ import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { retryPaymentAction } from "@/lib/actions";
+import { useParams } from "next/navigation";
 
 interface ProfileClientProps {
   user: any;
@@ -42,6 +43,8 @@ const getTrackingUrl = (carrier?: string, trackingNumber?: string) => {
 };
 
 export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
+  const params = useParams();
+  const isAr = params?.lang === "ar";
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
 
@@ -280,7 +283,6 @@ Trace
                         )}
 
                         {order.items.map((item: any) => {
-                          const isAr = dict.profile?.delivered === "تم التوصيل";
                           const preparingText = dict.profile?.preparing || (isAr ? "جاري التجهيز" : "Preparing");
                           return (
                             <div key={item.id} className="border-b last:border-0 border-primary/5 pb-6 last:pb-0">

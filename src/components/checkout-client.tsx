@@ -13,6 +13,9 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function CheckoutClient({ dict }: { dict: any }) {
+  // ⚙️ FEATURE FLAG: Set this to false to disable and hide the Coupon Code feature entirely!
+  const ENABLE_COUPONS = true;
+
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -64,7 +67,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   };
 
   const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) return;
+    if (!ENABLE_COUPONS || !couponCode.trim()) return;
     setIsValidatingCoupon(true);
     setCouponError("");
     try {
@@ -108,13 +111,14 @@ export function CheckoutClient({ dict }: { dict: any }) {
     setIsProcessing(true);
     setError("");
 
-    const finalPrice = Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0), 0);
+    const discountValue = ENABLE_COUPONS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
+    const finalPrice = Math.max(totalPrice - discountValue, 0);
 
     const res = await createOrder(session.user.id, finalPrice, cart, {
       ...shippingData,
       address: shippingData.address,
-      couponId: appliedCoupon?.id || null,
-      discountApplied: appliedCoupon?.appliedDiscount || 0
+      couponId: ENABLE_COUPONS && appliedCoupon ? appliedCoupon.id : null,
+      discountApplied: discountValue
     });
 
     if (res.success) {
@@ -190,64 +194,66 @@ export function CheckoutClient({ dict }: { dict: any }) {
               </div>
 
               {/* Promo Coupon Module */}
-              <div className="pt-6 pb-2 border-t border-white/10 mt-6">
-                <div className="flex gap-2.5">
-                  <input
-                    type="text"
-                    placeholder={promoPlaceholder}
-                    value={couponCode}
-                    onChange={(e) => {
-                      setCouponCode(e.target.value);
-                      if (couponError) setCouponError("");
-                    }}
-                    disabled={appliedCoupon !== null}
-                    className="flex-1 h-12 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
-                  />
-                  {appliedCoupon ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAppliedCoupon(null);
-                        setCouponCode("");
+              {ENABLE_COUPONS && (
+                <div className="pt-6 pb-2 border-t border-white/10 mt-6 animate-in fade-in duration-300">
+                  <div className="flex gap-2.5">
+                    <input
+                      type="text"
+                      placeholder={promoPlaceholder}
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value);
+                        if (couponError) setCouponError("");
                       }}
-                      className="px-4 h-12 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
+                      disabled={appliedCoupon !== null}
+                      className="flex-1 h-12 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
+                    />
+                    {appliedCoupon ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppliedCoupon(null);
+                          setCouponCode("");
+                        }}
+                        className="px-4 h-12 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
+                      >
+                        {promoRemove}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={isValidatingCoupon || !couponCode.trim()}
+                        className="px-5 h-12 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
+                      >
+                        {isValidatingCoupon ? "..." : promoApply}
+                      </button>
+                    )}
+                  </div>
+
+                  {couponError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider"
                     >
-                      {promoRemove}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={isValidatingCoupon || !couponCode.trim()}
-                      className="px-5 h-12 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
+                      ⚠️ {couponError}
+                    </motion.p>
+                  )}
+
+                  {appliedCoupon && (
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-2.5 rounded-xl text-xs font-bold mt-3"
                     >
-                      {isValidatingCoupon ? "..." : promoApply}
-                    </button>
+                      <span className="flex items-center gap-1.5">
+                        🎉 {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
+                      </span>
+                    </motion.div>
                   )}
                 </div>
-
-                {couponError && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider"
-                  >
-                    ⚠️ {couponError}
-                  </motion.p>
-                )}
-
-                {appliedCoupon && (
-                  <motion.div
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-2.5 rounded-xl text-xs font-bold mt-3"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      🎉 {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
-                    </span>
-                  </motion.div>
-                )}
-              </div>
+              )}
 
               <div className="space-y-3 md:space-y-4 pt-6 border-t border-white/10">
                 <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">

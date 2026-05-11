@@ -146,20 +146,32 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
                 </div>
 
                 {/* Price Summary */}
-                <div className="bg-cream/20 p-6 rounded-2xl border border-primary/5 space-y-3 h-fit">
-                  <div className="flex justify-between text-xs text-charcoal/60 font-medium">
-                    <span>{dict.cart.subtotal}</span>
-                    <span className="font-mono">{dict.product.currency} {order.totalAmount}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-charcoal/60 font-medium">
-                    <span>{dict.checkout.cairo_shipping}</span>
-                    <span className="text-green-600 font-bold uppercase tracking-wider">{dict.checkout.free}</span>
-                  </div>
-                  <div className="pt-3 border-t border-primary/5 flex justify-between text-base font-black text-primary">
-                    <span>{dict.checkout.total}</span>
-                    <span className="font-mono">{dict.product.currency} {order.totalAmount}</span>
-                  </div>
-                </div>
+                {(() => {
+                  const isAr = lang === "ar";
+                  const subtotal = order.totalAmount + (order.discountApplied || 0);
+                  return (
+                    <div className="bg-cream/20 p-6 rounded-2xl border border-primary/5 space-y-3 h-fit">
+                      <div className="flex justify-between text-xs text-charcoal/60 font-medium">
+                        <span>{dict.cart.subtotal}</span>
+                        <span className="font-mono">{dict.product.currency} {subtotal}</span>
+                      </div>
+                      {order.discountApplied > 0 && (
+                        <div className="flex justify-between text-xs text-emerald-600 font-bold">
+                          <span>{isAr ? "خصم كوبون" : "Promo Discount"}</span>
+                          <span className="font-mono">-{dict.product.currency} {order.discountApplied}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-xs text-charcoal/60 font-medium">
+                        <span>{dict.checkout.cairo_shipping}</span>
+                        <span className="text-green-600 font-bold uppercase tracking-wider">{dict.checkout.free}</span>
+                      </div>
+                      <div className="pt-3 border-t border-primary/5 flex justify-between text-base font-black text-primary">
+                        <span>{dict.checkout.total}</span>
+                        <span className="font-mono">{dict.product.currency} {order.totalAmount}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </motion.div>

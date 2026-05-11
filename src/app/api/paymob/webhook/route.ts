@@ -61,7 +61,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const orderId = obj.order.merchant_order_id;
+    const rawOrderId = obj.order.merchant_order_id;
+    const orderId = typeof rawOrderId === "string" && rawOrderId.includes("-") 
+      ? rawOrderId.split("-")[0] 
+      : rawOrderId;
     const isSuccess = obj.success === true && obj.pending === false;
 
     if (isSuccess) {

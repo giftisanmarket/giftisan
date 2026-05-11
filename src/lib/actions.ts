@@ -630,7 +630,7 @@ export async function createOrder(userId: string, totalAmount: number, items: an
 
       const clientSecret = await createPaymobIntention(
         amountCents,
-        order.id, // using our internal order ID as special_reference
+        `${order.id}-${Date.now()}`, // using unique suffixed order ID as special_reference to avoid duplicate reference collisions
         shippingData || {},
         itemsForPaymob
       );
@@ -716,7 +716,7 @@ export async function retryPaymentAction(orderId: string) {
 
     const clientSecret = await createPaymobIntention(
       amountCents,
-      order.id, // using our internal order ID as special_reference
+      `${order.id}-${Date.now()}`, // using unique suffixed order ID as special_reference to avoid duplicate reference collisions
       shippingData,
       itemsForPaymob
     );

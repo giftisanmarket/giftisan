@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle, CheckCircle2, MapPin, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useNotifications } from "./notification-provider";
 import { useFavorites } from "@/context/favorites-context";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
@@ -99,6 +99,39 @@ export function Navbar({ dict }: { dict?: any }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Segment matches client-side into rich classified suggestions
+  const suggestions = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return { products: [], artisans: [], categories: [] };
+    
+    const artisansMap = new Map<string, any>();
+    const categoriesSet = new Set<string>();
+    
+    searchResults.forEach((p) => {
+      if (p.artisan) {
+        const artisanId = p.artisan.id;
+        if (!artisansMap.has(artisanId)) {
+          artisansMap.set(artisanId, {
+            id: artisanId,
+            studioName: p.artisan.studioName || p.artisan.user?.name,
+            slug: p.artisan.slug || p.artisan.user?.name?.toLowerCase().replace(/ /g, "-"),
+            avatar: p.artisan.avatar,
+            location: p.artisan.location,
+            isVerified: p.artisan.isVerified
+          });
+        }
+      }
+      if (p.category) {
+        categoriesSet.add(p.category);
+      }
+    });
+    
+    return {
+      products: searchResults.slice(0, 4),
+      artisans: Array.from(artisansMap.values()).slice(0, 3),
+      categories: Array.from(categoriesSet).slice(0, 3),
+    };
+  }, [searchResults]);
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -160,7 +193,7 @@ export function Navbar({ dict }: { dict?: any }) {
 
                 {/* Quick Results Overlay */}
                 {showResults && (
-                  <div className="hidden xl:block absolute top-full left-0 right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50 max-w-[calc(100vw-32px)] md:max-w-none">
                     {!searchQuery ? (
                       /* Empty Search State - Trending discovered */
                       <div className="p-6 space-y-6">
@@ -216,35 +249,116 @@ export function Navbar({ dict }: { dict?: any }) {
                     ) : (
                       <>
                         <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
-                          <span className="text-xs font-bold text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
+                          <span className="text-xs font-black text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
                           <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
                             {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
                           </span>
                         </div>
 
-                        <div className="max-h-[400px] overflow-y-auto">
+                        {/* Split Multicolumn Suggestion Layout */}
+                        <div className="max-h-[500px] overflow-y-auto">
                           {searchResults.length > 0 ? (
-                            searchResults.map((p) => (
-                              <Link
-                                key={p.id}
-                                href={`/products/${p.slug}`}
-                                onClick={() => setShowResults(false)}
-                                className="flex items-center gap-4 p-4 hover:bg-primary/5 transition-all group border-b border-primary/5 last:border-0"
-                              >
-                                <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/5">
-                                  <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-5">
+                              
+                              {/* Left Column: Matching Products (Treasures) */}
+                              <div className="lg:col-span-7 space-y-3">
+                                <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2 px-1">
+                                  {pathname.includes("/ar") ? "الكنوز المتطابقة" : "Matching Treasures"}
+                                </p>
+                                <div className="space-y-2.5">
+                                  {suggestions.products.map((p) => (
+                                    <Link
+                                      key={p.id}
+                                      href={`/products/${p.slug || p.id}`}
+                                      onClick={() => setShowResults(false)}
+                                      className="flex items-center gap-3 p-2 hover:bg-primary/5 rounded-2xl transition-all group/item border border-transparent hover:border-primary/5"
+                                    >
+                                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-primary/5">
+                                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-2">
+                                          <h4 className="font-heading font-bold text-xs text-primary group-hover/item:text-accent transition-colors truncate">{p.name}</h4>
+                                          <span className="text-xs font-bold text-primary whitespace-nowrap">EGP {p.price}</span>
+                                        </div>
+                                        <p className="text-[10px] text-charcoal/40 font-medium truncate">
+                                          {p.artisan?.studioName || p.artisan?.user?.name}
+                                        </p>
+                                      </div>
+                                    </Link>
+                                  ))}
                                 </div>
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-start">
-                                    <h4 className="font-heading font-bold text-primary group-hover:text-accent transition-colors">{p.name}</h4>
-                                    <span className="text-sm font-bold text-primary">EGP {p.price}</span>
+                              </div>
+
+                              {/* Right Column: Dynamic Categories & Artisans */}
+                              <div className="lg:col-span-5 space-y-6 lg:border-s lg:border-primary/5 lg:ps-5">
+                                
+                                {/* Dynamic Category Suggestions */}
+                                {suggestions.categories.length > 0 && (
+                                  <div className="space-y-2">
+                                    <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2">
+                                      {pathname.includes("/ar") ? "الفئات الحرفية" : "Local Craft Categories"}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {suggestions.categories.map((cat) => {
+                                        const catSlug = cat.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+                                        const translatedName = d.common.categories_list?.[catSlug] || cat;
+                                        return (
+                                          <Link
+                                            key={cat}
+                                            href={`/category/${catSlug}`}
+                                            onClick={() => setShowResults(false)}
+                                            className="px-3 py-1.5 rounded-xl bg-cream hover:bg-accent hover:text-white text-[10px] font-bold text-primary/70 transition-all border border-primary/5 hover:shadow-sm"
+                                          >
+                                            {translatedName}
+                                          </Link>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-charcoal/40 font-medium">
-                                    {p.artisan.user?.name || p.artisan.studioName} • {p.category}
-                                  </p>
-                                </div>
-                              </Link>
-                            ))
+                                )}
+
+                                {/* Dynamic Artisan Suggestions */}
+                                {suggestions.artisans.length > 0 && (
+                                  <div className="space-y-3">
+                                    <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">
+                                      {pathname.includes("/ar") ? "الاستوديوهات والحرفيون" : "Makers & Studios"}
+                                    </p>
+                                    <div className="space-y-2">
+                                      {suggestions.artisans.map((artisan) => (
+                                        <Link
+                                          key={artisan.id}
+                                          href={`/artisans/${artisan.slug}`}
+                                          onClick={() => setShowResults(false)}
+                                          className="flex items-center gap-2.5 p-2 hover:bg-accent/5 rounded-xl transition-all group/artisan"
+                                        >
+                                          <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-primary/5 bg-cream">
+                                            {artisan.avatar ? (
+                                              <Image src={artisan.avatar} alt={artisan.studioName} fill className="object-cover" sizes="32px" />
+                                            ) : (
+                                              <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-primary/40">
+                                                {artisan.studioName?.charAt(0)}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1">
+                                              <h5 className="text-[11px] font-bold text-primary group-hover/artisan:text-accent transition-colors truncate">
+                                                {artisan.studioName}
+                                              </h5>
+                                              {artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent shrink-0" />}
+                                            </div>
+                                            <p className="text-[9px] text-charcoal/40 flex items-center gap-0.5 truncate">
+                                              <MapPin className="w-2.5 h-2.5 text-accent" /> {artisan.location}
+                                            </p>
+                                          </div>
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           ) : !isSearching ? (
                             <div className="p-8 text-center space-y-6">
                               <div className="space-y-2">
@@ -274,18 +388,18 @@ export function Navbar({ dict }: { dict?: any }) {
                               </div>
                             </div>
                           ) : (
-                            <div className="p-8 text-center text-charcoal/40 animate-pulse">
+                            <div className="p-8 text-center text-charcoal/40 animate-pulse text-xs font-bold uppercase tracking-widest">
                               {d.common.scanning_workshop}
                             </div>
                           )}
                         </div>
 
                         {searchResults.length > 0 && (
-                          <div className="p-3 bg-primary/5 text-center">
+                          <div className="p-3 bg-primary/5 text-center border-t border-primary/5">
                             <button
                               type="button"
                               onClick={handleSearch}
-                              className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] hover:text-accent transition-colors"
+                              className="text-[10px] font-black text-primary uppercase tracking-[0.25em] hover:text-accent transition-colors"
                             >
                               {d.common.see_all_results} →
                             </button>

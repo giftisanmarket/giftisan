@@ -86,7 +86,7 @@ export default function LandingPage({ dict }: { dict: any }) {
           </div>
 
           <div className="hidden lg:flex items-center gap-10">
-            <Link href="/search" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">{dict.common.explore}</Link>
+            <Link href="/products" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">{dict.common.explore}</Link>
             <a href="#artisans" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-tight">{dict.common.artisans}</a>
             {session ? (
               <Link href="/profile" className="flex items-center gap-2 group italic serif text-primary hover:text-accent font-bold transition-colors">
@@ -128,7 +128,7 @@ export default function LandingPage({ dict }: { dict: any }) {
             className="fixed inset-0 z-50 bg-cream lg:hidden flex flex-col p-8 pt-32"
           >
             <div className="flex flex-col gap-10 text-center">
-              <Link href="/search" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.common.explore.split(' ')[0]}</Link>
+              <Link href="/products" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.common.explore.split(' ')[0]}</Link>
               <a href="#artisans" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.home.view_studios.split(' ')[0]}</a>
               <Link href="/become-artisan" onClick={() => setIsMenuOpen(false)} className="text-4xl font-heading font-black text-primary capitalize">{dict.common.open_studio.split(' ')[0]}</Link>
               <div className="h-px bg-primary/10 w-24 mx-auto" />
@@ -194,7 +194,7 @@ export default function LandingPage({ dict }: { dict: any }) {
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             <Link
-              href="/search"
+              href="/products"
               className="w-full sm:w-auto px-10 md:px-14 h-16 md:h-20 bg-primary text-white font-black text-lg md:text-xl rounded-2xl md:rounded-[2rem] hover:bg-primary-light transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 group"
             >
               {dict.common.start_shopping} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

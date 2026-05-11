@@ -42,7 +42,7 @@ export default function NotFound() {
             Back to Home
           </Link>
           <Link 
-            href="/search"
+            href="/products"
             className="w-full sm:w-auto px-10 h-16 bg-white text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream transition-all shadow-lg flex items-center justify-center gap-3 active:scale-95"
           >
             <Sparkles className="w-5 h-5 text-accent" />

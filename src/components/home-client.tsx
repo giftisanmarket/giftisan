@@ -73,7 +73,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
             <p className="text-charcoal/60 mt-2">{dict.home.treasures_desc}</p>
           </div>
           <Link
-            href="/search"
+            href="/products"
             className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-2 group decoration-accent decoration-2 underline-offset-4"
           >
             {dict.home.shop_all_collections}

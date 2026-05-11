@@ -279,79 +279,83 @@ Trace
                           </div>
                         )}
 
-                        {order.items.map((item: any) => (
-                          <div key={item.id} className="border-b last:border-0 border-primary/5 pb-6 last:pb-0">
-                            <div className="flex gap-4 md:gap-6 items-start md:items-center">
-                              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-cream shrink-0">
-                                <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <Link href={`/products/${item.product.slug || item.product.id}`} className="block text-sm md:text-base font-heading font-bold text-primary hover:text-accent transition-colors line-clamp-1">
-                                  {item.product.name}
-                                </Link>
-                                <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
-                                
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                  <div className={cn(
-                                    "px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
-                                    item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
-                                    item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                                    "bg-green-50 text-green-600 border-green-200"
-                                  )}>
-                                    {item.status === "PENDING" ? dict.profile.pending :
-                                    item.status === "SHIPPED" ? dict.profile.shipped :
-                                    dict.profile.delivered}
-                                  </div>
-                                  <Link 
-                                    href={`/profile/messages?userId=${item.product.artisan.userId}`}
-                                    className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"
-                                  >
-                                    <MessageCircle className="w-3 h-3" />
-                                    {dict.profile.contact}
+                        {order.items.map((item: any) => {
+                          const isAr = dict.profile?.delivered === "تم التوصيل";
+                          const preparingText = dict.profile?.preparing || (isAr ? "جاري التجهيز" : "Preparing");
+                          return (
+                            <div key={item.id} className="border-b last:border-0 border-primary/5 pb-6 last:pb-0">
+                              <div className="flex gap-4 md:gap-6 items-start md:items-center">
+                                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-cream shrink-0">
+                                  <BespokeImage src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/products/${item.product.slug || item.product.id}`} className="block text-sm md:text-base font-heading font-bold text-primary hover:text-accent transition-colors line-clamp-1">
+                                    {item.product.name}
                                   </Link>
-                                </div>
-
-                                {item.personalization && (
-                                  <div className="mt-2 text-[9px] md:text-[10px] italic text-accent flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-accent rounded-full shrink-0" />
-                                    <span className="line-clamp-1">{dict.profile.personalized}: "{item.personalization}"</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {item.status === "SHIPPED" && item.trackingNumber && (
-                              <div className="mt-4 p-4 md:p-5 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5 flex flex-col md:flex-row justify-between items-center gap-3">
-                                <div className="flex items-center gap-3 w-full md:w-auto">
-                                  <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-accent shadow-sm shrink-0">
-                                    <Truck className="w-4 h-4 md:w-5 md:h-5" />
-                                  </div>
-                                  <div>
-                                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 leading-none mb-1">{dict.profile.carrier}</p>
-                                    <p className="text-xs md:text-sm font-bold text-primary">{item.carrier}</p>
-                                  </div>
-                                </div>
-                                <div className="flex flex-wrap md:flex-nowrap items-center gap-4 justify-between w-full md:w-auto border-t md:border-t-0 border-primary/5 pt-3 md:pt-0">
-                                  <div className="flex flex-col md:items-end">
-                                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-start md:text-end">{dict.profile.tracking_id}</p>
-                                    <p className="text-xs md:text-sm font-mono font-bold text-primary text-start md:text-end">{item.trackingNumber}</p>
-                                  </div>
-                                  {getTrackingUrl(item.carrier, item.trackingNumber) && (
-                                    <a
-                                      href={getTrackingUrl(item.carrier, item.trackingNumber) || "#"}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-lg text-xs hover:bg-brand transition-colors shadow-sm active:scale-95"
+                                  <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
+                                  
+                                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <div className={cn(
+                                      "px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
+                                      item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                                      item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                                      "bg-green-50 text-green-600 border-green-200"
+                                    )}>
+                                      {item.status === "PENDING" ? preparingText :
+                                      item.status === "SHIPPED" ? dict.profile.shipped :
+                                      dict.profile.delivered}
+                                    </div>
+                                    <Link 
+                                      href={`/profile/messages?userId=${item.product.artisan.userId}`}
+                                      className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"
                                     >
-                                      <ExternalLink className="w-3.5 h-3.5" />
-                                      <span>Track</span>
-                                    </a>
+                                      <MessageCircle className="w-3 h-3" />
+                                      {dict.profile.contact}
+                                    </Link>
+                                  </div>
+
+                                  {item.personalization && (
+                                    <div className="mt-2 text-[9px] md:text-[10px] italic text-accent flex items-center gap-2">
+                                      <span className="w-1 h-1 bg-accent rounded-full shrink-0" />
+                                      <span className="line-clamp-1">{dict.profile.personalized}: "{item.personalization}"</span>
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ))}
+
+                              {item.status === "SHIPPED" && item.trackingNumber && (
+                                <div className="mt-4 p-4 md:p-5 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5 flex flex-col md:flex-row justify-between items-center gap-3">
+                                  <div className="flex items-center gap-3 w-full md:w-auto">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-accent shadow-sm shrink-0">
+                                      <Truck className="w-4 h-4 md:w-5 md:h-5" />
+                                    </div>
+                                    <div>
+                                      <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 leading-none mb-1">{dict.profile.carrier}</p>
+                                      <p className="text-xs md:text-sm font-bold text-primary">{item.carrier}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-wrap md:flex-nowrap items-center gap-4 justify-between w-full md:w-auto border-t md:border-t-0 border-primary/5 pt-3 md:pt-0">
+                                    <div className="flex flex-col md:items-end">
+                                      <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 leading-none mb-1 text-start md:text-end">{dict.profile.tracking_id}</p>
+                                      <p className="text-xs md:text-sm font-mono font-bold text-primary text-start md:text-end">{item.trackingNumber}</p>
+                                    </div>
+                                    {getTrackingUrl(item.carrier, item.trackingNumber) && (
+                                      <a
+                                        href={getTrackingUrl(item.carrier, item.trackingNumber) || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold rounded-lg text-xs hover:bg-brand transition-colors shadow-sm active:scale-95"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        <span>Track</span>
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   ))

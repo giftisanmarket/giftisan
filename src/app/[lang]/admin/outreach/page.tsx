@@ -26,8 +26,12 @@ export default async function AdminOutreachPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-heading font-bold text-primary mb-2">Artisan Outreach</h1>
-        <p className="text-charcoal/40 font-medium">Send personalized, beautifully formatted Arabic invitations directly to artisans.</p>
+        <h1 className="text-3xl font-heading font-bold text-primary mb-2">
+          {dict.admin.outreach_title || "Artisan Outreach"}
+        </h1>
+        <p className="text-charcoal/40 font-medium">
+          {dict.admin.outreach_desc || "Send personalized, beautifully formatted Arabic invitations directly to artisans."}
+        </p>
       </div>
 
       <OutreachClient dict={dict} />

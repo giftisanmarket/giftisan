@@ -251,7 +251,7 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
 
       {/* Coupon List Table */}
       <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
-        <div className="overflow-x-auto no-scrollbar scrollbar-hide">
+        <div className="overflow-x-auto">
           <table className={cn("w-full min-w-[800px] lg:min-w-full text-start", isAr ? "text-right" : "text-left" )}>
             <thead>
               <tr className="bg-primary/5 border-b border-primary/5">

@@ -246,7 +246,12 @@
     "email_previews_desc": "تصور عالي الدقة لصوت جيفتيزان في جميع مراحل المنصة.",
     "handcrafted_mastery": "إتقان يدوي",
     "proudly_based_egypt": "بكل فخر من مصر • ندعم الحرفيين المحليين",
-    "giftisan_team": "فريق جيفتيزان"
+    "giftisan_team": "فريق جيفتيزان",
+    "payouts_requests": "إدارة المدفوعات",
+    "coupons": "كوبونات الخصم",
+    "outreach": "دعوة الحرفيين",
+    "outreach_title": "دعوة الحرفيين",
+    "outreach_desc": "أرسل دعوات مخصصة ومنسقة بشكل جميل باللغة العربية مباشرة إلى الحرفيين عبر البريد الإلكتروني."
   },
   "home": {
     "hero_title": "حيث تلتقي الحرفة بالروح.",
@@ -900,6 +905,7 @@
     "activity_product_rejected_desc": "{name} يحتاج إلى بعض اللمسات الإضافية",
     "activity_product_pending": "قائمة الانتظار للمراجعة",
     "activity_product_pending_desc": "{name} حالياً قيد المراجعة من قبل منسقينا",
+    "rejection_note": "ملاحظة",
     "tier_local_legend": "أسطورة محلية",
     "tier_local_legend_desc": "بدأ اسم استوديو الخاص بك يصبح معروفاً في المجتمع الحرفي المحلي.",
     "tier_regional_star": "نجم إقليمي",
@@ -1106,6 +1112,9 @@
     "saving_changes": "جاري حفظ التغييرات...",
     "update_success": "تم تحديث الكنز بنجاح",
     "update_failed": "فشل تحديث الكنز",
+    "feedback_title": "ملاحظات الإدارة",
+    "feedback_desc": "يرجى معالجة النقاط أدناه وإعادة تقديم كنزك للموافقة عليه مرة أخرى.",
+    "resolve_and_resubmit": "حل المشكلة وإعادة الإرسال",
     "variations": "الخيارات المتعددة",
     "option_name_placeholder": "مثال: اللون، المقاس",
     "add_option": "إضافة خيار",

@@ -87,7 +87,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
             <Link href="/admin/orders" className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent hover:underline">{dict.admin.view_all_action}</Link>
           </div>
           <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 overflow-hidden">
-            <div className="overflow-x-auto no-scrollbar scrollbar-hide">
+            <div className="overflow-x-auto">
               <table className="w-full text-left min-w-[500px] lg:min-w-full">
                 <thead>
                   <tr className="bg-primary/5 border-b border-primary/5">

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { 
   Users, 
@@ -24,10 +26,10 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
     { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
     { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
-    { label: isAr ? "إدارة المدفوعات" : "Payouts Requests", href: "/admin/payouts", icon: DollarSign },
+    { label: dict.admin.payouts_requests || (isAr ? "إدارة المدفوعات" : "Payout Requests"), href: "/admin/payouts", icon: DollarSign },
     { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
     { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
-    { label: "Outreach", href: "/admin/outreach", icon: Send },
+    { label: dict.admin.outreach || (isAr ? "دعوة الحرفيين" : "Outreach"), href: "/admin/outreach", icon: Send },
   ];
 };
 
@@ -39,7 +41,32 @@ export function AdminNavClient({
   dict: any
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const navItems = getNavItems(dict);
+
+  // Global Keyboard Shortcut for switching languages (Alt + L)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === "l" || e.key === "L" || e.key === "ل")) {
+        e.preventDefault();
+        const nextLang = pathname.startsWith("/en") ? "ar" : "en";
+        document.cookie = `NEXT_LOCALE=${nextLang}; path=/; max-age=31536000`;
+        const nextPath = pathname.replace(/^\/(en|ar)/, `/${nextLang}`);
+        
+        toast.success(
+          nextLang === "ar" 
+            ? "جاري التحويل إلى اللغة العربية..." 
+            : "Switching to English...",
+          { id: "lang-switch-toast", duration: 1500 }
+        );
+        
+        router.push(nextPath);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pathname, router]);
 
   return (
     <>
@@ -51,9 +78,21 @@ export function AdminNavClient({
           </div>
           <span className="font-heading font-black tracking-tighter text-xl">{dict.common.admin || "Admin"}</span>
         </div>
-        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-accent px-4 py-2 bg-white/5 rounded-full border border-white/10 active:scale-95 transition-all">
-           {dict.admin.exit}
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link 
+            href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
+            onClick={() => {
+              document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
+            }}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 text-xs font-black uppercase text-accent hover:text-white transition-all active:scale-90 border border-white/10"
+            title={pathname.startsWith('/en') ? "Switch to Arabic (Alt+L)" : "Switch to English (Alt+L)"}
+          >
+            {pathname.startsWith('/en') ? 'AR' : 'EN'}
+          </Link>
+          <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-accent px-4 py-2 bg-white/5 rounded-full border border-white/10 active:scale-95 transition-all">
+             {dict.admin.exit}
+          </Link>
+        </div>
       </header>
 
       {/* Sidebar (Desktop) */}
@@ -91,10 +130,24 @@ export function AdminNavClient({
           })}
         </nav>
 
-        <div className="pt-8 border-t border-white/10 space-y-4">
+        <div className="pt-8 border-t border-white/10 space-y-2">
+          <Link 
+            href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
+            onClick={() => {
+              document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
+            }}
+            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition-all font-bold text-white/60 hover:text-white active:scale-95"
+            title="Switch Language (Alt+L)"
+          >
+            <span className="text-xs font-black uppercase tracking-widest bg-white/15 px-2 py-0.5 rounded text-accent">
+              {pathname.startsWith('/en') ? 'عربي' : 'EN'}
+            </span>
+            <span className="text-sm">{pathname.startsWith('/en') ? "Switch to Arabic" : "Switch to English"}</span>
+          </Link>
+
           <Link href="/" className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition-all font-bold group text-white/60 hover:text-white active:scale-95">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span>{dict.admin.marketplace}</span>
+            <span className="text-sm">{dict.admin.marketplace}</span>
           </Link>
         </div>
       </aside>

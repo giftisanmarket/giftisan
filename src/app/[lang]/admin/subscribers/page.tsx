@@ -51,9 +51,8 @@ export default async function AdminSubscribersPage({ params }: { params: Promise
         </div>
       </div>
 
-      {/* Content */}
       <div className="bg-white rounded-[1.5rem] md:rounded-3xl border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
-        <div className="overflow-x-auto no-scrollbar scrollbar-hide">
+        <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px] lg:min-w-full">
             <thead>
               <tr className="bg-primary/5 border-b border-primary/10">

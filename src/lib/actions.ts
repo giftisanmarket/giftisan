@@ -592,6 +592,23 @@ export async function createOrder(userId: string, totalAmount: number, items: an
 
       // Update coupon usage count if used
       if (shippingData?.couponId) {
+        const coupon = await tx.coupon.findUnique({
+          where: { id: shippingData.couponId }
+        });
+
+        if (!coupon) {
+          throw new Error("The coupon code used for this order is invalid.");
+        }
+        if (!coupon.isActive) {
+          throw new Error("The coupon code used for this order is no longer active.");
+        }
+        if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+          throw new Error("The coupon code used for this order has expired.");
+        }
+        if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
+          throw new Error("This coupon has just reached its maximum usage limit!");
+        }
+
         await tx.coupon.update({
           where: { id: shippingData.couponId },
           data: {
@@ -874,6 +891,15 @@ export async function requestPayoutAction(
     }
 
     await prisma.$transaction(async (tx) => {
+      // Lock-guard verify: fetch live balance inside transaction lock before performing withdrawal
+      const liveBalance = await tx.artisanBalance.findUnique({
+        where: { artisanId: artisan.id }
+      });
+
+      if (!liveBalance || liveBalance.withdrawable < amount) {
+        throw new Error("Insufficient withdrawable balance due to a concurrent pending transaction.");
+      }
+
       // 1. Log transaction as a negative payout
       await tx.artisanTransaction.create({
         data: {

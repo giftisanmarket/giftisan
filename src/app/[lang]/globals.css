@@ -175,3 +175,60 @@ a,
     display: none !important;
   }
 }
+
+/* Premium Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #FDFCF0 !important; /* Brand Cream */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 78, 59, 0.25) !important; /* Brand Primary (Green) with opacity */
+  border-radius: 9999px !important;
+  border: 3px solid #FDFCF0 !important; /* Breathing padding */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 78, 59, 0.45) !important; /* Primary slightly more opaque */
+}
+
+/* Dark scrollbar variation for deep-forest/dark elements (like the Admin sidebar!) */
+.bg-primary::-webkit-scrollbar-track,
+aside::-webkit-scrollbar-track,
+.bg-primary-dark::-webkit-scrollbar-track,
+[class*="bg-primary"]::-webkit-scrollbar-track {
+  background: #064E3B !important; /* Dark primary background */
+}
+
+.bg-primary::-webkit-scrollbar-thumb,
+aside::-webkit-scrollbar-thumb,
+.bg-primary-dark::-webkit-scrollbar-thumb,
+[class*="bg-primary"]::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.35) !important; /* Brand Accent (Amber) */
+  border: 3px solid #064E3B !important;
+}
+
+.bg-primary::-webkit-scrollbar-thumb:hover,
+aside::-webkit-scrollbar-thumb:hover,
+.bg-primary-dark::-webkit-scrollbar-thumb:hover,
+[class*="bg-primary"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 119, 6, 0.55) !important;
+}
+
+/* Restrict standard scrollbar-color to Firefox to prevent it from disabling the rich webkit scrollbars on Chrome/Edge/Safari */
+@supports (-moz-appearance: none) {
+  * {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(6, 78, 59, 0.3) #FDFCF0 !important;
+  }
+  
+  .bg-primary,
+  aside,
+  [class*="bg-primary"] {
+    scrollbar-color: rgba(217, 119, 6, 0.35) #064E3B !important;
+  }
+}

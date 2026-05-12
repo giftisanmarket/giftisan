@@ -73,8 +73,12 @@ export function OutreachClient({ dict }: { dict: any }) {
             <div className="w-16 h-16 bg-cream rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary shadow-lg shadow-primary/5">
               <Send className="w-8 h-8" />
             </div>
-            <h2 className="text-3xl font-heading font-bold text-primary mb-3">Artisan Outreach</h2>
-            <p className="text-charcoal/50 text-sm font-medium">Send personalized invitations directly to artisans via Resend.</p>
+            <h2 className="text-3xl font-heading font-bold text-primary mb-3">
+              {dict.admin.outreach_title || "Artisan Outreach"}
+            </h2>
+            <p className="text-charcoal/50 text-sm font-medium">
+              {dict.admin.outreach_desc || "Send personalized invitations directly to artisans via Resend."}
+            </p>
           </div>
 
           {/* Language Toggle */}

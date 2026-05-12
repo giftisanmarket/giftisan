@@ -50,6 +50,7 @@ import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdatePro
 import { toast } from "react-hot-toast";
 import { EditProductModal } from "@/components/edit-product-modal";
 import { SalesChart } from "@/components/sales-chart";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { OverviewTab } from "./studio/overview-tab";
 import { InventoryTab } from "./studio/inventory-tab";
 import { SalesTab } from "./studio/sales-tab";
@@ -76,6 +77,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [bulkProductsToDelete, setBulkProductsToDelete] = useState<string[] | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -172,15 +174,20 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
       setShowMask(!isAtEnd);
     }
   };
-  const handleBulkDelete = async (ids: string[]) => {
+  const handleBulkDelete = (ids: string[]) => {
     if (isAdminPreview) return;
-    
-    const confirm = window.confirm(dict.studio.remove_desc);
-    if (!confirm) return;
+    setBulkProductsToDelete(ids);
+  };
 
+  const executeBulkDelete = async () => {
+    if (!bulkProductsToDelete || isAdminPreview) return;
+    
     const loadingToast = toast.loading("Removing treasures...", {
       style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
     });
+
+    const ids = bulkProductsToDelete;
+    setBulkProductsToDelete(null);
 
     const res = await bulkDeleteProducts(ids);
 
@@ -301,6 +308,17 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             </div>
           )}
         </AnimatePresence>
+
+        <ConfirmationModal
+          isOpen={bulkProductsToDelete !== null}
+          onClose={() => setBulkProductsToDelete(null)}
+          onConfirm={executeBulkDelete}
+          title={dict.studio.remove_treasure || "Remove Treasures"}
+          message={dict.studio.remove_desc}
+          confirmText={dict.studio.delete_permanently || "Delete"}
+          cancelText={dict.studio.keep_it || "Keep"}
+          isDestructive={true}
+        />
 
         <div className="max-w-[1400px] mx-auto px-4 pt-24 md:pt-32 pb-20">
           {/* Verification Status Banner */}

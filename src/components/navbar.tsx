@@ -77,6 +77,30 @@ export function Navbar({ dict }: { dict?: any }) {
     }
   }, [searchParams, update, pathname]);
 
+  // Global Keyboard Shortcut for switching languages (Alt + L)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === "l" || e.key === "L" || e.key === "ل")) {
+        e.preventDefault();
+        const nextLang = pathname.startsWith("/en") ? "ar" : "en";
+        document.cookie = `NEXT_LOCALE=${nextLang}; path=/; max-age=31536000`;
+        const nextPath = pathname.replace(/^\/(en|ar)/, `/${nextLang}`);
+        
+        toast.success(
+          nextLang === "ar" 
+            ? "جاري التحويل إلى اللغة العربية..." 
+            : "Switching to English...",
+          { id: "lang-switch-toast", duration: 1500 }
+        );
+        
+        router.push(nextPath);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pathname, router]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -527,6 +551,18 @@ export function Navbar({ dict }: { dict?: any }) {
                 </span>
               )}
             </button>
+            {/* Mobile Language Toggle */}
+            <Link 
+              href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
+              onClick={() => {
+                document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
+              }}
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/5 text-[10px] font-black uppercase text-primary/60 hover:text-accent transition-all active:scale-90 border border-primary/5 shadow-sm"
+              title={pathname.startsWith('/en') ? "Switch to Arabic (Alt+L)" : "Switch to English (Alt+L)"}
+            >
+              {pathname.startsWith('/en') ? 'AR' : 'EN'}
+            </Link>
+
             <button
               onClick={() => setIsMenuOpen(true)}
               className="md:hidden p-2 text-charcoal/70 hover:text-primary transition-colors active:scale-90"
@@ -542,6 +578,7 @@ export function Navbar({ dict }: { dict?: any }) {
                   document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
                 }}
                 className="text-xs font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-colors active:scale-90"
+                title="Switch Language (Alt+L)"
               >
                 {pathname.startsWith('/en') ? 'عربي' : 'EN'}
               </Link>
@@ -590,9 +627,22 @@ export function Navbar({ dict }: { dict?: any }) {
         )}>
           <div className="p-6 border-b border-primary/10 flex justify-between items-center">
             <span className="font-heading font-black text-primary text-xl">{d.common.menu}</span>
-            <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
-              <X className="w-6 h-6 text-primary" />
-            </button>
+            <div className="flex items-center gap-3">
+              <Link 
+                href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
+                onClick={() => {
+                  document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
+                  setIsMenuOpen(false);
+                }}
+                className="px-3 py-1.5 rounded-full bg-primary/5 text-[11px] font-black uppercase tracking-wider text-primary/60 hover:text-accent transition-all border border-primary/5 active:scale-95 shadow-sm"
+                title="Switch Language (Alt+L)"
+              >
+                {pathname.startsWith('/en') ? 'عربي' : 'English'}
+              </Link>
+              <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
+                <X className="w-6 h-6 text-primary" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-8">

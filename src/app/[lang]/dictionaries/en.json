@@ -189,6 +189,7 @@
     "preview_studio": "Preview Studio",
     "orders_count": "{count} Orders",
     "not_applicable": "N/A",
+    "newsletter_subscribers": "Newsletter Subscribers",
     "newsletter_title": "Newsletter",
     "subscribers_accent": "Subscribers",
     "mailing_list_desc": "Manage your community mailing list.",
@@ -245,7 +246,12 @@
     "email_previews_desc": "High-fidelity visualization of the Giftisan lifecycle voice.",
     "handcrafted_mastery": "Handcrafted Mastery",
     "proudly_based_egypt": "Proudly Based in Egypt • Supporting Local Artisans",
-    "giftisan_team": "The Giftisan Team"
+    "giftisan_team": "The Giftisan Team",
+    "payouts_requests": "Payout Requests",
+    "coupons": "Coupons",
+    "outreach": "Outreach",
+    "outreach_title": "Artisan Outreach",
+    "outreach_desc": "Send personalized, beautifully formatted Arabic invitations directly to artisans."
   },
   "home": {
     "hero_title": "WHERE CRAFT MEETS SOUL.",
@@ -715,6 +721,17 @@
     "management_locked": "Management Locked",
     "empty_studio_title": "Your studio is currently quiet",
     "empty_studio_desc": "Share your first creation with the Giftisan community to start your craftsman journey.",
+    "edit_product": {
+      "edit_treasure": "Edit Treasure",
+      "refine_details": "Refine the details of your handcrafted masterpiece",
+      "core_details": "Core Details",
+      "saving_changes": "Saving changes...",
+      "update_success": "Treasure refined and re-submitted!",
+      "update_failed": "Workshop error: Failed to refine the treasure.",
+      "feedback_title": "Curator Feedback",
+      "feedback_desc": "Please address the comments below and re-submit your treasure for approval.",
+      "resolve_and_resubmit": "Resolve and Re-submit"
+    },
     "create_first_piece": "Create Your First Piece",
     "mark_shipped": "Mark as Shipped",
     "mark_delivered": "Mark as Delivered",
@@ -1027,6 +1044,7 @@
   },
   "edit_product": {
     "edit_treasure": "Edit Treasure",
+    "treasure_accent": "Treasure",
     "refine_details": "Refine your handcrafted details",
     "core_details": "Core Details",
     "saving_changes": "Saving Changes...",

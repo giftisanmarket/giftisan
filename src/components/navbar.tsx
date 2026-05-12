@@ -146,7 +146,6 @@ export function Navbar({ dict }: { dict?: any }) {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      <PreLaunchBanner dict={d} />
       <FoundingBanner dict={d} />
       <VerificationBanner dict={d} />
       <nav className="w-full glass border-b border-primary/10">

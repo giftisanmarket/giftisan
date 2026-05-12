@@ -7,6 +7,7 @@ import { VerifyArtisanButton } from "@/components/admin/verify-artisan-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { RoleManager } from "@/components/admin/role-manager";
 import ExportArtisansButton from "@/components/admin/export-artisans-button";
+import { CommissionManager } from "@/components/admin/commission-manager";
 
 import { getDictionary } from "../../dictionaries";
 import { Metadata } from "next";
@@ -50,6 +51,7 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ lan
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.user_profile}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.role}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.studio_status}</th>
+                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{lang === "ar" ? "العمولة" : "Commission"}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.activity}</th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-right">{dict.admin.actions}</th>
               </tr>
@@ -113,6 +115,17 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ lan
                           </div>
                         </div>
                       </div>
+                    ) : (
+                      <span className="text-[9px] md:text-[10px] font-bold text-primary/20 uppercase tracking-widest">{dict.admin.not_applicable}</span>
+                    )}
+                  </td>
+                  <td className="px-6 md:px-8 py-4 md:py-6">
+                    {user.artisanProfile ? (
+                      <CommissionManager 
+                        artisanId={user.artisanProfile.id} 
+                        currentRate={user.artisanProfile.commissionRate || 0} 
+                        dict={dict} 
+                      />
                     ) : (
                       <span className="text-[9px] md:text-[10px] font-bold text-primary/20 uppercase tracking-widest">{dict.admin.not_applicable}</span>
                     )}

@@ -22,18 +22,35 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
 
   const cards = [
     { label: dict.admin.total_revenue, value: `${dict.product.currency} ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "bg-green-500", trend: "+12%" },
+    { label: lang === "ar" ? "أرباح المنصة" : "Platform Earnings", value: `${dict.product.currency} ${stats.platformEarnings.toLocaleString()}`, icon: TrendingUp, color: "bg-accent", trend: "Net" },
+    { label: lang === "ar" ? "طلبات سحب معلقة" : "Pending Payouts", value: `${dict.product.currency} ${stats.pendingPayouts.toLocaleString()}`, icon: Package, color: "bg-amber-500", trend: "Action" },
     { label: dict.admin.global_users, value: stats.userCount.toString(), icon: Users, color: "bg-blue-500", trend: "+5%" },
-    { label: dict.admin.active_products, value: stats.productCount.toString(), icon: ShoppingBag, color: "bg-accent", trend: "+8%" },
-    { label: dict.admin.orders_fulfilled, value: stats.orderCount.toString(), icon: Package, color: "bg-purple-500", trend: "+15%" },
+  ];
+
+  const secondaryStats = [
+    { label: lang === "ar" ? "أرصدة معلقة (ضمان)" : "Artisan Escrow (Pending)", value: `${dict.product.currency} ${stats.artisanPending.toLocaleString()}`, color: "text-amber-600" },
+    { label: lang === "ar" ? "أرصدة جاهزة للسحب" : "Artisan Withdrawable", value: `${dict.product.currency} ${stats.artisanWithdrawable.toLocaleString()}`, color: "text-emerald-600" },
   ];
 
   return (
     <div className="space-y-12">
-      <div>
-        <h1 className="text-4xl font-heading font-black text-primary tracking-tighter mb-2">
-          {dict.admin.platform_title} <span className="serif italic text-accent font-normal">{dict.admin.overview_accent}</span>
-        </h1>
-        <p className="text-charcoal/40 font-medium">{dict.admin.platform_overview_desc}</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+          <h1 className="text-4xl font-heading font-black text-primary tracking-tighter mb-2">
+            {dict.admin.platform_title} <span className="serif italic text-accent font-normal">{dict.admin.overview_accent}</span>
+          </h1>
+          <p className="text-charcoal/40 font-medium">{dict.admin.platform_overview_desc}</p>
+        </div>
+        
+        {/* Secondary Financial Indicators */}
+        <div className="flex gap-4 md:gap-8">
+          {secondaryStats.map((s, i) => (
+            <div key={i} className="text-right">
+              <p className="text-[9px] font-black uppercase tracking-widest text-primary/30 mb-1">{s.label}</p>
+              <p className={cn("text-sm md:text-lg font-bold font-heading", s.color)}>{s.value}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -48,7 +65,12 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
                 <p className="text-[8px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">{card.label}</p>
                 <p className="text-xl md:text-3xl font-heading font-bold text-primary">{card.value}</p>
               </div>
-              <div className="flex items-center gap-1 text-[8px] md:text-[10px] font-black text-green-500 bg-green-50 px-2 py-1 rounded-full shrink-0">
+              <div className={cn(
+                "flex items-center gap-1 text-[8px] md:text-[10px] font-black px-2 py-1 rounded-full shrink-0",
+                card.trend === "Action" ? "bg-amber-50 text-amber-600" : 
+                card.trend === "Net" ? "bg-accent/10 text-accent" :
+                "bg-green-50 text-green-500"
+              )}>
                 <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" />
                 {card.trend}
               </div>

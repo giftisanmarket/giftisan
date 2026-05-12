@@ -50,12 +50,17 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
               </button>
             </form>
             
-            <Link
-              href="/become-artisan"
-              className="h-14 md:h-16 px-8 bg-white text-primary border border-primary/10 font-bold rounded-xl md:rounded-full hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 text-sm md:text-base shrink-0"
-            >
-              {dict.common.open_studio} <Store className="w-4 h-4" />
-            </Link>
+            <div className="relative">
+              <Link
+                href="/become-artisan"
+                className="h-14 md:h-16 px-8 bg-white text-primary border border-primary/10 font-bold rounded-xl md:rounded-full hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 text-sm md:text-base shrink-0"
+              >
+                {dict.common.open_studio} <Store className="w-4 h-4" />
+              </Link>
+              <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 px-3 py-1 bg-accent text-white text-[8px] md:text-[9px] font-black rounded-full shadow-lg rotate-12 animate-pulse border-2 border-white uppercase tracking-widest z-10">
+                {dict.common?.founding_banner?.title?.split(' ')[0] || "2026"} {dict.common?.zero_fee_badge || "0% Fee"}
+              </div>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-6 pt-2">

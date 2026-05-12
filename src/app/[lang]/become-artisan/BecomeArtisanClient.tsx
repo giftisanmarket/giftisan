@@ -71,12 +71,12 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
   const benefits = [
     {
       title: dict.home.artisan_onboarding?.benefits?.commission_title || "0% Commission",
-      desc: dict.home.artisan_onboarding?.benefits?.commission_desc || "Keep 100% of your earnings for 6 months.",
+      desc: dict.home.artisan_onboarding?.benefits?.commission_desc || "Keep 100% of your earnings. No hidden charges. Enjoy 0% platform commission throughout the 2026 season.",
       icon: <Rocket className="w-6 h-6 text-accent" />,
     },
     {
       title: dict.home.artisan_onboarding?.benefits?.marketing_title || "Priority Spotlight",
-      desc: dict.home.artisan_onboarding?.benefits?.marketing_desc || "Permanent priority in our search results and homepage.",
+      desc: dict.home.artisan_onboarding?.benefits?.marketing_desc || "Founding artisans get permanent priority in search results and homepage features.",
       icon: <Sparkles className="w-6 h-6 text-accent" />,
     },
     {

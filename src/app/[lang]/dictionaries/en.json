@@ -30,6 +30,12 @@
     "privacy": "Privacy Policy",
     "shipping": "Shipping Policy",
     "refund": "Refund Policy",
+    "founding_banner": {
+      "title": "2026 Founding Artisan Program",
+      "desc": "Enjoy 0% platform fees throughout the 2026 season.",
+      "cta": "Apply Now"
+    },
+    "zero_fee_badge": "0% Fee",
     "discovery_mode": "Discovery mode",
     "popular_collections": "Popular Collections",
     "gifts_for_you": "Gifts for You",
@@ -420,7 +426,7 @@
       "onboarding_success": "Welcome to the circle! Redirecting to your studio...",
       "benefits": {
         "commission_title": "0% Commission",
-        "commission_desc": "Keep 100% of your earnings. No listing fees or hidden charges for your first 6 months.",
+        "commission_desc": "Keep 100% of your earnings. No listing fees or hidden charges. Enjoy 0% platform commission throughout the 2026 season.",
         "photography_title": "Pro Photography",
         "photography_desc": "Get free professional product shoots to make your treasures shine (Available in Cairo/Giza).",
         "marketing_title": "Priority Spotlight",
@@ -848,7 +854,9 @@
     "all_orders": "All Orders",
     "status_pending": "Pending",
     "status_shipped": "Shipped",
-    "status_delivered": "Delivered"
+    "status_delivered": "Delivered",
+    "top_5_favorites": "Top 5 Favorites",
+    "no_search_results_desc": "Try searching for a different name, email or order ID."
   },
   "profile": {
     "settings": "Settings",
@@ -1095,7 +1103,7 @@
     "section3_title": "3. Artisan Responsibilities",
     "section3_desc": "Artisans must ensure all products are handcrafted or vintage. They are responsible for accurate descriptions, shipping, and fulfilling orders in a timely manner. Giftisan reserves the right to remove any listing that violates our quality standards.",
     "section4_title": "4. Payments and Fees",
-    "section4_desc": "Giftisan processes payments through secure third-party providers. We collect a commission on each successful sale, which is clearly disclosed to the artisan upon registration. Buyers are responsible for the purchase price and shipping costs.",
+    "section4_desc": "Giftisan processes payments through secure third-party providers. For the duration of 2026, Giftisan collects 0% platform commission on all sales — artisans keep 100% of their earnings. Buyers are responsible for the purchase price and any applicable shipping costs. Commission terms may be updated for future periods and will be disclosed in advance.",
     "section5_title": "5. Intellectual Property",
     "section5_desc": "Artisans retain ownership of their designs. By listing products, artisans grant Giftisan a license to use product photos for marketing and promotional purposes. Users may not copy or redistribute content without permission."
   },

@@ -62,12 +62,12 @@ export default async function EmailPreviewsPage({ params }: { params: Promise<{ 
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: sans-serif;">
             ${emailHeader}
             <div style="padding: 40px 30px;">
-              <h1 style="color: ${ACCENT_COLOR}; text-align: center; font-size: 32px; margin-bottom: 10px;">New Commission!</h1>
+              <h1 style="color: ${ACCENT_COLOR}; text-align: center; font-size: 32px; margin-bottom: 10px;">New Sale Alert!</h1>
               <p style="color: #4b5563; font-size: 17px; text-align: center; margin-bottom: 30px;">Hi Hazem, a collector has just claimed a treasure from your studio.</p>
               <div style="background-color: #f9fafb; padding: 35px; border-radius: 20px; text-align: center;">
                 <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase;">Order Reference</p>
                 <p style="margin: 0 0 25px 0; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold;">#GT-48291</p>
-                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase;">Total Commission</p>
+                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase;">Your Earnings (0% Fee)</p>
                 <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 32px; font-weight: bold;">EGP 2,450.00</p>
               </div>
             </div>

@@ -178,7 +178,7 @@ export function OverviewTab({
               <BarChart3 className="w-3 h-3" />
               {dict.edit_product.variant_performance}
             </div>
-            <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Top 5 Favorites</span>
+            <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.studio.top_5_favorites}</span>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">

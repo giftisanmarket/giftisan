@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
@@ -827,13 +827,236 @@ export async function getArtisanData(userId: string) {
             createdAt: 'desc'
           }
         },
-        user: true
+        user: true,
+        balances: true,
+        transactions: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }
       }
     });
     return artisan;
   } catch (error) {
     console.error("Get artisan data error:", error);
     return null;
+  }
+}
+
+export async function requestPayoutAction(
+  artisanId: string,
+  amount: number,
+  method: string,
+  address: string,
+  name: string
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { id: artisanId },
+      include: { balances: true, user: true }
+    });
+
+    if (!artisan || artisan.userId !== session.user.id) {
+      return { error: "You are not authorized to make withdrawal requests for this studio" };
+    }
+
+    const balance = artisan.balances[0] || { withdrawable: 0 };
+    if (amount <= 0) {
+      return { error: "Withdrawal amount must be greater than zero." };
+    }
+    if (amount > balance.withdrawable) {
+      return { error: "Insufficient withdrawable balance." };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Log transaction as a negative payout
+      await tx.artisanTransaction.create({
+        data: {
+          artisanId: artisan.id,
+          amount: -amount,
+          type: "PAYOUT",
+          status: "PENDING", // Pending admin transfer approval
+          description: `Withdrawal request via ${method}. Sent to: ${address} (${name})`
+        }
+      });
+
+      // 2. Deduct from withdrawable balance
+      await tx.artisanBalance.update({
+        where: { artisanId: artisan.id },
+        data: {
+          withdrawable: { decrement: amount }
+        }
+      });
+
+      // 3. Update preferred profile payout coordinates
+      await tx.artisanProfile.update({
+        where: { id: artisan.id },
+        data: {
+          payoutMethod: method as any,
+          payoutAddress: address,
+          payoutName: name
+        }
+      });
+    });
+
+    // Send email notification to admin (support@giftisan.com) non-blockingly
+    const artisanName = artisan.studioName || artisan.user?.name || "Artisan";
+    sendPayoutRequestEmail(artisanName, amount, method, address).catch((err) =>
+      console.error("Failed to send payout request email notification:", err)
+    );
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Request payout error:", error);
+    return { error: error.message || "Failed to submit withdrawal request." };
+  }
+}
+
+export async function updateArtisanCommission(artisanId: string, rate: number) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "You must be an admin to perform this action." };
+    }
+
+    if (rate < 0 || rate > 1) {
+      return { error: "Commission rate must be between 0 and 1 (e.g., 0.15 for 15%)." };
+    }
+
+    await prisma.artisanProfile.update({
+      where: { id: artisanId },
+      data: { commissionRate: rate }
+    });
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Update commission error:", error);
+    return { error: error.message || "Failed to update commission rate." };
+  }
+}
+
+export async function approvePayoutAction(transactionId: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "You must be an admin to perform this action." };
+    }
+
+    const transaction = await prisma.artisanTransaction.findUnique({
+      where: { id: transactionId },
+      include: { 
+        artisan: { 
+          include: { user: true } 
+        } 
+      }
+    });
+
+    if (!transaction || transaction.type !== "PAYOUT" || transaction.status !== "PENDING") {
+      return { error: "Invalid transaction request." };
+    }
+
+    const payoutAmount = Math.abs(transaction.amount);
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Update transaction status to COMPLETED
+      await tx.artisanTransaction.update({
+        where: { id: transactionId },
+        data: { status: "COMPLETED" }
+      });
+
+      // 2. Increment withdrawn balance
+      await tx.artisanBalance.update({
+        where: { artisanId: transaction.artisanId },
+        data: {
+          withdrawn: { increment: payoutAmount }
+        }
+      });
+    });
+
+    // Send email notification to artisan in the background (non-blocking)
+    if (transaction.artisan?.user?.email) {
+      const email = transaction.artisan.user.email;
+      const name = transaction.artisan.studioName || transaction.artisan.user.name || "Artisan";
+      const method = transaction.description?.split("via ")?.[1]?.split(".")?.[0] || "INSTAPAY";
+      const address = transaction.description?.split("Sent to: ")?.[1]?.split(" (")?.[0] || "N/A";
+
+      sendPayoutApprovedEmail(email, name, payoutAmount, method, address).catch((err) =>
+        console.error("Failed to send payout approved email:", err)
+      );
+    }
+
+    revalidatePath("/admin/payouts");
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Approve payout error:", error);
+    return { error: error.message || "Failed to approve payout." };
+  }
+}
+
+export async function rejectPayoutAction(transactionId: string, reason?: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "You must be an admin to perform this action." };
+    }
+
+    const transaction = await prisma.artisanTransaction.findUnique({
+      where: { id: transactionId },
+      include: { 
+        artisan: { 
+          include: { user: true } 
+        } 
+      }
+    });
+
+    if (!transaction || transaction.type !== "PAYOUT" || transaction.status !== "PENDING") {
+      return { error: "Invalid transaction request." };
+    }
+
+    const payoutAmount = Math.abs(transaction.amount);
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Update transaction status to FAILED/REJECTED
+      await tx.artisanTransaction.update({
+        where: { id: transactionId },
+        data: { 
+          status: "FAILED",
+          description: `REJECTED: ${transaction.description}${reason ? ` (Reason: ${reason})` : ""}`
+        }
+      });
+
+      // 2. Refund withdrawable balance back to the artisan
+      await tx.artisanBalance.update({
+        where: { artisanId: transaction.artisanId },
+        data: {
+          withdrawable: { increment: payoutAmount }
+        }
+      });
+    });
+
+    // Send email notification to artisan in the background (non-blocking)
+    if (transaction.artisan?.user?.email) {
+      const email = transaction.artisan.user.email;
+      const name = transaction.artisan.studioName || transaction.artisan.user.name || "Artisan";
+      sendPayoutDeclinedEmail(email, name, payoutAmount, reason || "Invalid or unverified payout details.").catch((err) =>
+        console.error("Failed to send payout declined email:", err)
+      );
+    }
+
+    revalidatePath("/admin/payouts");
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Reject payout error:", error);
+    return { error: error.message || "Failed to reject payout." };
   }
 }
 
@@ -1143,6 +1366,22 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
       }
     });
 
+    // Reset escrow countdown to START NOW from the delivery moment (Security Escrow Start)
+    if (status === "DELIVERED") {
+      await prisma.artisanTransaction.updateMany({
+        where: {
+          orderId: updatedItem.orderId,
+          artisanId: orderItem.product.artisanId,
+          type: "SALE",
+          status: "PENDING"
+        },
+        data: {
+          createdAt: new Date()
+        }
+      });
+      console.log(`[Escrow Security] Reset transaction escrow clock for Order: ${updatedItem.orderId} to START NOW upon delivery.`);
+    }
+
     // Send email notification to the buyer
     if (updatedItem.order.user.email) {
       sendOrderStatusUpdateEmail(
@@ -1439,29 +1678,112 @@ export async function getAdminStats() {
   try {
     const session = await auth();
     if (session?.user?.role !== "ADMIN") {
-      return { userCount: 0, productCount: 0, orderCount: 0, revenue: 0 };
+      return { 
+        userCount: 0, 
+        productCount: 0, 
+        orderCount: 0, 
+        revenue: 0,
+        platformEarnings: 0,
+        pendingPayouts: 0,
+        artisanPending: 0,
+        artisanWithdrawable: 0
+      };
     }
 
-    const [userCount, productCount, orderCount, totalRevenue] = await Promise.all([
+    const [
+      userCount, 
+      productCount, 
+      orderCount, 
+      totalRevenue,
+      artisanBalances,
+      pendingPayouts,
+      allSales
+    ] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
       prisma.order.count(),
       prisma.order.aggregate({
+        where: { status: { not: "CANCELLED" } },
+        _sum: { totalAmount: true }
+      }),
+      prisma.artisanBalance.aggregate({
         _sum: {
-          totalAmount: true
+          pending: true,
+          withdrawable: true
+        }
+      }),
+      prisma.artisanTransaction.aggregate({
+        where: {
+          type: "PAYOUT",
+          status: "PENDING"
+        },
+        _sum: {
+          amount: true
+        }
+      }),
+      prisma.artisanTransaction.findMany({
+        where: {
+          type: "SALE",
+          status: { in: ["PENDING", "CLEARED"] }
+        },
+        select: {
+          amount: true,
+          artisanId: true,
+          orderId: true,
+          order: {
+            include: {
+              items: {
+                select: {
+                  price: true,
+                  quantity: true,
+                  product: {
+                    select: {
+                      artisanId: true
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       })
     ]);
+
+    // Calculate platform earnings (The difference between Order Item Total and Artisan Share)
+    // Note: In a production scale, we might want to store platform share directly in the transaction record
+    let platformEarnings = 0;
+    allSales.forEach(sale => {
+      if (sale.order) {
+        // Find items in this order belonging to this artisan
+        const artisanItems = sale.order.items.filter(item => item.product.artisanId === sale.artisanId);
+        const itemTotal = artisanItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const commission = itemTotal - Math.abs(sale.amount);
+        platformEarnings += commission;
+      }
+    });
 
     return {
       userCount,
       productCount,
       orderCount,
-      revenue: totalRevenue._sum.totalAmount || 0
+      revenue: totalRevenue._sum.totalAmount || 0,
+      platformEarnings,
+      pendingPayouts: Math.abs(pendingPayouts._sum.amount || 0),
+      artisanPending: artisanBalances._sum.pending || 0,
+      artisanWithdrawable: artisanBalances._sum.withdrawable || 0
     };
   } catch (error) {
     console.error("Admin stats error:", error);
-    return { userCount: 0, productCount: 0, orderCount: 0, revenue: 0 };
+    return { 
+      userCount: 0, 
+      productCount: 0, 
+      orderCount: 0, 
+      revenue: 0,
+      platformEarnings: 0,
+      pendingPayouts: 0,
+      artisanPending: 0,
+      artisanWithdrawable: 0
+    };
   }
 }
 

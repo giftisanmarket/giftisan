@@ -12,7 +12,7 @@ import {
   Area
 } from "recharts";
 import { format, subDays, isSameDay } from "date-fns";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface SalesChartProps {
   sales: any[];
@@ -20,6 +20,15 @@ interface SalesChartProps {
 }
 
 export function SalesChart({ sales, tickFormatter }: SalesChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    // 150ms delay allows any Framer Motion tab entry animations to fully expand and compute layout sizes,
+    // which completely silences the Recharts zero-dimension console warnings!
+    const timer = setTimeout(() => setIsMounted(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   const chartData = useMemo(() => {
     const last7Days = [...Array(7)].map((_, i) => subDays(new Date(), i)).reverse();
     
@@ -37,9 +46,20 @@ export function SalesChart({ sales, tickFormatter }: SalesChartProps) {
     });
   }, [sales]);
 
+  if (!isMounted) {
+    return (
+      <div className="h-[300px] w-full mt-8 rounded-2xl bg-cream/10 border border-primary/5 flex items-center justify-center animate-pulse">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-12 h-12 rounded-full border-4 border-primary/10 border-t-primary animate-spin" />
+          <span className="text-xs font-bold text-primary/40">Loading Analytics...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[300px] w-full mt-8">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -78,7 +98,7 @@ export function SalesChart({ sales, tickFormatter }: SalesChartProps) {
             fillOpacity={1} 
             fill="url(#colorRevenue)" 
           />
-        </AreaChart>
+         </AreaChart>
       </ResponsiveContainer>
     </div>
   );

@@ -70,12 +70,24 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
             ${emailHeader}
             <div style="padding: 40px 30px; text-align: center;">
-              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 32px; margin-bottom: 20px; tracking: -0.02em;">Welcome to the Circle, ${name}!</h1>
-              <p style="color: #4b5563; line-height: 1.8; font-size: 17px; margin-bottom: 30px;">We're honored to have you join our community of artisans and treasure hunters. Giftisan is a sanctum where craft meets soul.</p>
-              <div style="margin: 40px 0;">
-                <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Explore the Vault</a>
+              <!-- English Section -->
+              <div dir="ltr">
+                <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 32px; margin-bottom: 20px; tracking: -0.02em;">Welcome to the Circle, ${name}!</h1>
+                <p style="color: #4b5563; line-height: 1.8; font-size: 17px; margin-bottom: 30px;">We're honored to have you join our community of artisans and treasure hunters. Giftisan is a sanctum where craft meets soul.</p>
               </div>
-              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic;">Happy discovery!</p>
+
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <!-- Arabic Section -->
+              <div dir="rtl">
+                <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 32px; margin-bottom: 20px; tracking: -0.02em;">مرحباً بك في الدائرة، ${name}!</h1>
+                <p style="color: #4b5563; line-height: 2; font-size: 17px; margin-bottom: 30px;">نتشرف بانضمامك إلى مجتمعنا من الحرفيين ومقتني الكنوز. "جيفتيزان" هو الملاذ الذي تلتقي فيه الحرفة بالروح.</p>
+              </div>
+
+              <div style="margin: 40px 0;">
+                <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Explore the Vault | اكتشف الخزائن</a>
+              </div>
+              <p style="color: #9ca3af; font-size: 14px; font-weight: 500; font-style: italic;">Happy discovery! | نتمنى لك اكتشافاً ممتعاً!</p>
             </div>
             ${emailFooter}
           </div>
@@ -98,27 +110,48 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     await resend.emails.send({
       from: SENDER,
       to: artisanEmail,
-      subject: 'New Commission: A treasure has been claimed!',
+      subject: 'New Sale: A treasure has been claimed! | مبيعة جديدة: تم اقتناء كنز من استوديو الخاص بك',
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
             ${emailHeader}
-            <div style="padding: 40px 30px;">
-              <h1 class="heading" style="color: ${ACCENT_COLOR}; text-align: center; font-size: 32px; margin-bottom: 10px;">New Commission Alert!</h1>
-              <p style="color: #4b5563; font-size: 17px; text-align: center; margin-bottom: 30px;">Hi ${artisanName}, a collector has just claimed a treasure from your studio.</p>
-              
-              <div style="background-color: #f9fafb; padding: 35px; border-radius: 20px; border: 1px solid #f3f4f6; text-align: center;">
-                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Order Reference</p>
-                <p style="margin: 0 0 25px 0; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+            <div style="padding: 40px 30px; text-align: center;">
+              <!-- English Section -->
+              <div dir="ltr">
+                <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 32px; margin-bottom: 10px;">New Sale Alert!</h1>
+                <p style="color: #4b5563; font-size: 17px; margin-bottom: 30px;">Hi ${artisanName}, a collector has just claimed a treasure from your studio.</p>
                 
-                <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Total Commission</p>
-                <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 32px; font-weight: bold;">EGP ${totalAmount.toLocaleString()}</p>
+                <div style="background-color: #f9fafb; padding: 35px; border-radius: 20px; border: 1px solid #f3f4f6;">
+                  <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Order Reference</p>
+                  <p style="margin: 0 0 25px 0; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+                  
+                  <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">Your Earnings (0% Platform Fee)</p>
+                  <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 32px; font-weight: bold;">EGP ${totalAmount.toLocaleString()}</p>
+                </div>
+
+                <p style="color: #4b5563; font-size: 16px; margin: 30px 0; line-height: 1.6;">Please log in to your **Studio Dashboard** to view shipping details and begin the fulfillment journey.</p>
               </div>
 
-              <p style="color: #4b5563; font-size: 16px; margin: 30px 0; text-align: center; line-height: 1.6;">Please log in to your **Studio Dashboard** to view shipping details and begin the fulfillment journey.</p>
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <!-- Arabic Section -->
+              <div dir="rtl">
+                <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 32px; margin-bottom: 10px;">تنبيه مبيعة جديدة!</h1>
+                <p style="color: #4b5563; font-size: 17px; margin-bottom: 30px;">أهلاً ${artisanName}، لقد قام مقتني كنوز باقتناء قطعة من الاستوديو الخاص بك الآن.</p>
+                
+                <div style="background-color: #f9fafb; padding: 35px; border-radius: 20px; border: 1px solid #f3f4f6;">
+                  <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">رقم الطلب</p>
+                  <p style="margin: 0 0 25px 0; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+                  
+                  <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 11px; font-weight: black; text-transform: uppercase; letter-spacing: 0.2em;">أرباحك (0% عمولة للمنصة)</p>
+                  <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 32px; font-weight: bold;">${totalAmount.toLocaleString()} ج.م</p>
+                </div>
+
+                <p style="color: #4b5563; font-size: 16px; margin: 30px 0; line-height: 2;">يرجى تسجيل الدخول إلى **لوحة تحكم الاستوديو** لعرض تفاصيل الشحن والبدء في رحلة التنفيذ.</p>
+              </div>
               
-              <div style="text-align: center;">
-                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Enter Studio</a>
+              <div style="text-align: center; margin-top: 40px;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 20px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em;">Enter Studio | دخول الاستوديو</a>
               </div>
             </div>
             ${emailFooter}
@@ -389,6 +422,11 @@ export const sendArtisanApprovalEmail = async (email: string, name: string) => {
                 <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 28px; margin-bottom: 20px;">Your Studio is Approved!</h1>
                 <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, our curators have reviewed your portfolio and we're thrilled to welcome you officially to the Giftisan Guild. Your studio is now live and ready to be discovered by collectors worldwide.</p>
                 
+                <div style="background-color: #f0fdf4; padding: 25px; border-radius: 20px; border: 1px solid #bbf7d0; margin-bottom: 30px; text-align: left;">
+                  <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em;">✨ 2026 Founding Member Status</p>
+                  <p style="margin: 10px 0 0 0; color: #14532d; font-size: 14px; line-height: 1.6;">As an early partner, you've been granted **Founding Artisan** status. Enjoy **0% platform fees** and keep 100% of your earnings throughout the entire 2026 season.</p>
+                </div>
+
                 <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 30px; text-align: left;">
                   <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">Next steps for your journey:</p>
                   <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 1.8;">
@@ -410,6 +448,11 @@ export const sendArtisanApprovalEmail = async (email: string, name: string) => {
                 <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 28px; margin-bottom: 20px;">تمت الموافقة على الاستوديو الخاص بك!</h1>
                 <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 30px;">أهلاً يا ${name}، لقد قام فريقنا بمراجعة أعمالك ويسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان". الاستوديو الخاص بك الآن متاح للجمهور وجاهز لاستقبال مقتني الكنوز من كل مكان.</p>
                 
+                <div style="background-color: #f0fdf4; padding: 25px; border-radius: 20px; border: 1px solid #bbf7d0; margin-bottom: 30px; text-align: right;">
+                  <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em;">✨ شارة الحرفي المؤسس 2026</p>
+                  <p style="margin: 10px 0 0 0; color: #14532d; font-size: 14px; line-height: 1.8;">كشريك مبكر، تم منحك صفة **حرفي مؤسس**. استمتع بـ **0% عمولة للمنصة** واحتفظ بـ 100% من أرباحك طوال موسم 2026 بالكامل.</p>
+                </div>
+
                 <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; border: 1px solid #f3f4f6; margin-bottom: 30px; text-align: right;">
                   <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">الخطوات التالية في رحلتك:</p>
                   <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 2;">
@@ -591,6 +634,156 @@ export const sendProductStatusUpdateEmail = async (email: string, name: string, 
     return { success: true };
   } catch (error) {
     console.error('Error sending product status email:', error);
+    return { success: false, error };
+  }
+};
+
+export const sendPayoutRequestEmail = async (artisanName: string, amount: number, method: string, address: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: PAYOUT REQUEST SUBMITTED ---\nArtisan: ${artisanName}\nAmount: ${amount} EGP\nMethod: ${method}\nAddress: ${address}\n---------------------------------------\n`);
+    return { success: true };
+  }
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: "support@giftisan.com",
+      subject: `Withdrawal Requested: ${artisanName} is requesting ${amount} EGP | Giftisan Admin`,
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px;">
+              <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px; text-align: center;">New Withdrawal Request</h1>
+              
+              <div style="background-color: #f9fafb; padding: 25px; border-radius: 20px; margin-bottom: 25px; border: 1px solid #f3f4f6;">
+                <p style="margin: 0 0 12px 0; color: #4b5563; font-size: 15px;"><strong>Artisan:</strong> ${artisanName}</p>
+                <p style="margin: 0 0 12px 0; color: #4b5563; font-size: 15px;"><strong>Amount Requested:</strong> <strong style="color: ${ACCENT_COLOR};">${amount.toFixed(2)} EGP</strong></p>
+                <p style="margin: 0 0 12px 0; color: #4b5563; font-size: 15px;"><strong>Method:</strong> ${method}</p>
+                <p style="margin: 0; color: #4b5563; font-size: 15px; font-family: monospace;"><strong>Address:</strong> ${address}</p>
+              </div>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${BASE_URL}/admin/payouts" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Review Payouts Manager</a>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending payout request notification:', error);
+    return { success: false, error };
+  }
+};
+
+export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: PAYOUT APPROVED EMAIL ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\n--------------------------------------\n`);
+    return { success: true };
+  }
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: email,
+      subject: `Your payout of ${amount} EGP has been successfully sent! | تم إيداع مستحقاتك المالية بقيمة ${amount} ج.م!`,
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <!-- English Section -->
+              <div dir="ltr" style="margin-bottom: 40px;">
+                <h1 class="heading" style="color: #10b981; font-size: 28px; margin-bottom: 20px;">Payout Transferred Successfully!</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">Hi ${name}, our accounting team has processed your withdrawal request and successfully transferred your funds.</p>
+                
+                <div style="background-color: #f0fdf4; padding: 25px; border-radius: 20px; border: 1px solid #bbf7d0; text-align: left; margin-bottom: 20px;">
+                  <p style="margin: 0 0 10px 0; color: #166534; font-size: 15px; font-weight: bold;">Payout Summary:</p>
+                  <p style="margin: 0 0 5px 0; color: #14532d; font-size: 13px;"><strong>Amount:</strong> <strong style="color: #166534;">${amount.toFixed(2)} EGP</strong></p>
+                  <p style="margin: 0 0 5px 0; color: #14532d; font-size: 13px;"><strong>Channel:</strong> ${method}</p>
+                  <p style="margin: 0; color: #14532d; font-size: 13px; font-family: monospace;"><strong>To Account:</strong> ${address}</p>
+                </div>
+              </div>
+
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <!-- Arabic Section -->
+              <div dir="rtl">
+                <h1 class="heading" style="color: #10b981; font-size: 28px; margin-bottom: 20px;">تم تحويل مستحقاتك بنجاح!</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 30px;">أهلاً يا ${name}، لقد قام فريق الحسابات لدينا بمعالجة طلب السحب الخاص بك وتحويل الأموال بنجاح.</p>
+                
+                <div style="background-color: #f0fdf4; padding: 25px; border-radius: 20px; border: 1px solid #bbf7d0; text-align: right;">
+                  <p style="margin: 0 0 10px 0; color: #166534; font-size: 15px; font-weight: bold;">ملخص عملية التحويل:</p>
+                  <p style="margin: 0 0 5px 0; color: #14532d; font-size: 13px;"><strong>المبلغ الإجمالي:</strong> <strong style="color: #166534;">${amount.toFixed(2)} جنيه مصري</strong></p>
+                  <p style="margin: 0 0 5px 0; color: #14532d; font-size: 13px;"><strong>وسيلة الدفع:</strong> ${method === 'INSTAPAY' ? 'إنستا باي (InstaPay)' : method === 'VODAFONE_CASH' ? 'فودافون كاش' : 'تحويل بنكي IBAN'}</p>
+                  <p style="margin: 0; color: #14532d; font-size: 13px; font-family: monospace;"><strong>إلى حساب:</strong> ${address}</p>
+                </div>
+              </div>
+
+              <div style="margin-top: 45px;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Open Studio Dashboard</a>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending payout approved email:', error);
+    return { success: false, error };
+  }
+};
+
+export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: PAYOUT DECLINED EMAIL ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\nReason: ${reason}\n--------------------------------------\n`);
+    return { success: true };
+  }
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: email,
+      subject: `Fulfillment Update: Withdrawal Request declined | تحديث حسابات: تم إلغاء طلب سحب المستحقات`,
+      html: `
+        <div style="background-color: ${CREAM_BG}; padding: 30px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden;">
+            ${emailHeader}
+            <div style="padding: 40px 30px; text-align: center;">
+              <!-- English Section -->
+              <div dir="ltr" style="margin-bottom: 40px;">
+                <h1 class="heading" style="color: #ef4444; font-size: 28px; margin-bottom: 20px;">Withdrawal Request Declined</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">Hi ${name}, your payout request for <strong>${amount.toFixed(2)} EGP</strong> was declined and the funds have been fully refunded back to your Withdrawable balance.</p>
+                <div style="background-color: #fef2f2; padding: 25px; border-radius: 20px; border: 1px solid #fecaca; text-align: left;">
+                  <p style="margin: 0; color: #991b1b; font-size: 13px;"><strong>Reason for Cancellation:</strong><br/>${reason}</p>
+                </div>
+              </div>
+
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #f3f4f6;" />
+
+              <!-- Arabic Section -->
+              <div dir="rtl">
+                <h1 class="heading" style="color: #ef4444; font-size: 28px; margin-bottom: 20px;">تم إلغاء طلب سحب المستحقات</h1>
+                <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 20px;">أهلاً يا ${name}، تم رفض طلب السحب الخاص بك بقيمة <strong>${amount.toFixed(2)} جنيه مصري</strong> وإعادة كامل المبلغ فوراً لرصيدك القابل للسحب في لوحة التحكم.</p>
+                <div style="background-color: #fef2f2; padding: 25px; border-radius: 20px; border: 1px solid #fecaca; text-align: right;">
+                  <p style="margin: 0; color: #991b1b; font-size: 13px;"><strong>سبب الرفض والإرجاع:</strong><br/>${reason}</p>
+                </div>
+              </div>
+
+              <div style="margin-top: 45px;">
+                <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 45px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Update Payout Details</a>
+              </div>
+            </div>
+            ${emailFooter}
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending payout declined email:', error);
     return { success: false, error };
   }
 };

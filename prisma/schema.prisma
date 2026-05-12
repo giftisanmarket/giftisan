@@ -137,6 +137,16 @@ model ArtisanProfile {
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
 
+  // Financial fields
+  commissionRate  Float         @default(0.0) // Platform commission (e.g., 15% is 0.15)
+  payoutMethod    PayoutMethod? @default(INSTAPAY)
+  payoutAddress   String?       // E.g., mobile number for Vodafone Cash or InstaPay handle
+  payoutName      String?       // Beneficiary full name
+
+  // Financial ledger relationships
+  balances        ArtisanBalance[]
+  transactions    ArtisanTransaction[]
+
   // Following System
   followers User[] @relation("UserFollowsArtisan")
 
@@ -266,6 +276,9 @@ model Order {
   coupon          Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
   discountApplied Float?      @default(0)
 
+  // Financial ledger relation
+  transactions    ArtisanTransaction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -324,4 +337,51 @@ model Coupon {
 
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+enum PayoutMethod {
+  INSTAPAY
+  VODAFONE_CASH
+  BANK_TRANSFER
+}
+
+model ArtisanBalance {
+  id             String         @id @default(cuid())
+  artisanId      String         @unique
+  artisan        ArtisanProfile @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  
+  pending        Float          @default(0.0) // Money earned but still in escrow / holding period
+  withdrawable   Float          @default(0.0) // Money cleared and ready for payout
+  withdrawn      Float          @default(0.0) // Total money successfully paid out to date
+  
+  updatedAt      DateTime       @updatedAt
+}
+
+model ArtisanTransaction {
+  id          String            @id @default(cuid())
+  artisanId   String
+  artisan     ArtisanProfile    @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  
+  orderId     String?
+  order       Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  amount      Float             // positive (earnings) or negative (payouts / refunds)
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  
+  description String?
+  createdAt   DateTime          @default(now())
+}
+
+enum TransactionType {
+  SALE          // Earnings from a client order
+  PAYOUT        // Money transferred from platform to artisan
+  REFUND_DEBIT  // Money deducted from artisan due to customer refund
+}
+
+enum TransactionStatus {
+  PENDING       // In holding period
+  CLEARED       // Holding period ended, money moved to withdrawable
+  COMPLETED     // For payout requests: payment sent to artisan bank/wallet
+  FAILED        // Transaction cancelled or failed
 }

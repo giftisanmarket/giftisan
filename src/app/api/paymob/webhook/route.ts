@@ -89,29 +89,75 @@ export async function POST(req: NextRequest) {
       });
 
       if (order && order.status === "PENDING") {
-        await prisma.order.update({
-          where: { id: orderId },
-          data: { status: "PROCESSING" }
+        await prisma.$transaction(async (tx) => {
+          // Update Order Status
+          await tx.order.update({
+            where: { id: orderId },
+            data: { status: "PROCESSING" }
+          });
+
+          // Process ledger transactions and balances for each order item
+          for (const item of order.items) {
+            const product = item.product;
+            const artisan = product.artisan;
+            if (!artisan) continue;
+
+            const itemTotal = item.price * item.quantity;
+            const commission = artisan.commissionRate ?? 0.0; // e.g. 0.15 (15%)
+            const adminShare = itemTotal * commission;
+            const artisanShare = itemTotal - adminShare;
+
+            // Log the sale transaction
+            await tx.artisanTransaction.create({
+              data: {
+                artisanId: artisan.id,
+                orderId: order.id,
+                amount: artisanShare,
+                type: "SALE",
+                status: "PENDING",
+                description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
+              }
+            });
+
+            // Update the artisan's balance
+            await tx.artisanBalance.upsert({
+              where: { artisanId: artisan.id },
+              update: {
+                pending: {
+                  increment: artisanShare
+                }
+              },
+              create: {
+                artisanId: artisan.id,
+                pending: artisanShare,
+                withdrawable: 0.0,
+                withdrawn: 0.0
+              }
+            });
+          }
         });
-        console.log(`Order ${orderId} marked as PROCESSING via Paymob webhook.`);
+        console.log(`Order ${orderId} marked as PROCESSING and financial ledger updated via Paymob webhook.`);
 
         // Send email notifications to artisans
         try {
-          const artisans = new Map();
+          const artisanEarnings = new Map();
           order.items.forEach(item => {
             const artisan = item.product.artisan;
             if (artisan.user.email) {
-              artisans.set(artisan.user.email, {
+              const current = artisanEarnings.get(artisan.user.email) || {
                 name: artisan.user.name || artisan.studioName,
-                email: artisan.user.email
-              });
+                email: artisan.user.email,
+                total: 0
+              };
+              current.total += item.price * item.quantity;
+              artisanEarnings.set(artisan.user.email, current);
             }
           });
 
           // Send emails
-          artisans.forEach(artisan => {
-            sendOrderNotification(artisan.email, artisan.name, order.id, order.totalAmount)
-              .catch(err => console.error(`Failed to send order notification to ${artisan.email}:`, err));
+          artisanEarnings.forEach(data => {
+            sendOrderNotification(data.email, data.name, order.id, data.total)
+              .catch(err => console.error(`Failed to send order notification to ${data.email}:`, err));
           });
         } catch (err) {
           console.error("Failed to process order notification emails inside webhook:", err);

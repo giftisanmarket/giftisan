@@ -54,7 +54,7 @@ import { OverviewTab } from "./studio/overview-tab";
 import { InventoryTab } from "./studio/inventory-tab";
 import { SalesTab } from "./studio/sales-tab";
 import { GrowthTab } from "./studio/growth-tab";
-import { LogisticsTab } from "./studio/logistics-tab";
+import { PaymentTab } from "./studio/payment-tab";
 import { ReviewsTab } from "./studio/reviews-tab";
 import { SettingsTab } from "./studio/settings-tab";
 
@@ -544,8 +544,8 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   )}
                 >
                   {tab.id === "logistics" && (
-                    <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-accent text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter">
-                      {dict.studio.soon}
+                    <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-green-500 text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter animate-pulse">
+                      Beta
                     </div>
                   )}
                   {activeTab === tab.id && (
@@ -633,7 +633,9 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               {activeTab === "growth" && <GrowthTab dict={dict} />}
 
               {activeTab === "logistics" && (
-                <LogisticsTab
+                <PaymentTab
+                  artisan={artisan}
+                  lang={lang}
                   dict={dict}
                   handleJoinWaitlist={handleJoinWaitlist}
                   isJoiningWaitlist={isJoiningWaitlist}

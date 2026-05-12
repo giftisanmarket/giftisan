@@ -11,7 +11,8 @@ import {
   Mail,
   Send,
   ArrowLeft,
-  Tag
+  Tag,
+  DollarSign
 } from "lucide-react";
 
 import Image from "next/image";
@@ -23,6 +24,7 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
     { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
     { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
+    { label: isAr ? "إدارة المدفوعات" : "Payouts Requests", href: "/admin/payouts", icon: DollarSign },
     { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
     { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
     { label: "Outreach", href: "/admin/outreach", icon: Send },

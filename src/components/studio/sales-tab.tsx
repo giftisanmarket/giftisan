@@ -60,6 +60,18 @@ export function SalesTab({
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const isArabic = dict.studio.mark_shipped === "تحديد كمشحون";
+
+  const getBulkOrdersLabel = (count: number) => {
+    if (isArabic) {
+      if (count === 1) return "طلب واحد";
+      if (count === 2) return "طلبان";
+      if (count >= 3 && count <= 10) return `${count} طلبات`;
+      return `${count} طلباً`;
+    }
+    return `${count} ${count === 1 ? "Order" : "Orders"}`;
+  };
+
   const filteredSales = useMemo(() => {
     let result = sales;
     
@@ -237,7 +249,7 @@ export function SalesTab({
                 {searchQuery ? dict.studio.no_search_results : dict.studio.no_sales_title}
               </h3>
               <p className="text-charcoal/40 max-w-xs md:max-w-md mx-auto text-sm md:text-base">
-                {searchQuery ? "Try searching for a different name, email or order ID." : dict.studio.no_sales_desc}
+                {searchQuery ? dict.studio.no_search_results_desc : dict.studio.no_sales_desc}
               </p>
             </div>
           </div>
@@ -261,7 +273,7 @@ export function SalesTab({
                     toggleSelectOrder(item.id);
                   }}
                   className={cn(
-                    "absolute top-4 end-4 md:top-8 md:end-8 z-20 w-8 h-8 rounded-xl flex items-center justify-center transition-all shadow-xl",
+                    "absolute top-4 start-4 md:top-8 md:start-8 z-20 w-8 h-8 rounded-xl flex items-center justify-center transition-all shadow-xl",
                     selectedOrderIds.includes(item.id) 
                       ? "bg-accent text-white" 
                       : "bg-white text-primary opacity-0 group-hover:opacity-100 border border-primary/5"
@@ -287,7 +299,9 @@ export function SalesTab({
                         item.status === "SHIPPED" ? "bg-blue-500 text-white border-blue-400" :
                           "bg-green-500 text-white border-green-400"
                     )}>
-                      {item.status}
+                      {item.status === "PENDING" ? dict.studio.status_pending :
+                       item.status === "SHIPPED" ? dict.studio.status_shipped :
+                       dict.studio.status_delivered}
                     </span>
                   </div>
 
@@ -506,7 +520,7 @@ export function SalesTab({
             exit={{ y: 100, opacity: 0 }}
             className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-3xl"
           >
-            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4">
+            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4 animate-fade-in">
               <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 min-w-0">
                 <button 
                   onClick={() => setSelectedOrderIds([])}
@@ -514,9 +528,9 @@ export function SalesTab({
                 >
                   <X className="w-5 h-5" />
                 </button>
-                <div className="hidden sm:block">
-                  <p className="text-white font-bold text-lg">{selectedOrderIds.length} Orders</p>
-                  <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Selected for Action</p>
+                <div className="hidden sm:block text-start">
+                  <p className="text-white font-bold text-lg">{getBulkOrdersLabel(selectedOrderIds.length)}</p>
+                  <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{dict.studio.selected_for_action || "Selected for Action"}</p>
                 </div>
               </div>
 
@@ -527,7 +541,7 @@ export function SalesTab({
                   className="h-12 px-5 md:px-8 bg-green-500 text-white font-bold rounded-2xl hover:bg-green-600 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">Mark Delivered</span>
+                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.mark_delivered || "Mark Delivered"}</span>
                 </button>
                 <button
                   disabled={isUpdating === "BULK"}
@@ -535,7 +549,7 @@ export function SalesTab({
                   className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
                 >
                   <Truck className="w-4 h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">Mark Shipped</span>
+                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.mark_shipped || "Mark Shipped"}</span>
                 </button>
               </div>
             </div>

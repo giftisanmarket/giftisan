@@ -108,7 +108,13 @@ export default async function StudioPage({
               createdAt: 'desc'
             }
           },
-          user: true
+          user: true,
+          balances: true,
+          transactions: {
+            orderBy: {
+              createdAt: 'desc'
+            }
+          }
         }
       });
     } catch (createError: any) {

@@ -1,0 +1,767 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Sparkles, 
+  Coins, 
+  Banknote, 
+  Wallet, 
+  CheckCircle2, 
+  Clock, 
+  ArrowDownLeft, 
+  ArrowUpRight, 
+  AlertCircle, 
+  Send, 
+  HelpCircle,
+  TrendingUp,
+  ArrowRight,
+  ChevronDown,
+  FileText,
+  Printer,
+  X
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { requestPayoutAction } from "@/lib/actions";
+import { toast } from "react-hot-toast";
+
+interface PaymentTabProps {
+  artisan: any;
+  lang: string;
+  dict: any;
+  handleJoinWaitlist: () => void;
+  isJoiningWaitlist: boolean;
+  hasJoinedWaitlist: boolean;
+}
+
+export function PaymentTab({
+  artisan,
+  lang,
+  dict,
+  handleJoinWaitlist,
+  isJoiningWaitlist,
+  hasJoinedWaitlist
+}: PaymentTabProps) {
+  const router = useRouter();
+  
+  // Extract balance details
+  const balance = artisan.balances?.[0] || { pending: 0.0, withdrawable: 0.0, withdrawn: 0.0 };
+  const transactions = artisan.transactions || [];
+
+  // Payout request form states
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [method, setMethod] = useState<"INSTAPAY" | "VODAFONE_CASH" | "BANK_TRANSFER">("INSTAPAY");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [address, setAddress] = useState(artisan.payoutAddress || "");
+  const [name, setName] = useState(artisan.payoutName || "");
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+
+  // Bulletproof Isolated Print handler (forces pure vector receipt page printing/PDF saving via sandboxed iframe)
+  const handlePrint = () => {
+    const printElement = document.getElementById("print-receipt-container");
+    if (!printElement) return;
+
+    // Create a temporary hidden iframe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) return;
+
+    // Inject all active application stylesheets and styling rules to keep the gorgeous aesthetics
+    const styles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
+      .map(el => el.outerHTML)
+      .join("\n");
+
+    const isRtlLayout = lang === "ar";
+
+    doc.write(`
+      <html>
+        <head>
+          <title>Giftisan Transaction Receipt</title>
+          ${styles}
+          <style>
+            body {
+              background: white !important;
+              color: black !important;
+              padding: 40px !important;
+              font-family: system-ui, -apple-system, sans-serif;
+            }
+            #print-receipt-container {
+              box-shadow: none !important;
+              border: 1px solid rgba(0,0,0,0.1) !important;
+              width: 100% !important;
+              max-width: 500px !important;
+              margin: 0 auto !important;
+              padding: 30px !important;
+              background: white !important;
+              color: black !important;
+              border-radius: 16px !important;
+            }
+            /* Hide print headers/footers when saving as PDF */
+            @page {
+              size: auto;
+              margin: 0mm;
+            }
+          </style>
+        </head>
+        <body class="bg-white" dir="${isRtlLayout ? "rtl" : "ltr"}">
+          <div id="print-receipt-container">
+            ${printElement.innerHTML}
+          </div>
+          <script>
+            window.addEventListener('DOMContentLoaded', () => {
+              // Quick delay to ensure fonts and styles render
+              setTimeout(() => {
+                window.focus();
+                window.print();
+              }, 350);
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    // Clean up frame after print dialog is handled
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 4000);
+  };
+
+  const handleRequestPayout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const withdrawAmount = parseFloat(amount);
+
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+      toast.error("Please enter a valid amount greater than zero.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    if (withdrawAmount > balance.withdrawable) {
+      toast.error("You cannot withdraw more than your withdrawable balance.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    if (!address.trim() || !name.trim()) {
+      toast.error("Please fill out all payout details.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await requestPayoutAction(artisan.id, withdrawAmount, method, address, name);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast.success(`Success! Withdrawal request for ${withdrawAmount} EGP has been submitted.`, {
+        icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      setShowWithdrawForm(false);
+      setAmount("");
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to submit withdrawal request.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+    }
+  };
+
+  const isRTL = lang === "ar";
+
+  return (
+    <div className="space-y-12">
+      {/* 1. Header and Balance Cards */}
+      <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 pb-8 border-b border-primary/5">
+          <div className="space-y-2 text-start">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-700 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full border border-green-500/10">
+              <Sparkles className="w-3 h-3 text-green-600" /> {isRTL ? "قسم الأرباح المباشر (تجريبي)" : "Live Financial Tab (Beta)"}
+            </div>
+            <h2 className="text-2xl md:text-4xl font-heading font-black text-primary">
+              {isRTL ? "إدارة الأرباح والمدفوعات" : "Earnings & Payments"}
+            </h2>
+            <p className="text-xs md:text-sm text-charcoal/40 font-medium">
+              {isRTL 
+                ? "تتبع مبيعاتك وأرباحك المعلقة والمبالغ القابلة للسحب بكل سهولة." 
+                : "Track your sales, pending escrow clearances, and request secure payouts."}
+            </p>
+          </div>
+
+          {balance.withdrawable > 0 && !showWithdrawForm && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowWithdrawForm(true)}
+              className="px-8 h-14 bg-accent hover:bg-accent-dark text-white font-bold rounded-2xl flex items-center gap-2 shadow-xl shadow-accent/20 transition-all text-sm md:text-base self-stretch md:self-auto justify-center"
+            >
+              <Send className="w-4 h-4 rotate-45" /> {isRTL ? "طلب سحب الأرباح" : "Request Withdrawal"}
+            </motion.button>
+          )}
+        </div>
+
+        {/* Balance Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card A: Pending Escrow */}
+          <div className="bg-amber-50/50 rounded-3xl p-8 border border-amber-100 flex flex-col justify-between text-start relative overflow-hidden group">
+            <div className="absolute top-0 end-0 p-6 opacity-10">
+              <Clock className="w-16 h-16 text-amber-700" />
+            </div>
+            <div className="space-y-4">
+              <span className="px-3 py-1 bg-amber-100 text-amber-800 text-[9px] font-black uppercase tracking-widest rounded-full w-fit">
+                {isRTL ? "في الانتظار" : "Pending Escrow"}
+              </span>
+              <p className="text-3xl md:text-4xl lg:text-5xl font-heading font-black text-amber-900">
+                {balance.pending.toFixed(2)} <span className="text-sm font-bold font-sans">EGP</span>
+              </p>
+            </div>
+            <p className="text-[11px] text-amber-800/60 font-medium mt-6 flex items-center gap-1">
+              <HelpCircle className="w-3.5 h-3.5" />
+              {isRTL 
+                ? "أرباح مبيعاتك تحت فترة حظر الأمان (7 أيام)" 
+                : "Awaiting security holding period (7 days)"}
+            </p>
+          </div>
+
+          {/* Card B: Withdrawable Balance */}
+          <div className="bg-emerald-50/50 rounded-3xl p-8 border border-emerald-100 flex flex-col justify-between text-start relative overflow-hidden group">
+            <div className="absolute top-0 end-0 p-6 opacity-10">
+              <Coins className="w-16 h-16 text-emerald-700" />
+            </div>
+            <div className="space-y-4">
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-full w-fit">
+                {isRTL ? "قابل للسحب" : "Withdrawable"}
+              </span>
+              <p className="text-3xl md:text-4xl lg:text-5xl font-heading font-black text-emerald-900">
+                {balance.withdrawable.toFixed(2)} <span className="text-sm font-bold font-sans">EGP</span>
+              </p>
+            </div>
+            <p className="text-[11px] text-emerald-800/60 font-medium mt-6 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              {isRTL 
+                ? "الأموال الجاهزة للسحب الفوري إلى محفظتك أو حسابك" 
+                : "Cleared funds ready for immediate transfer"}
+            </p>
+          </div>
+
+          {/* Card C: Total Withdrawn */}
+          <div className="bg-primary-light/5 rounded-3xl p-8 border border-primary/5 flex flex-col justify-between text-start relative overflow-hidden group">
+            <div className="absolute top-0 end-0 p-6 opacity-10">
+              <Wallet className="w-16 h-16 text-primary" />
+            </div>
+            <div className="space-y-4">
+              <span className="px-3 py-1 bg-primary/5 text-primary text-[9px] font-black uppercase tracking-widest rounded-full w-fit">
+                {isRTL ? "تم سحبه" : "Total Paid Out"}
+              </span>
+              <p className="text-3xl md:text-4xl lg:text-5xl font-heading font-black text-primary">
+                {balance.withdrawn.toFixed(2)} <span className="text-sm font-bold font-sans">EGP</span>
+              </p>
+            </div>
+            <p className="text-[11px] text-primary/60 font-medium mt-6 flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-primary-light" />
+              {isRTL 
+                ? "مجموع الأموال التي قمت بسحبها بنجاح حتى الآن" 
+                : "Total earnings successfully paid out to date"}
+            </p>
+          </div>
+        </div>
+
+        {/* 2. Interactive Payout Request Form */}
+        <AnimatePresence>
+          {showWithdrawForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden mt-8"
+            >
+              <div className="p-8 bg-cream/30 rounded-3xl border border-primary/10 mt-4 text-start">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-heading font-bold text-primary">
+                    {isRTL ? "طلب سحب جديد" : "Request Payout"}
+                  </h3>
+                  <button 
+                    onClick={() => setShowWithdrawForm(false)}
+                    className="text-xs text-charcoal/40 hover:text-red-500 font-bold uppercase tracking-wider"
+                  >
+                    {isRTL ? "إلغاء" : "Cancel"}
+                  </button>
+                </div>
+
+                <form onSubmit={handleRequestPayout} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Amount */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary/60">
+                      {isRTL ? "المبلغ المراد سحبه (EGP)" : "Amount to Withdraw (EGP)"}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      min="1"
+                      max={balance.withdrawable}
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder={`Max: ${balance.withdrawable.toFixed(2)}`}
+                      className="w-full h-12 px-4 rounded-xl border border-primary/10 bg-white focus:outline-none focus:border-accent text-sm font-bold text-primary"
+                    />
+                  </div>
+
+                  {/* Method */}
+                  <div className="space-y-2 relative">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary/60">
+                      {isRTL ? "طريقة الدفع المفضلة" : "Preferred Payout Method"}
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full h-12 px-4 rounded-xl border border-primary/10 bg-white focus:outline-none focus:border-accent text-sm font-bold text-primary flex items-center justify-between text-start cursor-pointer hover:border-primary/20 transition-all"
+                      >
+                        <span>
+                          {method === "INSTAPAY"
+                            ? (isRTL ? "عنوان إنستا باي (InstaPay)" : "InstaPay Address")
+                            : method === "VODAFONE_CASH"
+                              ? (isRTL ? "فودافون كاش / محفظة الهاتف" : "Vodafone Cash / Mobile Wallet")
+                              : (isRTL ? "تحويل بنكي مباشر (IBAN)" : "Direct Bank Transfer (IBAN)")}
+                        </span>
+                        <ChevronDown className={cn("w-4 h-4 text-primary/30 transition-transform duration-200", isDropdownOpen && "rotate-180")} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isDropdownOpen && (
+                          <>
+                            {/* Backdrop overlay to click outside */}
+                            <div 
+                              className="fixed inset-0 z-40 cursor-default" 
+                              onClick={() => setIsDropdownOpen(false)}
+                            />
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.15 }}
+                              className="absolute left-0 right-0 mt-2 bg-white rounded-xl border border-primary/10 shadow-xl z-50 overflow-hidden divide-y divide-primary/5"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMethod("INSTAPAY");
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full px-4 py-3 text-start text-xs font-bold hover:bg-cream/40 transition-colors flex items-center justify-between cursor-pointer",
+                                  method === "INSTAPAY" ? "text-accent bg-accent/5" : "text-primary"
+                                )}
+                              >
+                                <span>{isRTL ? "عنوان إنستا باي (InstaPay)" : "InstaPay Address"}</span>
+                                {method === "INSTAPAY" && <CheckCircle2 className="w-4 h-4 text-accent" />}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMethod("VODAFONE_CASH");
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full px-4 py-3 text-start text-xs font-bold hover:bg-cream/40 transition-colors flex items-center justify-between cursor-pointer",
+                                  method === "VODAFONE_CASH" ? "text-accent bg-accent/5" : "text-primary"
+                                )}
+                              >
+                                <span>{isRTL ? "فودافون كاش / محفظة الهاتف" : "Vodafone Cash / Mobile Wallet"}</span>
+                                {method === "VODAFONE_CASH" && <CheckCircle2 className="w-4 h-4 text-accent" />}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMethod("BANK_TRANSFER");
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full px-4 py-3 text-start text-xs font-bold hover:bg-cream/40 transition-colors flex items-center justify-between cursor-pointer",
+                                  method === "BANK_TRANSFER" ? "text-accent bg-accent/5" : "text-primary"
+                                )}
+                              >
+                                <span>{isRTL ? "تحويل بنكي مباشر (IBAN)" : "Direct Bank Transfer (IBAN)"}</span>
+                                {method === "BANK_TRANSFER" && <CheckCircle2 className="w-4 h-4 text-accent" />}
+                              </button>
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary/60">
+                      {method === "INSTAPAY" ? "InstaPay Handle (e.g. name@instapay)" : method === "VODAFONE_CASH" ? "Mobile Wallet Number (010xxxxxxx)" : "Bank Account IBAN"}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder={method === "INSTAPAY" ? "yourname@instapay" : method === "VODAFONE_CASH" ? "01012345678" : "EGxxxxxxxxxxxxxxxxxxxxxxx"}
+                      className="w-full h-12 px-4 rounded-xl border border-primary/10 bg-white focus:outline-none focus:border-accent text-sm font-bold text-primary"
+                    />
+                  </div>
+
+                  {/* Full Name */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-wider text-primary/60">
+                      {isRTL ? "اسم المستفيد بالكامل" : "Beneficiary Full Name"}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Fatima Mohamed"
+                      className="w-full h-12 px-4 rounded-xl border border-primary/10 bg-white focus:outline-none focus:border-accent text-sm font-bold text-primary"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-colors text-sm uppercase tracking-wider"
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Withdrawal Request"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* 3. Transaction History */}
+      <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-start">
+        <h3 className="text-xl font-heading font-black text-primary mb-8 flex items-center gap-2">
+          {isRTL ? "سجل المعاملات المالية" : "Financial Transaction History"}
+        </h3>
+
+        {transactions.length === 0 ? (
+          <div className="p-12 text-center bg-cream/20 rounded-3xl border border-dashed border-primary/10 text-charcoal/40 font-medium space-y-3">
+            <Coins className="w-12 h-12 mx-auto text-primary/10" />
+            <p className="text-sm">
+              {isRTL 
+                ? "لم يتم تسجيل أي معاملات مالية بعد. ستظهر أرباح مبيعاتك هنا بمجرد استلام طلبات جديدة." 
+                : "No financial transactions have been logged yet. Your earnings will display here automatically."}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-primary/5">
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "التاريخ" : "Date"}</th>
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "النوع" : "Type"}</th>
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الوصف" : "Description"}</th>
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الحالة" : "Status"}</th>
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "المبلغ" : "Amount"}</th>
+                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "الإجراء" : "Action"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx: any) => {
+                  const isSale = tx.type === "SALE";
+                  const isPositive = tx.amount > 0;
+
+                  // Dynamic description translator for Arabic localization
+                  const getTranslatedDescription = (desc: string) => {
+                    if (!desc) return "";
+                    if (!isRTL) return desc;
+
+                    // 1. Withdrawal Pattern: "Withdrawal request via INSTAPAY. Sent to: hazemyasser911@gmail.com (HAZEM)"
+                    if (desc.includes("Withdrawal request via")) {
+                      const parts = desc.match(/Withdrawal request via ([A-Z_]+)\. Sent to: (.*) \((.*)\)/);
+                      if (parts) {
+                        const [_, method, address, name] = parts;
+                        const methodAr = method === "INSTAPAY" 
+                          ? "إنستا باي (InstaPay)" 
+                          : method === "VODAFONE_CASH" 
+                            ? "فودافون كاش / محفظة الهاتف" 
+                            : "تحويل بنكي مباشر (IBAN)";
+                        return `طلب سحب أرباح عبر ${methodAr}. مرسل إلى: ${address} (${name})`;
+                      }
+                      
+                      // Fallback translation
+                      return desc
+                        .replace("Withdrawal request via", "طلب سحب عبر")
+                        .replace("Sent to:", "مرسل إلى:");
+                    }
+
+                    // 2. Earnings Pattern: "Earnings from \"Hand-Carved Alabaster Candle Holder\" (Qty: 1). Total: 850 EGP (Commission: 127.50 EGP)"
+                    if (desc.includes("Earnings from")) {
+                      let arDesc = desc;
+                      arDesc = arDesc.replace("Earnings from", "أرباح من");
+                      arDesc = arDesc.replace("Qty:", "الكمية:");
+                      arDesc = arDesc.replace("Total:", "الإجمالي:");
+                      arDesc = arDesc.replace("Commission:", "العمولة:");
+                      arDesc = arDesc.replaceAll("EGP", "ج.م");
+                      return arDesc;
+                    }
+
+                    return desc;
+                  };
+                  
+                  return (
+                    <tr key={tx.id} className="border-b border-primary/5 hover:bg-cream/10 transition-colors">
+                      <td className="py-5 text-xs text-charcoal/60 font-medium">
+                        {new Date(tx.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric"
+                        })}
+                      </td>
+                      <td className="py-5">
+                        <span className={cn(
+                          "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md",
+                          isSale 
+                            ? "bg-green-100 text-green-800" 
+                            : tx.type === "PAYOUT" 
+                              ? "bg-blue-100 text-blue-800" 
+                              : "bg-red-100 text-red-800"
+                        )}>
+                          {isRTL 
+                            ? (isSale ? "أرباح مبيعات" : tx.type === "PAYOUT" ? "سحب أرباح" : "تعديل رصيد")
+                            : tx.type}
+                        </span>
+                      </td>
+                      <td className="py-5 text-xs text-primary font-bold max-w-xs md:max-w-md">
+                        {getTranslatedDescription(tx.description) || (isRTL ? (isSale ? "أرباح مبيعات" : "طلب سحب أرباح") : (isSale ? "Sale Proceeds" : "Withdrawal Request"))}
+                      </td>
+                      <td className="py-5">
+                        <span className={cn(
+                          "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md inline-flex items-center gap-1",
+                          tx.status === "COMPLETED" || tx.status === "CLEARED"
+                            ? "bg-green-100 text-green-800"
+                            : tx.status === "PENDING"
+                              ? "bg-amber-100 text-amber-800 animate-pulse"
+                              : "bg-red-100 text-red-800"
+                        )}>
+                          {tx.status === "PENDING" && <Clock className="w-2.5 h-2.5" />}
+                          {isRTL 
+                            ? (tx.status === "COMPLETED" ? "تم التحويل" : tx.status === "CLEARED" ? "جاهز للسحب" : tx.status === "PENDING" ? "في الانتظار" : "ملغي/مرفوض")
+                            : tx.status}
+                        </span>
+                      </td>
+                      <td className={cn(
+                        "py-5 text-sm font-bold text-end",
+                        isPositive ? "text-green-600" : "text-charcoal"
+                      )}>
+                        {isPositive ? "+" : ""}{tx.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
+                      </td>
+                      <td className="py-5 text-end">
+                        <button
+                          onClick={() => setSelectedReceipt(tx)}
+                          className="px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent rounded-lg transition-all inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer border border-primary/5 shadow-sm"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>{isRTL ? "الإيصال" : "Receipt"}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* 4. Educational Guidelines Tab / Prelaunch Info */}
+      <div className="p-8 md:p-12 bg-primary text-white rounded-[3rem] shadow-2xl relative overflow-hidden group text-start">
+        <div className="relative z-10 space-y-6 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 text-accent-light text-[9px] font-black uppercase tracking-widest rounded-full border border-white/10">
+            <HelpCircle className="w-3.5 h-3.5" /> {isRTL ? "فهم نظام الدفع والعمولات" : "Understanding Our Payout System"}
+          </div>
+          <h3 className="text-xl md:text-3xl font-heading font-black tracking-tight leading-snug">
+            {isRTL ? "كيف يتم احتساب نسبتك ومتى يمكنك سحبها؟" : "How is your share calculated, and when is it ready?"}
+          </h3>
+          <div className="space-y-4 text-sm text-white/70 font-medium leading-relaxed">
+            <p>
+              1. <strong>{isRTL ? "مبيعات فورية" : "Immediate Split Tracking"}:</strong> {isRTL 
+                ? "عندما يشتري عميل منتجك، يذهب المبلغ لوعاء المنصة المركزي. نقوم فوراً بحساب أرباحك كاملة (استمتع بـ 0% عمولة للمنصة!) وحفظها كرصيد معلّق." 
+                : "When a customer completes a checkout, the money goes to the secure central platform pool. We immediately calculate your full earnings (Enjoying 0% platform commission!), and place your earnings in your Pending balance."}
+            </p>
+            <p>
+              2. <strong>{isRTL ? "الأمان والضمان" : "Fulfillment Escrow"}:</strong> {isRTL 
+                ? "يتم تجميد الأرباح في رصيدك المعلّق لتسهيل الإلغاءات في حال تعذر شحن الطلب. بمجرد مرور 7 أيام على تسليم الطلب للعميل، ينتقل المبلغ تلقائياً لرصيدك القابل للسحب." 
+                : "The funds are held safely as Pending to accommodate cancellations or stock changes. Once 7 days pass after the customer safely receives their unique treasures, the funds clear automatically into your Withdrawable balance."}
+            </p>
+            <p>
+              3. <strong>{isRTL ? "خيارات سحب متعددة" : "Multiple Withdrawal Channels"}:</strong> {isRTL 
+                ? "يمكنك طلب سحب أموالك في أي وقت عبر حساب إنستاباي، أو محفظة كاش الهاتف، أو تحويل بنكي مباشر. نقوم بمراجعة الطلبات وإرسال الأموال خلال 24 ساعة عمل." 
+                : "You can request payouts via InstaPay, mobile wallet (Vodafone Cash, etc.), or directly into your bank account. Admin approvals are audited and paid out within 24 business hours."}
+            </p>
+          </div>
+        </div>
+        <div className="absolute bottom-0 end-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-y-1/2 translate-x-1/2" />
+      </div>
+
+      {/* Receipt PDF Generator Modal */}
+      <AnimatePresence>
+        {selectedReceipt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedReceipt(null)}
+              className="absolute inset-0 bg-primary/40 backdrop-blur-md cursor-pointer"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 25 } }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary/10 flex flex-col z-10 max-h-[90vh]"
+            >
+              {/* Header Actions */}
+              <div className="p-4 bg-cream/10 border-b border-primary/5 flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-primary/60">
+                  {isRTL ? "معاينة إيصال المعاملة" : "Transaction Receipt Preview"}
+                </span>
+                <button
+                  onClick={() => setSelectedReceipt(null)}
+                  className="p-1.5 hover:bg-cream rounded-full transition-colors cursor-pointer text-primary"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Printable Receipt Area */}
+              <div className="overflow-y-auto p-8 bg-cream/5 flex-1 flex justify-center">
+                <div 
+                  id="print-receipt-container"
+                  className="w-full max-w-md bg-white border border-primary/10 shadow-lg rounded-2xl p-6 md:p-8 space-y-6 text-start relative overflow-hidden"
+                  dir={isRTL ? "rtl" : "ltr"}
+                >
+                  {/* Decorative Border */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-accent to-primary" />
+
+                  {/* Header */}
+                  <div className="flex justify-between items-start border-b border-primary/5 pb-4">
+                    <div>
+                      <h2 className="text-xl font-heading font-black text-primary leading-none">Giftisan</h2>
+                      <p className="text-[9px] text-accent font-bold uppercase tracking-widest mt-1">Handcrafted Mastery</p>
+                    </div>
+                    <div className="text-end">
+                      <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-md text-[9px] font-black uppercase tracking-wider">
+                        {isRTL ? "معاملة رسمية" : "Official"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black text-primary">
+                      {selectedReceipt.type === "SALE" 
+                        ? (isRTL ? "إيصال أرباح مبيعات" : "Sale Proceeds Receipt")
+                        : (isRTL ? "إيصال تحويل مستحقات" : "Payout Transfer Receipt")
+                      }
+                    </h3>
+                    <p className="text-[10px] text-charcoal/40 font-mono">
+                      Ref: #{selectedReceipt.id}
+                    </p>
+                  </div>
+
+                  {/* Grid details */}
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-b border-primary/5 py-4 text-xs font-medium text-charcoal/80">
+                    <div>
+                      <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "التاريخ والوقت" : "Date & Time"}</p>
+                      <p className="font-bold text-primary">
+                        {new Date(selectedReceipt.createdAt).toLocaleString(lang === "ar" ? "ar-EG" : "en-US", {
+                          year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                        })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "حالة المعاملة" : "Transaction Status"}</p>
+                      <p className="font-bold text-green-600">
+                        {isRTL 
+                          ? (selectedReceipt.status === "COMPLETED" ? "تم التحويل" : selectedReceipt.status === "CLEARED" ? "جاهز للسحب" : selectedReceipt.status === "PENDING" ? "في الانتظار" : "ملغي/مرفوض")
+                          : selectedReceipt.status
+                        }
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "الوصف والتفاصيل" : "Description & Details"}</p>
+                      <p className="font-bold text-primary leading-relaxed text-xs">
+                        {selectedReceipt.description || (selectedReceipt.type === "SALE" ? "Earnings Split" : "Withdrawal request")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pricing / Total block */}
+                  <div className="bg-cream/20 rounded-xl p-4 flex justify-between items-center border border-primary/5">
+                    <span className="text-xs font-black text-primary/60 uppercase tracking-wider">{isRTL ? "المبلغ الإجمالي" : "Total Amount"}</span>
+                    <span className="text-xl font-black text-primary">
+                      {selectedReceipt.amount > 0 ? "+" : ""}{selectedReceipt.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
+                    </span>
+                  </div>
+
+                  {/* Footer message / Verification Code */}
+                  <div className="text-center pt-2 space-y-2">
+                    <p className="text-[10px] text-charcoal/40 font-bold italic leading-relaxed">
+                      {isRTL 
+                        ? "شكراً لكونك جزءاً من دائرة جيفتيزان الحرفية الإبداعية." 
+                        : "Thank you for being a vital part of the Giftisan artisan circle."
+                      }
+                    </p>
+                    {/* Fake Barcode representation for beautiful tactile aesthetics */}
+                    <div className="pt-2 flex flex-col items-center gap-1 opacity-40">
+                      <div className="h-6 w-32 bg-[repeating-linear-gradient(90deg,currentColor,currentColor_1px,transparent_1px,transparent_4px,currentColor_4px,currentColor_6px,transparent_6px,transparent_8px)]" />
+                      <span className="text-[8px] font-mono tracking-widest">{selectedReceipt.id.toUpperCase()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer CTA */}
+              <div className="p-4 bg-cream/10 border-t border-primary/5 flex gap-2">
+                <button
+                  onClick={() => setSelectedReceipt(null)}
+                  className="flex-1 h-12 rounded-xl text-xs font-bold text-primary bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
+                >
+                  {isRTL ? "إغلاق" : "Close"}
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex-1 h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>{isRTL ? "طباعة / حفظ PDF" : "Print / Save PDF"}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

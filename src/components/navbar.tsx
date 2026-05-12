@@ -13,6 +13,7 @@ import { useSession, signOut } from "next-auth/react";
 import { searchProducts } from "@/lib/actions";
 import { PreLaunchBanner } from "./pre-launch-banner";
 import { VerificationBanner } from "./verification-banner";
+import { FoundingBanner } from "./founding-banner";
 import { toast } from "react-hot-toast";
 
 import { getDictionary } from "@/app/[lang]/dictionaries";
@@ -146,6 +147,7 @@ export function Navbar({ dict }: { dict?: any }) {
   return (
     <div className="sticky top-0 z-50 w-full">
       <PreLaunchBanner dict={d} />
+      <FoundingBanner dict={d} />
       <VerificationBanner dict={d} />
       <nav className="w-full glass border-b border-primary/10">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">

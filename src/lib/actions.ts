@@ -1397,6 +1397,30 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
       }
     });
 
+    // Fetch all items for this order to compute parent order status
+    const allOrderItems = await prisma.orderItem.findMany({
+      where: { orderId: updatedItem.orderId }
+    });
+
+    const allDelivered = allOrderItems.every(item => item.status === "DELIVERED");
+    const allShippedOrDelivered = allOrderItems.every(item => item.status === "SHIPPED" || item.status === "DELIVERED");
+
+    let newOrderStatus = "PROCESSING";
+    if (allDelivered) {
+      newOrderStatus = "DELIVERED";
+    } else if (allShippedOrDelivered) {
+      newOrderStatus = "SHIPPED";
+    }
+
+    if (newOrderStatus !== updatedItem.order.status) {
+      await prisma.order.update({
+        where: { id: updatedItem.orderId },
+        data: { status: newOrderStatus }
+      });
+      updatedItem.order.status = newOrderStatus;
+      console.log(`[Order Sync] Updated parent Order ${updatedItem.orderId} status to "${newOrderStatus}" because all items reached this milestone.`);
+    }
+
     // Reset escrow countdown to START NOW from the delivery moment (Security Escrow Start)
     if (status === "DELIVERED") {
       await prisma.artisanTransaction.updateMany({

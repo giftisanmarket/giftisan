@@ -658,14 +658,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </div>
             </div>
           </section>
-          <VariationsSection 
-            options={options}
-            setOptions={setOptions}
-            variants={variants}
-            setVariants={setVariants}
-            basePrice={formData.price}
-            dict={dict}
-          />
 
           <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
@@ -827,6 +819,15 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               ))}
             </div>
           </section>
+
+          <VariationsSection 
+            options={options}
+            setOptions={setOptions}
+            variants={variants}
+            setVariants={setVariants}
+            basePrice={formData.price}
+            dict={dict}
+          />
 
           <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">

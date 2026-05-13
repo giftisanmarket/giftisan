@@ -969,14 +969,46 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
       {/* Hidden Printable Area */}
       {itemToPrint && (
         <div className="hidden print:flex print:flex-col print-isolated p-10 bg-white min-h-[25cm]">
-          <div className="flex items-center justify-between border-b pb-8 mb-8">
+          <div className="flex items-start justify-between border-b pb-8 mb-8">
             <div>
               <h1 className="text-3xl font-heading font-bold text-primary">GIFTISAN</h1>
               <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">Official Packing Slip</p>
+              {itemToPrint.trackingNumber && (
+                <div className="mt-4 flex items-center gap-2 bg-primary/5 p-2 rounded-xl border border-primary/10 w-fit">
+                  <Truck className="w-4 h-4 text-primary" />
+                  <span className="font-mono font-bold text-xs text-primary">{itemToPrint.carrier || "Carrier"}: #{itemToPrint.trackingNumber}</span>
+                </div>
+              )}
             </div>
-            <div className="text-end">
-              <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(-6).toUpperCase()}</p>
-              <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
+            <div className="flex items-center gap-6 text-end">
+              <div>
+                <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(-6).toUpperCase()}</p>
+                <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
+                {/* Traditional Barcode Visual representation */}
+                <div className="flex items-center justify-end gap-[2px] mt-3 h-8">
+                  <div className="w-1 h-full bg-primary" />
+                  <div className="w-[2px] h-full bg-primary" />
+                  <div className="w-1 h-full bg-primary" />
+                  <div className="w-[3px] h-full bg-primary" />
+                  <div className="w-[1px] h-full bg-primary" />
+                  <div className="w-[2px] h-full bg-primary" />
+                  <div className="w-[4px] h-full bg-primary" />
+                  <div className="w-1 h-full bg-primary" />
+                  <div className="w-[2px] h-full bg-primary" />
+                  <div className="w-1 h-full bg-primary" />
+                  <div className="w-[3px] h-full bg-primary" />
+                </div>
+              </div>
+
+              {/* Scannable QR Code */}
+              <div className="p-2 bg-white border-2 border-primary/10 rounded-2xl shadow-sm shrink-0 flex flex-col items-center">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://giftisan.com/api/bosta/webhook?trackingId=${itemToPrint.trackingNumber || itemToPrint.id}`} 
+                  alt="Scannable QR Code" 
+                  className="w-20 h-20 object-contain"
+                />
+                <span className="text-[7px] font-black uppercase tracking-tighter text-charcoal/40 mt-1">Scan to Verify</span>
+              </div>
             </div>
           </div>
 

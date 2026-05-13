@@ -15,14 +15,16 @@ import {
   ExternalLink,
   ShieldCheck,
   Truck,
-  MessageCircle
+  MessageCircle,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { retryPaymentAction } from "@/lib/actions";
+import { retryPaymentAction, cancelPendingOrderAction } from "@/lib/actions";
 import { useParams } from "next/navigation";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 interface ProfileClientProps {
   user: any;
@@ -47,6 +49,22 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
   const isAr = params?.lang === "ar";
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+
+  const executeCancelOrder = async (orderId: string) => {
+    setCancellingOrderId(orderId);
+    try {
+      const res = await cancelPendingOrderAction(orderId);
+      if (!res.success) {
+        alert(res.error || "Failed to cancel order.");
+      }
+    } catch (err) {
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setCancellingOrderId(null);
+    }
+  };
 
   const handleRetryPayment = async (orderId: string) => {
     setRetryingOrderId(orderId);
@@ -213,17 +231,30 @@ Trace
                         </div>
 
                         {order.status === "PENDING" && (
-                          <button
-                            onClick={() => handleRetryPayment(order.id)}
-                            disabled={retryingOrderId !== null}
-                            className={cn(
-                              "flex items-center gap-2 px-5 py-2.5 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-accent/90 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0",
-                              retryingOrderId === order.id && "animate-pulse"
-                            )}
-                          >
-                            <CreditCard className="w-4 h-4" />
-                            <span>{retryingOrderId === order.id ? dict.checkout.processing : dict.checkout.pay_now || "Pay Now"}</span>
-                          </button>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => setOrderToCancel(order.id)}
+                              disabled={cancellingOrderId !== null || retryingOrderId !== null}
+                              className={cn(
+                                "flex items-center gap-1.5 px-4 py-2.5 border border-red-200 text-red-600 bg-red-50/50 hover:bg-red-50 font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-sm active:scale-95 disabled:opacity-50",
+                                cancellingOrderId === order.id && "animate-pulse"
+                              )}
+                            >
+                              <X className="w-4 h-4" />
+                              <span>{cancellingOrderId === order.id ? (isAr ? "جاري الإلغاء..." : "Cancelling...") : (dict.common?.cancel || (isAr ? "إلغاء الطلب" : "Cancel"))}</span>
+                            </button>
+                            <button
+                              onClick={() => handleRetryPayment(order.id)}
+                              disabled={retryingOrderId !== null || cancellingOrderId !== null}
+                              className={cn(
+                                "flex items-center gap-2 px-5 py-2.5 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-wider hover:bg-accent/90 transition-all shadow-md active:scale-95 disabled:opacity-50 shrink-0",
+                                retryingOrderId === order.id && "animate-pulse"
+                              )}
+                            >
+                              <CreditCard className="w-4 h-4" />
+                              <span>{retryingOrderId === order.id ? dict.checkout.processing : dict.checkout.pay_now || "Pay Now"}</span>
+                            </button>
+                          </div>
                         )}
                       </div>
 
@@ -386,6 +417,20 @@ Trace
         </div>
       </div>
     </div>
+      <ConfirmationModal
+        isOpen={orderToCancel !== null}
+        onClose={() => setOrderToCancel(null)}
+        onConfirm={() => {
+          if (orderToCancel) {
+            executeCancelOrder(orderToCancel);
+          }
+        }}
+        title={isAr ? "إلغاء الطلب؟" : "Cancel Order?"}
+        message={isAr ? "هل أنت متأكد من إلغاء هذا الطلب؟ سيتم استعادة المخزون فوراً." : "Are you sure you want to cancel this order? Reserved stock will be restored immediately."}
+        confirmText={isAr ? "نعم، إلغاء" : "Yes, Cancel"}
+        cancelText={dict.common?.cancel || (isAr ? "تراجع" : "Keep Order")}
+        isDestructive={true}
+      />
     </main>
   );
 }

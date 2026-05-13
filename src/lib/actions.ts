@@ -794,6 +794,73 @@ export async function retryPaymentAction(orderId: string) {
   }
 }
 
+export async function cancelPendingOrderAction(orderId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: true
+      }
+    });
+
+    if (!order) {
+      return { error: "Order not found" };
+    }
+
+    if (order.userId !== session.user.id && session.user.role !== "ADMIN") {
+      return { error: "You are not authorized to cancel this order" };
+    }
+
+    if (order.status !== "PENDING") {
+      return { error: `This order is already ${order.status.toLowerCase()} and cannot be cancelled directly.` };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Mark order as CANCELLED
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: "CANCELLED" }
+      });
+
+      // Restore stock
+      for (const item of order.items) {
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: {
+              stock: {
+                increment: item.quantity
+              }
+            }
+          });
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                increment: item.quantity
+              }
+            }
+          });
+        }
+      }
+    });
+
+    revalidatePath("/profile");
+    revalidatePath("/studio");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Cancel order error:", error);
+    return { error: error.message || "Failed to cancel order" };
+  }
+}
+
 
 export async function getUserOrders(userId: string) {
   try {

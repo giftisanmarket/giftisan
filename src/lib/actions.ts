@@ -1294,6 +1294,11 @@ export async function getArtisanSales(artisanId: string) {
       where: {
         product: {
           artisanId: artisanId
+        },
+        order: {
+          status: {
+            notIn: ["PENDING", "CANCELLED"]
+          }
         }
       },
       include: {
@@ -1727,9 +1732,19 @@ export async function getAdminStats() {
     ] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
-      prisma.order.count(),
+      prisma.order.count({
+        where: {
+          status: {
+            notIn: ["PENDING", "CANCELLED"]
+          }
+        }
+      }),
       prisma.order.aggregate({
-        where: { status: { not: "CANCELLED" } },
+        where: {
+          status: {
+            notIn: ["PENDING", "CANCELLED"]
+          }
+        },
         _sum: { totalAmount: true }
       }),
       prisma.artisanBalance.aggregate({

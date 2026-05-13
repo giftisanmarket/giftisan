@@ -19,7 +19,15 @@ const getArtisanBySlug = cache(async (slug: string) => {
         },
         include: {
           reviews: true,
-          orderItems: true
+          orderItems: {
+            where: {
+              order: {
+                status: {
+                  notIn: ["PENDING", "CANCELLED"]
+                }
+              }
+            }
+          }
         }
       },
       user: true
@@ -48,7 +56,15 @@ const getArtisanBySlug = cache(async (slug: string) => {
             },
             include: {
               reviews: true,
-              orderItems: true
+              orderItems: {
+                where: {
+                  order: {
+                    status: {
+                      notIn: ["PENDING", "CANCELLED"]
+                    }
+                  }
+                }
+              }
             }
           },
           user: true

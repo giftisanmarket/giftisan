@@ -1,5 +1,5 @@
 import { getAllOrders } from "@/lib/actions";
-import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../../dictionaries";
@@ -91,10 +91,12 @@ export default async function AdminOrdersPage({ params }: { params: Promise<{ la
                     <span className={cn(
                       "px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border flex items-center gap-1.5 md:gap-2 w-fit whitespace-nowrap",
                       order.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                      order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-200" :
                       order.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
                       "bg-green-50 text-green-700 border-green-200"
                     )}>
                       {order.status === "PENDING" && <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />}
+                      {order.status === "CANCELLED" && <X className="w-2.5 h-2.5 md:w-3 md:h-3" />}
                       {order.status === "SHIPPED" && <Truck className="w-2.5 h-2.5 md:w-3 md:h-3" />}
                       {order.status === "DELIVERED" && <CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" />}
                       {order.status}

@@ -291,6 +291,8 @@ Trace
 
                         {order.items.map((item: any) => {
                           const preparingText = dict.profile?.preparing || (isAr ? "جاري التجهيز" : "Preparing");
+                          const awaitingPaymentText = isAr ? "بانتظار الدفع" : "Awaiting Payment";
+                          const cancelledText = isAr ? "ملغي" : "Cancelled";
                           return (
                             <div key={item.id} className="border-b last:border-0 border-primary/5 pb-6 last:pb-0">
                               <div className="flex gap-4 md:gap-6 items-start md:items-center">
@@ -304,16 +306,26 @@ Trace
                                   <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
                                   
                                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                                    <div className={cn(
-                                      "px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
-                                      item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
-                                      item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                                      "bg-green-50 text-green-600 border-green-200"
-                                    )}>
-                                      {item.status === "PENDING" ? preparingText :
-                                      item.status === "SHIPPED" ? dict.profile.shipped :
-                                      dict.profile.delivered}
-                                    </div>
+                                    {order.status === "PENDING" ? (
+                                      <div className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0 bg-slate-100 text-slate-500 border-slate-200">
+                                        {awaitingPaymentText}
+                                      </div>
+                                    ) : order.status === "CANCELLED" ? (
+                                      <div className="px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0 bg-red-50 text-red-600 border-red-200">
+                                        {cancelledText}
+                                      </div>
+                                    ) : (
+                                      <div className={cn(
+                                        "px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
+                                        item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                                        item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                                        "bg-green-50 text-green-600 border-green-200"
+                                      )}>
+                                        {item.status === "PENDING" ? preparingText :
+                                        item.status === "SHIPPED" ? dict.profile.shipped :
+                                        dict.profile.delivered}
+                                      </div>
+                                    )}
                                     <Link 
                                       href={`/profile/messages?userId=${item.product.artisan.userId}`}
                                       className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"

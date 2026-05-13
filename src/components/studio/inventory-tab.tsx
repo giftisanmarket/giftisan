@@ -90,7 +90,7 @@ export function InventoryTab({
             </h2>
             <div className="flex flex-col md:flex-row items-center gap-4">
               <p className="text-sm md:text-base text-charcoal/40 font-medium">{dict.studio.manage_inventory_desc}</p>
-              {products.length > 0 && !isAdminPreview && (
+              {products.length > 0 && (
                 <button 
                   onClick={toggleSelectAll}
                   className="text-[10px] font-black uppercase tracking-widest text-accent hover:text-accent-light transition-colors flex items-center gap-2"
@@ -159,7 +159,7 @@ export function InventoryTab({
               <motion.div
                 layout
                 key={p.id}
-                onClick={() => !isAdminPreview && selectedIds.length > 0 && toggleSelect(p.id)}
+                onClick={() => selectedIds.length > 0 && toggleSelect(p.id)}
                 className={cn(
                   "group relative bg-white rounded-[2rem] md:rounded-[3.5rem] border transition-all text-charcoal flex flex-col h-full overflow-hidden",
                   selectedIds.includes(p.id) ? "border-accent ring-4 ring-accent/5" : "border-primary/5 hover:shadow-2xl hover:shadow-primary/10"
@@ -169,22 +169,20 @@ export function InventoryTab({
                   <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
 
                   {/* Multi-Select Checkbox */}
-                  {!isAdminPreview && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleSelect(p.id);
-                      }}
-                      className={cn(
-                        "absolute top-4 end-4 md:top-8 md:end-8 z-20 w-8 h-8 rounded-xl flex items-center justify-center transition-all shadow-xl",
-                        selectedIds.includes(p.id) 
-                          ? "bg-accent text-white" 
-                          : "bg-white/90 backdrop-blur-md text-primary opacity-0 group-hover:opacity-100"
-                      )}
-                    >
-                      {selectedIds.includes(p.id) ? <Check className="w-5 h-5" strokeWidth={3} /> : <div className="w-4 h-4 rounded-md border-2 border-primary/20" />}
-                    </button>
-                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSelect(p.id);
+                    }}
+                    className={cn(
+                      "absolute top-4 end-4 md:top-8 md:end-8 z-20 w-8 h-8 rounded-xl flex items-center justify-center transition-all shadow-xl",
+                      selectedIds.includes(p.id) 
+                        ? "bg-accent text-white" 
+                        : "bg-white/90 backdrop-blur-md text-primary opacity-0 group-hover:opacity-100"
+                    )}
+                  >
+                    {selectedIds.includes(p.id) ? <Check className="w-5 h-5" strokeWidth={3} /> : <div className="w-4 h-4 rounded-md border-2 border-primary/20" />}
+                  </button>
 
                   {/* Status Overlay - Premium Look */}
                   <div className="absolute top-4 start-4 md:top-8 md:start-8 z-10 flex flex-col gap-2">
@@ -215,18 +213,16 @@ export function InventoryTab({
                     >
                       {isAdminPreview ? <Eye className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
                     </button>
-                    {!isAdminPreview && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProductToDelete(p.id);
-                        }}
-                        disabled={isDeleting === p.id}
-                        className="w-14 h-14 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90 disabled:opacity-50"
-                      >
-                        <Trash2 className="w-6 h-6" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProductToDelete(p.id);
+                      }}
+                      disabled={isDeleting === p.id}
+                      className="w-14 h-14 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-6 h-6" />
+                    </button>
                     <Link
                       href={`/products/${p.slug || p.id}`}
                       className="w-14 h-14 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90"
@@ -250,18 +246,16 @@ export function InventoryTab({
                     >
                       {isAdminPreview ? <Eye className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
                     </button>
-                    {!isAdminPreview && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProductToDelete(p.id);
-                        }}
-                        disabled={isDeleting === p.id}
-                        className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-xl active:scale-90 disabled:opacity-50"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProductToDelete(p.id);
+                      }}
+                      disabled={isDeleting === p.id}
+                      className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-xl active:scale-90 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                     <Link
                       href={`/products/${p.slug || p.id}`}
                       className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"

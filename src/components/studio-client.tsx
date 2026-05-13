@@ -125,7 +125,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   }, [sales, dict.edit_product]);
 
   const handleDelete = async () => {
-    if (!productToDelete || isAdminPreview) return;
+    if (!productToDelete) return;
 
     setIsDeleting(productToDelete);
     const res = await deleteProduct(productToDelete);
@@ -187,12 +187,11 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
     }
   };
   const handleBulkDelete = (ids: string[]) => {
-    if (isAdminPreview) return;
     setBulkProductsToDelete(ids);
   };
 
   const executeBulkDelete = async () => {
-    if (!bulkProductsToDelete || isAdminPreview) return;
+    if (!bulkProductsToDelete) return;
     
     const loadingToast = toast.loading("Removing treasures...", {
       style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
@@ -216,8 +215,6 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   };
 
   const handleBulkStatusUpdate = async (ids: string[], status: string) => {
-    if (isAdminPreview) return;
-
     const loadingToast = toast.loading("Updating status...", {
       style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
     });

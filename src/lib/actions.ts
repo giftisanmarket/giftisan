@@ -2614,8 +2614,8 @@ export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" |
         return { error: "You are not authorized to update some of these treasures" };
       }
 
-      // Artisans can only transition products to DRAFT or PENDING
-      if (status === "APPROVED" || status === "REJECTED") {
+      // If status is REJECTED, only admins can set that
+      if (status === "REJECTED") {
         targetStatus = "PENDING";
       }
     }

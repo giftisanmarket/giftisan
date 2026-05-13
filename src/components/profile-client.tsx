@@ -349,10 +349,12 @@ Trace
                                       <div className={cn(
                                         "px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
                                         item.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                                        item.status === "PROCESSING" ? "bg-purple-50 text-purple-700 border-purple-200 animate-pulse" :
                                         item.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
                                         "bg-green-50 text-green-600 border-green-200"
                                       )}>
                                         {item.status === "PENDING" ? preparingText :
+                                        item.status === "PROCESSING" ? (isAr ? "جاهز للشحن" : "Ready for Shipping") :
                                         item.status === "SHIPPED" ? dict.profile.shipped :
                                         dict.profile.delivered}
                                       </div>

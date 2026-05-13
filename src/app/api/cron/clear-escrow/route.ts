@@ -44,6 +44,9 @@ export async function GET(req: NextRequest) {
         status: "PENDING",
         createdAt: {
           lt: thresholdDate
+        },
+        order: {
+          status: "DELIVERED"
         }
       }
     });

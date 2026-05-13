@@ -1500,8 +1500,10 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
       where: { userId: session.user.id }
     });
 
-    if (!isAdmin && (!artisan || orderItem.product.artisanId !== artisan.id)) {
-      return { error: "You are not authorized to update this order item" };
+    const isOwner = artisan && orderItem.product.artisanId === artisan.id;
+
+    if (!isAdmin && (!isOwner || status !== "PROCESSING")) {
+      return { error: "Only platform administrators can update shipping statuses. Artisans can only mark items as ready." };
     }
 
     const updatedItem = await prisma.orderItem.update({
@@ -1581,6 +1583,80 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
   } catch (error: any) {
     console.error("CRITICAL Update status error:", error.message || error);
     return { error: `Failed to update item status: ${error.message || "Unknown error"}` };
+  }
+}
+
+export async function updateOrderStatus(orderId: string, status: string, trackingNumber?: string, carrier?: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized: Admin privileges required" };
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    if (!order) {
+      return { error: "Order not found" };
+    }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status }
+    });
+
+    await prisma.orderItem.updateMany({
+      where: { orderId },
+      data: {
+        status,
+        ...(trackingNumber ? { trackingNumber } : {}),
+        ...(carrier ? { carrier } : {})
+      }
+    });
+
+    if (status === "DELIVERED") {
+      await prisma.artisanTransaction.updateMany({
+        where: {
+          orderId,
+          type: "SALE",
+          status: "PENDING"
+        },
+        data: {
+          createdAt: new Date()
+        }
+      });
+      console.log(`[Escrow Security] Reset transaction escrow clock for Order: ${orderId} to START NOW upon delivery.`);
+    }
+
+    if (order.user.email) {
+      sendOrderStatusUpdateEmail(
+        order.user.email,
+        order.user.name || "Customer",
+        order.id,
+        status,
+        order.items[0]?.product?.name || "Your order",
+        order.items[0]?.product?.slug || undefined,
+        trackingNumber,
+        carrier
+      ).catch(err => console.error("Failed to send order status email:", err));
+    }
+
+    revalidatePath("/admin/orders");
+    revalidatePath("/studio");
+    revalidatePath("/profile");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Update order status error:", error);
+    return { error: "Failed to update order status" };
   }
 }
 

@@ -257,35 +257,9 @@ export function SalesTab({
           filteredSales.map((item: any) => (
             <div 
               key={item.id} 
-              onClick={() => selectedOrderIds.length > 0 && toggleSelectOrder(item.id)}
-              className={cn(
-                "bg-cream/20 rounded-[2rem] md:rounded-[2.5rem] border p-5 md:p-8 flex flex-col items-stretch gap-6 transition-all relative group",
-                selectedOrderIds.includes(item.id) 
-                  ? "border-accent bg-accent/5 ring-4 ring-accent/5 shadow-2xl" 
-                  : "border-primary/5 hover:shadow-xl hover:shadow-primary/5"
-              )}
+              className="bg-cream/20 rounded-[2rem] md:rounded-[2.5rem] border border-primary/5 p-5 md:p-8 flex flex-col items-stretch gap-6 transition-all hover:shadow-xl hover:shadow-primary/5 relative group"
             >
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-                {/* Selection Checkbox */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleSelectOrder(item.id);
-                  }}
-                  className={cn(
-                    "absolute top-4 start-4 md:top-8 md:start-8 z-20 w-8 h-8 rounded-xl flex items-center justify-center transition-all shadow-xl",
-                    selectedOrderIds.includes(item.id) 
-                      ? "bg-accent text-white" 
-                      : "bg-white text-primary opacity-0 group-hover:opacity-100 border border-primary/5"
-                  )}
-                >
-                  {selectedOrderIds.includes(item.id) ? (
-                    <Check className="w-5 h-5" strokeWidth={3} />
-                  ) : (
-                    <div className="w-4 h-4 rounded-md border-2 border-primary/20" />
-                  )}
-                </button>
-
                 <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-3xl overflow-hidden shrink-0 border-2 border-white shadow-lg">
                   <BespokeImage type="product" id={item.product.id} src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
                 </div>
@@ -296,10 +270,12 @@ export function SalesTab({
                     <span className={cn(
                       "inline-flex self-center md:self-auto px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border shadow-sm",
                       item.status === "PENDING" ? "bg-amber-500 text-white border-amber-400" :
-                        item.status === "SHIPPED" ? "bg-blue-500 text-white border-blue-400" :
-                          "bg-green-500 text-white border-green-400"
+                      item.status === "PROCESSING" ? "bg-purple-500 text-white border-purple-400" :
+                      item.status === "SHIPPED" ? "bg-blue-500 text-white border-blue-400" :
+                      "bg-green-500 text-white border-green-400"
                     )}>
                       {item.status === "PENDING" ? dict.studio.status_pending :
+                       item.status === "PROCESSING" ? "Ready / Prepared" :
                        item.status === "SHIPPED" ? dict.studio.status_shipped :
                        dict.studio.status_delivered}
                     </span>
@@ -368,36 +344,24 @@ export function SalesTab({
                   {item.status === "PENDING" && (
                     <button
                       disabled={isUpdating === item.id}
-                      onClick={() => {
-                        setShippingItem(item);
-                      }}
-                      className="flex-1 md:flex-none h-12 px-8 bg-accent text-white text-xs font-bold rounded-2xl hover:bg-accent-light transition-all shadow-lg shadow-accent/20 active:scale-95"
-                    >
-                      {dict.studio.mark_shipped}
-                    </button>
-                  )}
-                  {item.status === "SHIPPED" && (
-                    <button
-                      disabled={isUpdating === item.id}
                       onClick={async () => {
                         setIsUpdating(item.id);
-                        await updateOrderItemStatus(item.id, "DELIVERED");
+                        await updateOrderItemStatus(item.id, "PROCESSING");
                         router.refresh();
                         setIsUpdating(null);
                       }}
-                      className="flex-1 md:flex-none h-12 px-8 bg-green-500 text-white text-xs font-bold rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-green-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="h-12 px-6 bg-accent text-white text-xs font-bold rounded-2xl hover:bg-accent-light transition-all shadow-lg shadow-accent/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isUpdating === item.id ? (
                         <>
                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>{dict.studio.updating || "Updating..."}</span>
+                          <span>Updating...</span>
                         </>
                       ) : (
-                        dict.studio.mark_delivered
+                        "Mark as Ready"
                       )}
                     </button>
                   )}
-
                   <div className="relative">
                     <button
                       onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
@@ -517,52 +481,6 @@ export function SalesTab({
           ))
         )}
       </div>
-
-      {/* Floating Bulk Order Bar */}
-      <AnimatePresence>
-        {selectedOrderIds.length > 0 && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-3xl"
-          >
-            <div className="bg-primary/90 backdrop-blur-2xl p-4 md:p-6 rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2 md:gap-4 animate-fade-in">
-              <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 min-w-0">
-                <button 
-                  onClick={() => setSelectedOrderIds([])}
-                  className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <div className="hidden sm:block text-start">
-                  <p className="text-white font-bold text-lg">{getBulkOrdersLabel(selectedOrderIds.length)}</p>
-                  <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{dict.studio.selected_for_action || "Selected for Action"}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 md:gap-3 shrink-0">
-                <button
-                  disabled={isUpdating === "BULK"}
-                  onClick={() => handleBulkStatusUpdate("DELIVERED")}
-                  className="h-12 px-5 md:px-8 bg-green-500 text-white font-bold rounded-2xl hover:bg-green-600 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.mark_delivered || "Mark Delivered"}</span>
-                </button>
-                <button
-                  disabled={isUpdating === "BULK"}
-                  onClick={() => handleBulkStatusUpdate("SHIPPED")}
-                  className="h-12 px-5 md:px-8 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 text-xs md:text-sm disabled:opacity-50"
-                >
-                  <Truck className="w-4 h-4" />
-                  <span className="hidden md:inline whitespace-nowrap">{dict.studio.mark_shipped || "Mark Shipped"}</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -20,7 +20,8 @@ import {
   ChevronDown,
   FileText,
   Printer,
-  X
+  X,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requestPayoutAction } from "@/lib/actions";
@@ -139,6 +140,47 @@ export function PaymentTab({
   };
 
   const isRTL = lang === "ar";
+
+  const handleExportCSV = () => {
+    if (transactions.length === 0) {
+      toast.error(isRTL ? "لا توجد معاملات لتصديرها." : "No transactions available to export.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    const headers = isRTL 
+      ? ["المعرف", "التاريخ", "النوع", "الوصف", "الحالة", "المبلغ (ج.م)"]
+      : ["ID", "Date", "Type", "Description", "Status", "Amount (EGP)"];
+
+    const rows = transactions.map((tx: any) => [
+      tx.id,
+      new Date(tx.createdAt).toISOString().split('T')[0],
+      tx.type,
+      `"${(tx.description || '').replace(/"/g, '""')}"`,
+      tx.status,
+      tx.amount.toFixed(2)
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row: any[]) => row.join(","))
+    ].join("\n");
+
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `giftisan_ledger_${artisan.id}_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success(isRTL ? "تم تصدير السجل بنجاح!" : "Ledger exported successfully!", {
+      style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+    });
+  };
 
   const handleRequestPayout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -461,9 +503,20 @@ export function PaymentTab({
 
       {/* 3. Transaction History */}
       <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-start">
-        <h3 className="text-xl font-heading font-black text-primary mb-8 flex items-center gap-2">
-          {isRTL ? "سجل المعاملات المالية" : "Financial Transaction History"}
-        </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-primary/5">
+          <h3 className="text-xl font-heading font-black text-primary flex items-center gap-2">
+            {isRTL ? "سجل المعاملات المالية" : "Financial Transaction History"}
+          </h3>
+          {transactions.length > 0 && (
+            <button
+              onClick={handleExportCSV}
+              className="px-4 h-10 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent font-bold rounded-xl flex items-center gap-2 transition-all text-xs uppercase tracking-wider cursor-pointer border border-primary/10 shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{isRTL ? "تصدير السجل (CSV)" : "Export CSV"}</span>
+            </button>
+          )}
+        </div>
 
         {transactions.length === 0 ? (
           <div className="p-12 text-center bg-cream/20 rounded-3xl border border-dashed border-primary/10 text-charcoal/40 font-medium space-y-3">

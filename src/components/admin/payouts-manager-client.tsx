@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Printer,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
 import { approvePayoutAction, rejectPayoutAction, triggerEscrowClearanceAction } from "@/lib/actions";
 import { toast } from "react-hot-toast";
@@ -186,6 +187,48 @@ export function PayoutsManagerClient({
   };
 
   const isRTL = lang === "ar";
+
+  const handleExportAdminCSV = () => {
+    if (pastPayouts.length === 0) {
+      toast.error(isRTL ? "لا توجد معاملات لتصديرها." : "No payouts available to export.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    const headers = isRTL 
+      ? ["المعرف", "التاريخ", "الأستوديو", "البريد الإلكتروني", "الوصف", "الحالة", "المبلغ (ج.م)"]
+      : ["ID", "Date", "Studio", "Email", "Description", "Status", "Amount (EGP)"];
+
+    const rows = pastPayouts.map((tx: any) => [
+      tx.id,
+      new Date(tx.createdAt).toISOString().split('T')[0],
+      `"${((tx.artisan?.studioName || tx.artisan?.user?.name || 'Artisan')).replace(/"/g, '""')}"`,
+      tx.artisan?.user?.email || "",
+      `"${(tx.description || '').replace(/"/g, '""')}"`,
+      tx.status,
+      Math.abs(tx.amount).toFixed(2)
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row: any[]) => row.join(","))
+    ].join("\n");
+
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `giftisan_admin_payouts_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success(isRTL ? "تم تصدير سجل المدفوعات بنجاح!" : "Payouts ledger exported successfully!", {
+      style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+    });
+  };
 
   // Calculate quick metrics
   const pendingTotalAmount = pendingPayouts.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
@@ -429,16 +472,28 @@ export function PayoutsManagerClient({
             {isRTL ? "أرشيف عمليات السحب المنفذة" : "Completed Payouts History"}
           </h2>
 
-          {/* Search bar */}
-          <div className="relative w-full md:w-72">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30" />
-            <input
-              type="text"
-              placeholder={isRTL ? "البحث باسم الأستوديو..." : "Search studio..."}
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-              className="w-full h-10 ps-10 pe-4 rounded-xl border border-primary/10 bg-cream/10 text-xs font-bold focus:outline-none focus:border-accent"
-            />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+            {/* Search bar */}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30" />
+              <input
+                type="text"
+                placeholder={isRTL ? "البحث باسم الأستوديو..." : "Search studio..."}
+                value={historySearch}
+                onChange={(e) => setHistorySearch(e.target.value)}
+                className="w-full h-10 ps-10 pe-4 rounded-xl border border-primary/10 bg-cream/10 text-xs font-bold focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            {pastPayouts.length > 0 && (
+              <button
+                onClick={handleExportAdminCSV}
+                className="px-4 h-10 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-xs uppercase tracking-wider cursor-pointer border border-primary/10 shadow-sm shrink-0"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isRTL ? "تصدير الأرشيف (CSV)" : "Export CSV"}</span>
+              </button>
+            )}
           </div>
         </div>
 

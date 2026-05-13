@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus, subscribeToNewsletter } from "@/lib/actions";
 import { toast } from "react-hot-toast";
+import QRCode from "react-qr-code";
 import { EditProductModal } from "@/components/edit-product-modal";
 import { SalesChart } from "@/components/sales-chart";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
@@ -1001,12 +1002,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               </div>
 
               {/* Scannable QR Code */}
-              <div className="p-2 bg-white border-2 border-primary/10 rounded-2xl shadow-sm shrink-0 flex flex-col items-center">
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://giftisan.com/api/bosta/webhook?trackingId=${itemToPrint.trackingNumber || itemToPrint.id}`} 
-                  alt="Scannable QR Code" 
-                  className="w-20 h-20 object-contain"
-                />
+              <div className="p-2 bg-white border-2 border-primary/10 rounded-2xl shadow-sm shrink-0 flex flex-col items-center print:border-2 print:border-charcoal/20">
+                <div className="w-20 h-20 print:block">
+                  <QRCode 
+                    value={`https://giftisan.com/api/bosta/webhook?trackingId=${itemToPrint.trackingNumber || itemToPrint.id}`} 
+                    size={80}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  />
+                </div>
                 <span className="text-[7px] font-black uppercase tracking-tighter text-charcoal/40 mt-1">Scan to Verify</span>
               </div>
             </div>

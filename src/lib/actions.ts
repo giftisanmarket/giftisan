@@ -1153,6 +1153,63 @@ export async function rejectPayoutAction(transactionId: string, reason?: string)
   }
 }
 
+export async function triggerEscrowClearanceAction() {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "You must be an admin to perform this action." };
+    }
+
+    const HOLDING_DAYS = 7;
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() - HOLDING_DAYS);
+
+    const pendingSales = await prisma.artisanTransaction.findMany({
+      where: {
+        type: "SALE",
+        status: "PENDING",
+        createdAt: {
+          lt: thresholdDate
+        }
+      }
+    });
+
+    if (pendingSales.length === 0) {
+      return { success: true, clearedCount: 0, message: "No pending escrow balances older than 7 days matched the clearance criteria today." };
+    }
+
+    let clearedCount = 0;
+    for (const tx of pendingSales) {
+      try {
+        await prisma.$transaction(async (prismaTx) => {
+          await prismaTx.artisanTransaction.update({
+            where: { id: tx.id },
+            data: { status: "CLEARED" }
+          });
+
+          await prismaTx.artisanBalance.update({
+            where: { artisanId: tx.artisanId },
+            data: {
+              pending: { decrement: tx.amount },
+              withdrawable: { increment: tx.amount }
+            }
+          });
+        });
+        clearedCount++;
+      } catch (err: any) {
+        console.error(`Failed to clear transaction ${tx.id}:`, err);
+      }
+    }
+
+    revalidatePath("/admin/payouts");
+    revalidatePath("/studio");
+    return { success: true, clearedCount, message: `Successfully cleared ${clearedCount} transaction(s) from escrow to withdrawable balances.` };
+  } catch (error: any) {
+    console.error("Manual escrow clearance error:", error);
+    return { error: error.message || "Failed to trigger escrow settlement." };
+  }
+}
+
 export async function getAllArtisans() {
   try {
     const artisans = await prisma.artisanProfile.findMany({

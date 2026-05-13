@@ -18,7 +18,7 @@ import {
   Printer,
   FileText
 } from "lucide-react";
-import { approvePayoutAction, rejectPayoutAction } from "@/lib/actions";
+import { approvePayoutAction, rejectPayoutAction, triggerEscrowClearanceAction } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +42,29 @@ export function PayoutsManagerClient({
   const [historySearch, setHistorySearch] = useState("");
   const [confirmPayoutData, setConfirmPayoutData] = useState<{ id: string; amount: number } | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [isClearingEscrow, setIsClearingEscrow] = useState(false);
+
+  const handleClearEscrow = async () => {
+    setIsClearingEscrow(true);
+    const res = await triggerEscrowClearanceAction();
+    setIsClearingEscrow(false);
+
+    if (res.success) {
+      const msg = lang === "ar" 
+        ? `تم تسوية ${res.clearedCount} معاملة بنجاح من حسابات الضمان إلى الرصيد المتاح للسحب.`
+        : (res.message || "Escrow clearance completed successfully!");
+
+      toast.success(msg, {
+        icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      router.refresh();
+    } else {
+      toast.error(lang === "ar" ? "فشل في تسوية حسابات الضمان." : (res.error || "Failed to trigger escrow settlement."), {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+    }
+  };
 
   // Bulletproof Isolated Print handler (forces pure vector receipt page printing/PDF saving via sandboxed iframe)
   const handlePrint = () => {
@@ -131,13 +154,13 @@ export function PayoutsManagerClient({
     setConfirmPayoutData(null); // Close the modal
 
     if (res.success) {
-      toast.success("Payout request successfully completed and ledger updated!", {
+      toast.success(lang === "ar" ? "تم اعتماد طلب السحب بنجاح وتحديث السجلات المالية!" : "Payout request successfully completed and ledger updated!", {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       router.refresh();
     } else {
-      toast.error(res.error || "Failed to approve payout.", {
+      toast.error(lang === "ar" ? "فشل في اعتماد طلب السحب." : (res.error || "Failed to approve payout."), {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
     }
@@ -149,14 +172,14 @@ export function PayoutsManagerClient({
     setIsProcessing(null);
 
     if (res.success) {
-      toast.success("Payout declined and funds successfully refunded to artisan!", {
+      toast.success(lang === "ar" ? "تم رفض طلب السحب واسترجاع المبلغ لرصيد العارض بنجاح!" : "Payout declined and funds successfully refunded to artisan!", {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       setActiveRejectId(null);
       setRejectReason("");
       router.refresh();
     } else {
-      toast.error(res.error || "Failed to reject payout.", {
+      toast.error(lang === "ar" ? "فشل في رفض طلب السحب." : (res.error || "Failed to reject payout."), {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
     }
@@ -180,15 +203,25 @@ export function PayoutsManagerClient({
   return (
     <div className="space-y-12 text-start" dir={isRTL ? "rtl" : "ltr"}>
       {/* Page Header */}
-      <div>
-        <h1 className="text-4xl font-heading font-black text-primary tracking-tighter mb-2">
-          {isRTL ? "طلبات سحب مستحقات العارضين" : "Artisan Payouts Manager"}
-        </h1>
-        <p className="text-charcoal/40 font-medium">
-          {isRTL 
-            ? "مراجعة واعتماد طلبات السحب يدويًا وتسجيل التحويلات المالية بنجاح." 
-            : "Review, coordinate transfer receipts, and manually process outstanding payout requests."}
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-4xl font-heading font-black text-primary tracking-tighter mb-2">
+            {isRTL ? "طلبات سحب مستحقات العارضين" : "Artisan Payouts Manager"}
+          </h1>
+          <p className="text-charcoal/40 font-medium">
+            {isRTL 
+              ? "مراجعة واعتماد طلبات السحب يدويًا وتسجيل التحويلات المالية بنجاح." 
+              : "Review, coordinate transfer receipts, and manually process outstanding payout requests."}
+          </p>
+        </div>
+        <button
+          onClick={handleClearEscrow}
+          disabled={isClearingEscrow}
+          className="px-6 h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-xs uppercase tracking-wider shrink-0 cursor-pointer disabled:opacity-50"
+        >
+          <Clock className={cn("w-4 h-4", isClearingEscrow && "animate-spin")} />
+          <span>{isClearingEscrow ? (isRTL ? "جاري التسوية..." : "Settling Escrow...") : (isRTL ? "تسوية حسابات الضمان" : "Run Escrow Settlement")}</span>
+        </button>
       </div>
 
       {/* Analytics Grid */}

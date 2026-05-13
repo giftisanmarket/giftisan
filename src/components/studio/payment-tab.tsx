@@ -138,26 +138,28 @@ export function PaymentTab({
     }, 4000);
   };
 
+  const isRTL = lang === "ar";
+
   const handleRequestPayout = async (e: React.FormEvent) => {
     e.preventDefault();
     const withdrawAmount = parseFloat(amount);
 
     if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-      toast.error("Please enter a valid amount greater than zero.", {
+      toast.error(isRTL ? "الرجاء إدخال مبلغ صحيح أكبر من الصفر." : "Please enter a valid amount greater than zero.", {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       return;
     }
 
     if (withdrawAmount > balance.withdrawable) {
-      toast.error("You cannot withdraw more than your withdrawable balance.", {
+      toast.error(isRTL ? "لا يمكنك سحب مبلغ يتخطى رصيدك المتاح للسحب." : "You cannot withdraw more than your withdrawable balance.", {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       return;
     }
 
     if (!address.trim() || !name.trim()) {
-      toast.error("Please fill out all payout details.", {
+      toast.error(isRTL ? "الرجاء ملء جميع تفاصيل طلب السحب." : "Please fill out all payout details.", {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       return;
@@ -168,7 +170,7 @@ export function PaymentTab({
     setIsSubmitting(false);
 
     if (result.success) {
-      toast.success(`Success! Withdrawal request for ${withdrawAmount} EGP has been submitted.`, {
+      toast.success(isRTL ? `تم إرسال طلب سحب بمبلغ ${withdrawAmount} ج.م بنجاح!` : `Success! Withdrawal request for ${withdrawAmount} EGP has been submitted.`, {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
@@ -176,13 +178,11 @@ export function PaymentTab({
       setAmount("");
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to submit withdrawal request.", {
+      toast.error(isRTL ? "فشل في إرسال طلب السحب." : (result.error || "Failed to submit withdrawal request."), {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
     }
   };
-
-  const isRTL = lang === "ar";
 
   return (
     <div className="space-y-12">
@@ -412,7 +412,11 @@ export function PaymentTab({
                   {/* Address */}
                   <div className="space-y-2">
                     <label className="text-xs font-black uppercase tracking-wider text-primary/60">
-                      {method === "INSTAPAY" ? "InstaPay Handle (e.g. name@instapay)" : method === "VODAFONE_CASH" ? "Mobile Wallet Number (010xxxxxxx)" : "Bank Account IBAN"}
+                      {method === "INSTAPAY" 
+                        ? (isRTL ? "عنوان إنستا باي (مثال: name@instapay)" : "InstaPay Handle (e.g. name@instapay)") 
+                        : method === "VODAFONE_CASH" 
+                          ? (isRTL ? "رقم المحفظة الإلكترونية (010xxxxxxx)" : "Mobile Wallet Number (010xxxxxxx)") 
+                          : (isRTL ? "رقم الحساب البنكي (IBAN)" : "Bank Account IBAN")}
                     </label>
                     <input
                       type="text"
@@ -443,9 +447,9 @@ export function PaymentTab({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-colors text-sm uppercase tracking-wider"
+                      className="w-full h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-colors text-sm uppercase tracking-wider cursor-pointer"
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Withdrawal Request"}
+                      {isSubmitting ? (isRTL ? "جاري الإرسال..." : "Submitting...") : (isRTL ? "تأكيد وإرسال طلب السحب" : "Submit Withdrawal Request")}
                     </button>
                   </div>
                 </form>

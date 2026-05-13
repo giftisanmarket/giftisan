@@ -1005,7 +1005,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               <div className="p-2 bg-white border-2 border-primary/10 rounded-2xl shadow-sm shrink-0 flex flex-col items-center print:border-2 print:border-charcoal/20">
                 <div className="w-20 h-20 print:block">
                   <QRCode 
-                    value={`https://giftisan.com/api/bosta/webhook?trackingId=${itemToPrint.trackingNumber || itemToPrint.id}`} 
+                    value={`https://giftisan.com/api/shipping/verify?itemId=${itemToPrint.id}`} 
                     size={80}
                     style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                   />

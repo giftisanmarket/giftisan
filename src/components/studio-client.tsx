@@ -716,7 +716,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                        {dict.studio.sale_receipt} #{selectedItem.orderId.slice(-6).toUpperCase()}
+                        {dict.studio.sale_receipt} #{selectedItem.orderId.slice(0, 8).toUpperCase()}
                       </div>
                       <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
                     </div>
@@ -982,7 +982,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
             </div>
             <div className="flex items-center gap-6 text-end">
               <div>
-                <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(-6).toUpperCase()}</p>
+                <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(0, 8).toUpperCase()}</p>
                 <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
                 {/* Traditional Barcode Visual representation */}
                 <div className="flex items-center justify-end gap-[2px] mt-3 h-8">

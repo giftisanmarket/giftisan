@@ -50,7 +50,7 @@ export default async function AdminOrdersPage({ params }: { params: Promise<{ la
                 <tr key={order.id} className="hover:bg-cream/30 transition-colors group">
                   <td className="px-6 md:px-8 py-4 md:py-6">
                     <div>
-                      <p className="font-mono text-[10px] md:text-xs font-bold text-primary uppercase">{order.id.slice(0, 10)}</p>
+                      <p className="font-mono text-[10px] md:text-xs font-bold text-primary uppercase">{order.id.slice(0, 8)}</p>
                       <p className="text-[8px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </p>

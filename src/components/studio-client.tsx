@@ -90,6 +90,17 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
 
+  // Poll for new sales/orders to keep the artisan studio page updated in real-time
+  useEffect(() => {
+    if (isAdminPreview) return;
+
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 4000); // Refresh data from server every 4 seconds dynamically!
+
+    return () => clearInterval(interval);
+  }, [router, isAdminPreview]);
+
   // Variant Analytics
   const topVariants = useMemo(() => {
     return sales.reduce((acc: any[], sale: any) => {
@@ -907,8 +918,17 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     disabled={isAdminPreview || !carrier || !trackingNumber || isUpdating === shippingItem.id || isSkipping === shippingItem.id}
                     className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                   >
-                    {isAdminPreview ? dict.studio.preview_only : isUpdating === shippingItem.id ? dict.studio.saving : dict.studio.confirm_shipment}
-                    {!isAdminPreview && <CheckCircle2 className="w-4 h-4" />}
+                    {isUpdating === shippingItem.id ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>{dict.studio.saving || "Saving..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        {isAdminPreview ? dict.studio.preview_only : dict.studio.confirm_shipment}
+                        {!isAdminPreview && <CheckCircle2 className="w-4 h-4" />}
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={async () => {
@@ -928,9 +948,16 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       setIsSkipping(null);
                     }}
                     disabled={isUpdating === shippingItem.id || isSkipping === shippingItem.id}
-                    className="w-full h-16 text-primary/40 font-bold hover:text-primary transition-colors disabled:opacity-50"
+                    className="w-full h-16 text-primary/40 font-bold hover:text-primary transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {isSkipping === shippingItem.id ? "Updating..." : "Skip for now"}
+                    {isSkipping === shippingItem.id ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      "Skip for now"
+                    )}
                   </button>
                 </div>
               </div>

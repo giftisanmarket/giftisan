@@ -385,9 +385,16 @@ export function SalesTab({
                         router.refresh();
                         setIsUpdating(null);
                       }}
-                      className="flex-1 md:flex-none h-12 px-8 bg-green-500 text-white text-xs font-bold rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-green-100 active:scale-95"
+                      className="flex-1 md:flex-none h-12 px-8 bg-green-500 text-white text-xs font-bold rounded-2xl hover:bg-green-600 transition-all shadow-lg shadow-green-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {isUpdating === item.id ? dict.studio.updating : dict.studio.mark_delivered}
+                      {isUpdating === item.id ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>{dict.studio.updating || "Updating..."}</span>
+                        </>
+                      ) : (
+                        dict.studio.mark_delivered
+                      )}
                     </button>
                   )}
 

@@ -2,8 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Plus, Image as ImageIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function NewProductLoading() {
+  const params = useParams();
+  const lang = params?.lang || "en";
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -86,7 +90,9 @@ export default function NewProductLoading() {
          <div className="w-16 h-16 md:w-20 md:h-20 bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] shadow-2xl flex items-center justify-center border border-white/20">
              <Plus className="w-8 h-8 md:w-10 md:h-10 text-primary animate-pulse" />
          </div>
-         <p className="mt-6 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 text-center px-4">Preparing Workshop</p>
+         <p className="mt-6 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 text-center px-4">
+           {lang === "ar" ? "جاري تجهيز ورشة العمل وإعداد القوالب..." : "Preparing Workshop"}
+         </p>
       </div>
     </div>
   );

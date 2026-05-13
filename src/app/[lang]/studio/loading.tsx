@@ -2,8 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function StudioLoading() {
+  const params = useParams();
+  const lang = params?.lang || "en";
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -120,7 +124,9 @@ export default function StudioLoading() {
                 <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
          </div>
-         <p className="mt-6 md:mt-8 text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-primary/40 animate-pulse text-center px-4">Syncing Artisan Hub</p>
+         <p className="mt-6 md:mt-8 text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-primary/40 animate-pulse text-center px-4">
+           {lang === "ar" ? "جاري مزامنة بيانات الأستوديو..." : "Syncing Artisan Hub"}
+         </p>
       </div>
     </div>
   );

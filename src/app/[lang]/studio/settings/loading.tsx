@@ -2,8 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Loader2, Settings, User, Camera } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function StudioSettingsLoading() {
+  const params = useParams();
+  const lang = params?.lang || "en";
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -88,7 +92,9 @@ export default function StudioSettingsLoading() {
          <div className="w-20 h-20 md:w-24 md:h-24 bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl flex items-center justify-center border border-white/20">
              <Loader2 className="w-10 h-10 md:w-12 md:h-12 text-primary animate-spin" strokeWidth={1.5} />
          </div>
-         <p className="mt-6 md:mt-8 text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-primary/40 animate-pulse text-center px-4">Accessing Studio Controls</p>
+         <p className="mt-6 md:mt-8 text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-primary/40 animate-pulse text-center px-4">
+           {lang === "ar" ? "جاري الوصول إلى إعدادات الأستوديو..." : "Accessing Studio Controls"}
+         </p>
       </div>
     </div>
   );

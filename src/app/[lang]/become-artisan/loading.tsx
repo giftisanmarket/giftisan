@@ -1,6 +1,12 @@
+"use client";
+
 import { Loader2, Store } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function Loading() {
+  const params = useParams();
+  const lang = params?.lang || "en";
+
   return (
     <main className="min-h-screen bg-cream flex flex-col items-center justify-center p-6">
       <div className="relative">
@@ -12,8 +18,12 @@ export default function Loading() {
         </div>
       </div>
       <div className="mt-8 space-y-2 text-center">
-        <h2 className="text-xl font-heading font-bold text-primary animate-pulse">Entering the Workshop</h2>
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">Syncing Artisan Credentials</p>
+        <h2 className="text-xl font-heading font-bold text-primary animate-pulse">
+          {lang === "ar" ? "دخول ورشة العمل" : "Entering the Workshop"}
+        </h2>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+          {lang === "ar" ? "جاري مزامنة بيانات العارض..." : "Syncing Artisan Credentials"}
+        </p>
       </div>
     </main>
   );

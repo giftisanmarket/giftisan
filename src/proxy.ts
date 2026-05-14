@@ -44,16 +44,10 @@ export default function proxy(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/fonts') ||
-    pathname.startsWith('/images')
+    pathname.startsWith('/images') ||
+    pathname.includes('.')
   ) {
     return NextResponse.next();
-  }
-
-  // 1.5. Hard-stop for common bot/device file requests to prevent them from hitting dynamic [lang]
-  if (pathname.includes('.') && !locales.includes(pathname.split('/')[1])) {
-    // If it's a file request and doesn't exist in public (since we reached here), 
-    // and it's not a localized path, return 404 directly.
-    return new NextResponse(null, { status: 404 });
   }
 
   // 2. Internationalization Redirection

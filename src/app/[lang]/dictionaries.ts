@@ -10,7 +10,4 @@ export type Locale = keyof typeof dictionaries
 export const hasLocale = (locale: string): locale is Locale =>
   locale in dictionaries
 
-export const getDictionary = async (locale: Locale) => {
-  const dictionaryLoader = dictionaries[locale] || dictionaries.en;
-  return dictionaryLoader();
-}
+export const getDictionary = async (locale: Locale) => dictionaries[locale]()

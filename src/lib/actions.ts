@@ -20,9 +20,10 @@ export async function uploadImage(base64Data: string) {
     }
 
     let uploadPayload: string | Buffer = base64Data;
+    let isBuffer = false;
 
-    // Convert to WebP if it's an image and NOT already WebP
-    if (base64Data.startsWith('data:image/') && !base64Data.startsWith('data:image/webp') && !base64Data.includes('svg+xml')) {
+    // Always process images through sharp for resizing and WebP conversion to ensure consistent format and size
+    if (base64Data.startsWith('data:image/') && !base64Data.includes('svg+xml')) {
       try {
         const base64Image = base64Data.split(';base64,').pop();
         if (base64Image) {
@@ -31,16 +32,18 @@ export async function uploadImage(base64Data: string) {
             .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: 80 })
             .toBuffer();
-
-          console.log(`[Image Optimization] Converted image to WebP (Buffer size: ${uploadPayload.length})`);
+          isBuffer = true;
+          console.log(`[Image Optimization] Processed image (Buffer size: ${uploadPayload.length})`);
         }
       } catch (sharpError) {
-        console.error("Sharp conversion error, falling back to original:", sharpError);
+        console.error("Sharp conversion error, falling back to original base64:", sharpError);
       }
     }
 
-    // If payload is a Buffer (result of sharp processing), use upload_stream
-    if (Buffer.isBuffer(uploadPayload)) {
+    // Use upload_stream for Buffers or large strings to be more reliable
+    if (isBuffer || (typeof uploadPayload === 'string' && uploadPayload.length > 50000)) {
+      const bufferToUpload = isBuffer ? (uploadPayload as Buffer) : Buffer.from((uploadPayload as string).split(';base64,').pop() || '', 'base64');
+      
       const uploadResponse = await new Promise<any>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
@@ -48,16 +51,18 @@ export async function uploadImage(base64Data: string) {
             resource_type: "auto",
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              console.error("Cloudinary stream error:", error);
+              reject(error);
+            } else resolve(result);
           }
         );
-        uploadStream.end(uploadPayload);
+        uploadStream.end(bufferToUpload);
       });
       return { success: true, url: uploadResponse.secure_url };
     }
 
-    // Otherwise (base64 string or original URL fallback), use standard upload
+    // Standard upload for small strings or fallback
     const uploadResponse = await cloudinary.uploader.upload(uploadPayload as string, {
       folder: "giftisan",
       resource_type: "auto",
@@ -1406,15 +1411,15 @@ export async function createProduct(artisanId: string, formData: FormData) {
         stock: parseInt(data.stock) || 0,
         status: "PENDING",
         variants: {
-          create: JSON.parse(formData.get("variants") as string || "[]").map((v: any) => ({
+          create: await Promise.all(JSON.parse(formData.get("variants") as string || "[]").map(async (v: any) => ({
             name: v.name,
             price: parseFloat(v.price) || 0,
             stock: parseInt(v.stock) || 0,
             sku: v.sku || null,
             options: v.options || null,
-            image: v.image || null,
+            image: v.image ? await processImage(v.image) : null,
             badge: v.badge || null
-          }))
+          })))
         }
       }
     });
@@ -1732,16 +1737,16 @@ export async function updateProduct(productId: string, formData: FormData) {
 
     if (variantsData.length > 0) {
       await prisma.productVariant.createMany({
-        data: variantsData.map((v: any) => ({
+        data: await Promise.all(variantsData.map(async (v: any) => ({
           productId,
           name: v.name,
           price: parseFloat(v.price) || 0,
           stock: parseInt(v.stock) || 0,
           sku: v.sku || null,
           options: v.options || null,
-          image: v.image || null,
+          image: v.image ? await processImage(v.image) : null,
           badge: v.badge || null
-        }))
+        })))
       });
     }
 

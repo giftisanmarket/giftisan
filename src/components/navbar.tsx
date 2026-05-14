@@ -551,17 +551,7 @@ export function Navbar({ dict }: { dict?: any }) {
                 </span>
               )}
             </button>
-            {/* Mobile Language Toggle */}
-            <Link 
-              href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
-              onClick={() => {
-                document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
-              }}
-              className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/5 text-[10px] font-black uppercase text-primary/60 hover:text-accent transition-all active:scale-90 border border-primary/5 shadow-sm"
-              title={pathname.startsWith('/en') ? "Switch to Arabic (Alt+L)" : "Switch to English (Alt+L)"}
-            >
-              {pathname.startsWith('/en') ? 'AR' : 'EN'}
-            </Link>
+
 
             <button
               onClick={() => setIsMenuOpen(true)}
@@ -621,6 +611,9 @@ export function Navbar({ dict }: { dict?: any }) {
         "fixed inset-0 bg-charcoal/60 backdrop-blur-md z-[60] md:hidden transition-all duration-500",
         isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}>
+        {/* Backdrop click listener */}
+        <div className="absolute inset-0" onClick={() => setIsMenuOpen(false)} />
+
         <div className={cn(
           "absolute end-0 top-0 h-[100dvh] w-[80%] max-w-sm bg-cream shadow-2xl transition-transform duration-500 flex flex-col",
           isMenuOpen ? "translate-x-0" : (pathname.startsWith('/ar') ? "-translate-x-full" : "translate-x-full")

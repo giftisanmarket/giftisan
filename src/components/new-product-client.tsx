@@ -220,9 +220,23 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
                               if (file) {
                                 const reader = new FileReader();
                                 reader.onloadend = () => {
-                                  const newVariants = [...variants];
-                                  newVariants[i].image = reader.result as string;
-                                  setVariants(newVariants);
+                                  const img = new (window as any).Image();
+                                  img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    let width = img.width;
+                                    let height = img.height;
+                                    const MAX_RES = 1080;
+                                    if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                                    else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                                    canvas.width = width; canvas.height = height;
+                                    const ctx = canvas.getContext('2d');
+                                    if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                                    
+                                    const newVariants = [...variants];
+                                    newVariants[i].image = canvas.toDataURL('image/webp', 0.75);
+                                    setVariants(newVariants);
+                                  };
+                                  img.src = reader.result as string;
                                 };
                                 reader.readAsDataURL(file);
                               }
@@ -324,9 +338,23 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
                           if (file) {
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                              const newVariants = [...variants];
-                              newVariants[i].image = reader.result as string;
-                              setVariants(newVariants);
+                              const img = new (window as any).Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_RES = 1080;
+                                if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                                else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                                
+                                const newVariants = [...variants];
+                                newVariants[i].image = canvas.toDataURL('image/webp', 0.75);
+                                setVariants(newVariants);
+                              };
+                              img.src = reader.result as string;
                             };
                             reader.readAsDataURL(file);
                           }
@@ -526,13 +554,19 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
     form.append("variants", JSON.stringify(variants));
 
-    const res = await createProduct(artisanId, form);
+    try {
+      const res = await createProduct(artisanId, form);
 
-    if (res.success) {
-      toast.success(dict.new_product.success_message || "Treasure listed successfully!");
-      window.location.href = "/studio";
-    } else {
-      toast.error(res.error || "Failed to create product.");
+      if (res.success) {
+        toast.success(dict.new_product.success_message || "Treasure listed successfully!");
+        window.location.href = "/studio";
+      } else {
+        toast.error(res.error || "Failed to create product.");
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      toast.error(dict.common?.error || "A connection error occurred. Please check your signal.");
       setIsLoading(false);
     }
   };
@@ -770,13 +804,13 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                 const canvas = document.createElement('canvas');
                                 let width = img.width;
                                 let height = img.height;
-                                const MAX_RES = 2400;
+                                const MAX_RES = 1280;
                                 if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
                                 else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
                                 canvas.width = width; canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                                handleImageChange(idx, canvas.toDataURL('image/webp', 0.85));
+                                handleImageChange(idx, canvas.toDataURL('image/webp', 0.75));
                                 setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
                                 setIsCompressing(prev => ({ ...prev, [idx]: false }));
                               };

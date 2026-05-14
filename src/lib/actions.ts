@@ -523,10 +523,10 @@ export async function getUserFavorites(userId: string) {
     });
     return favorites.map(f => ({
       ...f.product,
-      images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 10000000 ? "" : img) : [],
+      images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
       artisan: {
         ...f.product.artisan,
-        avatar: (f.product.artisan.avatar?.length || 0) > 10000000 ? "" : f.product.artisan.avatar,
+        avatar: (f.product.artisan.avatar?.length || 0) > 300000 ? "" : f.product.artisan.avatar,
         user: { name: f.product.artisan.user?.name }
       }
     }));
@@ -1365,29 +1365,12 @@ export async function createProduct(artisanId: string, formData: FormData) {
       const img = formData.get(`image-${i}`);
       if (img) images.push(img as string);
     }
-    
-    console.log(`[CreateProduct] Received ${images.length} image(s) for processing.`);
 
     const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
-    const uploadedImages: string[] = [];
-    let count = 0;
-    for (const img of images) {
-      count++;
-      try {
-        console.log(`[CreateProduct] Processing image ${count}/${images.length}...`);
-        const processed = await processImage(img);
-        if (processed) {
-          uploadedImages.push(processed);
-          console.log(`[CreateProduct] Image ${count} processed successfully.`);
-        } else {
-          console.log(`[CreateProduct] Image ${count} returned null (possibly failed upload).`);
-        }
-      } catch (err) {
-        console.error(`[CreateProduct] Error processing image ${count}:`, err);
-      }
-    }
-    const finalImages = uploadedImages;
-    console.log(`[CreateProduct] Finished processing. ${finalImages.length} images ready for save.`);
+    const uploadedImages = await Promise.all(
+      images.map((img: string) => processImage(img))
+    );
+    const finalImages = uploadedImages.filter(img => img !== null) as string[];
 
     const product = await prisma.product.create({
       data: {

@@ -782,7 +782,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const MAX_RES = 1920;
+          const MAX_RES = 2400;
           if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
           else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
           canvas.width = width; canvas.height = height;

@@ -93,7 +93,7 @@ export function SignupClient({ dict }: { dict: any }) {
               <button 
                 type="button"
                 onClick={() => socialSignIn("google", { callbackUrl: "/" })}
-                className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-sm md:text-base"
+                className="w-full py-4 md:py-5 bg-white border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-sm md:text-base"
               >
                 <FcGoogle className="w-6 h-6" />
                 {dict.auth.signup_google}
@@ -154,7 +154,7 @@ export function SignupClient({ dict }: { dict: any }) {
 
               <button 
                 onClick={() => setStep(2)}
-                className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group text-sm md:text-base"
+                className="w-full py-4 md:py-5 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group text-sm md:text-base"
               >
                 {dict.auth.signup_set_purpose}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -185,7 +185,7 @@ export function SignupClient({ dict }: { dict: any }) {
                   <input 
                     type="text" 
                     placeholder={dict.auth.signup_name_placeholder}
-                    className="w-full h-14 md:h-16 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
+                    className="w-full py-4 md:py-5 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     required
@@ -197,7 +197,7 @@ export function SignupClient({ dict }: { dict: any }) {
                   <input 
                     type="email" 
                     placeholder={dict.auth.login_email_placeholder}
-                    className="w-full h-14 md:h-16 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
+                    className="w-full py-4 md:py-5 px-6 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required
@@ -210,7 +210,7 @@ export function SignupClient({ dict }: { dict: any }) {
                     <input 
                       type={showPassword ? "text" : "password"} 
                       placeholder="••••••••"
-                      className="w-full h-14 md:h-16 ps-6 pe-14 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base relative z-0"
+                      className="w-full py-4 md:py-5 ps-6 pe-14 rounded-2xl bg-cream/30 border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-all font-medium text-primary shadow-inner text-sm md:text-base relative z-0"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       required
@@ -234,7 +234,7 @@ export function SignupClient({ dict }: { dict: any }) {
                 <button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
+                  className="w-full py-4 md:py-5 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-sm md:text-base"
                 >
                   {isLoading ? dict.auth.signup_creating : dict.auth.signup_create_presence}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

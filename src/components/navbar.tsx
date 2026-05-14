@@ -202,7 +202,7 @@ export function Navbar({ dict }: { dict?: any }) {
                 }}
                 onFocus={() => setShowResults(true)}
                 placeholder={d.common.search_placeholder}
-                className="w-full h-12 ps-12 pe-10 bg-white border border-primary/20 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent text-primary font-medium placeholder:text-primary/50 transition-all shadow-inner"
+                className="w-full py-3 ps-12 pe-10 bg-white border border-primary/20 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent text-primary font-medium placeholder:text-primary/50 transition-all shadow-inner"
               />
               <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5 group-focus-within:text-accent transition-colors" />
 
@@ -648,7 +648,7 @@ export function Navbar({ dict }: { dict?: any }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={d.common.search_placeholder}
-                  className="w-full h-12 ps-12 pe-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
+                  className="w-full py-3 ps-12 pe-4 bg-white border border-primary/20 rounded-2xl text-primary font-medium"
                 />
                 <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-5 h-5" />
               </form>

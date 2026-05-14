@@ -301,14 +301,14 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <button
                     onClick={() => setProductToDelete(null)}
-                    className="flex-1 h-14 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
+                    className="flex-1 py-4 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all"
                   >
                     {dict.studio.keep_it}
                   </button>
                   <button
                     disabled={isDeleting === productToDelete}
                     onClick={handleDelete}
-                    className="flex-1 h-14 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
+                    className="flex-1 py-4 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
                   >
                     {isDeleting === productToDelete ? dict.studio.removing : dict.studio.delete_permanently}
                   </button>
@@ -803,7 +803,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                   <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 pt-2">
                     <Link
                       href={`/profile/messages?userId=${selectedItem.order.userId}`}
-                      className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
+                      className="w-full py-4 md:h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
                     >
                       <Mail className="w-4 h-4 md:w-5 md:h-5" />
                       {dict.studio.message_customer}
@@ -816,7 +816,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                           setItemToPrint(null);
                         }, 100);
                       }}
-                      className="w-full md:w-fit px-8 h-14 md:h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm md:text-base"
+                      className="w-full md:w-fit px-8 py-4 md:h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm md:text-base"
                     >
                       {dict.studio.print_summary}
                     </button>
@@ -914,7 +914,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       setIsUpdating(null);
                     }}
                     disabled={isAdminPreview || !carrier || !trackingNumber || isUpdating === shippingItem.id || isSkipping === shippingItem.id}
-                    className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                   >
                     {isUpdating === shippingItem.id ? (
                       <>

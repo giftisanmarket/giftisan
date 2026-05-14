@@ -74,7 +74,7 @@ export function ConfirmationModal({
                     onConfirm();
                     onClose();
                   }}
-                  className={`w-full h-14 rounded-2xl font-bold transition-all shadow-lg ${
+                  className={`w-full py-4 rounded-2xl font-bold transition-all shadow-lg ${
                     isDestructive 
                       ? 'bg-red-500 text-white hover:bg-red-600 shadow-red-500/20' 
                       : 'bg-primary text-white hover:bg-primary-light shadow-primary/20'
@@ -84,7 +84,7 @@ export function ConfirmationModal({
                 </button>
                 <button
                   onClick={onClose}
-                  className="w-full h-14 bg-white border border-primary/5 text-primary/40 font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm"
+                  className="w-full py-4 bg-white border border-primary/5 text-primary/40 font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm"
                 >
                   {cancelText}
                 </button>

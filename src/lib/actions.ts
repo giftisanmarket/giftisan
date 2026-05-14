@@ -39,9 +39,28 @@ export async function uploadImage(base64Data: string) {
       }
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(uploadPayload as any, {
+    // If payload is a Buffer (result of sharp processing), use upload_stream
+    if (Buffer.isBuffer(uploadPayload)) {
+      const uploadResponse = await new Promise<any>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "giftisan",
+            resource_type: "auto",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(uploadPayload);
+      });
+      return { success: true, url: uploadResponse.secure_url };
+    }
+
+    // Otherwise (base64 string or original URL fallback), use standard upload
+    const uploadResponse = await cloudinary.uploader.upload(uploadPayload as string, {
       folder: "giftisan",
-      resource_type: "auto", // Essential for videos
+      resource_type: "auto",
     });
     return { success: true, url: uploadResponse.secure_url };
   } catch (error) {

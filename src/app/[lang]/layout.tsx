@@ -39,7 +39,13 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     authors: [{ name: "Giftisan Team" }],
     creator: SITE_NAME,
     icons: {
-      icon: "/icon.png",
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      ],
+      apple: [
+        { url: "/icon.png", sizes: "180x180", type: "image/png" },
+      ],
     },
     alternates: {
       canonical: `${SITE_URL}/${lang}`,

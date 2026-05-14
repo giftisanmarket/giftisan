@@ -102,7 +102,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(outputBuffer), {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "public, max-age=3600, must-revalidate",
         "X-Image-Optimizer": "Sharp",
       },
     });

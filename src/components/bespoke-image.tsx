@@ -32,8 +32,9 @@ export function BespokeImage({
     )}>
       {isLoading && <Skeleton className="absolute inset-0 z-10" />}
       <Image
-        loader={isOptimized ? ({ src, width, quality }) => {
-          return `/api/image/${type}/${id}?w=${width}&q=${quality || 85}`
+        loader={isOptimized ? ({ width, quality }) => {
+          const v = typeof src === 'string' ? encodeURIComponent(src.split('/').pop() || '1') : '1';
+          return `/api/image/${type}/${id}?w=${width}&q=${quality || 85}&v=${v}`
         } : undefined}
         src={isOptimized ? `giftisan-${type}-${id}` : src}
         alt={alt}

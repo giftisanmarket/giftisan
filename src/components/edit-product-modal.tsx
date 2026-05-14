@@ -40,7 +40,7 @@ const EssentialsSection = memo(({ textData, setTextData, readOnly, dict }: any) 
           onChange={(e) => setTextData((prev: any) => ({...prev, name: e.target.value}))}
           disabled={readOnly}
           className={cn(
-            "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+            "w-full py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
             readOnly && "bg-cream/20 cursor-default"
           )}
         />
@@ -56,7 +56,7 @@ const EssentialsSection = memo(({ textData, setTextData, readOnly, dict }: any) 
             onChange={(e) => setTextData((prev: any) => ({...prev, price: e.target.value}))}
             disabled={readOnly}
             className={cn(
-              "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+              "w-full py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
               readOnly && "bg-cream/20 cursor-default"
             )}
           />
@@ -247,7 +247,7 @@ const DetailsSection = memo(({ textData, setTextData, readOnly, dict }: any) => 
             onChange={(e) => setTextData((prev: any) => ({...prev, stock: e.target.value}))}
             disabled={readOnly}
             className={cn(
-              "w-full h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+              "w-full py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
               readOnly && "bg-cream/20 cursor-default"
             )}
           />
@@ -275,7 +275,7 @@ const DetailsSection = memo(({ textData, setTextData, readOnly, dict }: any) => 
           placeholder="e.g. Best Seller"
           disabled={readOnly}
           className={cn(
-            "w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary",
+            "w-full py-3 px-8 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary",
             readOnly && "cursor-default"
           )}
         />
@@ -352,7 +352,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
             placeholder={dict.edit_product.option_name_placeholder}
             value={newOptionName}
             onChange={(e) => setNewOptionName(e.target.value)}
-            className="flex-1 h-12 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold text-sm md:text-base"
+            className="flex-1 py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold text-sm md:text-base"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -413,7 +413,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
             <button 
               type="button"
               onClick={generateVariants}
-              className="flex-1 h-12 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[10px] md:text-xs"
+              className="flex-1 py-3 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[10px] md:text-xs"
             >
               {dict.edit_product.generate_variants}
             </button>
@@ -425,7 +425,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                   setVariants(newVariants);
                   toast.success(dict.edit_product.prices_synced);
                 }}
-                className="px-6 h-12 bg-cream text-primary border border-primary/10 font-bold rounded-xl hover:bg-cream/50 transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-cream text-primary border border-primary/10 font-bold rounded-xl hover:bg-cream/50 transition-all flex items-center gap-2"
               >
                 <DollarSign className="w-4 h-4 text-accent" />
                 {dict.edit_product.apply_base_price}
@@ -782,7 +782,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const MAX_RES = 2400;
+          const MAX_RES = 1920;
           if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
           else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
           canvas.width = width; canvas.height = height;

@@ -22,9 +22,8 @@ const CREAM_BG = "#fcf9f1";
 
 const emailStyles = `
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap');
-    body { font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; }
-    .heading { font-family: 'Outfit', sans-serif; }
+    body { font-family: Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; }
+    .heading { font-family: Helvetica, Arial, sans-serif; font-weight: bold; }
     .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 30px; box-sizing: border-box; }
     .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
     .email-body { padding: 40px; }
@@ -578,13 +577,13 @@ export const sendProductStatusUpdateEmail = async (email: string, name: string, 
   }
 
   const isApproved = status === "APPROVED";
-  const subject = isApproved 
+  const subject = isApproved
     ? `Treasure Unveiled: ${productName} is now live! | كنز جديد: منتجك الآن متاح للجميع!`
     : `Curator Update: Status changed for ${productName} | تحديث من فريق التقييم: تم تغيير حالة منتجك`;
 
   const enMessage = isApproved
     ? `Great news! Our curators have approved <strong>${productName}</strong>. It is now visible to all collectors and ready to be claimed.`
-    : status === "REJECTED" 
+    : status === "REJECTED"
       ? `Our curators have reviewed <strong>${productName}</strong> and decided not to list it at this time.${reason ? `<br/><br/><strong>Feedback from Curators:</strong><br/>${reason}` : ' Please review our quality guidelines or contact support for more details.'}`
       : `<strong>${productName}</strong> has been moved back to the review queue. We will notify you once the status changes.`;
 

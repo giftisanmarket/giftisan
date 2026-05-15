@@ -3,7 +3,7 @@
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -35,7 +35,239 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_VIDEO_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_VIDEO_DURATION = 30; // 30 seconds
 
-const VariationsSection = ({ dict, options, setOptions, variants, setVariants, basePrice }: any) => {
+const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
+  <tr className="hover:bg-cream/20 transition-colors group">
+    <td className="px-6 py-4">
+      <div className="relative w-12 h-12 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center group/img">
+        {v.image ? (
+          <img src={v.image} className="w-full h-full object-cover" />
+        ) : (
+          <ImageIcon className="w-5 h-5 text-primary/20" />
+        )}
+        <input 
+          type="file" 
+          accept="image/*"
+          className="absolute inset-0 opacity-0 cursor-pointer"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                const img = new (window as any).Image();
+                img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width;
+                  let height = img.height;
+                  const MAX_RES = 1080;
+                  if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                  else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                  canvas.width = width; canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                  
+                  const newVariants = [...variants];
+                  newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
+                  setVariants(newVariants);
+                };
+                img.src = reader.result as string;
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
+      </div>
+    </td>
+    <td className="px-6 py-4 font-bold text-primary">{v.name}</td>
+    <td className="px-6 py-4">
+      <input 
+        type="number" 
+        value={v.price}
+        onChange={(e) => {
+          const newVariants = [...variants];
+          newVariants[i] = { ...newVariants[i], price: e.target.value };
+          setVariants(newVariants);
+        }}
+        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+      />
+    </td>
+    <td className="px-6 py-4">
+      <div className="space-y-1">
+        <input 
+          type="number" 
+          value={v.stock}
+          onChange={(e) => {
+            const newVariants = [...variants];
+            newVariants[i] = { ...newVariants[i], stock: e.target.value };
+            setVariants(newVariants);
+          }}
+          className={cn(
+            "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
+            parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
+          )}
+        />
+        {parseInt(v.stock) < 5 && (
+          <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
+        )}
+      </div>
+    </td>
+    <td className="px-6 py-4">
+      <input 
+        type="text" 
+        value={v.badge || ""}
+        onChange={(e) => {
+          const newVariants = [...variants];
+          newVariants[i] = { ...newVariants[i], badge: e.target.value };
+          setVariants(newVariants);
+        }}
+        placeholder="e.g. Rare"
+        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+      />
+    </td>
+    <td className="px-6 py-4">
+      <input 
+        type="text" 
+        value={v.sku}
+        onChange={(e) => {
+          const newVariants = [...variants];
+          newVariants[i] = { ...newVariants[i], sku: e.target.value };
+          setVariants(newVariants);
+        }}
+        placeholder={dict.checkout.optional}
+        className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
+      />
+    </td>
+    <td className="px-6 py-4 text-end">
+      <button 
+        type="button"
+        onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
+        className="text-red-400 hover:text-red-500 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
+    </td>
+  </tr>
+));
+
+VariantRow.displayName = "VariantRow";
+
+const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
+  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm space-y-5">
+    <div className="flex items-center gap-4">
+      <div className="relative w-14 h-14 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center shrink-0">
+        {v.image ? (
+          <img src={v.image} className="w-full h-full object-cover" />
+        ) : (
+          <ImageIcon className="w-6 h-6 text-primary/10" />
+        )}
+        <input 
+          type="file" 
+          accept="image/*"
+          className="absolute inset-0 opacity-0"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                const img = new (window as any).Image();
+                img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width;
+                  let height = img.height;
+                  const MAX_RES = 1080;
+                  if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                  else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                  canvas.width = width; canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                  
+                  const newVariants = [...variants];
+                  newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
+                  setVariants(newVariants);
+                };
+                img.src = reader.result as string;
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-primary truncate">{v.name}</p>
+        <button 
+          type="button"
+          onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
+          className="text-[10px] font-black uppercase text-red-400 mt-1"
+        >
+          {dict.common.remove}
+        </button>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.price_label}</label>
+        <input 
+          type="number" 
+          value={v.price}
+          onChange={(e) => {
+            const newVariants = [...variants];
+            newVariants[i] = { ...newVariants[i], price: e.target.value };
+            setVariants(newVariants);
+          }}
+          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
+        <input 
+          type="number" 
+          value={v.stock}
+          onChange={(e) => {
+            const newVariants = [...variants];
+            newVariants[i] = { ...newVariants[i], stock: e.target.value };
+            setVariants(newVariants);
+          }}
+          className={cn(
+            "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
+            parseInt(v.stock) < 5 ? "border-orange-300" : "border-primary/5"
+          )}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.variant_badge}</label>
+        <input 
+          type="text" 
+          value={v.badge || ""}
+          onChange={(e) => {
+            const newVariants = [...variants];
+            newVariants[i] = { ...newVariants[i], badge: e.target.value };
+            setVariants(newVariants);
+          }}
+          placeholder="e.g. Rare"
+          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.sku_label}</label>
+        <input 
+          type="text" 
+          value={v.sku}
+          onChange={(e) => {
+            const newVariants = [...variants];
+            newVariants[i] = { ...newVariants[i], sku: e.target.value };
+            setVariants(newVariants);
+          }}
+          placeholder={dict.checkout.optional}
+          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
+        />
+      </div>
+    </div>
+  </div>
+));
+
+VariantCard.displayName = "VariantCard";
+
+const VariationsSection = memo(({ dict, options, setOptions, variants, setVariants, basePrice }: any) => {
   const [newOptionName, setNewOptionName] = useState("");
 
   const addOption = () => {
@@ -203,116 +435,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
                 </thead>
                 <tbody className="divide-y divide-primary/5">
                   {variants.map((v: any, i: number) => (
-                    <tr key={i} className="hover:bg-cream/20 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="relative w-12 h-12 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center group/img">
-                          {v.image ? (
-                            <img src={v.image} className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon className="w-5 h-5 text-primary/20" />
-                          )}
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  const img = new (window as any).Image();
-                                  img.onload = () => {
-                                    const canvas = document.createElement('canvas');
-                                    let width = img.width;
-                                    let height = img.height;
-                                    const MAX_RES = 1080;
-                                    if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
-                                    else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
-                                    canvas.width = width; canvas.height = height;
-                                    const ctx = canvas.getContext('2d');
-                                    if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                                    
-                                    const newVariants = [...variants];
-                                    newVariants[i].image = canvas.toDataURL('image/webp', 0.75);
-                                    setVariants(newVariants);
-                                  };
-                                  img.src = reader.result as string;
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-bold text-primary">{v.name}</td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="number" 
-                          value={v.price}
-                          onChange={(e) => {
-                            const newVariants = [...variants];
-                            newVariants[i].price = e.target.value;
-                            setVariants(newVariants);
-                          }}
-                          className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <input 
-                            type="number" 
-                            value={v.stock}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[i].stock = e.target.value;
-                              setVariants(newVariants);
-                            }}
-                            className={cn(
-                              "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
-                              parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
-                            )}
-                          />
-                          {parseInt(v.stock) < 5 && (
-                            <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="text" 
-                          value={v.badge || ""}
-                          onChange={(e) => {
-                            const newVariants = [...variants];
-                            newVariants[i].badge = e.target.value;
-                            setVariants(newVariants);
-                          }}
-                          placeholder="e.g. Rare"
-                          className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="text" 
-                          value={v.sku}
-                          onChange={(e) => {
-                            const newVariants = [...variants];
-                            newVariants[i].sku = e.target.value;
-                            setVariants(newVariants);
-                          }}
-                          placeholder={dict.checkout.optional}
-                          className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-                        />
-                      </td>
-                      <td className="px-6 py-4 text-end">
-                        <button 
-                          type="button"
-                          onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-                          className="text-red-400 hover:text-red-500 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </td>
-                    </tr>
+                    <VariantRow key={i} v={v} i={i} variants={variants} setVariants={setVariants} dict={dict} />
                   ))}
                 </tbody>
               </table>
@@ -321,118 +444,7 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4">
               {variants.map((v: any, i: number) => (
-                <div key={i} className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm space-y-5">
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-14 h-14 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center shrink-0">
-                      {v.image ? (
-                        <img src={v.image} className="w-full h-full object-cover" />
-                      ) : (
-                        <ImageIcon className="w-6 h-6 text-primary/10" />
-                      )}
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        className="absolute inset-0 opacity-0"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const img = new (window as any).Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                const MAX_RES = 1080;
-                                if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
-                                else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
-                                canvas.width = width; canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                                
-                                const newVariants = [...variants];
-                                newVariants[i].image = canvas.toDataURL('image/webp', 0.75);
-                                setVariants(newVariants);
-                              };
-                              img.src = reader.result as string;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-primary truncate">{v.name}</p>
-                      <button 
-                        type="button"
-                        onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-                        className="text-[10px] font-black uppercase text-red-400 mt-1"
-                      >
-                        {dict.common.remove}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.price_label}</label>
-                      <input 
-                        type="number" 
-                        value={v.price}
-                        onChange={(e) => {
-                          const newVariants = [...variants];
-                          newVariants[i].price = e.target.value;
-                          setVariants(newVariants);
-                        }}
-                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
-                      <input 
-                        type="number" 
-                        value={v.stock}
-                        onChange={(e) => {
-                          const newVariants = [...variants];
-                          newVariants[i].stock = e.target.value;
-                          setVariants(newVariants);
-                        }}
-                        className={cn(
-                          "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
-                          parseInt(v.stock) < 5 ? "border-orange-300" : "border-primary/5"
-                        )}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.variant_badge}</label>
-                      <input 
-                        type="text" 
-                        value={v.badge || ""}
-                        onChange={(e) => {
-                          const newVariants = [...variants];
-                          newVariants[i].badge = e.target.value;
-                          setVariants(newVariants);
-                        }}
-                        placeholder="e.g. Rare"
-                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.sku_label}</label>
-                      <input 
-                        type="text" 
-                        value={v.sku}
-                        onChange={(e) => {
-                          const newVariants = [...variants];
-                          newVariants[i].sku = e.target.value;
-                          setVariants(newVariants);
-                        }}
-                        placeholder={dict.checkout.optional}
-                        className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <VariantCard key={i} v={v} i={i} variants={variants} setVariants={setVariants} dict={dict} />
               ))}
             </div>
           </div>
@@ -440,7 +452,9 @@ const VariationsSection = ({ dict, options, setOptions, variants, setVariants, b
       </div>
     </section>
   );
-};
+});
+
+VariationsSection.displayName = "VariationsSection";
 
 export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   const router = useRouter();
@@ -515,10 +529,10 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     { id: "stationery", label: dict.common.categories_list?.["stationery"] || dict.common.stationery }
   ];
 
-  const handleImageChange = (index: number, value: string) => {
+  const handleImageChange = useCallback((index: number, value: string) => {
     const newImages = [...formData.images];
     newImages[index] = value;
-    setFormData({ ...formData, images: newImages });
+    setFormData((prev: any) => ({ ...prev, images: newImages }));
     if (!value) {
       setResolutions(prev => {
         const next = { ...prev };
@@ -526,7 +540,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
         return next;
       });
     }
-  };
+  }, [formData.images]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -91,16 +91,6 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
 
-  // Poll for new sales/orders to keep the artisan studio page updated in real-time
-  useEffect(() => {
-    if (isAdminPreview) return;
-
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 4000); // Refresh data from server every 4 seconds dynamically!
-
-    return () => clearInterval(interval);
-  }, [router, isAdminPreview]);
 
   // Variant Analytics
   const topVariants = useMemo(() => {

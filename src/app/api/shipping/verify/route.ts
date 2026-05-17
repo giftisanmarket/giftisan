@@ -7,29 +7,46 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const itemId = searchParams.get("itemId");
+    const orderId = searchParams.get("orderId");
 
-    if (!itemId) {
-      return new NextResponse("Missing itemId parameter", { status: 400 });
+    if (!itemId && !orderId) {
+      return new NextResponse("Missing itemId or orderId parameter", { status: 400 });
     }
 
-    const orderItem = await prisma.orderItem.findUnique({
-      where: { id: itemId },
-      include: {
-        order: {
-          include: { user: true }
-        },
-        product: {
-          include: { artisan: true }
+    let orderItem;
+    if (itemId) {
+      orderItem = await prisma.orderItem.findUnique({
+        where: { id: itemId },
+        include: {
+          order: {
+            include: { user: true }
+          },
+          product: {
+            include: { artisan: true }
+          }
         }
-      }
-    });
+      });
+    } else if (orderId) {
+      // Find the first orderItem for this order to display details
+      orderItem = await prisma.orderItem.findFirst({
+        where: { orderId: orderId },
+        include: {
+          order: {
+            include: { user: true }
+          },
+          product: {
+            include: { artisan: true }
+          }
+        }
+      });
+    }
 
     if (!orderItem) {
       return new NextResponse(renderHtmlError("Package Not Found", "The requested package item could not be found in our system."), { headers: { "Content-Type": "text/html" } });
     }
 
     // If already delivered
-    if (orderItem.status === "DELIVERED") {
+    if (orderItem.order.status === "DELIVERED" || (itemId && orderItem.status === "DELIVERED")) {
       return new NextResponse(renderHtmlSuccess(orderItem), { headers: { "Content-Type": "text/html" } });
     }
 
@@ -41,7 +58,11 @@ export async function GET(req: NextRequest) {
           const bostaData = await bostaRes.json();
           const rawState = bostaData.state?.value || bostaData.state || bostaData.status;
           if (["Delivered", "DELIVERED", "delivered"].includes(rawState)) {
-            await markAsDelivered(orderItem.id);
+            if (itemId) {
+              await markAsDelivered(orderItem.id);
+            } else if (orderId) {
+              await markOrderAsDelivered(orderItem.orderId);
+            }
             return new NextResponse(renderHtmlSuccess(orderItem), { headers: { "Content-Type": "text/html" } });
           }
         }
@@ -51,7 +72,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Render beautiful mobile confirmation screen for the runner
-    return new NextResponse(renderHtmlConfirmationPrompt(orderItem), { headers: { "Content-Type": "text/html" } });
+    return new NextResponse(renderHtmlConfirmationPrompt(orderItem, !!orderId), { headers: { "Content-Type": "text/html" } });
 
   } catch (error: any) {
     console.error("[Universal Verify GET Error]:", error);
@@ -63,12 +84,19 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     const itemId = data.itemId;
+    const orderId = data.orderId;
 
-    if (!itemId) {
-      return NextResponse.json({ error: "Missing itemId" }, { status: 400 });
+    if (!itemId && !orderId) {
+      return NextResponse.json({ error: "Missing itemId or orderId" }, { status: 400 });
     }
 
-    const success = await markAsDelivered(itemId);
+    let success = false;
+    if (itemId) {
+      success = await markAsDelivered(itemId);
+    } else if (orderId) {
+      success = await markOrderAsDelivered(orderId);
+    }
+
     if (success) {
       return NextResponse.json({ success: true });
     }
@@ -147,7 +175,67 @@ async function markAsDelivered(itemId: string) {
   return true;
 }
 
-function renderHtmlConfirmationPrompt(item: any) {
+async function markOrderAsDelivered(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      items: {
+        include: { product: true }
+      },
+      user: true
+    }
+  });
+
+  if (!order || order.status === "DELIVERED") return false;
+
+  // 1. Update all OrderItems to DELIVERED
+  await prisma.orderItem.updateMany({
+    where: { orderId: orderId },
+    data: { status: "DELIVERED" }
+  });
+
+  // 2. Update Order status to DELIVERED
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "DELIVERED" }
+  });
+
+  // 3. Reset escrow holding period for all items in the order
+  for (const item of order.items) {
+    await prisma.artisanTransaction.updateMany({
+      where: {
+        orderId: orderId,
+        artisanId: item.product.artisanId,
+        type: "SALE",
+        status: "PENDING"
+      },
+      data: { createdAt: new Date() }
+    });
+
+    // 4. Send email notifications
+    if (order.user.email) {
+      sendOrderStatusUpdateEmail(
+        order.user.email,
+        order.user.name || "Customer",
+        order.id,
+        "DELIVERED",
+        item.product.name,
+        item.product.slug || undefined,
+        item.trackingNumber || "Hand Delivered",
+        item.carrier || "Private Runner"
+      ).catch(err => console.error("[Universal Verify] Failed to send email:", err));
+    }
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/studio");
+  return true;
+}
+
+function renderHtmlConfirmationPrompt(item: any, isOrderId: boolean = false) {
+  const targetId = isOrderId ? item.orderId : item.id;
+  const idKey = isOrderId ? "orderId" : "itemId";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -171,9 +259,9 @@ function renderHtmlConfirmationPrompt(item: any) {
     
     <div class="my-8 p-6 bg-[#FAF8F5] rounded-2xl border border-[#123524]/5 text-left space-y-4">
       <div>
-        <span class="text-[10px] font-extrabold uppercase text-[#123524]/40 tracking-widest">Item Package</span>
-        <p class="text-base font-bold text-[#123524] mt-0.5">${item.product.name}</p>
-        <p class="text-xs font-bold text-[#123524]/60 mt-1">Qty: ${item.quantity} • Order #${item.orderId.slice(0, 8).toUpperCase()}</p>
+        <span class="text-[10px] font-extrabold uppercase text-[#123524]/40 tracking-widest">Order Package</span>
+        <p class="text-base font-bold text-[#123524] mt-0.5">${item.product.name} ${item.order.items && item.order.items.length > 1 ? `and ${item.order.items.length - 1} other items` : ''}</p>
+        <p class="text-xs font-bold text-[#123524]/60 mt-1">Order #${item.orderId.slice(0, 8).toUpperCase()}</p>
       </div>
       <hr class="border-[#123524]/5" />
       <div>
@@ -185,7 +273,7 @@ function renderHtmlConfirmationPrompt(item: any) {
 
     <button 
       id="confirmBtn" 
-      onclick="confirmDelivery('${item.id}')"
+      onclick="confirmDelivery('${targetId}')"
       class="w-full py-4 px-6 bg-[#123524] hover:bg-[#123524]/90 text-white font-bold rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-base"
     >
       <span id="btnText">Confirm Doorstep Delivery ✓</span>
@@ -195,7 +283,7 @@ function renderHtmlConfirmationPrompt(item: any) {
   </div>
 
   <script>
-    async function confirmDelivery(itemId) {
+    async function confirmDelivery(id) {
       const btn = document.getElementById('confirmBtn');
       const btnText = document.getElementById('btnText');
       btn.disabled = true;
@@ -206,7 +294,7 @@ function renderHtmlConfirmationPrompt(item: any) {
         const res = await fetch('/api/shipping/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ itemId })
+          body: JSON.stringify({ "${idKey}": id })
         });
         if (res.ok) {
           window.location.reload();
@@ -249,7 +337,7 @@ function renderHtmlSuccess(item: any) {
     <p class="text-xs font-bold text-[#E38E49] uppercase tracking-widest mt-1">Package successfully verified</p>
     
     <div class="my-8 p-6 bg-[#FAF8F5] rounded-2xl border border-[#123524]/5 text-left">
-      <p class="text-sm font-bold text-[#123524]">${item.product.name}</p>
+      <p class="text-sm font-bold text-[#123524]">${item.product.name} ${item.order.items && item.order.items.length > 1 ? `and ${item.order.items.length - 1} other items` : ''}</p>
       <p class="text-xs font-bold text-[#123524]/60 mt-1">Order #${item.orderId.slice(0, 8).toUpperCase()} • Delivered</p>
     </div>
 

@@ -654,7 +654,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
             </div>
             <div className="flex flex-col items-end">
               <div className="p-2 bg-white border-2 border-primary rounded-2xl mb-4">
-                <QRCode value={orderToPrint.id} size={100} />
+                <QRCode value={`${window.location.origin}/api/shipping/verify?orderId=${orderToPrint.id}`} size={100} />
               </div>
               <p className="text-[8px] font-black uppercase tracking-widest text-primary/20">{dict.admin.scan_to_verify}</p>
             </div>

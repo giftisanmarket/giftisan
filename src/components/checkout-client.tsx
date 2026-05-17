@@ -168,7 +168,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
         <div className="container mx-auto px-4 py-32 text-center space-y-6">
           <h1 className="text-4xl font-heading font-bold text-primary">{dict.cart.cart_empty}</h1>
           <p className="text-charcoal/60">{dict.checkout.empty_checkout_desc}</p>
-          <Link href="/" className="px-8 h-14 bg-primary text-white font-bold rounded-full flex items-center justify-center mx-auto w-fit leading-none">
+          <Link href="/" className="px-8 py-4 bg-primary text-white font-bold rounded-full flex items-center justify-center mx-auto w-fit leading-none">
             {dict.checkout.continue_shopping}
           </Link>
         </div>
@@ -238,7 +238,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         }
                       }}
                       disabled={appliedCoupon !== null}
-                      className="flex-1 h-12 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
+                      className="flex-1 py-3 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
                     />
                     {appliedCoupon ? (
                       <button
@@ -247,7 +247,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                           setAppliedCoupon(null);
                           setCouponCode("");
                         }}
-                        className="px-4 h-12 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
+                        className="px-4 py-3 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
                       >
                         {promoRemove}
                       </button>
@@ -256,7 +256,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         type="button"
                         onClick={handleApplyCoupon}
                         disabled={isValidatingCoupon || !couponCode.trim()}
-                        className="px-5 h-12 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
+                        className="px-5 py-3 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
                       >
                         {isValidatingCoupon ? "..." : promoApply}
                       </button>
@@ -316,7 +316,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                 <button
                   onClick={handlePurchase}
                   disabled={isProcessing}
-                  className="w-full h-14 md:h-16 bg-white text-primary font-bold rounded-xl md:rounded-2xl hover:bg-cream transition-all flex items-center justify-center shadow-xl text-base md:text-lg group disabled:opacity-50 active:scale-95 duration-200"
+                  className="w-full py-4 md:py-5 bg-white text-primary font-bold rounded-xl md:rounded-2xl hover:bg-cream transition-all flex items-center justify-center shadow-xl text-base md:text-lg group disabled:opacity-50 active:scale-95 duration-200"
                 >
                   {isProcessing ? dict.checkout.processing : dict.checkout.place_order}
                   <CheckCircle2 className="w-5 h-5 ms-2 text-accent" />
@@ -357,7 +357,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       value={shippingData.firstName}
                       onChange={(e) => updateShippingField("firstName", e.target.value)}
                       className={cn(
-                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
                         validationErrors.includes("firstName") 
                           ? "border-accent ring-2 ring-accent/10" 
                           : "border-primary/20 focus:ring-accent/20 focus:border-accent"
@@ -372,7 +372,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       value={shippingData.lastName}
                       onChange={(e) => updateShippingField("lastName", e.target.value)}
                       className={cn(
-                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
                         validationErrors.includes("lastName") 
                           ? "border-accent ring-2 ring-accent/10" 
                           : "border-primary/20 focus:ring-accent/20 focus:border-accent"
@@ -388,7 +388,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     value={shippingData.address}
                     onChange={(e) => updateShippingField("address", e.target.value)}
                     className={cn(
-                      "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                      "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
                       validationErrors.includes("address") 
                         ? "border-accent ring-2 ring-accent/10" 
                         : "border-primary/20 focus:ring-accent/20 focus:border-accent"
@@ -404,7 +404,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       value={shippingData.city}
                       onChange={(e) => updateShippingField("city", e.target.value)}
                       className={cn(
-                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
                         validationErrors.includes("city") 
                           ? "border-accent ring-2 ring-accent/10" 
                           : "border-primary/20 focus:ring-accent/20 focus:border-accent"
@@ -418,7 +418,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       placeholder="11511"
                       value={shippingData.zip}
                       onChange={(e) => updateShippingField("zip", e.target.value)}
-                      className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
+                      className="w-full py-4 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
                     />
                   </div>
                 </div>

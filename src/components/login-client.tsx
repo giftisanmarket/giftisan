@@ -108,7 +108,7 @@ export function LoginClient({ dict }: { dict: any }) {
             <button 
               type="button"
               onClick={() => socialSignIn("google", { callbackUrl: "/" })}
-              className="w-full h-14 md:h-16 bg-white border border-primary/10 text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-xs md:text-base active:scale-95"
+              className="w-full py-4 md:py-5 bg-white border border-primary/10 text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-3 group text-xs md:text-base active:scale-95"
             >
               <FcGoogle className="w-5 h-5 md:w-6 md:h-6" />
               {dict.auth.login_google}
@@ -134,7 +134,7 @@ export function LoginClient({ dict }: { dict: any }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={dict.auth.login_email_placeholder}
-                  className="w-full h-14 md:h-16 ps-14 pe-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
+                  className="w-full py-4 md:py-5 ps-14 pe-6 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
                   required
                 />
               </div>
@@ -154,7 +154,7 @@ export function LoginClient({ dict }: { dict: any }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-14 md:h-16 ps-14 pe-14 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
+                  className="w-full py-4 md:py-5 ps-14 pe-14 rounded-xl md:rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm text-sm relative z-0"
                   required
                 />
                 <button
@@ -170,7 +170,7 @@ export function LoginClient({ dict }: { dict: any }) {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-base active:scale-95"
+              className="w-full py-4 md:py-5 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-base active:scale-95"
             >
               {isLoading ? dict.auth.login_authenticating : dict.auth.login_button}
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 md:group-hover:translate-x-1 transition-transform" />

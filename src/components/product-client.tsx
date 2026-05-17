@@ -530,7 +530,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   }}
                   disabled={(displayStock || 0) <= 0}
                   className={cn(
-                    "flex-1 h-16 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
+                    "flex-1 py-5 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
                     (displayStock || 0) > 0 
                       ? "hover:bg-primary-light shadow-primary/20" 
                       : "bg-charcoal/20 shadow-none !cursor-not-allowed pointer-events-auto"
@@ -541,7 +541,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 <button
                   onClick={() => toggleFavorite(product)}
                   className={cn(
-                    "w-16 h-16 border rounded-2xl transition-all flex items-center justify-center shrink-0 active:scale-95",
+                    "w-16 py-5 border rounded-2xl transition-all flex items-center justify-center shrink-0 active:scale-95",
                     isFavorite(product.id)
                       ? "border-red-100 bg-red-50 text-red-500 shadow-inner"
                       : "border-primary/10 text-primary hover:bg-white"
@@ -576,7 +576,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 }}
                 disabled={(displayStock || 0) <= 0}
                 className={cn(
-                  "w-full h-16 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95",
+                  "w-full py-5 bg-white border-2 border-primary text-primary font-bold rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95",
                   (displayStock || 0) > 0 
                   ? "hover:bg-primary/5 shadow-xl shadow-primary/5" 
                   : "opacity-30 grayscale !cursor-not-allowed pointer-events-auto"
@@ -840,7 +840,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="w-full h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
+                          className="w-full py-3 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
                         >
                           {isSubmitting ? dict.product.posting_discovery : dict.product.post_review}
                           <ArrowRight className="w-4 h-4" />

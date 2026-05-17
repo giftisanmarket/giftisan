@@ -122,11 +122,15 @@ a,
 
 /* Professional Print Styles for Packing Slips */
 @media print {
-
-  /* Hide whole app by default */
-  /* Hide whole app by default */
-  body, 
-  .bg-cream {
+  /* Reset body, HTML, and wrapper heights to prevent phantom page breaks */
+  html,
+  body,
+  .min-h-screen,
+  #__next,
+  main {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
     background-color: white !important;
     background-image: none !important;
   }
@@ -146,10 +150,13 @@ a,
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
     margin: 0 !important;
-    padding: 2cm !important;
+    padding: 0 !important; /* Let page margins handle it */
     box-shadow: none !important;
     border: none !important;
+    background: white !important;
   }
 
   .print-isolated * {
@@ -167,11 +174,11 @@ a,
     position: relative !important;
     z-index: auto !important;
     inset: auto !important;
-    padding: 2cm !important;
   }
 
   @page {
-    margin: 0;
+    size: letter portrait;
+    margin: 1.5cm;
   }
 
   .backdrop-blur-xl {
@@ -236,15 +243,6 @@ aside::-webkit-scrollbar-thumb:hover,
   }
 }
 
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  body {
-    background: white !important;
-  }
-}
 
 /* ── Tiptap Rich Text Editor ── */
 .ProseMirror {

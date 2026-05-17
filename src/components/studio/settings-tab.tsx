@@ -49,6 +49,7 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
+
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [slug, setSlug] = useState(artisan.slug || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -93,7 +94,8 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
       facebook,
       brandColor,
       bannerImage,
-      phoneNumber
+      phoneNumber,
+
     });
 
     if (res.success) {
@@ -196,13 +198,14 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                                         height = MAX_SIZE;
                                       }
                                     }
-                                    canvas.width = width;
-                                    canvas.height = height;
-                                    const ctx = canvas.getContext('2d');
-                                    if (ctx) ctx.imageSmoothingQuality = 'high';
-                                    ctx?.drawImage(img, 0, 0, width, height);
-                                    setAvatar(canvas.toDataURL('image/webp', 0.9));
-                                  };
+                                     canvas.width = width;
+                                     canvas.height = height;
+                                     const ctx = canvas.getContext('2d');
+                                     if (ctx) ctx.imageSmoothingQuality = 'high';
+                                     ctx?.drawImage(img, 0, 0, width, height);
+                                     const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                     setAvatar(canvas.toDataURL(outType, 0.9));
+                                   };
                                   img.src = reader.result as string;
                                 };
                                 reader.readAsDataURL(file);
@@ -353,7 +356,7 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                     </button>
                   </div>
                 </motion.form>
-              ) : (
+              ) : activeSettingsTab === "branding" ? (
                 <motion.form
                   key="branding"
                   initial={{ opacity: 0, x: 20 }}
@@ -410,13 +413,14 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                                     height = MAX_SIZE;
                                   }
                                 }
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) ctx.imageSmoothingQuality = 'high';
-                                ctx?.drawImage(img, 0, 0, width, height);
-                                setBannerImage(canvas.toDataURL('image/webp', 0.9));
-                              };
+                                 canvas.width = width;
+                                 canvas.height = height;
+                                 const ctx = canvas.getContext('2d');
+                                 if (ctx) ctx.imageSmoothingQuality = 'high';
+                                 ctx?.drawImage(img, 0, 0, width, height);
+                                 const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                 setBannerImage(canvas.toDataURL(outType, 0.9));
+                               };
                               img.src = reader.result as string;
                             };
                             reader.readAsDataURL(file);
@@ -452,7 +456,7 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                   </div>
 
                   {/* Visual Preview */}
-                  <div className="p-8 bg-cream/20 rounded-[2.5rem] border border-primary/5 space-y-6">
+                  <div className="p-6 md:p-8 bg-cream/20 rounded-3xl border border-primary/5 space-y-6">
                     <div className="flex items-center gap-3">
                       <Sparkles className="w-5 h-5 text-accent" />
                       <h4 className="font-bold text-primary">{dict.studio_profile.preview_theme}</h4>
@@ -478,7 +482,8 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                     </button>
                   </div>
                 </motion.form>
-              )}
+              ) : null}
+
             </AnimatePresence>
           </div>
         </div>

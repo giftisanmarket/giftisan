@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, EB_Garamond, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
@@ -23,6 +23,13 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 });
 
 import { SITE_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;

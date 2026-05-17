@@ -16,5 +16,5 @@ export default async function AdminOrdersPage({ params }: { params: Promise<{ la
   const dict = await getDictionary(lang as any);
   const orders = await getAllOrders();
 
-  return <AdminOrdersClient orders={orders} dict={dict} />;
+  return <AdminOrdersClient orders={orders} dict={dict} lang={lang} />;
 }

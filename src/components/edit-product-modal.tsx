@@ -790,7 +790,8 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
           if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
           
           const newImages = [...images];
-          newImages[index] = canvas.toDataURL('image/webp', 0.85);
+          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          newImages[index] = canvas.toDataURL(outType, 0.85);
           setImages(newImages);
           setResolutions(prev => ({ ...prev, [index]: `${width}×${height}` }));
           setIsCompressing(prev => ({ ...prev, [index]: false }));

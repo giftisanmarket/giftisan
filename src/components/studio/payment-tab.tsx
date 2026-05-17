@@ -332,7 +332,7 @@ export function PaymentTab({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mt-8"
             >
-              <div className="p-8 bg-cream/30 rounded-3xl border border-primary/10 mt-4 text-start">
+              <div className="p-5 md:p-8 bg-cream/30 rounded-3xl border border-primary/10 mt-4 text-start">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-heading font-bold text-primary">
                     {isRTL ? "طلب سحب جديد" : "Request Payout"}
@@ -532,12 +532,12 @@ export function PaymentTab({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-primary/5">
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "التاريخ" : "Date"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "النوع" : "Type"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الوصف" : "Description"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الحالة" : "Status"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "المبلغ" : "Amount"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "الإجراء" : "Action"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-start whitespace-nowrap">{isRTL ? "التاريخ" : "Date"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-start whitespace-nowrap">{isRTL ? "النوع" : "Type"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-start min-w-[250px]">{isRTL ? "الوصف" : "Description"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-start whitespace-nowrap">{isRTL ? "الحالة" : "Status"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-end whitespace-nowrap">{isRTL ? "المبلغ" : "Amount"}</th>
+                  <th className="py-4 px-2 text-xs font-black uppercase tracking-wider text-primary/40 text-end whitespace-nowrap">{isRTL ? "الإجراء" : "Action"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -585,14 +585,14 @@ export function PaymentTab({
                   
                   return (
                     <tr key={tx.id} className="border-b border-primary/5 hover:bg-cream/10 transition-colors">
-                      <td className="py-5 text-xs text-charcoal/60 font-medium">
+                      <td className="py-5 px-2 text-xs text-charcoal/60 font-medium whitespace-nowrap">
                         {new Date(tx.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
                           year: "numeric",
                           month: "short",
                           day: "numeric"
                         })}
                       </td>
-                      <td className="py-5">
+                      <td className="py-5 px-2 whitespace-nowrap">
                         <span className={cn(
                           "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md",
                           isSale 
@@ -606,10 +606,10 @@ export function PaymentTab({
                             : tx.type}
                         </span>
                       </td>
-                      <td className="py-5 text-xs text-primary font-bold max-w-xs md:max-w-md">
+                      <td className="py-5 px-2 text-xs text-primary font-bold min-w-[250px]">
                         {getTranslatedDescription(tx.description) || (isRTL ? (isSale ? "أرباح مبيعات" : "طلب سحب أرباح") : (isSale ? "Sale Proceeds" : "Withdrawal Request"))}
                       </td>
-                      <td className="py-5">
+                      <td className="py-5 px-2 whitespace-nowrap">
                         <span className={cn(
                           "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md inline-flex items-center gap-1",
                           tx.status === "COMPLETED" || tx.status === "CLEARED"
@@ -625,12 +625,12 @@ export function PaymentTab({
                         </span>
                       </td>
                       <td className={cn(
-                        "py-5 text-sm font-bold text-end",
+                        "py-5 px-2 text-sm font-bold text-end whitespace-nowrap",
                         isPositive ? "text-green-600" : "text-charcoal"
                       )}>
                         {isPositive ? "+" : ""}{tx.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
                       </td>
-                      <td className="py-5 text-end">
+                      <td className="py-5 px-2 text-end whitespace-nowrap">
                         <button
                           onClick={() => setSelectedReceipt(tx)}
                           className="px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent rounded-lg transition-all inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer border border-primary/5 shadow-sm"
@@ -649,7 +649,7 @@ export function PaymentTab({
       </div>
 
       {/* 4. Educational Guidelines Tab / Prelaunch Info */}
-      <div className="p-8 md:p-12 bg-primary text-white rounded-[3rem] shadow-2xl relative overflow-hidden group text-start">
+      <div className="p-6 md:p-12 bg-primary text-white rounded-3xl md:rounded-[3rem] shadow-2xl relative overflow-hidden group text-start">
         <div className="relative z-10 space-y-6 max-w-4xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 text-accent-light text-[9px] font-black uppercase tracking-widest rounded-full border border-white/10">
             <HelpCircle className="w-3.5 h-3.5" /> {isRTL ? "فهم نظام الدفع والعمولات" : "Understanding Our Payout System"}

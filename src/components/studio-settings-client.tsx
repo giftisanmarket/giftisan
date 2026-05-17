@@ -260,7 +260,8 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                                 const ctx = canvas.getContext('2d');
                                 if (ctx) ctx.imageSmoothingQuality = 'high';
                                 ctx?.drawImage(img, 0, 0, width, height);
-                                setBannerImage(canvas.toDataURL('image/webp', 0.9));
+                                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                setBannerImage(canvas.toDataURL(outType, 0.9));
                               };
                               img.src = reader.result as string;
                             };
@@ -347,7 +348,8 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                                   const ctx = canvas.getContext('2d');
                                   if (ctx) ctx.imageSmoothingQuality = 'high';
                                   ctx?.drawImage(img, 0, 0, width, height);
-                                  setAvatar(canvas.toDataURL('image/webp', 0.9));
+                                  const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                  setAvatar(canvas.toDataURL(outType, 0.9));
                                 };
                                 img.src = reader.result as string;
                               };

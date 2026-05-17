@@ -5,6 +5,11 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
+import { useState } from "react";
+import { replyToReview } from "@/lib/actions";
+import { toast } from "react-hot-toast";
+import { MessageCircle, Send, CheckCircle2, CornerDownRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ReviewsTabProps {
   reviews: any[];
@@ -12,6 +17,26 @@ interface ReviewsTabProps {
 }
 
 export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
+  const router = useRouter();
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleReply = async (reviewId: string) => {
+    if (!replyText.trim()) return;
+    setIsSubmitting(true);
+    const res = await replyToReview(reviewId, replyText);
+    if (res.success) {
+      toast.success("Reply posted!");
+      setReplyingTo(null);
+      setReplyText("");
+      router.refresh();
+    } else {
+      toast.error(res.error || "Failed to post reply");
+    }
+    setIsSubmitting(false);
+  };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-10">
@@ -30,7 +55,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
             <motion.div
               layout
               key={review.id}
-              className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all hover:shadow-2xl hover:shadow-primary/10"
+              className="bg-white p-5 md:p-10 rounded-3xl md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col justify-between group hover:border-accent/20 transition-all hover:shadow-2xl hover:shadow-primary/10"
             >
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8 gap-4">
@@ -74,6 +99,72 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                     ))}
                   </div>
                 )}
+
+                {/* Artisan Reply Section */}
+                <div className="mt-8 space-y-4">
+                  {review.artisanReply ? (
+                    <div className="bg-primary/5 p-6 rounded-3xl border border-primary/5 relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle2 className="w-4 h-4 text-accent" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">Your Response</span>
+                      </div>
+                      <p className="text-sm text-primary/70 font-medium italic">
+                        "{review.artisanReply}"
+                      </p>
+                      <button 
+                        onClick={() => {
+                          setReplyingTo(review.id);
+                          setReplyText(review.artisanReply);
+                        }}
+                        className="absolute top-4 end-4 text-[8px] font-black uppercase tracking-widest text-primary/20 hover:text-accent transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  ) : (
+                    replyingTo !== review.id && (
+                      <button
+                        onClick={() => setReplyingTo(review.id)}
+                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent hover:text-primary transition-colors group/r"
+                      >
+                        <MessageCircle className="w-4 h-4 group-hover/r:scale-110 transition-transform" />
+                        Reply to this Collector
+                      </button>
+                    )
+                  )}
+
+                  {replyingTo === review.id && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4 bg-cream/30 p-4 md:p-6 rounded-3xl border border-primary/5"
+                    >
+                      <textarea
+                        autoFocus
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Write your response..."
+                        className="w-full bg-white border border-primary/5 rounded-2xl p-4 text-sm font-medium focus:border-accent focus:ring-1 focus:ring-accent outline-none min-h-[100px] resize-none"
+                      />
+                      <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() => setReplyingTo(null)}
+                          className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          disabled={isSubmitting || !replyText.trim()}
+                          onClick={() => handleReply(review.id)}
+                          className="px-6 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-light transition-all disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {isSubmitting ? "Posting..." : "Post Response"}
+                          <Send className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
               <Link

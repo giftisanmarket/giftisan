@@ -13,7 +13,7 @@ import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tok
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
 
-export async function uploadImage(base64Data: string) {
+export async function uploadImage(base64Data: string, skipWebPConversion = true) {
   try {
     if (base64Data.startsWith('http')) {
       return { success: true, url: base64Data };
@@ -22,7 +22,7 @@ export async function uploadImage(base64Data: string) {
     let uploadPayload: string | Buffer = base64Data;
 
     // Convert to WebP if it's an image and NOT already WebP
-    if (base64Data.startsWith('data:image/') && !base64Data.startsWith('data:image/webp') && !base64Data.includes('svg+xml')) {
+    if (!skipWebPConversion && base64Data.startsWith('data:image/') && !base64Data.startsWith('data:image/webp') && !base64Data.includes('svg+xml')) {
       try {
         const base64Image = base64Data.split(';base64,').pop();
         if (base64Image) {
@@ -50,12 +50,12 @@ export async function uploadImage(base64Data: string) {
   }
 }
 
-async function processImage(imageSource: string | null | undefined): Promise<string | null> {
+async function processImage(imageSource: string | null | undefined, skipWebPConversion = true): Promise<string | null> {
   if (!imageSource) return null;
   // Upload any data URL (image, video, etc.)
   if (imageSource.startsWith('data:')) {
     try {
-      const res = await uploadImage(imageSource);
+      const res = await uploadImage(imageSource, skipWebPConversion);
       if (res.success && res.url) return res.url;
     } catch (err) {
       console.error("Cloudinary upload failed:", err);
@@ -578,6 +578,8 @@ export async function createOrder(userId: string, totalAmount: number, items: an
           giftMessage: shippingData?.giftMessage || null,
           couponId: shippingData?.couponId || null,
           discountApplied: shippingData?.discountApplied || 0,
+          shippingMethodId: shippingData?.shippingMethodId || null,
+          shippingCost: shippingData?.shippingCost || 0,
           items: {
             create: items.map(item => ({
               productId: item.id,
@@ -1290,7 +1292,9 @@ export async function updateArtisanProfile(userId: string, data: any) {
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
         bannerImage: bannerUrl || null,
-        phoneNumber: data.phoneNumber || null
+        phoneNumber: data.phoneNumber || null,
+        payoutAddress: data.payoutAddress || null,
+        payoutName: data.payoutName || null
       },
       update: {
         studioName: data.studioName || null,
@@ -1305,7 +1309,9 @@ export async function updateArtisanProfile(userId: string, data: any) {
         facebook: data.facebook || null,
         brandColor: data.brandColor || "#da7b5a",
         bannerImage: bannerUrl || null,
-        phoneNumber: data.phoneNumber || null
+        phoneNumber: data.phoneNumber || null,
+        payoutAddress: data.payoutAddress || null,
+        payoutName: data.payoutName || null
       }
     });
 
@@ -1611,7 +1617,11 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
 
     await prisma.order.update({
       where: { id: orderId },
-      data: { status }
+      data: { 
+        status,
+        trackingNumber: trackingNumber || undefined,
+        carrier: carrier || undefined
+      }
     });
 
     await prisma.orderItem.updateMany({
@@ -1952,7 +1962,9 @@ export async function getAdminStats() {
       totalRevenue,
       artisanBalances,
       pendingPayouts,
-      allSales
+      allSales,
+      shippingRevenue,
+      readyToShipCount
     ] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -2011,6 +2023,20 @@ export async function getAdminStats() {
             }
           }
         }
+      }),
+      prisma.order.aggregate({
+        where: { status: { notIn: ["PENDING", "CANCELLED"] } },
+        _sum: { shippingCost: true }
+      }),
+      prisma.order.count({
+        where: {
+          status: { in: ["PENDING", "PROCESSING"] },
+          items: {
+            every: {
+              status: { in: ["PROCESSING", "SHIPPED", "DELIVERED"] }
+            }
+          }
+        }
       })
     ]);
 
@@ -2035,7 +2061,9 @@ export async function getAdminStats() {
       platformEarnings,
       pendingPayouts: Math.abs(pendingPayouts._sum.amount || 0),
       artisanPending: artisanBalances._sum.pending || 0,
-      artisanWithdrawable: artisanBalances._sum.withdrawable || 0
+      artisanWithdrawable: artisanBalances._sum.withdrawable || 0,
+      shippingRevenue: shippingRevenue._sum.shippingCost || 0,
+      readyToShipCount
     };
   } catch (error) {
     console.error("Admin stats error:", error);
@@ -2264,7 +2292,7 @@ export async function sendMessage(senderId: string, receiverId: string, content:
   }
 
   try {
-    const attachmentUrl = await processImage(attachment);
+    const attachmentUrl = await processImage(attachment, true);
 
     const message = await prisma.message.create({
       data: {
@@ -2718,7 +2746,7 @@ export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" |
   }
 }
 
-export async function validateCouponAction(code: string, subtotal: number) {
+export async function validateCouponAction(code: string, subtotal: number, items: any[] = []) {
   try {
     const coupon = await prisma.coupon.findUnique({
       where: { code: code.toUpperCase().trim() }
@@ -2740,13 +2768,30 @@ export async function validateCouponAction(code: string, subtotal: number) {
       return { error: "This coupon has reached its maximum usage limit." };
     }
 
-    if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
-      return { error: `This coupon is only valid for orders of EGP ${coupon.minOrderAmount} or more.` };
+    let discountableSubtotal = subtotal;
+
+    if (coupon.artisanId) {
+      // Filter items belonging to this artisan
+      const artisanItems = items.filter(item => {
+        // Handle both possible locations for artisanId
+        const id = item.artisanId || item.artisan?.id;
+        return id === coupon.artisanId;
+      });
+
+      if (artisanItems.length === 0) {
+        return { error: "This coupon only applies to products from a specific artisan that are not in your cart." };
+      }
+
+      discountableSubtotal = artisanItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    }
+
+    if (coupon.minOrderAmount && discountableSubtotal < coupon.minOrderAmount) {
+      return { error: `This coupon is only valid for ${coupon.artisanId ? "eligible items" : "orders"} of EGP ${coupon.minOrderAmount} or more.` };
     }
 
     let appliedDiscount = 0;
     if (coupon.discountType === "PERCENTAGE") {
-      appliedDiscount = subtotal * (coupon.discountValue / 100);
+      appliedDiscount = discountableSubtotal * (coupon.discountValue / 100);
       if (coupon.maxDiscount && appliedDiscount > coupon.maxDiscount) {
         appliedDiscount = coupon.maxDiscount;
       }
@@ -2754,8 +2799,8 @@ export async function validateCouponAction(code: string, subtotal: number) {
       appliedDiscount = coupon.discountValue;
     }
 
-    // Round to 2 decimal places and clamp to subtotal
-    appliedDiscount = Math.min(Math.round(appliedDiscount * 100) / 100, subtotal);
+    // Round to 2 decimal places and clamp to discountableSubtotal
+    appliedDiscount = Math.min(Math.round(appliedDiscount * 100) / 100, discountableSubtotal);
 
     return {
       success: true,
@@ -2817,10 +2862,16 @@ export async function createCouponAction(data: {
   minOrderAmount?: number;
   maxDiscount?: number;
   maxUses?: number;
+  artisanId?: string;
 }) {
   try {
     const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
+    if (!session?.user) return { error: "Unauthorized" };
+
+    const isAdmin = session.user.role === "ADMIN";
+    const isArtisan = session.user.role === "ARTISAN";
+
+    if (!isAdmin && !isArtisan) {
       return { error: "Unauthorized" };
     }
 
@@ -2836,6 +2887,14 @@ export async function createCouponAction(data: {
       return { error: "A coupon code with this name already exists" };
     }
 
+    let artisanId = data.artisanId;
+    if (isArtisan && !isAdmin) {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id }
+      });
+      artisanId = artisan?.id;
+    }
+
     const newCoupon = await prisma.coupon.create({
       data: {
         code: data.code.toUpperCase().trim(),
@@ -2845,7 +2904,8 @@ export async function createCouponAction(data: {
         maxDiscount: data.maxDiscount ? Number(data.maxDiscount) : null,
         maxUses: data.maxUses ? Number(data.maxUses) : null,
         isActive: true,
-        usedCount: 0
+        usedCount: 0,
+        artisanId: artisanId || null
       }
     });
 
@@ -2853,5 +2913,215 @@ export async function createCouponAction(data: {
   } catch (error: any) {
     console.error("Create coupon error:", error);
     return { error: error.message || "Failed to create coupon." };
+  }
+}
+
+// --- SHIPPING METHODS MANAGEMENT ---
+
+export async function getAllShippingMethods() {
+  try {
+    return await prisma.shippingMethod.findMany({
+      orderBy: { price: "asc" }
+    });
+  } catch (error) {
+    console.error("Fetch shipping methods error:", error);
+    return [];
+  }
+}
+
+export async function createShippingMethod(data: { name: string; price: number; estimatedDays?: string }) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" };
+
+    const method = await prisma.shippingMethod.create({
+      data: {
+        name: data.name,
+        price: Number(data.price),
+        estimatedDays: data.estimatedDays,
+        isActive: true
+      }
+    });
+
+    revalidatePath("/admin/shipping");
+    return { success: true, method };
+  } catch (error: any) {
+    return { error: error.message || "Failed to create shipping method" };
+  }
+}
+
+export async function updateShippingMethod(id: string, data: { name: string; price: number; estimatedDays?: string }) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" };
+
+    const method = await prisma.shippingMethod.update({
+      where: { id },
+      data: {
+        name: data.name,
+        price: Number(data.price),
+        estimatedDays: data.estimatedDays
+      }
+    });
+
+    revalidatePath("/admin/shipping");
+    return { success: true, method };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update shipping method" };
+  }
+}
+
+export async function toggleShippingMethod(id: string, isActive: boolean) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" };
+
+    await prisma.shippingMethod.update({
+      where: { id },
+      data: { isActive }
+    });
+
+    revalidatePath("/admin/shipping");
+    return { success: true };
+  } catch (error: any) {
+    return { error: "Failed to toggle shipping method" };
+  }
+}
+
+export async function deleteShippingMethod(id: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" };
+
+    await prisma.shippingMethod.delete({
+      where: { id }
+    });
+
+    revalidatePath("/admin/shipping");
+    return { success: true };
+  } catch (error: any) {
+    return { error: "Failed to delete shipping method" };
+  }
+}
+
+export async function replyToReview(reviewId: string, reply: string) {
+  try {
+    const session = await auth();
+    if (!session?.user || session.user.role !== "ARTISAN") {
+      return { error: "Only artisans can reply to reviews." };
+    }
+
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!artisan) return { error: "Artisan profile not found." };
+
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      include: { product: true }
+    });
+
+    if (!review) return { error: "Review not found." };
+    if (review.product.artisanId !== artisan.id) {
+      return { error: "You can only reply to reviews for your own products." };
+    }
+
+    await prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        artisanReply: reply,
+        artisanReplyDate: new Date()
+      }
+    });
+
+    revalidatePath("/studio");
+    revalidatePath(`/products/${review.product.slug || review.product.id}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Reply to review error:", error);
+    return { error: "Failed to post reply." };
+  }
+}
+
+export async function updateOrderItemNotes(orderItemId: string, notes: string) {
+  try {
+    const session = await auth();
+    if (!session?.user || session.user.role !== "ARTISAN") {
+      return { error: "Unauthorized" };
+    }
+
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!artisan) return { error: "Artisan profile not found." };
+
+    const orderItem = await prisma.orderItem.findUnique({
+      where: { id: orderItemId },
+      include: { product: true }
+    });
+
+    if (!orderItem) return { error: "Order item not found." };
+    if (orderItem.product.artisanId !== artisan.id) {
+      return { error: "Unauthorized" };
+    }
+
+    await prisma.orderItem.update({
+      where: { id: orderItemId },
+      data: { artisanNotes: notes }
+    });
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error) {
+    console.error("Update order item notes error:", error);
+    return { error: "Failed to update notes." };
+  }
+}
+
+export async function getArtisanCoupons(artisanId: string) {
+  try {
+    const coupons = await prisma.coupon.findMany({
+      where: { artisanId },
+      orderBy: { createdAt: 'desc' }
+    });
+    return coupons;
+  } catch (error) {
+    console.error("Get artisan coupons error:", error);
+    return [];
+  }
+}
+
+export async function deleteArtisanCoupon(couponId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) return { error: "Unauthorized" };
+
+    const coupon = await prisma.coupon.findUnique({
+      where: { id: couponId }
+    });
+
+    if (!coupon) return { error: "Coupon not found" };
+
+    // Check if user is owner of the coupon
+    const artisan = await prisma.artisanProfile.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (session.user.role !== "ADMIN" && coupon.artisanId !== artisan?.id) {
+      return { error: "Unauthorized" };
+    }
+
+    await prisma.coupon.delete({
+      where: { id: couponId }
+    });
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete coupon error:", error);
+    return { error: "Failed to delete coupon" };
   }
 }

@@ -162,8 +162,10 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
                         </div>
                       )}
                       <div className="flex justify-between text-xs text-charcoal/60 font-medium">
-                        <span>{dict.checkout.cairo_shipping}</span>
-                        <span className="text-green-600 font-bold uppercase tracking-wider">{dict.checkout.free}</span>
+                        <span>{order.shippingMethod?.name || dict.checkout.cairo_shipping}</span>
+                        <span className="font-mono">
+                          {order.shippingCost === 0 ? dict.checkout.free : `${dict.product.currency} ${order.shippingCost}`}
+                        </span>
                       </div>
                       <div className="pt-3 border-t border-primary/5 flex justify-between text-base font-black text-primary">
                         <span>{dict.checkout.total}</span>

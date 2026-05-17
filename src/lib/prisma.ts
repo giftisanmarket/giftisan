@@ -1,5 +1,5 @@
 import "dotenv/config";
-// Force reload to pick up schema changes
+// Force reload to pick up schema changes - v2
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";

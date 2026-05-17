@@ -81,15 +81,19 @@ export function OverviewTab({
             <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white mb-4 md:mb-6", stat.color)}>
               <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
             </div>
-            <div className="flex items-center gap-2 mb-1 group relative">
+            <div className="flex items-center gap-2 mb-1">
               <p className="text-xs font-black text-primary/40 uppercase tracking-widest">{stat.label}</p>
               {stat.tooltip && (
-                <>
-                  <Info className="w-3 h-3 text-primary/20 cursor-help" />
-                  <div className="absolute bottom-full start-0 mb-2 w-64 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50 shadow-2xl leading-relaxed">
+                <button type="button" className="group relative focus:outline-none flex items-center justify-center p-1 -m-1">
+                  <Info className="w-3 h-3 text-primary/20 cursor-help transition-colors group-hover:text-primary/40 group-focus:text-primary/40" />
+                  <div className={cn(
+                    "absolute bottom-full mb-2 w-[180px] sm:w-56 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus:opacity-100 group-focus:visible transition-all pointer-events-none z-50 shadow-2xl leading-relaxed text-start",
+                    i % 2 === 0 ? "start-0 sm:-start-2" : "end-0 sm:end-auto sm:-start-2",
+                    i === 3 ? "lg:end-0 lg:start-auto" : ""
+                  )}>
                     {stat.tooltip}
                   </div>
-                </>
+                </button>
               )}
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
@@ -117,7 +121,7 @@ export function OverviewTab({
 
       {/* Pro Insights */}
       <div className="grid md:grid-cols-2 gap-6 md:gap-10">
-        <div className="bg-primary text-white p-8 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col items-center md:items-start text-center md:text-start">
+        <div className="bg-primary text-white p-6 md:p-10 lg:p-12 rounded-3xl md:rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col items-center md:items-start text-center md:text-start">
           <div className="relative z-10 w-full flex flex-col items-center md:items-start">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
               <Sparkles className="w-3.5 h-3.5" />
@@ -142,7 +146,7 @@ export function OverviewTab({
           <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
         </div>
 
-        <div className="bg-white p-8 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col items-center md:items-start text-center md:text-start">
+        <div className="bg-white p-6 md:p-10 lg:p-12 rounded-3xl md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col items-center md:items-start text-center md:text-start">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {dict.studio.best_selling_piece}
@@ -172,7 +176,7 @@ export function OverviewTab({
 
       {/* Variant Performance */}
       {topVariants.length > 0 && (
-        <div className="bg-white p-10 rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
+        <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
           <div className="flex items-center justify-between mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest">
               <BarChart3 className="w-3 h-3" />

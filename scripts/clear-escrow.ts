@@ -1,69 +1,67 @@
-import { prisma } from "../src/lib/prisma";
+/**
+ * One-off admin script: move all PENDING escrow → Withdrawable
+ * for the artisan whose user email is support@giftisan.com
+ *
+ * Run with:  npx tsx scripts/clear-escrow.ts
+ */
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+const connectionString =
+  process.env.DATABASE_URL ||
+  "postgresql://neondb_owner:npg_Vk1WClEjyQN8@ep-sweet-bread-amgrccvn-pooler.c-5.us-east-1.aws.neon.tech/neondb?uselibpqcompat=true&sslmode=require";
+
+const pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  // Configurable holding window (7 days is standard ecommerce escrow)
-  const HOLDING_DAYS = 7;
-  const thresholdDate = new Date();
-  thresholdDate.setDate(thresholdDate.getDate() - HOLDING_DAYS);
-
-  console.log(`⏳ Running escrow clearance check...`);
-  console.log(`👉 Scanning for SALE transactions created before: ${thresholdDate.toLocaleString()}\n`);
-
-  // Find all pending sales older than the threshold
-  const pendingSales = await prisma.artisanTransaction.findMany({
-    where: {
-      type: "SALE",
-      status: "PENDING",
-      createdAt: {
-        lt: thresholdDate
-      }
-    }
+  const artisan = await prisma.artisanProfile.findFirst({
+    where: { user: { email: "support@giftisan.com" } },
+    include: { balances: true },
   });
 
-  if (pendingSales.length === 0) {
-    console.log("🫙 No pending escrow balances match the clearance criteria today.");
+  if (!artisan) {
+    console.error("❌  No artisan found for support@giftisan.com");
+    return;
+  }
+  console.log(`✅  Found artisan: ${artisan.id}`);
+
+  const balance = artisan.balances[0];
+  if (!balance) {
+    console.error("❌  Artisan has no balance record");
     return;
   }
 
-  console.log(`✅ Found ${pendingSales.length} transaction(s) eligible for clearance.`);
+  const pendingAmount = balance.pending;
+  console.log(`💰  Pending escrow: ${pendingAmount} EGP`);
 
-  let clearedCount = 0;
-
-  // Process each transaction atomically
-  for (const tx of pendingSales) {
-    try {
-      await prisma.$transaction(async (prismaTx) => {
-        // 1. Mark transaction as CLEARED
-        await prismaTx.artisanTransaction.update({
-          where: { id: tx.id },
-          data: { status: "CLEARED" }
-        });
-
-        // 2. Transfer funds from pending to withdrawable
-        await prismaTx.artisanBalance.update({
-          where: { artisanId: tx.artisanId },
-          data: {
-            pending: { decrement: tx.amount },
-            withdrawable: { increment: tx.amount }
-          }
-        });
-      });
-
-      console.log(`   - Cleared transaction ${tx.id} (${tx.amount} EGP) for Artisan: ${tx.artisanId}`);
-      clearedCount++;
-    } catch (err) {
-      console.error(`   - ❌ Failed to clear transaction ${tx.id}:`, err);
-    }
+  if (pendingAmount <= 0) {
+    console.log("ℹ️   Nothing to move — pending is already 0");
+    return;
   }
 
-  console.log(`\n🎉 Escrow process completed! Successfully cleared ${clearedCount} transaction(s).`);
+  const updatedTxns = await prisma.artisanTransaction.updateMany({
+    where: { artisanId: artisan.id, status: "PENDING" },
+    data: { status: "CLEARED" },
+  });
+  console.log(`🔄  Marked ${updatedTxns.count} transaction(s) as CLEARED`);
+
+  const updatedBalance = await prisma.artisanBalance.update({
+    where: { artisanId: artisan.id },
+    data: {
+      withdrawable: { increment: pendingAmount },
+      pending: 0,
+    },
+  });
+
+  console.log(
+    `✅  Done! Withdrawable: ${updatedBalance.withdrawable} EGP | Pending: ${updatedBalance.pending} EGP`
+  );
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Escrow script error:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(() => pool.end());

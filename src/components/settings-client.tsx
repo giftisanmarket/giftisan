@@ -62,8 +62,9 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
           if (ctx) ctx.imageSmoothingQuality = 'high';
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Export as optimized WebP
-          const compressedDataUrl = canvas.toDataURL('image/webp', 0.9);
+          // Export as optimized image
+          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          const compressedDataUrl = canvas.toDataURL(outType, 0.9);
           setImage(compressedDataUrl);
           setIsCompressing(false);
         };

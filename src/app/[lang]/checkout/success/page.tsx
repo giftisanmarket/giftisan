@@ -25,7 +25,8 @@ export default async function SuccessPage({ params, searchParams }: SuccessPageP
           include: {
             product: true
           }
-        }
+        },
+        shippingMethod: true
       }
     });
   }
@@ -42,7 +43,12 @@ export default async function SuccessPage({ params, searchParams }: SuccessPageP
         createdAt: item.product.createdAt.toISOString(),
         updatedAt: item.product.updatedAt.toISOString()
       }
-    }))
+    })),
+    shippingMethod: order.shippingMethod ? {
+      ...order.shippingMethod,
+      createdAt: order.shippingMethod.createdAt.toISOString(),
+      updatedAt: order.shippingMethod.updatedAt.toISOString()
+    } : null
   } : null;
 
   return <SuccessClient dict={dict} lang={lang} order={serializedOrder} />;

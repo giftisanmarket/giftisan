@@ -14,7 +14,8 @@ import {
   Send,
   ArrowLeft,
   Tag,
-  DollarSign
+  DollarSign,
+  Truck
 } from "lucide-react";
 
 import Image from "next/image";
@@ -26,6 +27,7 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
     { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
     { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
+    { label: dict.admin.shipping_management || (isAr ? "إدارة الشحن" : "Shipping"), href: "/admin/shipping", icon: Truck },
     { label: dict.admin.payouts_requests || (isAr ? "إدارة المدفوعات" : "Payout Requests"), href: "/admin/payouts", icon: DollarSign },
     { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
     { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
@@ -71,7 +73,7 @@ export function AdminNavClient({
   return (
     <>
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 start-0 end-0 h-20 bg-primary text-white flex items-center justify-between px-6 z-[100] border-b border-white/5 shadow-2xl">
+      <header className="lg:hidden fixed top-0 start-0 end-0 h-20 bg-primary text-white flex items-center justify-between px-6 z-[100] border-b border-white/5 shadow-2xl no-print">
         <div className="flex items-center gap-3">
           <div className="relative w-9 h-9 overflow-hidden rounded-xl border border-white/20 shadow-lg">
              <Image src="/icon.png" alt="" fill className="object-cover" />
@@ -96,7 +98,7 @@ export function AdminNavClient({
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="fixed start-0 top-0 bottom-0 w-80 bg-primary text-white p-8 hidden lg:flex flex-col z-50 shadow-2xl overflow-y-auto">
+      <aside className="fixed start-0 top-0 bottom-0 w-80 bg-primary text-white p-8 hidden lg:flex flex-col z-50 shadow-2xl overflow-y-auto no-print">
         <div className="flex items-center gap-3 mb-16 px-4">
           <div className="relative w-10 h-10 overflow-hidden rounded-xl border border-white/20 shadow-xl">
              <Image
@@ -153,7 +155,7 @@ export function AdminNavClient({
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl overflow-x-auto">
+      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl overflow-x-auto no-print">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (

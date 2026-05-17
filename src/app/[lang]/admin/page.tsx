@@ -1,5 +1,5 @@
 import { getAdminStats, getAllOrders } from "@/lib/actions";
-import { Users, ShoppingBag, Package, DollarSign, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Users, ShoppingBag, Package, DollarSign, TrendingUp, ArrowUpRight, Truck } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -21,15 +21,16 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
   const recentOrders = await getAllOrders();
 
   const cards = [
-    { label: dict.admin.total_revenue, value: `${dict.product.currency} ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "bg-green-500", trend: "+12%" },
-    { label: lang === "ar" ? "أرباح المنصة" : "Platform Earnings", value: `${dict.product.currency} ${stats.platformEarnings.toLocaleString()}`, icon: TrendingUp, color: "bg-accent", trend: "Net" },
-    { label: lang === "ar" ? "طلبات سحب معلقة" : "Pending Payouts", value: `${dict.product.currency} ${stats.pendingPayouts.toLocaleString()}`, icon: Package, color: "bg-amber-500", trend: "Action" },
-    { label: dict.admin.global_users, value: stats.userCount.toString(), icon: Users, color: "bg-blue-500", trend: "+5%" },
+    { label: dict.admin.total_revenue, value: `${dict.product.currency} ${(stats.revenue || 0).toLocaleString()}`, icon: DollarSign, color: "bg-green-500", trend: "+12%" },
+    { label: dict.admin.ready_to_ship, value: (stats.readyToShipCount || 0).toString(), icon: Truck, color: "bg-purple-600", trend: "Urgent" },
+    { label: dict.admin.platform_earnings, value: `${dict.product.currency} ${(stats.platformEarnings || 0).toLocaleString()}`, icon: TrendingUp, color: "bg-accent", trend: "Net" },
+    { label: dict.admin.pending_payouts, value: `${dict.product.currency} ${(stats.pendingPayouts || 0).toLocaleString()}`, icon: Package, color: "bg-amber-500", trend: "Action" },
   ];
 
   const secondaryStats = [
-    { label: lang === "ar" ? "أرصدة معلقة (ضمان)" : "Artisan Escrow (Pending)", value: `${dict.product.currency} ${stats.artisanPending.toLocaleString()}`, color: "text-amber-600" },
-    { label: lang === "ar" ? "أرصدة جاهزة للسحب" : "Artisan Withdrawable", value: `${dict.product.currency} ${stats.artisanWithdrawable.toLocaleString()}`, color: "text-emerald-600" },
+    { label: dict.admin.shipping_collected, value: `${dict.product.currency} ${(stats.shippingRevenue || 0).toLocaleString()}`, color: "text-blue-600" },
+    { label: dict.admin.artisan_escrow, value: `${dict.product.currency} ${(stats.artisanPending || 0).toLocaleString()}`, color: "text-amber-600" },
+    { label: dict.admin.artisan_withdrawable, value: `${dict.product.currency} ${(stats.artisanWithdrawable || 0).toLocaleString()}`, color: "text-emerald-600" },
   ];
 
   return (

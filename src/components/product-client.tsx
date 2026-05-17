@@ -135,7 +135,8 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          const compressedDataUrl = canvas.toDataURL('image/webp', 0.8);
+          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          const compressedDataUrl = canvas.toDataURL(outType, 0.8);
           setReviewImages(prev => [...prev, compressedDataUrl].slice(0, 4));
         };
         img.src = reader.result;

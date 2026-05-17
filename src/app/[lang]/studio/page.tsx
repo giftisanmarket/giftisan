@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getArtisanData, getArtisanSales, getArtisanReviews } from "@/lib/actions";
+import { getArtisanData, getArtisanSales, getArtisanReviews, getArtisanCoupons } from "@/lib/actions";
 import { StudioClient } from "@/components/studio-client";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
@@ -128,9 +128,10 @@ export default async function StudioPage({
     redirect(isAdmin ? `/${lang}/admin/users` : `/${lang}/profile`);
   }
 
-  const [sales, reviews] = await Promise.all([
+  const [sales, reviews, coupons] = await Promise.all([
     getArtisanSales(artisan.id),
-    getArtisanReviews(artisan.id)
+    getArtisanReviews(artisan.id),
+    getArtisanCoupons(artisan.id)
   ]);
 
   return (
@@ -144,6 +145,7 @@ export default async function StudioPage({
         artisan={artisan} 
         sales={sales} 
         reviews={reviews} 
+        coupons={coupons}
         isAdminPreview={!!(isAdmin && artisanUserId)}
         dict={dict}
         lang={lang}

@@ -5,10 +5,10 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import { createOrder, validateCouponAction } from "@/lib/actions";
+import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,9 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponError, setCouponError] = useState("");
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [shippingMethods, setShippingMethods] = useState<any[]>([]);
+  const [selectedMethod, setSelectedMethod] = useState<any>(null);
+  const [isLoadingMethods, setIsLoadingMethods] = useState(true);
 
   // Localization detector (Frictionless check for /ar)
   const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
@@ -59,6 +62,21 @@ export function CheckoutClient({ dict }: { dict: any }) {
     }
   }, [error]);
 
+  // Load Shipping Methods
+  useEffect(() => {
+    async function loadShipping() {
+      const methods = await getAllShippingMethods();
+      const activeMethods = methods.filter((m: any) => m.isActive);
+      setShippingMethods(activeMethods);
+      // Auto-select first method if available
+      if (activeMethods.length > 0) {
+        setSelectedMethod(activeMethods[0]);
+      }
+      setIsLoadingMethods(false);
+    }
+    loadShipping();
+  }, []);
+
   const updateShippingField = (field: keyof typeof shippingData, value: string) => {
     setShippingData(prev => ({ ...prev, [field]: value }));
     if (error) setError("");
@@ -79,7 +97,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
     setIsValidatingCoupon(true);
     setCouponError("");
     try {
-      const res = await validateCouponAction(couponCode, totalPrice);
+      const res = await validateCouponAction(couponCode, totalPrice, cart);
       if (res.success && res.coupon) {
         setAppliedCoupon(res.coupon);
         setCouponError("");
@@ -116,17 +134,17 @@ export function CheckoutClient({ dict }: { dict: any }) {
       return;
     }
 
-    setIsProcessing(true);
-    setError("");
-
     const discountValue = ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
-    const finalPrice = Math.max(totalPrice - discountValue, 0);
+    const shippingCost = selectedMethod?.price || 0;
+    const finalPrice = Math.max(totalPrice - discountValue + shippingCost, 0);
 
     const res = await createOrder(session.user.id, finalPrice, cart, {
       ...shippingData,
       address: shippingData.address,
       couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
-      discountApplied: discountValue
+      discountApplied: discountValue,
+      shippingMethodId: selectedMethod?.id,
+      shippingCost: shippingCost
     });
 
     if (res.success) {
@@ -281,13 +299,15 @@ export function CheckoutClient({ dict }: { dict: any }) {
                   </div>
                 )}
                 <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
-                  <span>{dict.checkout.cairo_shipping}</span>
-                  <span className="text-accent-light">{dict.checkout.free}</span>
+                  <span>{selectedMethod?.name || dict.checkout.cairo_shipping}</span>
+                  <span className="text-accent-light">
+                    {selectedMethod?.price === 0 ? dict.checkout.free : `${dict.product.currency} ${selectedMethod?.price || 0}`}
+                  </span>
                 </div>
                 <div className="flex justify-between font-heading font-bold pt-4 border-t border-white/10">
                   <span className="text-lg md:text-xl">{dict.checkout.total}</span>
                   <span className="text-2xl md:text-3xl">
-                    {dict.product.currency} {Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0), 0)}.00
+                    {dict.product.currency} {Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0) + (selectedMethod?.price || 0), 0)}.00
                   </span>
                 </div>
               </div>
@@ -416,6 +436,51 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         : "border-primary/20 focus:ring-accent/20 focus:border-accent"
                     )}
                   />
+                </div>
+
+                <div className="pt-8 border-t border-primary/5">
+                  <h3 className="text-xl font-heading font-bold text-primary mb-6 flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-accent" />
+                    {dict.checkout.shipping_method}
+                  </h3>
+                  
+                  {isLoadingMethods ? (
+                    <div className="flex items-center gap-2 text-charcoal/40 text-sm animate-pulse">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {dict.checkout.loading_regions}
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {shippingMethods.map((method) => (
+                        <div 
+                          key={method.id}
+                          onClick={() => setSelectedMethod(method)}
+                          className={cn(
+                            "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all",
+                            selectedMethod?.id === method.id 
+                              ? "border-accent bg-accent/5" 
+                              : "border-primary/5 bg-white hover:border-primary/10"
+                          )}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                              selectedMethod?.id === method.id ? "border-accent bg-accent" : "border-primary/20"
+                            )}>
+                              {selectedMethod?.id === method.id && <div className="w-2 h-2 rounded-full bg-white" />}
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm text-primary">{method.name}</p>
+                              {method.estimatedDays && <p className="text-[10px] text-charcoal/40 uppercase font-black tracking-widest">{method.estimatedDays}</p>}
+                            </div>
+                          </div>
+                          <p className="font-bold text-sm text-primary">
+                            {method.price === 0 ? dict.checkout.free : `${dict.product.currency} ${method.price}`}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-8 space-y-6 border-t border-primary/5">

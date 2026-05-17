@@ -41,12 +41,13 @@ import {
   Banknote,
   Wallet,
   User,
-  Calendar
+  Calendar,
+  Printer
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus, subscribeToNewsletter } from "@/lib/actions";
+import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus, subscribeToNewsletter, updateOrderItemNotes } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import QRCode from "react-qr-code";
 import { EditProductModal } from "@/components/edit-product-modal";
@@ -64,43 +65,30 @@ interface StudioClientProps {
   artisan: any;
   sales: any[];
   reviews: any[];
+  coupons: any[];
   isAdminPreview?: boolean;
   dict: any;
   lang: string;
 }
 
-export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, dict, lang }: StudioClientProps) {
+export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview = false, dict, lang }: StudioClientProps) {
   const router = useRouter();
   const [showMask, setShowMask] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings">("overview");
   const contentRef = useRef<HTMLDivElement>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [bulkProductsToDelete, setBulkProductsToDelete] = useState<string[] | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
-  const [itemToPrint, setItemToPrint] = useState<any | null>(null);
   const [shippingItem, setShippingItem] = useState<any | null>(null);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
-
-  // Poll for new sales/orders to keep the artisan studio page updated in real-time
-  useEffect(() => {
-    if (isAdminPreview) return;
-
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 4000); // Refresh data from server every 4 seconds dynamically!
-
-    return () => clearInterval(interval);
-  }, [router, isAdminPreview]);
 
   // Variant Analytics
   const topVariants = useMemo(() => {
@@ -270,8 +258,12 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
 
   return (
     <>
-      <main className="min-h-screen bg-cream overflow-x-hidden">
+      <div className="min-h-screen bg-cream/30 selection:bg-accent/20">
+      <div className="no-print">
         <Navbar dict={dict} />
+      </div>
+
+      <main className="no-print max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
 
         <AnimatePresence>
           {productToDelete && (
@@ -642,22 +634,19 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                 <SalesTab
                   sales={sales}
                   dict={dict}
-                  expandedOrder={expandedOrder}
-                  setExpandedOrder={setExpandedOrder}
+                  lang={lang}
                   isAdminPreview={isAdminPreview}
                   isUpdating={isUpdating}
                   setIsUpdating={setIsUpdating}
                   updateOrderItemStatus={updateOrderItemStatus}
                   setShippingItem={setShippingItem}
-                  openMenuId={openMenuId}
-                  setOpenMenuId={setOpenMenuId}
                   setSelectedItem={setSelectedItem}
-                  setItemToPrint={setItemToPrint}
                   router={router}
+                  commissionRate={artisan.commissionRate || 0}
                 />
               )}
 
-              {activeTab === "growth" && <GrowthTab dict={dict} />}
+              {activeTab === "growth" && <GrowthTab dict={dict} coupons={coupons} sales={sales} />}
 
               {activeTab === "logistics" && (
                 <PaymentTab
@@ -707,7 +696,7 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-[calc(100vw-2rem)] sm:max-w-2xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[90vh] flex flex-col"
             >
               <div className="overflow-y-auto custom-scrollbar">
                 <div className="p-5 md:p-16 space-y-6 md:space-y-10">
@@ -718,16 +707,25 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       </div>
                       <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
                     </div>
-                    <button
-                      onClick={() => setSelectedItem(null)}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors shrink-0"
-                    >
-                      <X className="w-5 h-5 md:w-6 md:h-6" />
-                    </button>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={() => window.print()}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-accent hover:border-accent/20 transition-all active:scale-90"
+                        title={lang === "ar" ? "طباعة قسيمة الطلب" : "Print Order Slip"}
+                      >
+                        <Printer className="w-5 h-5 md:w-6 md:h-6" />
+                      </button>
+                      <button
+                        onClick={() => setSelectedItem(null)}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
+                      >
+                        <X className="w-5 h-5 md:w-6 md:h-6" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-8 md:gap-12 pt-0 md:pt-4">
-                    <div className="space-y-4 md:space-y-6">
+                    <div className="space-y-4 md:space-y-6 min-w-0">
                       <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.item_info}</h3>
                       <div className="flex gap-4">
                         <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm shrink-0">
@@ -755,9 +753,9 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       )}
                     </div>
 
-                    <div className="space-y-4 md:space-y-6">
+                    <div className="space-y-4 md:space-y-6 min-w-0">
                       <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.buyer_details}</h3>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-bold text-primary text-sm md:text-base">{selectedItem.order.user.name}</p>
                         <p className="text-charcoal/60 text-xs md:text-sm font-medium mt-1 truncate">{selectedItem.order.user.email}</p>
                         {selectedItem.order.clientPhone && (
@@ -800,6 +798,30 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                     </div>
                   )}
 
+                  {/* Artisan Internal Notes */}
+                  <div className="p-4 md:p-6 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                      <div className="w-1.5 h-1.5 bg-primary/40 rounded-full" />
+                      <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.internal_notes}</h3>
+                    </div>
+                    <textarea
+                      defaultValue={selectedItem.artisanNotes || ""}
+                      onBlur={async (e) => {
+                        const newNotes = e.target.value;
+                        if (newNotes === (selectedItem.artisanNotes || "")) return;
+                        const res = await updateOrderItemNotes(selectedItem.id, newNotes);
+                        if (res.success) {
+                          toast.success(dict.studio.notes_updated);
+                          router.refresh();
+                        } else {
+                          toast.error(dict.studio.notes_update_failed);
+                        }
+                      }}
+                      placeholder={dict.studio.internal_notes_placeholder}
+                      className="w-full bg-white/50 border border-primary/5 rounded-xl p-3 text-xs md:text-sm font-medium focus:border-primary/20 focus:bg-white outline-none min-h-[80px] resize-none transition-all"
+                    />
+                  </div>
+
                   <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 pt-2">
                     <Link
                       href={`/profile/messages?userId=${selectedItem.order.userId}`}
@@ -808,130 +830,106 @@ export function StudioClient({ artisan, sales, reviews, isAdminPreview = false, 
                       <Mail className="w-4 h-4 md:w-5 md:h-5" />
                       {dict.studio.message_customer}
                     </Link>
-                    <button
-                      onClick={() => {
-                        setItemToPrint(selectedItem);
-                        setTimeout(() => {
-                          window.print();
-                          setItemToPrint(null);
-                        }, 100);
-                      }}
-                      className="w-full md:w-fit px-8 h-14 md:h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm md:text-base"
-                    >
-                      {dict.studio.print_summary}
-                    </button>
                   </div>
                 </div>
               </div>
             </motion.div>
+
+            {/* Printable Area (Hidden by default, sibling to no-print modal) */}
+            <div className="hidden print:block fixed inset-0 bg-white z-[9999] p-10 overflow-visible text-black">
+              <div className="flex justify-between items-start border-b-2 border-black pb-8 mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold uppercase tracking-tighter mb-1">GIFTISAN</h1>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Handcrafted Marketplace</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold">PACKING SLIP</p>
+                  <p className="text-sm font-medium">#{selectedItem.orderId.slice(0, 8).toUpperCase()}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(selectedItem.order.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-12 mb-12">
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 border-b pb-1">Artisan Studio</h3>
+                  <div>
+                    <p className="font-bold text-lg">{artisan.studioName || artisan.user.name}</p>
+                    <p className="text-sm text-gray-600">{artisan.location}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 border-b pb-1">Ship To</h3>
+                  <div>
+                    <p className="font-bold text-lg">{selectedItem.order.user.name}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                      {selectedItem.order.shippingAddress}
+                      <br />
+                      {selectedItem.order.shippingCity}{selectedItem.order.shippingZip ? `, ${selectedItem.order.shippingZip}` : ""}
+                      <br />
+                      Phone: {selectedItem.order.clientPhone || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-12">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-black text-[10px] font-black uppercase tracking-widest text-left">
+                      <th className="py-4">Item Description</th>
+                      <th className="py-4 text-center">Qty</th>
+                      <th className="py-4 text-right">Price</th>
+                      <th className="py-4 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-100">
+                      <td className="py-6">
+                        <p className="font-bold">{selectedItem.product.name}</p>
+                        {selectedItem.variant && (
+                          <p className="text-xs text-gray-500 mt-1">Option: {selectedItem.variant.name}</p>
+                        )}
+                        {selectedItem.personalization && (
+                          <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Personalization</p>
+                            <p className="text-xs italic">"{selectedItem.personalization}"</p>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-6 text-center font-bold">{selectedItem.quantity}</td>
+                      <td className="py-6 text-right">{dict.product.currency} {selectedItem.price}</td>
+                      <td className="py-6 text-right font-bold">{dict.product.currency} {(selectedItem.price * selectedItem.quantity).toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {(selectedItem.order.isGift || selectedItem.order.orderNotes) && (
+                <div className="grid grid-cols-2 gap-8 mb-12">
+                  {selectedItem.order.isGift && (
+                    <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Gift Message</p>
+                      <p className="text-sm italic">"{selectedItem.order.giftMessage || "No message provided."}"</p>
+                    </div>
+                  )}
+                  {selectedItem.order.orderNotes && (
+                    <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Customer Instructions</p>
+                      <p className="text-sm">{selectedItem.order.orderNotes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-auto pt-12 border-t-2 border-gray-100 text-center">
+                <p className="text-sm font-bold italic serif text-gray-400">Thank you for supporting independent artisans.</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-300 mt-2">www.giftisan.shop</p>
+              </div>
+            </div>
           </div>
         )}
       </AnimatePresence>
-
-
-
-      {/* Hidden Printable Area */}
-      {itemToPrint && (
-        <div className="hidden print:flex print:flex-col print-isolated p-10 bg-white min-h-[25cm]">
-          <div className="flex items-start justify-between border-b pb-8 mb-8">
-            <div>
-              <h1 className="text-3xl font-heading font-bold text-primary">GIFTISAN</h1>
-              <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">Official Packing Slip</p>
-              {itemToPrint.trackingNumber && (
-                <div className="mt-4 flex items-center gap-2 bg-primary/5 p-2 rounded-xl border border-primary/10 w-fit">
-                  <Truck className="w-4 h-4 text-primary" />
-                  <span className="font-mono font-bold text-xs text-primary">{itemToPrint.carrier || "Carrier"}: #{itemToPrint.trackingNumber}</span>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-6 text-end">
-              <div>
-                <p className="text-sm font-bold text-primary">Order #{itemToPrint.orderId.slice(0, 8).toUpperCase()}</p>
-                <p className="text-xs text-charcoal/40 font-medium">{new Date(itemToPrint.order.createdAt).toLocaleDateString()}</p>
-                {/* Traditional Barcode Visual representation */}
-                <div className="flex items-center justify-end gap-[2px] mt-3 h-8">
-                  <div className="w-1 h-full bg-primary" />
-                  <div className="w-[2px] h-full bg-primary" />
-                  <div className="w-1 h-full bg-primary" />
-                  <div className="w-[3px] h-full bg-primary" />
-                  <div className="w-[1px] h-full bg-primary" />
-                  <div className="w-[2px] h-full bg-primary" />
-                  <div className="w-[4px] h-full bg-primary" />
-                  <div className="w-1 h-full bg-primary" />
-                  <div className="w-[2px] h-full bg-primary" />
-                  <div className="w-1 h-full bg-primary" />
-                  <div className="w-[3px] h-full bg-primary" />
-                </div>
-              </div>
-
-              {/* Scannable QR Code */}
-              <div className="p-2 bg-white border-2 border-primary/10 rounded-2xl shadow-sm shrink-0 flex flex-col items-center print:border-2 print:border-charcoal/20">
-                <div className="w-20 h-20 print:block">
-                  <QRCode 
-                    value={`https://giftisan.com/api/shipping/verify?itemId=${itemToPrint.id}`} 
-                    size={80}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  />
-                </div>
-                <span className="text-[7px] font-black uppercase tracking-tighter text-charcoal/40 mt-1">Scan to Verify</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-12 mb-12">
-            <div>
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">Ship To</h3>
-              <p className="font-bold text-primary">{itemToPrint.order.user.name}</p>
-              <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
-                {itemToPrint.order.shippingAddress}<br />
-                {itemToPrint.order.shippingCity}, {itemToPrint.order.shippingZip}<br />
-                {itemToPrint.order.clientPhone && <span className="font-bold text-primary">{itemToPrint.order.clientPhone}</span>}
-              </p>
-            </div>
-            <div className="text-end">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-3">From</h3>
-              <p className="font-bold text-primary">{artisan.studioName || artisan.user.name}</p>
-              <p className="text-sm text-charcoal/60 leading-relaxed font-medium mt-1">
-                {artisan.user.email}
-              </p>
-            </div>
-          </div>
-
-          <table className="w-full mb-12">
-            <thead>
-              <tr className="border-b text-start">
-                <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40">Item</th>
-                <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-center">Qty</th>
-                <th className="py-4 text-[10px] font-black uppercase tracking-widest text-primary/40 text-end">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b">
-                <td className="py-6">
-                  <p className="font-bold text-primary">{itemToPrint.product.name}</p>
-                  {itemToPrint.variant && (
-                    <p className="text-[10px] font-bold text-accent mt-1">
-                      {dict.edit_product.variant_name}: {itemToPrint.variant.name}
-                    </p>
-                  )}
-                  {itemToPrint.personalization && (
-                    <p className="text-[10px] italic text-charcoal/40 mt-1">
-                      "{itemToPrint.personalization}"
-                    </p>
-                  )}
-                </td>
-                <td className="py-6 text-center font-bold text-charcoal/60">{itemToPrint.quantity}</td>
-                <td className="py-6 text-end font-bold text-primary">EGP {itemToPrint.price.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="mt-auto text-center pt-8 border-t border-primary/5">
-            <p className="text-xs italic font-serif text-primary/60">"Thank you for supporting handcrafted excellence."</p>
-            <p className="text-[8px] uppercase font-black tracking-[0.2em] text-accent mt-4">giftisan.com</p>
-          </div>
-        </div>
-      )}
+      </div>
     </>
   );
 }

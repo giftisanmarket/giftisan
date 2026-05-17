@@ -776,7 +776,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                 canvas.width = width; canvas.height = height;
                                 const ctx = canvas.getContext('2d');
                                 if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                                handleImageChange(idx, canvas.toDataURL('image/webp', 0.85));
+                                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                handleImageChange(idx, canvas.toDataURL(outType, 0.85));
                                 setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
                                 setIsCompressing(prev => ({ ...prev, [idx]: false }));
                               };

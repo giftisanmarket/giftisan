@@ -8,6 +8,7 @@ import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
 import { useNotifications } from "./notification-provider";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 // Premium client-side canvas compression to keep payload <50KB
@@ -76,12 +77,15 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isRtl = lang === "ar";
 
-  // Security guard: only render this global hub for logged-in users with ARTISAN role
+  const pathname = usePathname();
+
+  // Security guard: only render this global hub for logged-in users with ARTISAN role on studio pages
   const isArtisan = session?.user?.role === "ARTISAN";
+  const isStudioPage = pathname?.includes("/studio");
 
   // Fetch conversations when the panel is opened
   useEffect(() => {
-    if (!isOpen || !session?.user?.id || !isArtisan) return;
+    if (!isOpen || !session?.user?.id || !isArtisan || !isStudioPage) return;
 
     const fetchInbox = async () => {
       setIsLoading(messages.length === 0);
@@ -105,7 +109,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [isOpen, session?.user?.id, isArtisan]);
+  }, [isOpen, session?.user?.id, isArtisan, isStudioPage]);
 
   // Scroll to bottom on thread switches or incoming messages
   useEffect(() => {
@@ -247,10 +251,10 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
     productInquiry: isRtl ? "سؤال حول" : "Inquiry about",
   };
 
-  if (!isArtisan) return null;
+  if (!isArtisan || !isStudioPage) return null;
 
   return (
-    <div className="fixed z-[99] bottom-6 flex flex-col end-6 items-end">
+    <div className="fixed z-[99] bottom-6 right-6 rtl:left-6 rtl:right-auto flex flex-col items-end max-w-[calc(100vw-3rem)]">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -258,7 +262,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.85, y: 30 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="mb-4 w-[360px] h-[520px] bg-white rounded-[2.5rem] border border-primary/10 shadow-2xl overflow-hidden flex flex-col z-[100]"
+            className="mb-4 w-[calc(100vw-3rem)] max-w-[360px] h-[520px] max-h-[75vh] bg-white rounded-[2.5rem] border border-primary/10 shadow-2xl overflow-hidden flex flex-col z-[100]"
           >
             {/* Header */}
             <div className="p-5 bg-primary text-white flex items-center justify-between">

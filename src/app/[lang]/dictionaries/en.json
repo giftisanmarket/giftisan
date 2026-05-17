@@ -532,7 +532,8 @@
     "benefit_returns": "Returns in 30d",
     "benefit_gift_wrap": "Gift Wrap Ready",
     "master_artisan": "Master Artisan",
-    "studio_hub": "Studio Hub"
+    "studio_hub": "Studio Hub",
+    "account_deleted_success": "Account deleted successfully."
   },
   "auth": {
     "login_title": "Login to Giftisan",

@@ -532,7 +532,8 @@
     "benefit_returns": "إرجاع خلال 30 يوماً",
     "benefit_gift_wrap": "جاهز كهدية",
     "master_artisan": "كبير الحرفيين",
-    "studio_hub": "مركز الاستوديو"
+    "studio_hub": "مركز الاستوديو",
+    "account_deleted_success": "تم حذف الحساب بنجاح."
   },
   "auth": {
     "login_title": "سجل دخولك إلى جيفتيزان",

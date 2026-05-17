@@ -67,7 +67,7 @@ export function Navbar({ dict }: { dict?: any }) {
     if (searchParams.get("success") === "EmailVerified") {
       toast.success(d.auth?.toast_email_verified || "Identity verified! Your account is now fully active.", {
         id: "global-verified",
-        duration: 5000
+        duration: 3000
       });
       update();
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   MousePointer2, 
@@ -44,6 +45,24 @@ export function OverviewTab({
   topVariants,
   activities
 }: OverviewTabProps) {
+  const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (activeTooltip === null) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.info-tooltip-btn')) {
+        setActiveTooltip(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick, { passive: true });
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [activeTooltip]);
+
   return (
     <div className="space-y-12">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -84,10 +103,23 @@ export function OverviewTab({
             <div className="flex items-center gap-2 mb-1">
               <p className="text-xs font-black text-primary/40 uppercase tracking-widest">{stat.label}</p>
               {stat.tooltip && (
-                <button type="button" className="group relative focus:outline-none flex items-center justify-center p-1 -m-1">
-                  <Info className="w-3 h-3 text-primary/20 cursor-help transition-colors group-hover:text-primary/40 group-focus:text-primary/40" />
+                <button
+                  type="button"
+                  className="group relative focus:outline-none flex items-center justify-center p-1 -m-1 info-tooltip-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTooltip(activeTooltip === i ? null : i);
+                  }}
+                  onMouseEnter={() => setActiveTooltip(i)}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <Info className={cn(
+                    "w-3 h-3 text-primary/20 cursor-help transition-colors",
+                    activeTooltip === i ? "text-primary/60" : "group-hover:text-primary/40 group-focus:text-primary/40"
+                  )} />
                   <div className={cn(
-                    "absolute bottom-full mb-2 w-[180px] sm:w-56 p-3 bg-primary text-[10px] text-white rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus:opacity-100 group-focus:visible transition-all pointer-events-none z-50 shadow-2xl leading-relaxed text-start",
+                    "absolute bottom-full mb-2 w-[180px] sm:w-56 p-3 bg-primary text-[10px] text-white rounded-xl transition-all pointer-events-none z-50 shadow-2xl leading-relaxed text-start",
+                    activeTooltip === i ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-1",
                     i % 2 === 0 ? "start-0 sm:-start-2" : "end-0 sm:end-auto sm:-start-2",
                     i === 3 ? "lg:end-0 lg:start-auto" : ""
                   )}>

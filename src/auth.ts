@@ -4,12 +4,14 @@ declare module "next-auth" {
   interface Session {
     user: {
       role: string;
+      isOAuth?: boolean;
     } & DefaultSession["user"]
   }
 
   interface User {
     role?: string;
     emailVerified?: Date | null;
+    isOAuth?: boolean;
   }
 }
 
@@ -84,6 +86,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.emailVerified && session.user) {
         (session.user as any).emailVerified = token.emailVerified;
       }
+      if (token.isOAuth !== undefined && session.user) {
+        (session.user as any).isOAuth = token.isOAuth;
+      }
       
       // Safety: Never allow massive images in the session object to prevent RSC serialization crashes
       if (session.user.image && session.user.image.length > 300000) {
@@ -99,6 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name;
         // If they use Google/OAuth/OIDC, they are verified by default
         token.emailVerified = (account && account.provider !== "credentials") ? new Date() : user.emailVerified;
+        token.isOAuth = (account && account.provider !== "credentials") ? true : false;
       }
 
       // Handle session updates (e.g. from update() on the client)
@@ -122,13 +128,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Fetch latest role and name, but avoid fetching the large image blob
           const dbUser = await prisma.user.findUnique({
             where: { id: token.sub },
-            select: { role: true, name: true, emailVerified: true } 
+            select: { 
+              role: true, 
+              name: true, 
+              emailVerified: true,
+              accounts: {
+                select: { provider: true }
+              }
+            } 
           });
           
           if (dbUser) {
             token.role = dbUser.role;
             token.name = dbUser.name;
             token.emailVerified = dbUser.emailVerified;
+            token.isOAuth = dbUser.accounts.length > 0;
             token.lastChecked = now;
           }
         } catch (error) {

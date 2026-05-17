@@ -21,8 +21,8 @@ export function VerificationBanner({ dict }: { dict?: any }) {
   const [isResending, setIsResending] = useState(false);
   const [resent, setResent] = useState(false);
 
-  // If session is loading, or not logged in, or already verified, don't show
-  if (status === "loading" || !session?.user || (session.user as any).emailVerified || !isVisible) {
+  // If session is loading, or not logged in, or already verified, or signed up via Google/OAuth, don't show
+  if (status === "loading" || !session?.user || (session.user as any).isOAuth || (session.user as any).emailVerified || !isVisible) {
     return null;
   }
 

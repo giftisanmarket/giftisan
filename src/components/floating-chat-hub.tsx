@@ -124,6 +124,9 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
     const userId = session.user.id;
 
     const threadsMap = messages.reduce((acc: Record<string, Thread>, m) => {
+      // Security filter: ensure the message actually involves the currently logged-in user
+      if (m.senderId !== userId && m.receiverId !== userId) return acc;
+
       const partnerId = m.senderId === userId ? m.receiverId : m.senderId;
       const threadKey = `${[userId, partnerId].sort().join("-")}-${m.productId || "general"}`;
 

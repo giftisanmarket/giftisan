@@ -55,6 +55,17 @@ const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Prom
   });
 };
 
+const isImageAttachment = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  return (
+    url.startsWith("data:image") ||
+    url.includes("image") ||
+    url.includes("cloudinary") ||
+    url.includes("/api/image") ||
+    /\.(jpg|jpeg|png|webp|gif|svg|bmp)($|\?)/i.test(url)
+  );
+};
+
 export function ContactArtisanButton({ 
   artisanId, 
   artisanName, 
@@ -208,6 +219,7 @@ export function ContactArtisanButton({
         setNewMessage("");
         setAttachment(null);
         scrollToBottom("smooth");
+        toast.success(dict.home?.message_sent || (isRtl ? "تم إرسال الرسالة!" : "Message sent!"));
       } else {
         toast.error(res.error || dict.contact_artisan.failed_send);
       }
@@ -343,7 +355,7 @@ export function ContactArtisanButton({
                         )}>
                           {m.attachment && (
                             <div className="mb-2 rounded-xl overflow-hidden border border-white/20 bg-black/5 min-w-[150px]">
-                              {m.attachment.startsWith("data:image") || m.attachment.includes("image") ? (
+                              {isImageAttachment(m.attachment) ? (
                                 <div className="relative w-full aspect-video">
                                   <Image src={m.attachment} alt="Attached" fill className="object-cover" unoptimized />
                                   <a 
@@ -395,7 +407,7 @@ export function ContactArtisanButton({
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-accent shadow-lg group"
                     >
-                      {attachment.startsWith("data:image") ? (
+                      {isImageAttachment(attachment) ? (
                         <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">

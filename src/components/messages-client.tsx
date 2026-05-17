@@ -46,6 +46,17 @@ const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Prom
   });
 };
 
+const isImageAttachment = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  return (
+    url.startsWith("data:image") ||
+    url.includes("image") ||
+    url.includes("cloudinary") ||
+    url.includes("/api/image") ||
+    /\.(jpg|jpeg|png|webp|gif|svg|bmp)($|\?)/i.test(url)
+  );
+};
+
 export function MessagesClient(props: { initialMessages: any[], userId: string, targetUser?: any, dict: any }) {
   return (
     <Suspense fallback={<div className="h-[75vh] flex items-center justify-center font-heading font-bold text-primary">{props.dict.home.loading_inbox || "Loading Inbox..."}</div>}>
@@ -432,7 +443,7 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
                     )}>
                       {m.attachment && (
                         <div className="mb-2 rounded-xl md:rounded-2xl overflow-hidden border border-white/20 bg-black/5 min-w-[180px] md:min-w-[200px]">
-                          {m.attachment.startsWith("data:image") ? (
+                          {isImageAttachment(m.attachment) ? (
                             <div className="relative w-full aspect-video">
                               <Image src={m.attachment} alt="Attached" fill className="object-cover" unoptimized />
                               <a 
@@ -476,7 +487,7 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
                       exit={{ opacity: 0, y: 10 }}
                       className="relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
                     >
-                      {attachment.startsWith("data:image") ? (
+                      {isImageAttachment(attachment) ? (
                         <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">

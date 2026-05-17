@@ -47,6 +47,17 @@ const compressImage = (base64Str: string, maxWidth = 600, maxHeight = 600): Prom
   });
 };
 
+const isImageAttachment = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  return (
+    url.startsWith("data:image") ||
+    url.includes("image") ||
+    url.includes("cloudinary") ||
+    url.includes("/api/image") ||
+    /\.(jpg|jpeg|png|webp|gif|svg|bmp)($|\?)/i.test(url)
+  );
+};
+
 interface Thread {
   key: string;
   partner: {
@@ -229,6 +240,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
         setReply("");
         setAttachment(null);
         refreshUnreadCount();
+        toast.success(dict.home?.message_sent || (isRtl ? "تم إرسال الرسالة!" : "Message sent!"));
       } else {
         toast.error(res.error || (isRtl ? "تعذر الإرسال" : "Failed to deliver message"));
       }
@@ -329,7 +341,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
                           >
                             {m.attachment && (
                               <div className="mb-1.5 rounded-xl overflow-hidden border border-white/10 max-w-[200px]">
-                                {m.attachment.startsWith("data:image") || m.attachment.includes("image") ? (
+                                {isImageAttachment(m.attachment) ? (
                                   <div className="relative w-40 aspect-video">
                                     <Image
                                       src={m.attachment}
@@ -387,7 +399,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
                           exit={{ scale: 0.8, opacity: 0 }}
                           className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-accent shadow-sm group"
                         >
-                          {attachment.startsWith("data:image") ? (
+                          {isImageAttachment(attachment) ? (
                             <Image src={attachment} alt="Upload" fill className="object-cover" unoptimized />
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-0.5">

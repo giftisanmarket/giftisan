@@ -97,8 +97,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role;
         token.name = user.name;
-        // If they use Google/OAuth, they are verified by default
-        token.emailVerified = (account?.type === "oauth") ? new Date() : user.emailVerified;
+        // If they use Google/OAuth/OIDC, they are verified by default
+        token.emailVerified = (account && account.provider !== "credentials") ? new Date() : user.emailVerified;
       }
 
       // Handle session updates (e.g. from update() on the client)

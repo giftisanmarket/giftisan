@@ -83,6 +83,33 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
   }, [initialMessages]);
 
   const [reply, setReply] = useState("");
+  
+  const handleDownload = async (url: string) => {
+    if (!url) return;
+    if (url.startsWith("data:")) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "giftisan-attachment";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "giftisan-attachment";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(url, "_blank");
+    }
+  };
   const [attachment, setAttachment] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const { refreshUnreadCount } = useNotifications();
@@ -596,16 +623,13 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
 
               {/* Download Bar */}
               <div className="mt-4 flex items-center gap-3">
-                <a
-                  href={previewImageUrl}
-                  download="giftisan-attachment"
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  onClick={() => handleDownload(previewImageUrl!)}
                   className="px-6 py-3 bg-accent hover:bg-accent-light text-white font-bold text-xs md:text-sm uppercase tracking-widest rounded-full flex items-center gap-2 shadow-xl shadow-accent/20 transition-all active:scale-95 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   {dict.home?.download || "Download"}
-                </a>
+                </button>
               </div>
             </motion.div>
           </motion.div>

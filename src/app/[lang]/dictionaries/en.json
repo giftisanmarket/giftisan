@@ -398,6 +398,7 @@
     "choose_convo_desc": "Choose a conversation from the sidebar to view messages and respond.",
     "attachment_too_large": "File size must be less than 5MB",
     "compressing": "Optimizing image clarity for lightning delivery...",
+    "download": "Download Image",
     "reply_button": "Reply",
     "verify_to_reply": "Verify email to reply",
     "start_new_convo": "Start a new conversation...",

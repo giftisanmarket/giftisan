@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, Send, X, Paperclip, FileIcon, Eye, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
+import { MessageSquare, Send, X, Paperclip, FileIcon, Eye, Sparkles, CheckCircle2, Loader2, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendMessage, getInbox } from "@/lib/actions";
 import { useSession } from "next-auth/react";
@@ -85,6 +85,7 @@ export function ContactArtisanButton({
   
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const isRtl = dict.common?.direction === "rtl" || dict.common?.lang === "ar";
@@ -358,16 +359,13 @@ export function ContactArtisanButton({
                               {isImageAttachment(m.attachment) ? (
                                 <div className="relative w-full aspect-video">
                                   <Image src={m.attachment} alt="Attached" fill className="object-cover" unoptimized />
-                                  <a 
-                                    href={m.attachment} 
-                                    download="attachment"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2"
+                                  <div 
+                                    onClick={() => setPreviewImageUrl(m.attachment)}
+                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
                                   >
                                     <Eye className="w-4 h-4 text-white" />
                                     <span className="text-[10px] font-black text-white uppercase tracking-widest">{isRtl ? "عرض الصورة" : "View Image"}</span>
-                                  </a>
+                                  </div>
                                 </div>
                               ) : (
                                 <div className="p-3 flex items-center gap-2 bg-white/10">
@@ -473,6 +471,60 @@ export function ContactArtisanButton({
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Image Preview Modal */}
+      <AnimatePresence>
+        {previewImageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+            onClick={() => setPreviewImageUrl(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center justify-center bg-transparent"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setPreviewImageUrl(null)}
+                className="absolute -top-12 right-0 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all cursor-pointer shadow-lg active:scale-90"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Image Container */}
+              <div className="relative w-full aspect-video max-h-[70vh] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
+                <Image
+                  src={previewImageUrl}
+                  alt="Full-size preview"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+
+              {/* Download Bar */}
+              <div className="mt-4 flex items-center gap-3">
+                <a
+                  href={previewImageUrl}
+                  download="giftisan-attachment"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-6 py-3 bg-accent hover:bg-accent-light text-white font-bold text-xs md:text-sm uppercase tracking-widest rounded-full flex items-center gap-2 shadow-xl shadow-accent/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  {dict.home?.download || "Download"}
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

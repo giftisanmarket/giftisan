@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, useMemo, useRef } from "react";
-import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye, ArrowLeft } from "lucide-react";
+import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye, ArrowLeft, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
 import { useNotifications } from "./notification-provider";
@@ -68,6 +68,7 @@ export function MessagesClient(props: { initialMessages: any[], userId: string, 
 function MessagesContent({ initialMessages, userId, targetUser, dict }: { initialMessages: any[], userId: string, targetUser?: any, dict: any }) {
   const { data: session } = useSession();
   const [messages, setMessages] = useState(initialMessages);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
   // Sync state with props when server revalidates
   useEffect(() => {
@@ -444,16 +445,15 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
                       {m.attachment && (
                         <div className="mb-2 rounded-xl md:rounded-2xl overflow-hidden border border-white/20 bg-black/5 min-w-[180px] md:min-w-[200px]">
                           {isImageAttachment(m.attachment) ? (
-                            <div className="relative w-full aspect-video">
+                            <div 
+                              onClick={() => setPreviewImageUrl(m.attachment)}
+                              className="relative w-full aspect-video cursor-pointer"
+                            >
                               <Image src={m.attachment} alt="Attached" fill className="object-cover" unoptimized />
-                              <a 
-                                href={m.attachment} 
-                                download="attachment"
-                                className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2"
-                              >
+                              <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover/msg:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                 <Eye className="w-5 h-5 text-white" />
                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">{dict.home.view_image}</span>
-                              </a>
+                              </div>
                             </div>
                           ) : (
                             <div className="p-3 md:p-4 flex items-center gap-3 bg-white/10">
@@ -558,6 +558,59 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
           )}
         </div>
       </div>
+      {/* Lightbox Image Preview Modal */}
+      <AnimatePresence>
+        {previewImageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+            onClick={() => setPreviewImageUrl(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center justify-center bg-transparent"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setPreviewImageUrl(null)}
+                className="absolute -top-12 right-0 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all cursor-pointer shadow-lg active:scale-90"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Image Container */}
+              <div className="relative w-full aspect-video max-h-[70vh] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
+                <Image
+                  src={previewImageUrl}
+                  alt="Full-size preview"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+
+              {/* Download Bar */}
+              <div className="mt-4 flex items-center gap-3">
+                <a
+                  href={previewImageUrl}
+                  download="giftisan-attachment"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-6 py-3 bg-accent hover:bg-accent-light text-white font-bold text-xs md:text-sm uppercase tracking-widest rounded-full flex items-center gap-2 shadow-xl shadow-accent/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  {dict.home?.download || "Download"}
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

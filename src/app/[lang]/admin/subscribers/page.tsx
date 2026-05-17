@@ -34,18 +34,18 @@ export default async function AdminSubscribersPage({ params }: { params: Promise
 
   return (
     <div className="space-y-8 md:space-y-12">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-primary/5 pb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-primary tracking-tighter">
-            {dict.admin.newsletter_title} <span className="serif italic text-accent font-normal underline decoration-accent/30 underline-offset-8">{dict.admin.subscribers_accent}</span>
+          <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter">
+            {dict.admin.newsletter_title} <span className="serif italic text-accent font-normal">{dict.admin.subscribers_accent}</span>
           </h1>
           <p className="text-charcoal/40 text-sm font-medium mt-2">{dict.admin.mailing_list_desc}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <ExportSubscribersButton subscribers={subscribers} dict={dict} />
-          <div className="bg-white px-5 py-3 rounded-2xl border border-primary/10 shadow-sm flex flex-col justify-center min-w-[140px]">
-            <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest mb-0.5">{dict.admin.total_interest}</p>
+          <div className="bg-white px-5 py-3 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-center min-w-[140px]">
+            <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-0.5">{dict.admin.total_interest}</p>
             <p className="text-xl md:text-2xl font-black text-primary leading-none">{subscribers.length}</p>
           </div>
         </div>
@@ -114,10 +114,9 @@ export default async function AdminSubscribersPage({ params }: { params: Promise
         </div>
       </div>
 
-        {/* Footer info */}
-        <p className="mt-8 text-center text-primary/30 text-[10px] font-bold uppercase tracking-[0.3em]">
-          {dict.admin.admin_footer_info}
-        </p>
-      </div>
+      <p className="text-center text-primary/30 text-[10px] font-bold uppercase tracking-[0.3em]">
+        {dict.admin.admin_footer_info}
+      </p>
+    </div>
   );
 }

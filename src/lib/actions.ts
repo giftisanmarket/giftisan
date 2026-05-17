@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
@@ -2661,6 +2661,25 @@ export async function sendOutreachAction(data: { name: string; email: string; pr
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function sendCustomEmailAction(data: { to: string; subject: string; body: string; dir: 'ltr' | 'rtl' }) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const result = await sendCustomEmail(data.to, data.subject, data.body, data.dir);
+    if (!result.success) {
+      return { success: false, error: "Failed to send email via Resend" };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Send Custom Email Action Error:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}
+
 
 export async function bulkDeleteProducts(ids: string[]) {
   try {

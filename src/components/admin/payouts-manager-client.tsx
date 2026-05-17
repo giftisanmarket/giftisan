@@ -246,12 +246,15 @@ export function PayoutsManagerClient({
   return (
     <div className="space-y-12 text-start" dir={isRTL ? "rtl" : "ltr"}>
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-primary/5 pb-8">
         <div>
-          <h1 className="text-4xl font-heading font-black text-primary tracking-tighter mb-2">
-            {isRTL ? "طلبات سحب مستحقات العارضين" : "Artisan Payouts Manager"}
+          <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-2">
+            {isRTL ? "طلبات" : "Artisan"}{" "}
+            <span className="serif italic text-accent font-normal">
+              {isRTL ? "السحب" : "Payouts"}
+            </span>
           </h1>
-          <p className="text-charcoal/40 font-medium">
+          <p className="text-charcoal/40 font-medium text-sm md:text-base">
             {isRTL 
               ? "مراجعة واعتماد طلبات السحب يدويًا وتسجيل التحويلات المالية بنجاح." 
               : "Review, coordinate transfer receipts, and manually process outstanding payout requests."}

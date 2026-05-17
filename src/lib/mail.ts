@@ -570,6 +570,42 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
   }
 };
 
+export const sendCustomEmail = async (to: string, subject: string, body: string, dir: 'ltr' | 'rtl' = 'ltr') => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n--- 📧 DEV: CUSTOM EMAIL (${dir.toUpperCase()}) ---\nTarget: ${to}\nSubject: ${subject}\n------------------------------\n`);
+    return { success: true };
+  }
+
+  const html = `
+    <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="${dir}">
+      <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: ${dir === 'rtl' ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
+        ${emailHeader}
+        <div class="email-body" style="padding: 40px; text-align: ${dir === 'rtl' ? 'right' : 'left'};">
+          <div style="color: #4b5563; font-size: 16px; line-height: 1.8;">
+            ${body}
+          </div>
+        </div>
+        ${emailFooter}
+      </div>
+    </div>
+  `;
+
+
+  try {
+    await resend.emails.send({
+      from: SENDER,
+      to: to,
+      subject: subject,
+      html: html,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending custom email:', error);
+    return { success: false, error };
+  }
+};
+
+
 export const sendProductStatusUpdateEmail = async (email: string, name: string, productName: string, status: "APPROVED" | "REJECTED" | "PENDING", reason?: string) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PRODUCT STATUS UPDATE ---\nTarget: ${email}\nProduct: ${productName}\nStatus: ${status}\nReason: ${reason || 'N/A'}\n-------------------------------------\n`);

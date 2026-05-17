@@ -31,7 +31,7 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.payouts_requests || (isAr ? "إدارة المدفوعات" : "Payout Requests"), href: "/admin/payouts", icon: DollarSign },
     { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
     { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },
-    { label: dict.admin.outreach || (isAr ? "دعوة الحرفيين" : "Outreach"), href: "/admin/outreach", icon: Send },
+    { label: dict.admin.outreach || (isAr ? "مرسل البريد" : "Mail Sender"), href: "/admin/mail-sender", icon: Send },
   ];
 };
 
@@ -45,6 +45,8 @@ export function AdminNavClient({
   const pathname = usePathname();
   const router = useRouter();
   const navItems = getNavItems(dict);
+  const normalizedPath = pathname.replace(/^\/(en|ar)/, "") || "/";
+
 
   // Global Keyboard Shortcut for switching languages (Alt + L)
   useEffect(() => {
@@ -98,8 +100,8 @@ export function AdminNavClient({
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="fixed start-0 top-0 bottom-0 w-80 bg-primary text-white p-8 hidden lg:flex flex-col z-50 shadow-2xl overflow-y-auto no-print">
-        <div className="flex items-center gap-3 mb-16 px-4">
+      <aside className="fixed start-0 top-0 bottom-0 w-80 bg-primary text-white p-6 hidden lg:flex flex-col z-50 shadow-2xl overflow-y-auto no-print">
+        <div className="flex items-center gap-3 mb-10 px-2">
           <div className="relative w-10 h-10 overflow-hidden rounded-xl border border-white/20 shadow-xl">
              <Image
               src="/icon.png"
@@ -111,15 +113,15 @@ export function AdminNavClient({
           <span className="text-2xl font-heading font-black tracking-tighter">Giftisan <span className="text-[10px] text-accent font-black uppercase tracking-widest block leading-none">{dict.common.admin || "Admin"}</span></span>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 mb-4">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = normalizedPath === item.href || (item.href !== "/admin" && normalizedPath.startsWith(item.href));
             return (
               <Link 
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl transition-all font-bold group active:scale-95",
+                  "flex items-center gap-4 py-3 px-4 rounded-2xl transition-all font-bold group active:scale-95",
                   isActive 
                     ? "bg-white text-primary shadow-xl shadow-white/5" 
                     : "hover:bg-white/10 text-white/60 hover:text-white"
@@ -132,13 +134,13 @@ export function AdminNavClient({
           })}
         </nav>
 
-        <div className="pt-8 border-t border-white/10 space-y-2">
+        <div className="pt-4 border-t border-white/10 space-y-1.5">
           <Link 
             href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
             onClick={() => {
               document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
             }}
-            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition-all font-bold text-white/60 hover:text-white active:scale-95"
+            className="flex items-center gap-4 py-3 px-4 rounded-2xl hover:bg-white/10 transition-all font-bold text-white/60 hover:text-white active:scale-95"
             title="Switch Language (Alt+L)"
           >
             <span className="text-xs font-black uppercase tracking-widest bg-white/15 px-2 py-0.5 rounded text-accent">
@@ -147,7 +149,7 @@ export function AdminNavClient({
             <span className="text-sm">{pathname.startsWith('/en') ? "Switch to Arabic" : "Switch to English"}</span>
           </Link>
 
-          <Link href="/" className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition-all font-bold group text-white/60 hover:text-white active:scale-95">
+          <Link href="/" className="flex items-center gap-4 py-3 px-4 rounded-2xl hover:bg-white/10 transition-all font-bold group text-white/60 hover:text-white active:scale-95">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm">{dict.admin.marketplace}</span>
           </Link>
@@ -155,9 +157,9 @@ export function AdminNavClient({
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl overflow-x-auto no-print">
+      <nav className="lg:hidden fixed bottom-6 start-4 end-4 h-16 bg-primary/95 text-white rounded-2xl z-[100] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-around px-2 border border-white/10 backdrop-blur-xl overflow-x-auto overflow-y-hidden no-scrollbar no-print">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = normalizedPath === item.href || (item.href !== "/admin" && normalizedPath.startsWith(item.href));
           return (
             <Link 
               key={item.href}
@@ -176,8 +178,8 @@ export function AdminNavClient({
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ms-80 pt-24 lg:pt-0">
-        <div className="p-5 md:p-8 lg:p-12">
+      <main className="flex-1 lg:ms-80 pt-24 lg:pt-0 overflow-x-auto">
+        <div className="p-5 md:p-8 lg:p-12 min-w-0">
           {children}
         </div>
       </main>

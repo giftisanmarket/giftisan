@@ -32,9 +32,9 @@ export default async function AdminProductsPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-8 md:space-y-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-primary/5 pb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-primary tracking-tighter mb-2">
+          <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-2">
             {dict.admin.global_products_title} <span className="serif italic text-accent font-normal">{dict.admin.products_accent}</span>
           </h1>
           <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-md">{dict.admin.monitor_products_desc}</p>

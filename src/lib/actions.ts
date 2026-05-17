@@ -2402,10 +2402,6 @@ export async function sendMessage(senderId: string, receiverId: string, content:
 }
 
 export async function getInbox(userId: string) {
-  if (!userId || typeof userId !== "string" || userId.trim() === "" || userId === "undefined" || userId === "null") {
-    return [];
-  }
-
   try {
     const rawMessages = await prisma.message.findMany({
       where: {
@@ -2588,10 +2584,6 @@ export async function checkFollowStatus(artisanId: string, userId: string) {
 }
 
 export async function getUnreadMessageCount(userId: string) {
-  if (!userId || typeof userId !== "string" || userId.trim() === "" || userId === "undefined" || userId === "null") {
-    return 0;
-  }
-
   try {
     const unreadCount = await prisma.message.count({
       where: {
@@ -2606,10 +2598,6 @@ export async function getUnreadMessageCount(userId: string) {
 }
 
 export async function markMessagesAsRead(userId: string, senderId: string) {
-  if (!userId || !senderId || typeof userId !== "string" || typeof senderId !== "string" || userId === "undefined" || senderId === "undefined") {
-    return { success: false };
-  }
-
   try {
     await prisma.message.updateMany({
       where: {

@@ -155,9 +155,6 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
   // Memoize threads to prevent infinite loops and unnecessary re-renders
   const threads = useMemo<Thread[]>(() => {
     const threadsMap = (messages || []).reduce((acc: Record<string, Thread>, m) => {
-      // Security filter: ensure the message actually involves the currently logged-in user
-      if (m.senderId !== userId && m.receiverId !== userId) return acc;
-
       const partnerId = m.senderId === userId ? m.receiverId : m.senderId;
       const threadKey = `${[userId, partnerId].sort().join("-")}-${m.productId || "general"}`;
       

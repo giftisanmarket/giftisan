@@ -16,13 +16,13 @@ export function VerificationBanner({ dict }: { dict?: any }) {
       resend_link: "Resend Link"
     }
   };
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [isResending, setIsResending] = useState(false);
   const [resent, setResent] = useState(false);
 
-  // If not logged in or already verified, don't show
-  if (!session?.user || (session.user as any).emailVerified || !isVisible) {
+  // If session is loading, or not logged in, or already verified, don't show
+  if (status === "loading" || !session?.user || (session.user as any).emailVerified || !isVisible) {
     return null;
   }
 

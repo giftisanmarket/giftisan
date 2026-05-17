@@ -15,7 +15,7 @@ const NotificationContext = createContext<NotificationContextType>({
   refreshUnreadCount: async () => { },
 });
 
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
+export function NotificationProvider({ children, lang = "en" }: { children: React.ReactNode; lang?: string }) {
   const { data: session } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
   const lastCountRef = useRef(0);
@@ -27,12 +27,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     if (isFirstFetch.current && count > 0) {
       // Welcome toast for existing messages
-      toast(`Welcome back! You have ${count} unread message${count > 1 ? 's' : ''}.`, {
+      const msg = lang === "ar"
+        ? `مرحباً بعودتك! لديك ${count} رسائل غير مقروءة.`
+        : `Welcome back! You have ${count} unread message${count > 1 ? 's' : ''}.`;
+      toast(msg, {
         icon: <Bell className="w-5 h-5 text-accent" />,
       });
     } else if (!isFirstFetch.current && count > lastCountRef.current) {
       // New message detected during session
-      toast("New Message: You have a new message in your inbox.", {
+      const msg = lang === "ar"
+        ? "رسالة جديدة: لديك رسالة جديدة في صندوق الوارد."
+        : "New Message: You have a new message in your inbox.";
+      toast(msg, {
         icon: <Mail className="w-5 h-5 text-accent" />,
       });
     }

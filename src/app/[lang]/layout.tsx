@@ -229,7 +229,7 @@ export default async function RootLayout({
           `}
         </Script>
         <SessionProvider session={session} key={session?.user?.id || "guest"}>
-          <NotificationProvider>
+          <NotificationProvider lang={lang}>
             <FavoritesProvider>
               <CartProvider>
                 {children}

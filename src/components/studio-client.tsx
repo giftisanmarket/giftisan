@@ -831,18 +831,6 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                       <Mail className="w-4 h-4 md:w-5 md:h-5" />
                       {dict.studio.message_customer}
                     </Link>
-                    <button
-                      onClick={() => {
-                        setItemToPrint(selectedItem);
-                        setTimeout(() => {
-                          window.print();
-                          setItemToPrint(null);
-                        }, 100);
-                      }}
-                      className="w-full md:w-fit px-8 py-4 md:h-16 border border-primary/10 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm md:text-base"
-                    >
-                      {dict.studio.print_summary}
-                    </button>
                   </div>
                 </div>
               </div>

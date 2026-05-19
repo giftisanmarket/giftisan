@@ -120,7 +120,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
       return;
     }
 
-    if (!(session.user as any).emailVerified) {
+    if (!(session.user as any).emailVerified && !(session.user as any).isOAuth) {
       setError(dict.checkout.error_verify);
       return;
     }

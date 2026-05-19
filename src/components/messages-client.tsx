@@ -288,7 +288,7 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
   const handleReply = async () => {
     if ((!reply.trim() && !attachment) || isSending || !activeThread) return;
     
-    if (session?.user && !(session.user as any).emailVerified) {
+    if (session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth) {
       toast.error(dict.home.verify_to_send);
       return;
     }
@@ -564,10 +564,10 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
                       disabled={isSending || (!reply.trim() && !attachment)}
                       className={cn(
                         "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm active:scale-95",
-                        session?.user && !(session.user as any).emailVerified && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
+                        session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
                       )}
                     >
-                      {session?.user && !(session.user as any).emailVerified ? dict.home.verify_to_reply : isSending ? "..." : dict.home.reply_button}
+                      {session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth ? dict.home.verify_to_reply : isSending ? "..." : dict.home.reply_button}
                       {!isSending && <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                     </button>
                   </div>

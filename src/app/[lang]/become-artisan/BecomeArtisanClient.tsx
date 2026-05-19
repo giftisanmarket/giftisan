@@ -30,7 +30,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!(session?.user as any)?.emailVerified) {
+    if (!(session?.user as any)?.emailVerified && !(session?.user as any)?.isOAuth) {
       toast.error(dict.home.verify_email_error);
       setIsLoading(false);
       return;

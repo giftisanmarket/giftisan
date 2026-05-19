@@ -705,6 +705,16 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         });
       }
 
+      if (shippingData?.shippingCost && shippingData.shippingCost > 0) {
+        itemsForPaymob.push({
+          name: "Shipping",
+          price: shippingData.shippingCost,
+          description: "Shipping Cost",
+          quantity: 1,
+          image: ""
+        });
+      }
+
       const clientSecret = await createPaymobIntention(
         amountCents,
         `${order.id}-${Date.now()}`, // using unique suffixed order ID as special_reference to avoid duplicate reference collisions
@@ -785,6 +795,16 @@ export async function retryPaymentAction(orderId: string) {
         name: "Promo Discount",
         price: -order.discountApplied,
         description: "Applied coupon discount",
+        quantity: 1,
+        image: ""
+      });
+    }
+
+    if (order.shippingCost && order.shippingCost > 0) {
+      itemsForPaymob.push({
+        name: "Shipping",
+        price: order.shippingCost,
+        description: "Shipping Cost",
         quantity: 1,
         image: ""
       });

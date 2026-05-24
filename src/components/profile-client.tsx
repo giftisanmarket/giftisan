@@ -230,7 +230,7 @@ Trace
                           )}
                         </div>
 
-                        {order.status === "PENDING" && (
+                        {(order.status === "PENDING" || order.status === "FAILED") && (
                           <div className="flex items-center gap-2 shrink-0">
                             <button
                               onClick={() => setOrderToCancel(order.id)}

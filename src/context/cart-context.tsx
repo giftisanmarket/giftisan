@@ -33,7 +33,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedCart = localStorage.getItem('giftisan-cart');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      Promise.resolve().then(() => {
+        setCart(JSON.parse(savedCart));
+      });
     }
   }, []);
 

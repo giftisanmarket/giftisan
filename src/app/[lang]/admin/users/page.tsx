@@ -1,4 +1,5 @@
 import { getAllUsers } from "@/lib/actions";
+export const dynamic = "force-dynamic";
 import { User, Shield, Store, Trash2, Calendar, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

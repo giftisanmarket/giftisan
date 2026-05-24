@@ -4,7 +4,7 @@ import { useCart } from "@/context/cart-context";
 import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
@@ -13,6 +13,8 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function CheckoutClient({ dict }: { dict: any }) {
+  const params = useParams();
+  const lang = params?.lang as string || "en";
   // ⚙️ FEATURE FLAGS:
   const ENABLE_COUPONS = true;          // Keep this true to still show the promo input field
   const APPLY_COUPON_DISCOUNTS = true;  // Set this to true to fully calculate and apply discounts at checkout!
@@ -116,7 +118,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const handlePurchase = async () => {
     if (!session?.user?.id) {
       setError(dict.checkout.error_signin);
-      router.push("/login?callbackUrl=/checkout");
+      router.push(`/${lang}/login?callbackUrl=/${lang}/checkout`);
       return;
     }
 
@@ -153,7 +155,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
       if (res.paymentUrl) {
         window.location.href = res.paymentUrl;
       } else {
-        router.push("/checkout/success");
+        router.push(`/${lang}/checkout/success`);
       }
     } else {
       setError(res.error || "An error occurred during checkout.");

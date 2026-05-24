@@ -764,8 +764,55 @@ export async function retryPaymentAction(orderId: string) {
       return { error: "You are not authorized to retry payment for this order" };
     }
 
-    if (order.status !== "PENDING") {
+    if (order.status !== "PENDING" && order.status !== "FAILED") {
       return { error: `This order is already ${order.status.toLowerCase()}` };
+    }
+
+    if (order.status === "FAILED") {
+      // Re-reserve stock and set order status back to PENDING
+      await prisma.$transaction(async (tx) => {
+        for (const item of order.items) {
+          if (item.variantId) {
+            const variant = await tx.productVariant.findUnique({
+              where: { id: item.variantId },
+              select: { stock: true, name: true }
+            });
+            if (!variant || variant.stock < item.quantity) {
+              throw new Error(`The variation "${variant?.name || 'One of your items'}" just sold out! Please place a new order.`);
+            }
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: {
+                stock: {
+                  decrement: item.quantity
+                }
+              }
+            });
+          } else {
+            const product = await tx.product.findUnique({
+              where: { id: item.productId },
+              select: { stock: true, name: true }
+            });
+            if (!product || product.stock < item.quantity) {
+              throw new Error(`The treasure "${product?.name || 'One of your items'}" just sold out! Please place a new order.`);
+            }
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                stock: {
+                  decrement: item.quantity
+                }
+              }
+            });
+          }
+        }
+
+        // Set status back to PENDING since stock is now successfully re-reserved
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "PENDING" }
+        });
+      });
     }
 
     // Generate fresh Paymob Intention link

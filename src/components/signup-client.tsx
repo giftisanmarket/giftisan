@@ -6,7 +6,7 @@ import { ArrowLeft, User, Lock, ArrowRight, Paintbrush, ShoppingBag, Eye, EyeOff
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { signUp } from "@/lib/actions";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { signIn as socialSignIn } from "next-auth/react";
 
@@ -17,6 +17,8 @@ export function SignupClient({ dict }: { dict: any }) {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const params = useParams();
+  const lang = params?.lang as string || "en";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,10 +40,10 @@ export function SignupClient({ dict }: { dict: any }) {
         setError(res.error);
       } else {
         if (res.autoLogin) {
-          router.push("/");
+          router.push(`/${lang}`);
           router.refresh();
         } else {
-          router.push("/login?signup=success");
+          router.push(`/${lang}/login?signup=success`);
         }
       }
     }
@@ -50,7 +52,7 @@ export function SignupClient({ dict }: { dict: any }) {
   return (
     <main className="min-h-screen bg-cream flex flex-col justify-center items-center py-12 px-6 md:p-20 relative">
       <Link 
-        href="/" 
+        href={`/${lang}`} 
         className="absolute top-12 start-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10"
       >
         <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5">
@@ -246,7 +248,7 @@ export function SignupClient({ dict }: { dict: any }) {
 
         <p className="text-center text-charcoal/40 font-medium mt-10 md:mt-12 text-sm">
           {dict.auth.signup_already_member}{" "}
-          <Link href="/login" className="text-accent font-bold hover:underline">{dict.auth.signup_sign_in}</Link>
+          <Link href={`/${lang}/login`} className="text-accent font-bold hover:underline">{dict.auth.signup_sign_in}</Link>
         </p>
       </motion.div>
     </main>

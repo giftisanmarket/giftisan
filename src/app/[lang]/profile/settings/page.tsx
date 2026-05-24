@@ -8,7 +8,7 @@ import { getDictionary } from "../../dictionaries";
 export default async function SettingsPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session) redirect(`/${lang}/login`);
 
   const dict = await getDictionary(lang as any);
 
@@ -16,7 +16,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
     where: { id: session.user.id }
   });
 
-  if (!user) redirect("/");
+  if (!user) redirect(`/${lang}`);
 
   // Sanitize user object to prevent large image serialization issues
   const sanitizedUser = {

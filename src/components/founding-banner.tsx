@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, ArrowRight, BadgeCheck } from "lucide-react";
 import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 export function FoundingBanner({ dict }: { dict: any }) {
@@ -11,6 +11,8 @@ export function FoundingBanner({ dict }: { dict: any }) {
   const [isVisible, setIsVisible] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  const params = useParams();
+  const lang = params?.lang as string || "en";
 
   useEffect(() => {
     const isDismissed = sessionStorage.getItem("giftisan-founding-banner-dismissed");
@@ -43,7 +45,7 @@ export function FoundingBanner({ dict }: { dict: any }) {
           exit={{ height: 0, opacity: 0 }}
           className="relative z-[61] overflow-hidden shadow-2xl cursor-pointer group border-b border-white/5"
           style={{ backgroundColor: '#064E3B' }}
-          onClick={() => router.push("/become-artisan")}
+          onClick={() => router.push(`/${lang}/become-artisan`)}
         >
           <div className="container mx-auto px-4 py-2.5 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 text-center relative z-10">
             <div className="flex items-center gap-2">

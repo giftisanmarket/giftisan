@@ -6,10 +6,12 @@ import { ArrowLeft, Lock, ArrowRight, CheckCircle, AlertCircle, Sparkles, Eye, E
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "@/components/bespoke-image";
 import { resetPasswordAction } from "@/lib/actions";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 export function ResetPasswordClient({ dict }: { dict: any }) {
+  const params = useParams();
+  const lang = params?.lang as string || "en";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +50,7 @@ export function ResetPasswordClient({ dict }: { dict: any }) {
       setSuccess(true);
       setIsLoading(false);
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/${lang}/login`);
       }, 3000);
     }
   };
@@ -82,7 +84,7 @@ export function ResetPasswordClient({ dict }: { dict: any }) {
       {/* Form Side */}
       <div className="flex flex-col justify-center items-center py-16 px-6 md:p-20 relative">
         <Link 
-          href="/login" 
+          href={`/${lang}/login`} 
           className="md:absolute md:top-12 md:start-12 flex items-center gap-2 text-primary/60 hover:text-primary font-bold transition-all group z-10 mb-8 md:mb-0 self-start md:self-auto"
         >
           <div className="w-8 h-8 rounded-full border border-primary/10 flex items-center justify-center group-hover:bg-primary/5 active:scale-90">

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { sendOrderStatusUpdateEmail } from "@/lib/mail";
 
 /**
  * SECURE SHIPPING & LOGISTICS WEBHOOK ENDPOINT
@@ -41,18 +42,18 @@ export async function POST(req: Request) {
     if (trackingNumber) {
       targetItems = await prisma.orderItem.findMany({
         where: { trackingNumber },
-        include: { product: true }
+        include: { product: true, order: { include: { user: true } } }
       });
     } else if (itemId) {
       const singleItem = await prisma.orderItem.findUnique({
         where: { id: itemId },
-        include: { product: true }
+        include: { product: true, order: { include: { user: true } } }
       });
       if (singleItem) targetItems = [singleItem];
     } else if (orderId) {
       targetItems = await prisma.orderItem.findMany({
         where: { orderId },
-        include: { product: true }
+        include: { product: true, order: { include: { user: true } } }
       });
     }
 
@@ -100,6 +101,20 @@ export async function POST(req: Request) {
         });
 
         console.log(`⚡ [Escrow Security] Reset escrow clock for Order: ${item.orderId} and Artisan: ${item.product.artisanId}. Updated ${affectedTxs.count} transaction(s).`);
+
+        // Send beautiful delivery confirmation email notification to buyer
+        if (item.order?.user?.email) {
+          sendOrderStatusUpdateEmail(
+            item.order.user.email,
+            item.order.user.name || "Customer",
+            item.orderId,
+            "DELIVERED",
+            item.product.name,
+            item.product.slug || undefined,
+            trackingNumber || item.trackingNumber || "Hand Delivered",
+            carrier || item.carrier || "Private Runner"
+          ).catch(err => console.error(`[Shipping Webhook] Failed to send delivery email for item ${item.id}:`, err));
+        }
       }
 
       // 4. Proactive Parent Order Sync: Check if all other items in this order are delivered

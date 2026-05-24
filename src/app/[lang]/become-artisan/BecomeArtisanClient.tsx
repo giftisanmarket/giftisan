@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users } from "lucide-react";
@@ -13,6 +13,8 @@ import { toast } from "react-hot-toast";
 export default function BecomeArtisanClient({ dict }: { dict: any }) {
   const { data: session, update, status } = useSession();
   const router = useRouter();
+  const params = useParams();
+  const lang = params?.lang as string || "en";
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     studioName: "",
@@ -22,9 +24,9 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
   useEffect(() => {
     if (session?.user?.role === "ARTISAN") {
-      router.push("/studio");
+      router.push(`/${lang}/studio`);
     }
-  }, [session, router]);
+  }, [session, router, lang]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +114,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
           <h1 className="text-4xl font-heading font-bold text-primary mb-6">{dict.home.join_circle_title}</h1>
           <p className="text-charcoal/60 mb-8 max-w-md mx-auto">{dict.home.join_circle_desc}</p>
           <button
-            onClick={() => router.push("/login?callbackUrl=/become-artisan")}
+            onClick={() => router.push(`/${lang}/login?callbackUrl=/${lang}/become-artisan`)}
             className="px-10 h-14 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20"
           >
             {dict.home.sign_in_continue}

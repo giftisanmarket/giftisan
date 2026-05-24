@@ -12,10 +12,9 @@ export default async function MessagesPage({
   searchParams: Promise<{ userId?: string }>;
   params: Promise<{ lang: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
   const { lang } = await params;
+  const session = await auth();
+  if (!session?.user?.id) redirect(`/${lang}/login`);
   const dict = hasLocale(lang) ? await getDictionary(lang as any) : await getDictionary("en");
 
   const { userId: targetUserId } = await searchParams;

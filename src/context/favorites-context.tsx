@@ -21,6 +21,9 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   // Load from localStorage on mount, then sync with DB if logged in
   useEffect(() => {
     const loadFavorites = async () => {
+      // Defer execution to next tick to avoid synchronous setState inside mount effect body
+      await Promise.resolve();
+
       // 1. Load from localStorage as baseline
       const savedFavorites = localStorage.getItem("giftisan-favorites");
       if (savedFavorites) {

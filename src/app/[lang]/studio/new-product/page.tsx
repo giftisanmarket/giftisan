@@ -23,17 +23,17 @@ export default async function NewProductPage({ params }: { params: Promise<{ lan
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login?callbackUrl=/studio/new-product");
+    redirect(`/${lang}/login?callbackUrl=/${lang}/studio/new-product`);
   }
 
   if (session.user.role !== "ARTISAN") {
-    redirect("/profile");
+    redirect(`/${lang}/profile`);
   }
 
   const artisan = await getArtisanData(session.user.id as string);
 
   if (!artisan) {
-    redirect("/profile");
+    redirect(`/${lang}/profile`);
   }
 
   const { getDictionary } = await import("@/app/[lang]/dictionaries");

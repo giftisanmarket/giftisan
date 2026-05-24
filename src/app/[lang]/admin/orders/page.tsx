@@ -1,4 +1,5 @@
 import { getAllOrders } from "@/lib/actions";
+export const dynamic = "force-dynamic";
 import { getDictionary } from "../../dictionaries";
 import { Metadata } from "next";
 import { AdminOrdersClient } from "@/components/admin/admin-orders-client";

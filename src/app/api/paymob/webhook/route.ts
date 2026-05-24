@@ -174,10 +174,10 @@ export async function POST(req: NextRequest) {
 
       if (order && order.status === "PENDING") {
         await prisma.$transaction(async (tx) => {
-          // Mark order as CANCELLED
+          // Mark order as FAILED
           await tx.order.update({
             where: { id: orderId },
-            data: { status: "CANCELLED" }
+            data: { status: "FAILED" }
           });
 
           // Restore stock
@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
             }
           }
         });
-        console.log(`Order ${orderId} payment failed. Marked as CANCELLED and restored stock.`);
+        console.log(`Order ${orderId} payment failed. Marked as FAILED and restored stock.`);
       } else if (order) {
         console.log(`Order ${orderId} has status: ${order.status} (No stock restoration needed)`);
       }

@@ -8,11 +8,11 @@ export default async function StudioSettingsPage({ params }: { params: Promise<{
   const { lang } = await params;
   const session = await auth();
   if (!session?.user || session.user.role !== "ARTISAN") {
-    redirect("/");
+    redirect(`/${lang}`);
   }
 
   const artisan = await getArtisanData(session.user.id as string);
-  if (!artisan) redirect("/studio");
+  if (!artisan) redirect(`/${lang}/studio`);
 
   // Aggressively sanitize artisan to prevent serialization crashes from deep nesting (products/reviews)
   const sanitizedArtisan = {

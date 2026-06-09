@@ -91,7 +91,14 @@ export default function proxy(request: NextRequest) {
 
   const isAllowedInMaintenance = 
     purePathname === '/maintenance' ||
-    purePathname.startsWith('/admin');
+    purePathname.startsWith('/admin') ||
+    purePathname.startsWith('/signup') ||
+    purePathname.startsWith('/login') ||
+    purePathname.startsWith('/become-artisan') ||
+    purePathname.startsWith('/forgot-password') ||
+    purePathname.startsWith('/reset-password') ||
+    purePathname.startsWith('/studio') ||
+    purePathname.startsWith('/profile');
 
   if (isAllowedInMaintenance) {
     return NextResponse.next();

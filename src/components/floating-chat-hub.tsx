@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { MessageSquare, Send, X, ArrowLeft, Paperclip, FileIcon, Eye, Loader2, Sparkles, ChevronDown, Download } from "lucide-react";
+import { MessageSquare, Send, X, ArrowLeft, Paperclip, FileIcon, Eye, Loader2, Sparkles, ChevronDown, Download, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
+import { IS_CHAT_LOCKED } from "@/lib/constants";
 import { useNotifications } from "./notification-provider";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
@@ -251,6 +252,11 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
   };
 
   const handleSendMessage = async () => {
+    if (IS_CHAT_LOCKED) {
+      toast.error(isRtl ? "المحادثات مغلقة حالياً" : "Messaging is currently locked");
+      return;
+    }
+
     if ((!reply.trim() && !attachment) || isSending || !activeThread || !session?.user?.id) return;
 
     setIsSending(true);
@@ -444,46 +450,55 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
                   </AnimatePresence>
 
                   {/* Thread Compose Bar */}
-                  <div className="p-4 bg-white border-t border-primary/5 flex items-center gap-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        value={reply}
-                        onChange={(e) => setReply(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSendMessage();
-                          }
-                        }}
-                        placeholder={ui.replyPlaceholder}
-                        className="w-full h-10 px-4 pe-10 bg-cream/30 border border-primary/10 rounded-full focus:outline-none focus:border-accent text-xs font-semibold text-primary"
-                      />
-                      <input
-                        type="file"
-                        id="hub-attachment"
-                        className="hidden"
-                        onChange={handleFileChange}
-                        accept="image/*,.pdf,.doc,.docx"
-                      />
-                      <label
-                        htmlFor="hub-attachment"
-                        className="absolute end-3 top-1/2 -translate-y-1/2 text-primary/30 hover:text-accent transition-colors cursor-pointer"
-                      >
-                        <Paperclip className="w-3.5 h-3.5" />
-                      </label>
+                  {IS_CHAT_LOCKED ? (
+                    <div className="p-4 bg-amber-500/10 border-t border-amber-500/20 flex items-center justify-center gap-2 text-center">
+                      <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+                      <span className="text-xs font-semibold text-amber-900">
+                        {isRtl ? "المحادثات المباشرة مغلقة حالياً" : "Direct messaging is currently locked"}
+                      </span>
                     </div>
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={isSending || (!reply.trim() && !attachment)}
-                      className="h-10 w-10 bg-accent hover:bg-accent-light text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 disabled:opacity-45 disabled:hover:bg-accent"
-                    >
-                      {isSending ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Send className="w-3.5 h-3.5 rtl:rotate-180" />
-                      )}
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="p-4 bg-white border-t border-primary/5 flex items-center gap-2">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          value={reply}
+                          onChange={(e) => setReply(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSendMessage();
+                            }
+                          }}
+                          placeholder={ui.replyPlaceholder}
+                          className="w-full h-10 px-4 pe-10 bg-cream/30 border border-primary/10 rounded-full focus:outline-none focus:border-accent text-xs font-semibold text-primary"
+                        />
+                        <input
+                          type="file"
+                          id="hub-attachment"
+                          className="hidden"
+                          onChange={handleFileChange}
+                          accept="image/*,.pdf,.doc,.docx"
+                        />
+                        <label
+                          htmlFor="hub-attachment"
+                          className="absolute end-3 top-1/2 -translate-y-1/2 text-primary/30 hover:text-accent transition-colors cursor-pointer"
+                        >
+                          <Paperclip className="w-3.5 h-3.5" />
+                        </label>
+                      </div>
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={isSending || (!reply.trim() && !attachment)}
+                        className="h-10 w-10 bg-accent hover:bg-accent-light text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 disabled:opacity-45 disabled:hover:bg-accent"
+                      >
+                        {isSending ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Send className="w-3.5 h-3.5 rtl:rotate-180" />
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 /* Thread List Grid */

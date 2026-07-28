@@ -1134,7 +1134,9 @@
     "placeholder": "Ask about customization, materials, or shipping...",
     "sending": "Sending...",
     "send_message": "Send Message",
-    "failed_send": "Failed to send message. Please try again."
+    "failed_send": "Failed to send message. Please try again.",
+    "chat_locked_title": "Messaging Temporarily Locked",
+    "chat_locked_desc": "Direct messaging between clients and artisans is currently locked by administration."
   },
   "privacy": {
     "title_base": "Privacy",

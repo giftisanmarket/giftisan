@@ -12,6 +12,7 @@ import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendV
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
+import { IS_CHAT_LOCKED } from "@/lib/constants";
 
 export async function uploadImage(base64Data: string, skipWebPConversion = true) {
   try {
@@ -2378,6 +2379,10 @@ export async function updateUserRole(userId: string, role: "CLIENT" | "ARTISAN" 
 }
 
 export async function sendMessage(senderId: string, receiverId: string, content: string, productId?: string, attachment?: string) {
+  if (IS_CHAT_LOCKED) {
+    return { error: "Messaging between clients and artisans is currently locked." };
+  }
+
   if (!senderId || !receiverId) {
     return { error: "Missing sender or receiver ID" };
   }

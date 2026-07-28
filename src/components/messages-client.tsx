@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, Suspense, useMemo, useRef } from "react";
-import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye, ArrowLeft, Download } from "lucide-react";
+import { MessageSquare, Send, User, Package, Clock, Paperclip, X, FileIcon, Eye, ArrowLeft, Download, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage, markMessagesAsRead, getInbox } from "@/lib/actions";
+import { IS_CHAT_LOCKED } from "@/lib/constants";
 import { useNotifications } from "./notification-provider";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -286,6 +287,11 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
   }, [activeThread, userId, refreshUnreadCount]);
 
   const handleReply = async () => {
+    if (IS_CHAT_LOCKED) {
+      toast.error(dict.home?.chat_locked_title || "Messaging is currently locked");
+      return;
+    }
+
     if ((!reply.trim() && !attachment) || isSending || !activeThread) return;
     
     if (session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth) {
@@ -505,73 +511,91 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
 
               {/* Input Area */}
               <div className="p-4 md:p-8 bg-white border-t border-primary/5 space-y-3">
-                {/* Attachment Preview */}
-                <AnimatePresence>
-                  {attachment && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
-                    >
-                      {isImageAttachment(attachment) ? (
-                        <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">
-                          <FileIcon className="w-4 h-4 md:w-6 md:h-6 text-accent" />
-                          <span className="text-[7px] font-black text-accent uppercase tracking-widest">Doc</span>
-                        </div>
-                      )}
-                      <button 
-                        onClick={() => setAttachment(null)}
-                        className="absolute inset-0 bg-accent/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                      >
-                        <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                <div className="flex flex-col md:relative">
-                  <textarea 
-                    value={reply}
-                    onChange={(e) => setReply(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleReply();
-                      }
-                    }}
-                    placeholder={dict.home.reply_placeholder.replace('{name}', activeThread.partner.name)}
-                    className="w-full h-20 md:h-32 p-4 md:p-6 pe-4 md:pe-20 bg-cream/30 border border-primary/10 rounded-xl md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
-                  />
-                  <div className="flex md:absolute bottom-4 end-4 items-center justify-end gap-2 md:gap-3">
-                    <input 
-                      type="file" 
-                      id="file-attachment" 
-                      className="hidden" 
-                      onChange={handleFileChange}
-                      accept="image/*,.pdf,.doc,.docx"
-                    />
-                    <label 
-                      htmlFor="file-attachment"
-                      className="h-10 w-10 md:h-12 md:w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm active:scale-90"
-                    >
-                      <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
-                    </label>
-                    <button 
-                      onClick={handleReply}
-                      disabled={isSending || (!reply.trim() && !attachment)}
-                      className={cn(
-                        "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm active:scale-95",
-                        session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
-                      )}
-                    >
-                      {session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth ? dict.home.verify_to_reply : isSending ? "..." : dict.home.reply_button}
-                      {!isSending && <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />}
-                    </button>
+                {IS_CHAT_LOCKED ? (
+                  <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl md:rounded-[2rem] flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-start">
+                    <div className="p-3 bg-amber-500/15 rounded-2xl text-amber-700 shrink-0">
+                      <Lock className="w-6 h-6 md:w-8 md:h-8" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm md:text-base text-amber-900">
+                        {dict.home?.chat_locked_title || "Messaging Temporarily Locked"}
+                      </h4>
+                      <p className="text-xs md:text-sm text-amber-800/80 mt-0.5 leading-relaxed">
+                        {dict.home?.chat_locked_desc || "Direct messaging between clients and artisans is currently locked by administration."}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Attachment Preview */}
+                    <AnimatePresence>
+                      {attachment && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 border-accent shadow-xl group"
+                        >
+                          {isImageAttachment(attachment) ? (
+                            <Image src={attachment} alt="Preview" fill className="object-cover" unoptimized />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-cream gap-1">
+                              <FileIcon className="w-4 h-4 md:w-6 md:h-6 text-accent" />
+                              <span className="text-[7px] font-black text-accent uppercase tracking-widest">Doc</span>
+                            </div>
+                          )}
+                          <button 
+                            onClick={() => setAttachment(null)}
+                            className="absolute inset-0 bg-accent/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    <div className="flex flex-col md:relative">
+                      <textarea 
+                        value={reply}
+                        onChange={(e) => setReply(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleReply();
+                          }
+                        }}
+                        placeholder={dict.home.reply_placeholder.replace('{name}', activeThread.partner.name)}
+                        className="w-full h-20 md:h-32 p-4 md:p-6 pe-4 md:pe-20 bg-cream/30 border border-primary/10 rounded-xl md:rounded-[2rem] focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none text-sm md:text-base mb-3 md:mb-0"
+                      />
+                      <div className="flex md:absolute bottom-4 end-4 items-center justify-end gap-2 md:gap-3">
+                        <input 
+                          type="file" 
+                          id="file-attachment" 
+                          className="hidden" 
+                          onChange={handleFileChange}
+                          accept="image/*,.pdf,.doc,.docx"
+                        />
+                        <label 
+                          htmlFor="file-attachment"
+                          className="h-10 w-10 md:h-12 md:w-12 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm active:scale-90"
+                        >
+                          <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
+                        </label>
+                        <button 
+                          onClick={handleReply}
+                          disabled={isSending || (!reply.trim() && !attachment)}
+                          className={cn(
+                            "h-10 md:h-12 px-6 md:px-8 bg-accent text-white font-bold rounded-full hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center gap-2 disabled:opacity-50 text-xs md:text-sm active:scale-95",
+                            session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth && "opacity-50 cursor-not-allowed bg-charcoal/40 shadow-none active:scale-100"
+                          )}
+                        >
+                          {session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth ? dict.home.verify_to_reply : isSending ? "..." : dict.home.reply_button}
+                          {!isSending && <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           ) : (

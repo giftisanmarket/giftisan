@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, Send, X, Paperclip, FileIcon, Eye, Sparkles, CheckCircle2, Loader2, Download } from "lucide-react";
+import { MessageSquare, Send, X, Paperclip, FileIcon, Eye, Sparkles, CheckCircle2, Loader2, Download, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendMessage, getInbox } from "@/lib/actions";
+import { IS_CHAT_LOCKED } from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -229,6 +230,11 @@ export function ContactArtisanButton({
 
   // Send message action
   const handleSendMessage = async () => {
+    if (IS_CHAT_LOCKED) {
+      toast.error(dict.contact_artisan?.chat_locked_title || (isRtl ? "المحادثات مغلقة حالياً" : "Messaging is currently locked"));
+      return;
+    }
+
     if ((!newMessage.trim() && !attachment) || isSending || !session?.user?.id) return;
 
     setIsSending(true);
@@ -451,50 +457,66 @@ export function ContactArtisanButton({
                 </AnimatePresence>
 
                 {/* Input Controls */}
-                <div className="flex items-end gap-3">
-                  <div className="flex-1 relative">
-                    <textarea 
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      placeholder={isRtl ? "اسأل عن التفاصيل أو أضف تعديلات مخصصة..." : "Ask about tailored engraving, specific materials..."}
-                      className="w-full h-20 md:h-24 p-4 pe-12 bg-cream/30 border border-primary/10 rounded-2xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/10 transition-all font-medium text-primary resize-none text-xs md:text-sm placeholder:text-primary/30"
-                    />
-                    
-                    {/* File Attachment Hidden Input */}
-                    <input 
-                      type="file" 
-                      id="drawer-file-attachment" 
-                      className="hidden" 
-                      onChange={handleFileChange}
-                      accept="image/*,.pdf,.doc,.docx"
-                    />
-                    <label 
-                      htmlFor="drawer-file-attachment"
-                      className="absolute bottom-4 end-4 h-8 w-8 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm active:scale-90"
-                    >
-                      <Paperclip className="w-3.5 h-3.5" />
-                    </label>
+                {IS_CHAT_LOCKED ? (
+                  <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3 text-start">
+                    <div className="p-2.5 bg-amber-500/15 rounded-xl text-amber-700 shrink-0">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs md:text-sm text-amber-900">
+                        {dict.contact_artisan?.chat_locked_title || (isRtl ? "المحادثات مغلقة حالياً" : "Messaging Temporarily Locked")}
+                      </h4>
+                      <p className="text-[11px] md:text-xs text-amber-800/80 mt-0.5 leading-relaxed">
+                        {dict.contact_artisan?.chat_locked_desc || (isRtl ? "المحادثات المباشرة بين العملاء والحرفيين مغلقة حالياً من قبل الإدارة." : "Direct messaging between clients and artisans is currently locked by administration.")}
+                      </p>
+                    </div>
                   </div>
-                  
-                  {/* Send Button */}
-                  <button 
-                    onClick={handleSendMessage}
-                    disabled={isSending || (!newMessage.trim() && !attachment)}
-                    className="h-12 w-12 bg-accent hover:bg-accent-light text-white rounded-2xl flex items-center justify-center transition-all shadow-md shadow-accent/20 active:scale-95 shrink-0 disabled:opacity-40 disabled:hover:bg-accent"
-                  >
-                    {isSending ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4 rtl:rotate-180" />
-                    )}
-                  </button>
-                </div>
+                ) : (
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1 relative">
+                      <textarea 
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        placeholder={isRtl ? "اسأل عن التفاصيل أو أضف تعديلات مخصصة..." : "Ask about tailored engraving, specific materials..."}
+                        className="w-full h-20 md:h-24 p-4 pe-12 bg-cream/30 border border-primary/10 rounded-2xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/10 transition-all font-medium text-primary resize-none text-xs md:text-sm placeholder:text-primary/30"
+                      />
+                      
+                      {/* File Attachment Hidden Input */}
+                      <input 
+                        type="file" 
+                        id="drawer-file-attachment" 
+                        className="hidden" 
+                        onChange={handleFileChange}
+                        accept="image/*,.pdf,.doc,.docx"
+                      />
+                      <label 
+                        htmlFor="drawer-file-attachment"
+                        className="absolute bottom-4 end-4 h-8 w-8 bg-white text-primary/40 border border-primary/10 rounded-full flex items-center justify-center hover:text-accent hover:border-accent transition-all cursor-pointer shadow-sm active:scale-90"
+                      >
+                        <Paperclip className="w-3.5 h-3.5" />
+                      </label>
+                    </div>
+                    
+                    {/* Send Button */}
+                    <button 
+                      onClick={handleSendMessage}
+                      disabled={isSending || (!newMessage.trim() && !attachment)}
+                      className="h-12 w-12 bg-accent hover:bg-accent-light text-white rounded-2xl flex items-center justify-center transition-all shadow-md shadow-accent/20 active:scale-95 shrink-0 disabled:opacity-40 disabled:hover:bg-accent"
+                    >
+                      {isSending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4 rtl:rotate-180" />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

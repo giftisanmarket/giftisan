@@ -16,9 +16,10 @@ import {
   ShieldCheck,
   Truck,
   MessageCircle,
-  X
+  X,
+  Download
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -51,6 +52,45 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
   const [retryError, setRetryError] = useState<string | null>(null);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+
+  const handleDownloadImage = async (url: string) => {
+    try {
+      if (url.startsWith("data:")) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `custom_client_image_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      const cleanUrl = url.split("?")[0];
+      const ext = cleanUrl.split(".").pop() || "jpg";
+      link.download = `client_custom_image_${Date.now()}.${ext.length <= 4 ? ext : "jpg"}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 200);
+    } catch (error) {
+      console.error("Direct download failed, falling back:", error);
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.download = `client_custom_image_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const executeCancelOrder = async (orderId: string) => {
     setCancellingOrderId(orderId);
@@ -377,11 +417,21 @@ Trace
 
                                   {item.customImage && (
                                     <div className="mt-2 text-[9px] md:text-[10px] text-accent flex items-center gap-2">
-                                      <div className="relative w-6 h-6 rounded overflow-hidden shrink-0 border border-accent/20 bg-white">
+                                      <button 
+                                        type="button"
+                                        onClick={() => setViewingImage(item.customImage)}
+                                        className="relative w-6 h-6 rounded overflow-hidden shrink-0 border border-accent/20 bg-white cursor-pointer hover:opacity-80 transition-opacity"
+                                      >
                                         <img src={item.customImage} alt="Custom uploaded photo" className="w-full h-full object-cover" />
-                                      </div>
+                                      </button>
                                       <span className="font-bold">{dict.product?.custom_image_attached || (isAr ? "صورة مخصصة مرفقة" : "Custom photo attached")}</span>
-                                      <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="underline ms-1 font-semibold">{dict.common?.view_image || "View"}</a>
+                                      <button 
+                                        type="button"
+                                        onClick={() => setViewingImage(item.customImage)} 
+                                        className="underline ms-1 font-semibold cursor-pointer hover:text-accent-light"
+                                      >
+                                        {dict.common?.view_image || (isAr ? "عرض" : "View")}
+                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -443,6 +493,31 @@ Trace
         cancelText={dict.common?.cancel || (isAr ? "تراجع" : "Keep Order")}
         isDestructive={true}
       />
+
+      <AnimatePresence>
+        {viewingImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setViewingImage(null)}
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6 cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative max-w-4xl max-h-[85vh] flex items-center justify-center overflow-hidden rounded-2xl"
+            >
+              <img
+                src={viewingImage}
+                alt="Custom design preview"
+                className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

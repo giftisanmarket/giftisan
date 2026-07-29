@@ -481,7 +481,7 @@ export function SalesTab({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setViewingImage(null)}
-            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6"
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6 cursor-pointer"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -489,7 +489,6 @@ export function SalesTab({
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative max-w-4xl w-full flex flex-col items-center gap-4 pointer-events-none"
             >
-              {/* Image Preview */}
               <div 
                 className="relative max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl cursor-default pointer-events-auto"
                 onClick={(e) => e.stopPropagation()}
@@ -501,7 +500,6 @@ export function SalesTab({
                 />
               </div>
 
-              {/* Action Buttons */}
               <div 
                 className="flex items-center gap-3 mt-2 pointer-events-auto"
                 onClick={(e) => e.stopPropagation()}
@@ -513,13 +511,6 @@ export function SalesTab({
                 >
                   <Download className="w-4 h-4" />
                   {dict.product?.download_high_res || dict.common?.download || (isArabic ? "تنزيل الصورة" : "Download Image")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewingImage(null)}
-                  className="px-6 py-3 bg-white/10 text-white font-bold text-xs uppercase tracking-widest rounded-full hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
-                >
-                  {dict.product?.close || dict.common?.close || (isArabic ? "إغلاق" : "Close")}
                 </button>
               </div>
             </motion.div>

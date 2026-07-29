@@ -16,7 +16,8 @@ import {
   X,
   Clock,
   Coins,
-  Printer
+  Printer,
+  Camera
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
@@ -480,47 +481,45 @@ export function SalesTab({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setViewingImage(null)}
-            className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-w-5xl max-h-[90vh] bg-charcoal/90 rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center p-4 md:p-6"
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative max-w-4xl w-full flex flex-col items-center gap-4 pointer-events-none"
             >
-              <button
-                type="button"
-                onClick={() => setViewingImage(null)}
-                className="absolute top-4 end-4 z-10 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all active:scale-95"
-                title={dict.common?.close || "Close"}
+              {/* Image Preview */}
+              <div 
+                className="relative max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl cursor-default pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
               >
-                <X className="w-6 h-6" />
-              </button>
-
-              <div className="relative w-full max-h-[75vh] flex items-center justify-center overflow-hidden my-4">
                 <img
                   src={viewingImage}
-                  alt="Client custom uploaded design"
-                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
+                  alt="Client design preview"
+                  className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl"
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2 flex-wrap justify-center">
+              {/* Action Buttons */}
+              <div 
+                className="flex items-center gap-3 mt-2 pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
                   type="button"
                   onClick={() => handleDownloadImage(viewingImage)}
-                  className="px-6 py-3 bg-accent text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-accent-light transition-all flex items-center gap-2 shadow-lg shadow-accent/20 active:scale-95 cursor-pointer"
+                  className="px-6 py-3 bg-accent text-white font-bold text-xs uppercase tracking-widest rounded-full hover:bg-accent-light transition-all flex items-center gap-2 shadow-lg active:scale-95 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  {dict.common?.download || "Download High-Res Image"}
+                  {dict.product?.download_high_res || dict.common?.download || (isArabic ? "تنزيل الصورة" : "Download Image")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewingImage(null)}
-                  className="px-6 py-3 bg-white/10 text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all active:scale-95"
+                  className="px-6 py-3 bg-white/10 text-white font-bold text-xs uppercase tracking-widest rounded-full hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
                 >
-                  {dict.common?.close || "Close"}
+                  {dict.product?.close || dict.common?.close || (isArabic ? "إغلاق" : "Close")}
                 </button>
               </div>
             </motion.div>

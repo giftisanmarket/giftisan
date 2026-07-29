@@ -159,6 +159,44 @@ export function SalesTab({
     document.body.removeChild(link);
   };
 
+  const handleDownloadImage = async (url: string) => {
+    try {
+      if (url.startsWith("data:")) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `client_custom_image_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      const cleanUrl = url.split("?")[0];
+      const ext = cleanUrl.split(".").pop() || "jpg";
+      link.download = `client_custom_image_${Date.now()}.${ext.length <= 4 ? ext : "jpg"}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 200);
+    } catch (error) {
+      console.error("Direct download failed, falling back:", error);
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.download = `client_custom_image_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="bg-white rounded-[2rem] md:rounded-[3.5rem] p-5 md:p-8 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-charcoal">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 md:gap-12">
@@ -469,16 +507,14 @@ export function SalesTab({
               </div>
 
               <div className="flex items-center gap-3 pt-2 flex-wrap justify-center">
-                <a
-                  href={viewingImage}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download="client_custom_image"
-                  className="px-6 py-3 bg-accent text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-accent-light transition-all flex items-center gap-2 shadow-lg shadow-accent/20 active:scale-95"
+                <button
+                  type="button"
+                  onClick={() => handleDownloadImage(viewingImage)}
+                  className="px-6 py-3 bg-accent text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-accent-light transition-all flex items-center gap-2 shadow-lg shadow-accent/20 active:scale-95 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   {dict.common?.download || "Download High-Res Image"}
-                </a>
+                </button>
                 <button
                   type="button"
                   onClick={() => setViewingImage(null)}

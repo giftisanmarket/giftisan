@@ -467,6 +467,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     images: ["", "", "", "", "", "", "", "", "", ""],
     canPersonalize: false,
     personalizationPrompt: "",
+    requiresClientImage: false,
+    clientImagePrompt: "",
     badge: "",
     stock: "1"
   });
@@ -559,6 +561,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     form.append("category", formData.category);
     form.append("canPersonalize", formData.canPersonalize.toString());
     form.append("personalizationPrompt", formData.personalizationPrompt);
+    form.append("requiresClientImage", formData.requiresClientImage.toString());
+    form.append("clientImagePrompt", formData.clientImagePrompt);
     form.append("badge", formData.badge);
     form.append("stock", formData.stock.trim());
 
@@ -906,6 +910,31 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-2 overflow-hidden">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
                     <textarea value={formData.personalizationPrompt} onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })} placeholder={dict.new_product.personalization_prompt_placeholder} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-start gap-4 p-5 md:p-6 bg-cream/20 rounded-2xl md:rounded-[2rem] border border-primary/5">
+                <div className="pt-1">
+                  <input
+                    type="checkbox"
+                    id="requireClientImage"
+                    checked={formData.requiresClientImage}
+                    onChange={(e) => setFormData({ ...formData, requiresClientImage: e.target.checked })}
+                    className="w-4 h-4 md:w-5 md:h-5 rounded border-primary/20 text-accent focus:ring-accent"
+                  />
+                </div>
+                <label htmlFor="requireClientImage" className="cursor-pointer">
+                  <p className="font-bold text-primary text-sm md:text-base">{dict.new_product.require_client_image || "Require Customer Image Upload"}</p>
+                  <p className="text-[10px] md:text-xs text-charcoal/50">{dict.new_product.client_image_desc || "Require buyers to upload an image/photo before purchasing."}</p>
+                </label>
+              </div>
+
+              <AnimatePresence>
+                {formData.requiresClientImage && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-2 overflow-hidden">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.client_image_prompt_label || "Image Upload Instructions"}</label>
+                    <textarea value={formData.clientImagePrompt} onChange={(e) => setFormData({ ...formData, clientImagePrompt: e.target.value })} placeholder={dict.new_product.client_image_prompt_placeholder || "What photo should the buyer upload?"} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
                   </motion.div>
                 )}
               </AnimatePresence>

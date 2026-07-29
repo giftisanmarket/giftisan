@@ -65,7 +65,7 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id + (item.personalization || "") + (item.variantId || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
+                  <div key={item.id + (item.personalization || "") + (item.variantId || "") + (item.customImage || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
                     <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
                       <BespokeImage src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
@@ -97,11 +97,20 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                           <p className="text-[10px] text-primary italic leading-tight">"{item.personalization}"</p>
                         </div>
                       )}
+
+                      {item.customImage && (
+                        <div className="flex items-center gap-2 bg-primary/5 border border-primary/5 rounded-xl p-2 mt-2">
+                          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-primary/10 bg-white">
+                            <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-[10px] text-primary font-bold">{dict.product.custom_image_attached || "Custom photo attached"}</span>
+                        </div>
+                      )}
                       
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center border border-primary/5 rounded-full h-8 md:h-9 px-3 gap-3 md:gap-4 bg-white shadow-sm">
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization, item.variantId)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization, item.variantId, item.customImage)}
                             className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
                             <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -110,14 +119,14 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                             {item.quantity}
                           </span>
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization, item.variantId)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization, item.variantId, item.customImage)}
                             className="p-1 text-primary hover:text-accent transition-all active:scale-75"
                           >
                             <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </div>
                         <button 
-                          onClick={() => removeFromCart(item.id, item.personalization, item.variantId)}
+                          onClick={() => removeFromCart(item.id, item.personalization, item.variantId, item.customImage)}
                           className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95"
                         >
                           {dict.cart.remove}

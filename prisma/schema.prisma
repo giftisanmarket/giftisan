@@ -173,6 +173,8 @@ model Product {
   tags                  String[]
   canPersonalize        Boolean       @default(false)
   personalizationPrompt String? // Instruction for the buyer (e.g. "Enter name for engraving")
+  requiresClientImage   Boolean       @default(false)
+  clientImagePrompt     String?       // Instruction for client image upload (e.g. "Upload photo to print")
   badge                 String?
   stock                 Int           @default(1)
   status                ProductStatus @default(PENDING)
@@ -315,6 +317,7 @@ model OrderItem {
   quantity        Int
   price           Float
   personalization String?
+  customImage     String? @db.Text
   variantId       String?
   status          String  @default("PENDING")
   trackingNumber  String?

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   Truck,
@@ -52,6 +52,7 @@ export function SalesTab({
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   const isArabic = dict.studio.mark_shipped === "تحديد كمشحون";
 
@@ -312,6 +313,36 @@ export function SalesTab({
                             <p className="text-xs italic text-primary leading-relaxed">"{item.personalization}"</p>
                           </div>
                         )}
+
+                        {item.customImage && (
+                          <div className="bg-accent/5 border border-accent/10 p-3 rounded-2xl flex items-center gap-3 shadow-sm max-w-full">
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewingImage(item.customImage);
+                              }}
+                              className="relative w-12 h-12 rounded-xl overflow-hidden border border-primary/10 bg-white shrink-0 group/img hover:opacity-90 shadow-sm cursor-pointer"
+                            >
+                              <img src={item.customImage} alt="Client upload" className="w-full h-full object-cover" />
+                            </button>
+                            <div className="text-start">
+                              <p className="text-[9px] font-black text-accent/60 uppercase tracking-[0.2em] mb-0.5">
+                                {dict.product.custom_image_attached || "Client Uploaded Image"}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setViewingImage(item.customImage);
+                                }}
+                                className="text-[10px] font-bold text-accent hover:underline inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                {dict.common.view_image || "View Image"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -403,6 +434,63 @@ export function SalesTab({
           })
         )}
       </div>
+
+      <AnimatePresence>
+        {viewingImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setViewingImage(null)}
+            className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-5xl max-h-[90vh] bg-charcoal/90 rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center p-4 md:p-6"
+            >
+              <button
+                type="button"
+                onClick={() => setViewingImage(null)}
+                className="absolute top-4 end-4 z-10 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all active:scale-95"
+                title={dict.common?.close || "Close"}
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="relative w-full max-h-[75vh] flex items-center justify-center overflow-hidden my-4">
+                <img
+                  src={viewingImage}
+                  alt="Client custom uploaded design"
+                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2 flex-wrap justify-center">
+                <a
+                  href={viewingImage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download="client_custom_image"
+                  className="px-6 py-3 bg-accent text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-accent-light transition-all flex items-center gap-2 shadow-lg shadow-accent/20 active:scale-95"
+                >
+                  <Download className="w-4 h-4" />
+                  {dict.common?.download || "Download High-Res Image"}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setViewingImage(null)}
+                  className="px-6 py-3 bg-white/10 text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all active:scale-95"
+                >
+                  {dict.common?.close || "Close"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

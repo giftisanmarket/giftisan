@@ -230,7 +230,7 @@ const MediaSlot = memo(({ idx, img, resolution, isCompressing, onImageChange, re
 
 MediaSlot.displayName = "MediaSlot";
 
-const DetailsSection = memo(({ stock, canPersonalize, badge, setTextData, readOnly, dict }: any) => (
+const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, requiresClientImage, clientImagePrompt, badge, setTextData, readOnly, dict }: any) => (
   <section className="space-y-8 pb-10">
     <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
       <CheckCircle2 className="w-5 h-5 text-accent" />
@@ -252,6 +252,7 @@ const DetailsSection = memo(({ stock, canPersonalize, badge, setTextData, readOn
             )}
           />
         </div>
+
         <div className="flex items-center gap-3 p-4 bg-cream/10 rounded-xl border border-primary/5">
           <input 
             type="checkbox" 
@@ -265,7 +266,54 @@ const DetailsSection = memo(({ stock, canPersonalize, badge, setTextData, readOn
             {dict.new_product.allow_personalization}
           </label>
         </div>
+
+        {canPersonalize && (
+          <div className="space-y-2 pt-2">
+            <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
+            <textarea 
+              value={personalizationPrompt}
+              onChange={(e) => !readOnly && setTextData((prev: any) => ({...prev, personalizationPrompt: e.target.value}))}
+              disabled={readOnly}
+              placeholder={dict.new_product.personalization_prompt_placeholder}
+              className={cn(
+                "w-full h-20 p-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-medium text-xs text-primary resize-none shadow-sm",
+                readOnly && "bg-cream/20 cursor-default"
+              )}
+            />
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 p-4 bg-cream/10 rounded-xl border border-primary/5">
+          <input 
+            type="checkbox" 
+            id="edit-require-client-image"
+            disabled={readOnly}
+            checked={requiresClientImage}
+            onChange={(e) => !readOnly && setTextData((prev: any) => ({...prev, requiresClientImage: e.target.checked}))}
+            className="w-4 h-4 rounded text-accent focus:ring-accent"
+          />
+          <label htmlFor="edit-require-client-image" className="text-xs font-bold text-primary cursor-pointer">
+            {dict.new_product.require_client_image || "Require Customer Image Upload"}
+          </label>
+        </div>
+
+        {requiresClientImage && (
+          <div className="space-y-2 pt-2">
+            <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.client_image_prompt_label || "Image Upload Instructions"}</label>
+            <textarea 
+              value={clientImagePrompt}
+              onChange={(e) => !readOnly && setTextData((prev: any) => ({...prev, clientImagePrompt: e.target.value}))}
+              disabled={readOnly}
+              placeholder={dict.new_product.client_image_prompt_placeholder || "What photo should the buyer upload?"}
+              className={cn(
+                "w-full h-20 p-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-medium text-xs text-primary resize-none shadow-sm",
+                readOnly && "bg-cream/20 cursor-default"
+              )}
+            />
+          </div>
+        )}
       </div>
+
       <div className="space-y-2">
         <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
         <input 
@@ -715,7 +763,10 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
     description: product.description,
     price: product.price.toString(),
     category: product.category,
-    canPersonalize: product.canPersonalize,
+    canPersonalize: product.canPersonalize || false,
+    personalizationPrompt: product.personalizationPrompt || "",
+    requiresClientImage: product.requiresClientImage || false,
+    clientImagePrompt: product.clientImagePrompt || "",
     badge: product.badge || "",
     stock: (product.stock || 0).toString()
   });
@@ -860,6 +911,9 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
     form.append("price", textData.price.trim());
     form.append("category", textData.category);
     form.append("canPersonalize", textData.canPersonalize.toString());
+    form.append("personalizationPrompt", textData.personalizationPrompt);
+    form.append("requiresClientImage", textData.requiresClientImage.toString());
+    form.append("clientImagePrompt", textData.clientImagePrompt);
     form.append("badge", textData.badge);
     form.append("stock", textData.stock.trim());
     
@@ -972,6 +1026,9 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                 <DetailsSection 
                   stock={textData.stock}
                   canPersonalize={textData.canPersonalize}
+                  personalizationPrompt={textData.personalizationPrompt}
+                  requiresClientImage={textData.requiresClientImage}
+                  clientImagePrompt={textData.clientImagePrompt}
                   badge={textData.badge}
                   setTextData={setTextData} 
                   readOnly={readOnly} 

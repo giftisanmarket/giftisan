@@ -23,6 +23,9 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
   const { data: session } = useSession();
   const [selectedImage, setSelectedImage] = useState(0);
   const [personalization, setPersonalization] = useState("");
+  const [customImage, setCustomImage] = useState("");
+  const [customImageError, setCustomImageError] = useState(false);
+  const [isCompressingCustomImage, setIsCompressingCustomImage] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "artisan" | "reviews">("details");
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [reviewImages, setReviewImages] = useState<string[]>([]);
@@ -33,6 +36,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const personalizationRef = useRef<HTMLTextAreaElement>(null);
+  const customImageRef = useRef<HTMLDivElement>(null);
 
   // Extract unique options from variants
   const options = product.variants?.reduce((acc: any[], v: any) => {
@@ -503,6 +507,96 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </motion.div>
             )}
 
+            {product.requiresClientImage && (
+              <motion.div 
+                ref={customImageRef}
+                animate={customImageError ? { x: [-5, 5, -5, 5, 0] } : {}}
+                className={cn(
+                  "bg-white/50 border rounded-2xl p-6 mb-8 transition-colors",
+                  customImageError ? "border-red-400 bg-red-50/30" : "border-primary/10"
+                )}
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Camera className="w-5 h-5 text-accent" />
+                  <h3 className="font-heading font-bold text-primary">
+                    {dict.product.upload_client_image_title || "Upload Custom Image / Photo"}
+                  </h3>
+                </div>
+                <p className="text-xs text-charcoal/50 mb-4 font-medium">
+                  {product.clientImagePrompt || dict.product.client_image_upload_prompt || "Upload your custom photo for this piece"}
+                </p>
+
+                {customImage ? (
+                  <div className="relative w-full aspect-video max-h-48 rounded-xl overflow-hidden border border-primary/20 bg-cream/40 flex items-center justify-center group">
+                    <img src={customImage} alt="Custom upload" className="w-full h-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => setCustomImage("")}
+                      className="absolute top-3 end-3 p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="absolute bottom-2 start-2 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                      {dict.product.custom_image_attached || "Photo attached"}
+                    </div>
+                  </div>
+                ) : (
+                  <label className={cn(
+                    "relative flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:bg-accent/5",
+                    customImageError ? "border-red-400 bg-red-50/20" : "border-primary/20 bg-white"
+                  )}>
+                    <input 
+                      type="file" 
+                      accept="image/jpeg,image/png,image/webp" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error(dict.home.upload_rules?.image_size_error || "Image must be less than 5MB");
+                          return;
+                        }
+                        setIsCompressingCustomImage(true);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          const img = new (window as any).Image();
+                          img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_RES = 1280;
+                            if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                            else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                            setCustomImage(canvas.toDataURL('image/jpeg', 0.85));
+                            setCustomImageError(false);
+                            setIsCompressingCustomImage(false);
+                          };
+                          img.src = reader.result as string;
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                    {isCompressingCustomImage ? (
+                      <div className="flex items-center gap-2 py-4 text-primary">
+                        <Camera className="w-6 h-6 animate-pulse text-accent" />
+                        <span className="text-xs font-bold">{dict.home?.compressing || "Processing image..."}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <ImagePlus className="w-8 h-8 text-accent" />
+                        <span className="text-xs font-bold text-primary">{dict.product.upload_image_btn || "Upload Image"}</span>
+                        <span className="text-[10px] text-charcoal/40 font-medium">JPG, PNG, WebP (Max 5MB)</span>
+                      </div>
+                    )}
+                  </label>
+                )}
+              </motion.div>
+            )}
+
             <div className="space-y-4 mb-8">
               <div className="flex gap-3">
                 <button
@@ -511,6 +605,12 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       setPersonalizationError(true);
                       personalizationRef.current?.focus();
                       toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
+                      return;
+                    }
+                    if (product.requiresClientImage && !customImage) {
+                      setCustomImageError(true);
+                      customImageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      toast.error(dict.product.image_upload_required_err || (lang === 'ar' ? "يرجى رفع الصورة المطلوبة قبل الشراء" : "Please upload the required photo before purchasing"));
                       return;
                     }
                     if (options.length > 0 && !selectedVariant) {
@@ -524,9 +624,10 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       image: selectedVariant?.image || product.images[0],
                       stock: displayStock,
                       variantId: selectedVariant?.id || null,
-                      variantName: selectedVariant?.name || null
+                      variantName: selectedVariant?.name || null,
+                      customImage: customImage || undefined
                     };
-                    addToCart(productToCart, personalization.trim());
+                    addToCart(productToCart, personalization.trim(), false, customImage || undefined);
                   }}
                   disabled={(displayStock || 0) <= 0}
                   className={cn(
@@ -558,6 +659,12 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
                     return;
                   }
+                  if (product.requiresClientImage && !customImage) {
+                    setCustomImageError(true);
+                    customImageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    toast.error(dict.product.image_upload_required_err || (lang === 'ar' ? "يرجى رفع الصورة المطلوبة قبل الشراء" : "Please upload the required photo before purchasing"));
+                    return;
+                  }
                   if (options.length > 0 && !selectedVariant) {
                     toast.error("Please select a variation first");
                     return;
@@ -569,9 +676,10 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     image: selectedVariant?.image || product.images[0],
                     stock: displayStock,
                     variantId: selectedVariant?.id || null,
-                    variantName: selectedVariant?.name || null
+                    variantName: selectedVariant?.name || null,
+                    customImage: customImage || undefined
                   };
-                  addToCart(productToCart, personalization.trim(), true);
+                  addToCart(productToCart, personalization.trim(), true, customImage || undefined);
                   window.location.href = "/checkout";
                 }}
                 disabled={(displayStock || 0) <= 0}

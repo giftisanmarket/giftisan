@@ -374,6 +374,16 @@ Trace
                                       <span className="line-clamp-1">{dict.profile.personalized}: "{item.personalization}"</span>
                                     </div>
                                   )}
+
+                                  {item.customImage && (
+                                    <div className="mt-2 text-[9px] md:text-[10px] text-accent flex items-center gap-2">
+                                      <div className="relative w-6 h-6 rounded overflow-hidden shrink-0 border border-accent/20 bg-white">
+                                        <img src={item.customImage} alt="Custom uploaded photo" className="w-full h-full object-cover" />
+                                      </div>
+                                      <span className="font-bold">{dict.product?.custom_image_attached || (isAr ? "صورة مخصصة مرفقة" : "Custom photo attached")}</span>
+                                      <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="underline ms-1 font-semibold">{dict.common?.view_image || "View"}</a>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 

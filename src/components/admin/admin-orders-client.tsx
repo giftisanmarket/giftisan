@@ -552,6 +552,16 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                 "{item.personalization}"
                               </p>
                             )}
+                            {item.customImage && (
+                              <div className="mt-2 flex items-center gap-2 bg-white/50 p-2 rounded-lg border border-primary/5">
+                                <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="relative w-8 h-8 rounded overflow-hidden shrink-0 border border-primary/10 bg-white">
+                                  <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
+                                </a>
+                                <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-accent hover:underline">
+                                  {dict.common?.view_image || "View Custom Photo"}
+                                </a>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -684,6 +694,12 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                         <div className="mt-2 p-3 bg-cream/30 rounded-xl border border-primary/5">
                           <p className="text-[8px] font-black uppercase tracking-widest text-accent mb-1">{dict.profile?.personalized || "Personalization"}</p>
                           <p className="text-xs italic text-primary/70">"{item.personalization}"</p>
+                        </div>
+                      )}
+                      {item.customImage && (
+                        <div className="mt-2 p-3 bg-cream/30 rounded-xl border border-primary/5 flex items-center gap-2">
+                          <img src={item.customImage} alt="Custom upload" className="w-10 h-10 object-cover rounded border border-primary/10" />
+                          <span className="text-[10px] font-bold text-primary">{dict.product?.custom_image_attached || "Custom photo attached"}</span>
                         </div>
                       )}
                     </td>

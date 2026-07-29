@@ -217,6 +217,14 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         <p className="text-[10px] md:text-[11px] text-accent-light italic leading-tight">"{item.personalization}"</p>
                       </div>
                     )}
+                    {item.customImage && (
+                      <div className="ms-16 md:ms-20 mt-1.5 flex items-center gap-2 bg-white/10 p-2 rounded-lg border border-white/10">
+                        <div className="relative w-8 h-8 rounded overflow-hidden shrink-0 border border-white/20">
+                          <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] text-accent-light font-bold">{dict.product.custom_image_attached || "Custom photo attached"}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -563,9 +563,14 @@ export async function getUserFavorites(userId: string) {
 
 export async function createOrder(userId: string, totalAmount: number, items: any[], shippingData?: any) {
   try {
+    const processedItems = await Promise.all(items.map(async item => ({
+      ...item,
+      processedCustomImage: item.customImage ? await processImage(item.customImage) : null
+    })));
+
     const order = await prisma.$transaction(async (tx) => {
       // 🛡️ Final Inventory Guard: Verify stock for all items before processing
-      for (const item of items) {
+      for (const item of processedItems) {
         if (item.variantId) {
           const variant = await tx.productVariant.findUnique({
             where: { id: item.variantId },
@@ -606,12 +611,13 @@ export async function createOrder(userId: string, totalAmount: number, items: an
           shippingMethodId: shippingData?.shippingMethodId || null,
           shippingCost: shippingData?.shippingCost || 0,
           items: {
-            create: items.map(item => ({
+            create: processedItems.map(item => ({
               productId: item.id,
               variantId: item.variantId || null,
               quantity: item.quantity,
               price: item.price,
-              personalization: item.personalization
+              personalization: item.personalization,
+              customImage: item.processedCustomImage
             }))
           }
         }
@@ -1454,6 +1460,8 @@ export async function createProduct(artisanId: string, formData: FormData) {
       category: formData.get("category") as string,
       canPersonalize: formData.get("canPersonalize") === "true",
       personalizationPrompt: formData.get("personalizationPrompt") as string,
+      requiresClientImage: formData.get("requiresClientImage") === "true",
+      clientImagePrompt: formData.get("clientImagePrompt") as string,
       badge: formData.get("badge") as string,
       stock: formData.get("stock") as string,
     };
@@ -1481,6 +1489,8 @@ export async function createProduct(artisanId: string, formData: FormData) {
         images: finalImages,
         canPersonalize: data.canPersonalize,
         personalizationPrompt: data.personalizationPrompt || null,
+        requiresClientImage: data.requiresClientImage,
+        clientImagePrompt: data.clientImagePrompt || null,
         badge: data.badge,
         stock: parseInt(data.stock) || 0,
         status: "PENDING",
@@ -1850,6 +1860,8 @@ export async function updateProduct(productId: string, formData: FormData) {
       category: formData.get("category") as string,
       canPersonalize: formData.get("canPersonalize") === "true",
       personalizationPrompt: formData.get("personalizationPrompt") as string,
+      requiresClientImage: formData.get("requiresClientImage") === "true",
+      clientImagePrompt: formData.get("clientImagePrompt") as string,
       badge: formData.get("badge") as string,
       stock: formData.get("stock") as string,
     };
@@ -1875,6 +1887,8 @@ export async function updateProduct(productId: string, formData: FormData) {
         images: finalImages,
         canPersonalize: data.canPersonalize,
         personalizationPrompt: data.personalizationPrompt || null,
+        requiresClientImage: data.requiresClientImage,
+        clientImagePrompt: data.clientImagePrompt || null,
         badge: data.badge || null,
         stock: parseInt(data.stock) || 0,
         status: "PENDING", // Reset to pending on update for re-approval

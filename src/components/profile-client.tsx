@@ -508,7 +508,16 @@ Trace
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative max-w-4xl max-h-[85vh] flex items-center justify-center overflow-hidden rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
+              <button
+                type="button"
+                onClick={() => setViewingImage(null)}
+                className="absolute top-4 end-4 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 backdrop-blur-md text-white flex items-center justify-center transition-all shadow-lg active:scale-90 cursor-pointer"
+                title={dict.product?.close || dict.common?.close || (isAr ? "إغلاق" : "Close")}
+              >
+                <X className="w-5 h-5" />
+              </button>
               <img
                 src={viewingImage}
                 alt="Custom design preview"

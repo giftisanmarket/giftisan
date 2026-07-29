@@ -490,9 +490,17 @@ export function SalesTab({
               className="relative max-w-4xl w-full flex flex-col items-center gap-4 pointer-events-none"
             >
               <div 
-                className="relative max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl cursor-default pointer-events-auto"
+                className="relative max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl cursor-default pointer-events-auto group"
                 onClick={(e) => e.stopPropagation()}
               >
+                <button
+                  type="button"
+                  onClick={() => setViewingImage(null)}
+                  className="absolute top-4 end-4 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 backdrop-blur-md text-white flex items-center justify-center transition-all shadow-lg active:scale-90 cursor-pointer"
+                  title={dict.product?.close || dict.common?.close || (isArabic ? "إغلاق" : "Close")}
+                >
+                  <X className="w-5 h-5" />
+                </button>
                 <img
                   src={viewingImage}
                   alt="Client design preview"

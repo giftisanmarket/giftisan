@@ -129,8 +129,8 @@ export function SalesTab({
     const rows = sales.map(item => [
       item.order.id,
       new Date(item.order.createdAt).toLocaleDateString(),
-      item.order.user.name,
-      item.order.user.email,
+      "Giftisan Customer",
+      "Protected",
       `"${item.product.name}"`,
       item.variant?.name || "Standard",
       item.quantity,
@@ -323,7 +323,7 @@ export function SalesTab({
                       <div className="flex flex-col md:flex-row flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-charcoal/60">
                         <p className="flex items-center gap-1.5">
                           <User className="w-3.5 h-3.5 opacity-40" />
-                          <span className="font-bold text-primary">{item.order.user.name}</span>
+                          <span className="font-bold text-primary">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</span>
                         </p>
                         <p className="hidden md:block opacity-20">•</p>
                         <p className="flex items-center gap-1.5">

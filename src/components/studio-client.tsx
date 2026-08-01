@@ -753,11 +753,11 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         <div className="space-y-4 md:space-y-6 min-w-0">
                           <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.buyer_details}</h3>
                           <div className="min-w-0">
-                            <p className="font-bold text-primary text-sm md:text-base">{selectedItem.order.user.name}</p>
-                            <p className="text-charcoal/60 text-xs md:text-sm font-medium mt-1 truncate">{selectedItem.order.user.email}</p>
-                            {selectedItem.order.clientPhone && (
-                              <p className="text-accent text-xs md:text-sm font-bold mt-2">{selectedItem.order.clientPhone}</p>
-                            )}
+                            <p className="font-bold text-primary text-sm md:text-base">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary/60 mt-2">
+                              <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
+                              <span>{lang === "ar" ? "بيانات العميل محمية الخصوصية" : "Customer Details Protected"}</span>
+                            </div>
                             <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5">
                               <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">{dict.studio.shipping_to}</p>
                               <div className="inline-flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary/70">
@@ -819,15 +819,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         />
                       </div>
 
-                      <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 pt-2">
-                        <Link
-                          href={`/profile/messages?userId=${selectedItem.order.userId}`}
-                          className="w-full py-4 md:h-16 bg-primary text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
-                        >
-                          <Mail className="w-4 h-4 md:w-5 md:h-5" />
-                          {dict.studio.message_customer}
-                        </Link>
-                      </div>
+
                     </div>
                   </div>
                 </motion.div>
@@ -860,7 +852,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   <div>
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.ship_to || "Ship To"}</h3>
                     <div className="space-y-1">
-                      <p className="text-lg font-black text-primary">{selectedItem.order.user.name}</p>
+                      <p className="text-lg font-black text-primary">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
                       <p className="text-sm font-bold text-charcoal/60 leading-relaxed">
                         🔒 {lang === "ar" ? "الشحن بواسطة خدمة توصيل جيفتيزان" : "Managed & Shipped by Giftisan Delivery"}
                       </p>

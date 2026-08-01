@@ -42,7 +42,8 @@ import {
   Wallet,
   User,
   Calendar,
-  Printer
+  Printer,
+  MapPin
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -758,12 +759,16 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                               <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
                               <span>{lang === "ar" ? "بيانات العميل محمية الخصوصية" : "Customer Details Protected"}</span>
                             </div>
-                            <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5">
-                              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">{dict.studio.shipping_to}</p>
-                              <div className="inline-flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary/70">
-                                <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
-                                <span>{lang === "ar" ? "الشحن بواسطة جيفتيزان (العنوان محمي الخصوصية)" : "Fulfilled & Shipped by Giftisan (Address Protected)"}</span>
+                            <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5 space-y-2">
+                              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio.shipping_to}</p>
+                              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary">
+                                <MapPin className="w-4 h-4 text-accent shrink-0" />
+                                <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
                               </div>
+                              <p className="text-[10px] font-medium text-charcoal/40 flex items-center gap-1.5 pt-0.5">
+                                <Lock className="w-3 h-3 text-accent shrink-0" />
+                                <span>{lang === "ar" ? "تتم التغطية بواسطة توصيل جيفتيزان (العنوان التفصيلي محمي)" : "Fulfilled by Giftisan Delivery (Street Address Protected)"}</span>
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -853,8 +858,11 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.ship_to || "Ship To"}</h3>
                     <div className="space-y-1">
                       <p className="text-lg font-black text-primary">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
-                      <p className="text-sm font-bold text-charcoal/60 leading-relaxed">
-                        🔒 {lang === "ar" ? "الشحن بواسطة خدمة توصيل جيفتيزان" : "Managed & Shipped by Giftisan Delivery"}
+                      <p className="text-sm font-bold text-primary">
+                        📍 {lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}
+                      </p>
+                      <p className="text-xs font-medium text-charcoal/40">
+                        🔒 {lang === "ar" ? "تتم التغطية بواسطة خدمة توصيل جيفتيزان" : "Fulfilled & Shipped by Giftisan Delivery"}
                       </p>
                     </div>
                   </div>

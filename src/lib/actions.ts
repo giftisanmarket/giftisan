@@ -2245,7 +2245,11 @@ export async function getAllOrders() {
         user: true,
         items: {
           include: {
-            product: true
+            product: {
+              include: {
+                artisan: true
+              }
+            }
           }
         }
       },

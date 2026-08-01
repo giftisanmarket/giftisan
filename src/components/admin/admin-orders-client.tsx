@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateOrderStatus } from "@/lib/actions";
 import toast from "react-hot-toast";
@@ -552,14 +552,24 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                 "{item.personalization}"
                               </p>
                             )}
-                            {item.customImage && (
-                              <div className="mt-2 flex items-center gap-2 bg-white/50 p-2 rounded-lg border border-primary/5">
-                                <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="relative w-8 h-8 rounded overflow-hidden shrink-0 border border-primary/10 bg-white">
-                                  <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
-                                </a>
-                                <a href={item.customImage} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-accent hover:underline">
-                                  {dict.common?.view_image || "View Custom Photo"}
-                                </a>
+                            {item.product?.artisan && (
+                              <div className="mt-2 text-[10px] bg-primary/5 p-2.5 rounded-xl border border-primary/10 space-y-1">
+                                <p className="font-bold text-primary flex items-center gap-1.5">
+                                  <Store className="w-3 h-3 text-accent shrink-0" />
+                                  <span>Seller Studio: {item.product.artisan.studioName}</span>
+                                </p>
+                                {item.product.artisan.location && (
+                                  <p className="text-charcoal/70 flex items-center gap-1.5">
+                                    <MapPin className="w-3 h-3 text-primary/40 shrink-0" />
+                                    <span>Pickup Location: {item.product.artisan.location}</span>
+                                  </p>
+                                )}
+                                {item.product.artisan.phoneNumber && (
+                                  <p className="text-accent font-bold flex items-center gap-1.5">
+                                    <Phone className="w-3 h-3 shrink-0" />
+                                    <span>Seller Phone: {item.product.artisan.phoneNumber}</span>
+                                  </p>
+                                )}
                               </div>
                             )}
                           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2 } from "lucide-react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
 import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -57,6 +57,11 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studioName || !studioName.trim() || !bio || !bio.trim() || !location || !location.trim() || !phoneNumber || !phoneNumber.trim() || !slug || !slug.trim()) {
+      setErrorStatus("Studio Name, Handle (Slug), Bio, Location, and Phone Number are all required.");
+      setTimeout(() => setErrorStatus(null), 4000);
+      return;
+    }
     setIsSaving(true);
 
     const res = await updateArtisanProfile(artisan.userId, {
@@ -367,11 +372,12 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                   <div className="grid grid-cols-1 gap-8 pt-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label} *</label>
                       <div className="relative">
                         <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><User className="w-4 h-4" /></span>
                         <input
                           type="text"
+                          required
                           value={studioName || ""}
                           onChange={(e) => setStudioName(e.target.value)}
                           className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
@@ -382,13 +388,14 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center gap-2">
-                        {dict.studio_profile.studio_slug_label}
+                        {dict.studio_profile.studio_slug_label} *
                         <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">{dict.studio_profile.studio_slug_permanent}</span>
                       </label>
                       <div className="relative">
                         <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
                         <input
                           type="text"
+                          required
                           value={slug || ""}
                           onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
                           className={cn(
@@ -421,8 +428,9 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.artisan_bio_label}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.artisan_bio_label} *</label>
                       <textarea
+                        required
                         value={bio || ""}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full h-32 p-8 rounded-[2rem] bg-cream/30 border border-primary/5 transition-all font-medium text-primary focus:outline-none focus:border-accent resize-none placeholder:text-primary/40"
@@ -432,11 +440,12 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label} *</label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaLocationDot className="w-4 h-4" /></span>
                           <input
                             type="text"
+                            required
                             value={location || ""}
                             onChange={(e) => setLocation(e.target.value)}
                             className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
@@ -446,7 +455,7 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
-                          {dict.checkout?.phone_number || "Phone Number"}
+                          {dict.checkout?.phone_number || "Phone Number"} *
                         </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40">
@@ -454,6 +463,7 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                           </span>
                           <input
                             type="tel"
+                            required
                             value={phoneNumber || ""}
                             onChange={(e) => setPhoneNumber(e.target.value)}
                             className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
@@ -473,27 +483,37 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                     <div className="grid md:grid-cols-2 gap-8 pt-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.instagram_handle}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                          <span>{dict.studio_profile.instagram_handle}</span>
+                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
+                        </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
                           <input
                             type="text"
+                            disabled
+                            readOnly
                             value={instagram || ""}
                             onChange={(e) => setInstagram(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
                             placeholder={dict.studio_profile.insta_placeholder}
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.website_url}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                          <span>{dict.studio_profile.website_url}</span>
+                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
+                        </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
                           <input
                             type="url"
+                            disabled
+                            readOnly
                             value={website || ""}
                             onChange={(e) => setWebsite(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
                             placeholder={dict.studio_profile.website_placeholder}
                           />
                         </div>
@@ -502,27 +522,37 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                     <div className="grid md:grid-cols-2 gap-8 pt-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.tiktok_handle}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                          <span>{dict.studio_profile.tiktok_handle}</span>
+                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
+                        </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
                           <input
                             type="text"
+                            disabled
+                            readOnly
                             value={tiktok || ""}
                             onChange={(e) => setTiktok(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
                             placeholder={dict.studio_profile.tiktok_placeholder}
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.facebook_profile}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                          <span>{dict.studio_profile.facebook_profile}</span>
+                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
+                        </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
                           <input
                             type="text"
+                            disabled
+                            readOnly
                             value={facebook || ""}
                             onChange={(e) => setFacebook(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
                             placeholder={dict.studio_profile.facebook_placeholder}
                           />
                         </div>
@@ -531,14 +561,19 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
                     <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.pinterest_username}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                          <span>{dict.studio_profile.pinterest_username}</span>
+                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
+                        </label>
                         <div className="relative">
                           <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
                           <input
                             type="text"
+                            disabled
+                            readOnly
                             value={pinterest || ""}
                             onChange={(e) => setPinterest(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40"
+                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
                             placeholder={dict.studio_profile.pinterest_placeholder}
                           />
                         </div>

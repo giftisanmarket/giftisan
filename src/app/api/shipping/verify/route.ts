@@ -156,11 +156,14 @@ async function markAsDelivered(itemId: string) {
     data: { createdAt: new Date() }
   });
 
+  const recipientEmail = updatedItem.order.user?.email || updatedItem.order.clientEmail;
+  const recipientName = updatedItem.order.user?.name || "Customer";
+
   // 4. Send email notification
-  if (updatedItem.order.user.email) {
+  if (recipientEmail) {
     sendOrderStatusUpdateEmail(
-      updatedItem.order.user.email,
-      updatedItem.order.user.name || "Customer",
+      recipientEmail,
+      recipientName,
       updatedItem.order.id,
       "DELIVERED",
       updatedItem.product.name,
@@ -212,11 +215,14 @@ async function markOrderAsDelivered(orderId: string) {
       data: { createdAt: new Date() }
     });
 
+    const recipientEmail = order.user?.email || order.clientEmail;
+    const recipientName = order.user?.name || "Customer";
+
     // 4. Send email notifications
-    if (order.user.email) {
+    if (recipientEmail) {
       sendOrderStatusUpdateEmail(
-        order.user.email,
-        order.user.name || "Customer",
+        recipientEmail,
+        recipientName,
         order.id,
         "DELIVERED",
         item.product.name,

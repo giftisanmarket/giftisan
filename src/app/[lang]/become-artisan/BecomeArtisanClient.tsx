@@ -20,6 +20,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     studioName: "",
     bio: "",
     location: "",
+    phoneNumber: "",
   });
 
   useEffect(() => {
@@ -38,8 +39,8 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
       return;
     }
 
-    if (!formData.studioName || !formData.bio) {
-      toast.error(dict.home.form_error);
+    if (!formData.studioName.trim() || !formData.bio.trim() || !formData.location.trim() || !formData.phoneNumber.trim()) {
+      toast.error(lang === 'ar' ? 'جميع الحقول (اسم الاستوديو، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Studio name, location, phone number, and bio are all required.');
       setIsLoading(false);
       return;
     }
@@ -264,13 +265,30 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
                 <div className="space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    <MapPin className="w-3 h-3" /> {dict.home.location_label}
+                    <MapPin className="w-3 h-3" /> {dict.home.location_label} *
                   </label>
                   <input
                     type="text"
+                    required
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder={dict.home.location_placeholder}
+                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
+                    📱 {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف / واتساب' : 'Phone Number / WhatsApp')} *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    name="phone"
+                    autoComplete="tel"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    placeholder="+20 100 000 0000"
                     className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
                   />
                 </div>

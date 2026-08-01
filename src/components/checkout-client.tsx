@@ -5,12 +5,13 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 export function CheckoutClient({ dict }: { dict: any }) {
   const params = useParams();
@@ -23,6 +24,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [error, setError] = useState("");
   const [validationErrors, setValidationErrors] = useState<(keyof typeof shippingData)[]>([]);
   const router = useRouter();
@@ -55,6 +57,65 @@ export function CheckoutClient({ dict }: { dict: any }) {
     isGift: false,
     giftMessage: ""
   });
+
+  // Auto-restore saved shipping address from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("giftisan_saved_shipping");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setShippingData(prev => ({
+          ...prev,
+          firstName: prev.firstName || parsed.firstName || "",
+          lastName: prev.lastName || parsed.lastName || "",
+          address: prev.address || parsed.address || "",
+          city: prev.city || parsed.city || "",
+          zip: prev.zip || parsed.zip || "",
+          phone: prev.phone || parsed.phone || "",
+          email: prev.email || parsed.email || ""
+        }));
+      }
+    } catch (e) {
+      // Ignore parse error
+    }
+  }, []);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setError(isAr ? "خدمة تحديد الموقع غير مدعومة في متصفحك." : "Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          if (data && data.address) {
+            const detectedCity = data.address.city || data.address.state || data.address.town || data.address.governorate || "Cairo";
+            const detectedStreet = [data.address.road, data.address.suburb, data.address.neighbourhood].filter(Boolean).join(", ") || data.display_name?.split(",")[0] || "";
+            
+            setShippingData(prev => ({
+              ...prev,
+              address: detectedStreet || prev.address,
+              city: detectedCity || prev.city
+            }));
+            toast.success(isAr ? "تم تحديد عنوانك بنجاح 📍" : "Location detected successfully 📍");
+          }
+        } catch (err) {
+          setError(isAr ? "تعذر تحديد العنوان تلقائياً." : "Could not fetch address details.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (err) => {
+        setIsDetectingLocation(false);
+        setError(isAr ? "يرجى السماح بالوصول للموقع لتحديد العنوان." : "Location access was denied or unavailable.");
+      }
+    );
+  };
 
   // Smart-clear error state
   useEffect(() => {
@@ -116,18 +177,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   };
 
   const handlePurchase = async () => {
-    if (!session?.user?.id) {
-      setError(dict.checkout.error_signin);
-      router.push(`/${lang}/login?callbackUrl=/${lang}/checkout`);
-      return;
-    }
-
-    if (!(session.user as any).emailVerified && !(session.user as any).isOAuth) {
-      setError(dict.checkout.error_verify);
-      return;
-    }
-
-    const mandatoryFields: (keyof typeof shippingData)[] = ["firstName", "lastName", "address", "city", "phone"];
+    const mandatoryFields: (keyof typeof shippingData)[] = ["firstName", "lastName", "address", "city", "phone", "email"];
     const emptyFields = mandatoryFields.filter(field => !shippingData[field]);
 
     if (emptyFields.length > 0) {
@@ -136,11 +186,19 @@ export function CheckoutClient({ dict }: { dict: any }) {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(shippingData.email)) {
+      setError(isAr ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address.");
+      setValidationErrors(["email"]);
+      return;
+    }
+
+    setIsProcessing(true);
     const discountValue = ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
     const shippingCost = selectedMethod?.price || 0;
     const finalPrice = Math.max(totalPrice - discountValue + shippingCost, 0);
 
-    const res = await createOrder(session.user.id, finalPrice, cart, {
+    const res = await createOrder(session?.user?.id || null, finalPrice, cart, {
       ...shippingData,
       address: shippingData.address,
       couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
@@ -150,12 +208,25 @@ export function CheckoutClient({ dict }: { dict: any }) {
     });
 
     if (res.success) {
+      try {
+        localStorage.setItem("giftisan_saved_shipping", JSON.stringify({
+          firstName: shippingData.firstName,
+          lastName: shippingData.lastName,
+          address: shippingData.address,
+          city: shippingData.city,
+          zip: shippingData.zip,
+          phone: shippingData.phone,
+          email: shippingData.email
+        }));
+      } catch (e) {
+        // Ignore storage error
+      }
       setIsRedirecting(true);
       clearCart();
       if (res.paymentUrl) {
         window.location.href = res.paymentUrl;
       } else {
-        router.push(`/${lang}/checkout/success`);
+        router.push(`/${lang}/checkout/success?orderId=${res.orderId}`);
       }
     } else {
       setError(res.error || "An error occurred during checkout.");
@@ -189,8 +260,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 md:gap-12 items-start">
-          {/* Order Summary: Shown FIRST on mobile, sticky on desktop */}
-          <div className="lg:col-span-5 lg:sticky lg:top-32 order-first lg:order-last">
+          {/* Order Summary: Shown SECOND on mobile, sticky on desktop */}
+          <div className="lg:col-span-5 lg:sticky lg:top-32 order-last lg:order-last">
             <section className="bg-primary text-white rounded-[2rem] md:rounded-[2.5rem] px-5 py-8 md:p-10 shadow-2xl shadow-primary/20">
               <h2 className="text-xl md:text-2xl font-heading font-bold mb-6 md:mb-8 flex items-center gap-2">
                 <Lock className="w-5 h-5 text-accent-light" />
@@ -308,12 +379,14 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <span>-{dict.product.currency} {appliedCoupon.appliedDiscount}.00</span>
                   </div>
                 )}
-                <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
-                  <span>{selectedMethod?.name || dict.checkout.cairo_shipping}</span>
-                  <span className="text-accent-light">
-                    {selectedMethod?.price === 0 ? dict.checkout.free : `${dict.product.currency} ${selectedMethod?.price || 0}`}
-                  </span>
-                </div>
+                {selectedMethod && (
+                  <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
+                    <span>{selectedMethod.name}</span>
+                    <span className="text-accent-light">
+                      {selectedMethod.price === 0 ? dict.checkout.free : `${dict.product.currency} ${selectedMethod.price}`}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between font-heading font-bold pt-4 border-t border-white/10">
                   <span className="text-lg md:text-xl">{dict.checkout.total}</span>
                   <span className="text-2xl md:text-3xl">
@@ -350,8 +423,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
             </section>
           </div>
 
-          {/* Checkout Form: Shown SECOND on mobile */}
-          <div className="lg:col-span-7 space-y-6 md:space-y-8 order-last lg:order-first">
+          {/* Checkout Form: Shown FIRST on mobile */}
+          <div className="lg:col-span-7 space-y-6 md:space-y-8 order-first lg:order-first">
             <motion.section 
               animate={validationErrors.length > 0 ? { x: [-2, 2, -2, 2, 0], transition: { duration: 0.4 } } : {}}
               className="bg-white rounded-[2rem] md:rounded-[2.5rem] px-5 py-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5"
@@ -363,6 +436,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.first_name}</label>
                     <input
                       type="text"
+                      name="firstName"
+                      autoComplete="given-name"
                       placeholder="Jane"
                       value={shippingData.firstName}
                       onChange={(e) => updateShippingField("firstName", e.target.value)}
@@ -378,6 +453,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.last_name}</label>
                     <input
                       type="text"
+                      name="lastName"
+                      autoComplete="family-name"
                       placeholder="Doe"
                       value={shippingData.lastName}
                       onChange={(e) => updateShippingField("lastName", e.target.value)}
@@ -391,9 +468,22 @@ export function CheckoutClient({ dict }: { dict: any }) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.shipping_address}</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.shipping_address}</label>
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isDetectingLocation}
+                      className="text-[10px] font-bold text-accent hover:text-accent-light flex items-center gap-1 transition-colors disabled:opacity-50"
+                    >
+                      <MapPin className={cn("w-3.5 h-3.5", isDetectingLocation && "animate-spin")} />
+                      <span>{isDetectingLocation ? (isAr ? "جاري التحديد..." : "Detecting...") : (isAr ? "تحديد موقعي 📍" : "Use current location 📍")}</span>
+                    </button>
+                  </div>
                   <input
                     type="text"
+                    name="address"
+                    autoComplete="street-address"
                     placeholder={dict.checkout.street_placeholder}
                     value={shippingData.address}
                     onChange={(e) => updateShippingField("address", e.target.value)}
@@ -410,6 +500,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.city}</label>
                     <input
                       type="text"
+                      name="city"
+                      autoComplete="address-level2"
                       placeholder="Cairo"
                       value={shippingData.city}
                       onChange={(e) => updateShippingField("city", e.target.value)}
@@ -425,6 +517,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.postal_code} ({dict.checkout.optional})</label>
                     <input
                       type="text"
+                      name="zip"
+                      autoComplete="postal-code"
                       placeholder="11511"
                       value={shippingData.zip}
                       onChange={(e) => updateShippingField("zip", e.target.value)}
@@ -432,66 +526,90 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.phone_number}</label>
-                  <input
-                    type="tel"
-                    placeholder="+20 100 000 0000"
-                    value={shippingData.phone}
-                    onChange={(e) => updateShippingField("phone", e.target.value)}
-                    className={cn(
-                      "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                      validationErrors.includes("phone") 
-                        ? "border-accent ring-2 ring-accent/10" 
-                        : "border-primary/20 focus:ring-accent/20 focus:border-accent"
-                    )}
-                  />
+                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.email || (isAr ? "البريد الإلكتروني" : "Email Address")}</label>
+                    <input
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      placeholder="jane@example.com"
+                      value={shippingData.email}
+                      onChange={(e) => updateShippingField("email", e.target.value)}
+                      className={cn(
+                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                        validationErrors.includes("email") 
+                          ? "border-accent ring-2 ring-accent/10" 
+                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.phone_number}</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      autoComplete="tel"
+                      placeholder="+20 100 000 0000"
+                      value={shippingData.phone}
+                      onChange={(e) => updateShippingField("phone", e.target.value)}
+                      className={cn(
+                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
+                        validationErrors.includes("phone") 
+                          ? "border-accent ring-2 ring-accent/10" 
+                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <div className="pt-8 border-t border-primary/5">
-                  <h3 className="text-xl font-heading font-bold text-primary mb-6 flex items-center gap-2">
-                    <Truck className="w-5 h-5 text-accent" />
-                    {dict.checkout.shipping_method}
-                  </h3>
-                  
-                  {isLoadingMethods ? (
-                    <div className="flex items-center gap-2 text-charcoal/40 text-sm animate-pulse">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {dict.checkout.loading_regions}
-                    </div>
-                  ) : (
-                    <div className="grid gap-3">
-                      {shippingMethods.map((method) => (
-                        <div 
-                          key={method.id}
-                          onClick={() => setSelectedMethod(method)}
-                          className={cn(
-                            "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all",
-                            selectedMethod?.id === method.id 
-                              ? "border-accent bg-accent/5" 
-                              : "border-primary/5 bg-white hover:border-primary/10"
-                          )}
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={cn(
-                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                              selectedMethod?.id === method.id ? "border-accent bg-accent" : "border-primary/20"
-                            )}>
-                              {selectedMethod?.id === method.id && <div className="w-2 h-2 rounded-full bg-white" />}
+                {/* Shipping Method Section: Hide if not loading and no active methods exist */}
+                {(isLoadingMethods || shippingMethods.length > 0) && (
+                  <div className="pt-8 border-t border-primary/5">
+                    <h3 className="text-xl font-heading font-bold text-primary mb-6 flex items-center gap-2">
+                      <Truck className="w-5 h-5 text-accent" />
+                      {dict.checkout.shipping_method}
+                    </h3>
+                    
+                    {isLoadingMethods ? (
+                      <div className="flex items-center gap-2 text-charcoal/40 text-sm animate-pulse">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {dict.checkout.loading_regions}
+                      </div>
+                    ) : (
+                      <div className="grid gap-3">
+                        {shippingMethods.map((method) => (
+                          <div 
+                            key={method.id}
+                            onClick={() => setSelectedMethod(method)}
+                            className={cn(
+                              "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all",
+                              selectedMethod?.id === method.id 
+                                ? "border-accent bg-accent/5" 
+                                : "border-primary/5 bg-white hover:border-primary/10"
+                            )}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={cn(
+                                "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                selectedMethod?.id === method.id ? "border-accent bg-accent" : "border-primary/20"
+                              )}>
+                                {selectedMethod?.id === method.id && <div className="w-2 h-2 rounded-full bg-white" />}
+                              </div>
+                              <div>
+                                <p className="font-bold text-sm text-primary">{method.name}</p>
+                                {method.estimatedDays && <p className="text-[10px] text-charcoal/40 uppercase font-black tracking-widest">{method.estimatedDays}</p>}
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-bold text-sm text-primary">{method.name}</p>
-                              {method.estimatedDays && <p className="text-[10px] text-charcoal/40 uppercase font-black tracking-widest">{method.estimatedDays}</p>}
-                            </div>
+                            <p className="font-bold text-sm text-primary">
+                              {method.price === 0 ? dict.checkout.free : `${dict.product.currency} ${method.price}`}
+                            </p>
                           </div>
-                          <p className="font-bold text-sm text-primary">
-                            {method.price === 0 ? dict.checkout.free : `${dict.product.currency} ${method.price}`}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="pt-8 space-y-6 border-t border-primary/5">
                   <div className="flex items-center gap-4 group cursor-pointer" onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}>

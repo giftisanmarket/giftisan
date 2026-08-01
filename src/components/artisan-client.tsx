@@ -173,56 +173,6 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
                   ) : isPending ? dict.artisan_detail.wait : dict.artisan_detail.follow_studio}
                 </button>
                 <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 max-w-full">
-                  {artisan.instagram && (
-                    <a 
-                      href={artisan.instagram.startsWith('http') ? artisan.instagram : `https://instagram.com/${artisan.instagram}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
-                    >
-                      <FaInstagram className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                    </a>
-                  )}
-                  {artisan.tiktok && (
-                    <a 
-                      href={artisan.tiktok.startsWith('http') ? artisan.tiktok : `https://tiktok.com/@${artisan.tiktok}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
-                    >
-                      <FaTiktok className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                    </a>
-                  )}
-                  {artisan.facebook && (
-                    <a 
-                      href={artisan.facebook.startsWith('http') ? artisan.facebook : `https://facebook.com/${artisan.facebook}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
-                    >
-                      <FaFacebook className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                    </a>
-                  )}
-                  {artisan.pinterest && (
-                    <a 
-                      href={artisan.pinterest.startsWith('http') ? artisan.pinterest : `https://pinterest.com/${artisan.pinterest}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
-                    >
-                      <FaPinterestP className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                    </a>
-                  )}
-                  {artisan.website && (
-                    <a 
-                      href={artisan.website.startsWith('http') ? artisan.website : `https://${artisan.website}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm hover:scale-110"
-                    >
-                      <FaGlobe className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                    </a>
-                  )}
                   <button 
                     onClick={handleShare}
                     className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm group"

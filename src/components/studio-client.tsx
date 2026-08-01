@@ -368,14 +368,9 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   <div className="space-y-4">
                     {[
                       {
-                        label: dict.studio.checklist_story,
-                        done: !!artisan.bio && artisan.bio.trim().length > 0,
-                        link: "/studio/settings"
-                      },
-                      {
-                        label: dict.studio.checklist_location,
-                        done: !!artisan.location && artisan.location.trim().length > 0,
-                        link: "/studio/settings"
+                        label: dict.studio.checklist_settings || "Fill required studio details in Settings",
+                        done: !!artisan.studioName && !!artisan.bio && !!artisan.location && !!artisan.phoneNumber,
+                        link: "#settings"
                       },
                       {
                         label: dict.studio.checklist_products.replace('{count}', artisan.products.length.toString()),
@@ -394,11 +389,11 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         onClick={(e) => {
                           if (item.link.startsWith("#")) {
                             e.preventDefault();
-                            setActiveTab(item.link.substring(1) as any);
-                            const element = document.getElementById(item.link.substring(1));
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
+                            const targetTab = item.link.substring(1);
+                            setActiveTab(targetTab as any);
+                            setTimeout(() => {
+                              contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 100);
                           }
                         }}
                         className={cn(
@@ -765,10 +760,10 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                             )}
                             <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5">
                               <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/20 mb-2">{dict.studio.shipping_to}</p>
-                              <p className="text-xs md:text-sm text-charcoal/60 leading-relaxed font-medium">
-                                {selectedItem.order.shippingAddress}<br />
-                                {selectedItem.order.shippingCity}{selectedItem.order.shippingZip ? `, ${selectedItem.order.shippingZip}` : ''}
-                              </p>
+                              <div className="inline-flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary/70">
+                                <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
+                                <span>{lang === "ar" ? "الشحن بواسطة جيفتيزان (العنوان محمي الخصوصية)" : "Fulfilled & Shipped by Giftisan (Address Protected)"}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -866,12 +861,9 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.ship_to || "Ship To"}</h3>
                     <div className="space-y-1">
                       <p className="text-lg font-black text-primary">{selectedItem.order.user.name}</p>
-                      <p className="text-sm font-bold text-charcoal/60 leading-relaxed whitespace-pre-line">
-                        {selectedItem.order.shippingAddress}
-                        <br />
-                        {selectedItem.order.shippingCity}{selectedItem.order.shippingZip ? `, ${selectedItem.order.shippingZip}` : ""}
+                      <p className="text-sm font-bold text-charcoal/60 leading-relaxed">
+                        🔒 {lang === "ar" ? "الشحن بواسطة خدمة توصيل جيفتيزان" : "Managed & Shipped by Giftisan Delivery"}
                       </p>
-                      <p className="text-sm font-black text-accent mt-4">{selectedItem.order.clientPhone || "N/A"}</p>
                     </div>
                   </div>
                 </div>

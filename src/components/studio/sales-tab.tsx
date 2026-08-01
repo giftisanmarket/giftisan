@@ -137,9 +137,9 @@ export function SalesTab({
       item.price,
       item.price * item.quantity,
       item.status,
-      `"${item.order.shippingAddress}"`,
-      item.order.shippingCity,
-      item.order.shippingCountry
+      "\"Fulfilled by Giftisan\"",
+      "Protected",
+      "EG"
     ]);
 
     // Join headers and rows

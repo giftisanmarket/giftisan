@@ -561,7 +561,7 @@ export async function getUserFavorites(userId: string) {
   }
 }
 
-export async function createOrder(userId: string, totalAmount: number, items: any[], shippingData?: any) {
+export async function createOrder(userId: string | null, totalAmount: number, items: any[], shippingData?: any) {
   try {
     const processedItems = await Promise.all(items.map(async item => ({
       ...item,
@@ -591,10 +591,22 @@ export async function createOrder(userId: string, totalAmount: number, items: an
         }
       }
 
+      // If userId is missing, try to resolve by clientEmail if user is already registered
+      let effectiveUserId = userId;
+      if (!effectiveUserId && shippingData?.email) {
+        const existingUser = await tx.user.findUnique({
+          where: { email: shippingData.email.toLowerCase().trim() },
+          select: { id: true }
+        });
+        if (existingUser) {
+          effectiveUserId = existingUser.id;
+        }
+      }
+
       // Create the order
       const newOrder = await tx.order.create({
         data: {
-          userId,
+          userId: effectiveUserId,
           totalAmount,
           status: "PENDING",
           shippingAddress: shippingData?.address,
@@ -865,9 +877,9 @@ export async function retryPaymentAction(orderId: string) {
     }
 
     const shippingData = {
-      firstName: order.user.name?.split(" ")[0] || "NA",
-      lastName: order.user.name?.split(" ").slice(1).join(" ") || "NA",
-      email: order.clientEmail || order.user.email || "test@test.com",
+      firstName: order.user?.name?.split(" ")[0] || "NA",
+      lastName: order.user?.name?.split(" ").slice(1).join(" ") || "NA",
+      email: order.clientEmail || order.user?.email || "test@test.com",
       phone: order.clientPhone || "+201234567890",
       address: order.shippingAddress || "NA",
       city: order.shippingCity || "NA",
@@ -1364,6 +1376,10 @@ export async function updateArtisanProfile(userId: string, data: any) {
       return { error: "You are not authorized to update this profile" };
     }
 
+    if (!data.studioName?.trim() || !data.slug?.trim() || !data.bio?.trim() || !data.location?.trim() || !data.phoneNumber?.trim()) {
+      return { error: "Studio Name, Handle (Slug), Bio, Location, and Phone Number are all required." };
+    }
+
     // Only generate slug if it's not manually provided OR it's a new profile
     const slug = data.slug
       ? slugify(data.slug)
@@ -1671,11 +1687,14 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
       console.log(`[Escrow Security] Reset transaction escrow clock for Order: ${updatedItem.orderId} to START NOW upon delivery.`);
     }
 
+    const recipientEmail = updatedItem.order.user?.email || updatedItem.order.clientEmail;
+    const recipientName = updatedItem.order.user?.name || "Customer";
+
     // Send email notification to the buyer
-    if (updatedItem.order.user.email) {
+    if (recipientEmail) {
       sendOrderStatusUpdateEmail(
-        updatedItem.order.user.email,
-        updatedItem.order.user.name || "Customer",
+        recipientEmail,
+        recipientName,
         updatedItem.order.id,
         status,
         updatedItem.product.name,
@@ -1749,10 +1768,13 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       console.log(`[Escrow Security] Reset transaction escrow clock for Order: ${orderId} to START NOW upon delivery.`);
     }
 
-    if (order.user.email) {
+    const recipientEmail = order.user?.email || order.clientEmail;
+    const recipientName = order.user?.name || "Customer";
+
+    if (recipientEmail) {
       sendOrderStatusUpdateEmail(
-        order.user.email,
-        order.user.name || "Customer",
+        recipientEmail,
+        recipientName,
         order.id,
         status,
         order.items[0]?.product?.name || "Your order",
@@ -1988,12 +2010,17 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       data: { role: "ARTISAN" }
     });
 
+    if (!studioData.studioName?.trim() || !studioData.bio?.trim() || !studioData.location?.trim() || !studioData.phoneNumber?.trim()) {
+      return { error: "Studio Name, Bio, Location, and Phone Number are all required for artisan registration." };
+    }
+
     await prisma.artisanProfile.create({
       data: {
         userId,
         studioName: studioData.studioName,
         bio: studioData.bio || "",
         location: studioData.location || "",
+        phoneNumber: studioData.phoneNumber.trim(),
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
       }
     });
@@ -3254,3 +3281,72 @@ export async function deleteArtisanCoupon(couponId: string) {
     return { error: "Failed to delete coupon" };
   }
 }
+
+export async function convertGuestToAccount({
+  orderId,
+  password,
+}: {
+  orderId: string;
+  password: string;
+}) {
+  try {
+    if (!password || password.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters long." };
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+
+    if (!order || !order.clientEmail) {
+      return { success: false, error: "Order or customer email not found." };
+    }
+
+    const email = order.clientEmail.toLowerCase().trim();
+
+    // Check if user already exists
+    let user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (user) {
+      if (!user.password) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { password: hashedPassword }
+        });
+      } else {
+        return { success: false, error: "An account with this email already exists. Please log in to view your orders." };
+      }
+    } else {
+      const clientName = (order as any).clientName || email.split("@")[0];
+      user = await prisma.user.create({
+        data: {
+          email,
+          name: clientName,
+          password: hashedPassword,
+          role: "CLIENT"
+        }
+      });
+    }
+
+    // Connect all guest orders under this email to the user
+    await prisma.order.updateMany({
+      where: {
+        clientEmail: email,
+        userId: null
+      },
+      data: {
+        userId: user.id
+      }
+    });
+
+    return { success: true, email: user.email };
+  } catch (error: any) {
+    console.error("convertGuestToAccount error:", error);
+    return { success: false, error: error?.message || "Failed to create account." };
+  }
+}
+

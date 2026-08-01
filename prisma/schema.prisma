@@ -257,7 +257,7 @@ model Review {
 
 model Order {
   id          String @id @default(cuid())
-  userId      String
+  userId      String?
   totalAmount Float
   status      String @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED
 
@@ -273,7 +273,7 @@ model Order {
   isGift      Boolean @default(false)
   giftMessage String? @db.Text
 
-  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items OrderItem[]
 
   // Coupon / Discount Integration

@@ -153,11 +153,14 @@ async function markItemAsDelivered(trackingNumber: string) {
   });
   console.log(`[Bosta Automation] Escrow countdown triggered starting now for order ${orderId}.`);
 
+  const recipientEmail = updatedItem.order.user?.email || updatedItem.order.clientEmail;
+  const recipientName = updatedItem.order.user?.name || "Customer";
+
   // 4. Send beautiful delivery confirmation email notification to buyer
-  if (updatedItem.order.user.email) {
+  if (recipientEmail) {
     sendOrderStatusUpdateEmail(
-      updatedItem.order.user.email,
-      updatedItem.order.user.name || "Customer",
+      recipientEmail,
+      recipientName,
       updatedItem.order.id,
       "DELIVERED",
       updatedItem.product.name,

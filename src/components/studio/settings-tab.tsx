@@ -13,7 +13,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Sparkles
+  Sparkles,
+  Lock
 } from "lucide-react";
 import { 
   FaInstagram, 
@@ -79,6 +80,10 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studioName.trim() || !bio.trim() || !location.trim() || !phoneNumber.trim() || !slug.trim()) {
+      toast.error("Studio Name, Slug/Handle, Bio, Location, and Phone Number are all required.");
+      return;
+    }
     setIsSaving(true);
 
     const res = await updateArtisanProfile(artisan.userId, {
@@ -220,11 +225,12 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                     <div className="space-y-8">
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label}</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label} *</label>
                           <div className="relative">
                             <User className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                             <input
                               type="text"
+                              required
                               value={studioName}
                               onChange={(e) => setStudioName(e.target.value)}
                               className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
@@ -234,13 +240,14 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center gap-2">
-                            {dict.studio_profile.studio_slug_label}
+                            {dict.studio_profile.studio_slug_label} *
                             <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full uppercase tracking-widest">{dict.studio_profile.studio_slug_permanent}</span>
                           </label>
                           <div className="relative">
                             <Globe className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                             <input
                               type="text"
+                              required
                               value={slug}
                               onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
                               className={cn(
@@ -261,8 +268,9 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.artisan_bio_label}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.artisan_bio_label} *</label>
                         <textarea
+                          required
                           value={bio}
                           onChange={(e) => setBio(e.target.value)}
                           rows={4}
@@ -275,11 +283,12 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
 
                   <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-primary/5">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label} *</label>
                       <div className="relative">
                         <MapPin className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                         <input
                           type="text"
+                          required
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
@@ -288,11 +297,12 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.phone_number_label}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.phone_number_label} *</label>
                       <div className="relative">
                         <Phone className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                         <input
                           type="tel"
+                          required
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
@@ -302,43 +312,58 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                     </div>
                   </div>
 
-                  {/* Socials */}
+                  {/* Socials - Locked for now */}
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.instagram_handle}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                        <span>{dict.studio_profile.instagram_handle}</span>
+                        <Lock className="w-3 h-3 text-primary/30" />
+                      </label>
                       <div className="relative">
                         <FaInstagram className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                         <input
                           type="text"
+                          disabled
+                          readOnly
                           value={instagram}
                           onChange={(e) => setInstagram(e.target.value)}
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
+                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
                           placeholder="@handle"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.tiktok_handle}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                        <span>{dict.studio_profile.tiktok_handle}</span>
+                        <Lock className="w-3 h-3 text-primary/30" />
+                      </label>
                       <div className="relative">
                         <FaTiktok className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                         <input
                           type="text"
+                          disabled
+                          readOnly
                           value={tiktok}
                           onChange={(e) => setTiktok(e.target.value)}
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
+                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
                           placeholder="@handle"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.website_url}</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
+                        <span>{dict.studio_profile.website_url}</span>
+                        <Lock className="w-3 h-3 text-primary/30" />
+                      </label>
                       <div className="relative">
                         <Globe className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                         <input
                           type="url"
+                          disabled
+                          readOnly
                           value={website}
                           onChange={(e) => setWebsite(e.target.value)}
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
+                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
                           placeholder="https://..."
                         />
                       </div>

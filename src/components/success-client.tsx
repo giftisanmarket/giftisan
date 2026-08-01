@@ -2,11 +2,12 @@
 
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
-import { CheckCircle2, Package, ArrowRight, MessageSquare, CreditCard } from "lucide-react";
+import { CheckCircle2, Package, ArrowRight, MessageSquare, CreditCard, Lock, Sparkles, UserCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { cn } from "@/lib/utils";
+import { convertGuestToAccount } from "@/lib/actions";
 
 interface SuccessClientProps {
   dict: any;
@@ -16,10 +17,34 @@ interface SuccessClientProps {
 
 export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const [password, setPassword] = useState("");
+  const [isSubmittingAccount, setIsSubmittingAccount] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
+  const [accountError, setAccountError] = useState("");
+
+  const isAr = lang === "ar";
 
   useEffect(() => {
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
   }, []);
+
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!order?.id || !password) return;
+    if (password.length < 6) {
+      setAccountError(isAr ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل." : "Password must be at least 6 characters.");
+      return;
+    }
+    setIsSubmittingAccount(true);
+    setAccountError("");
+    const res = await convertGuestToAccount({ orderId: order.id, password });
+    setIsSubmittingAccount(false);
+    if (res.success) {
+      setAccountCreated(true);
+    } else {
+      setAccountError(res.error || "Failed to create account.");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-cream overflow-hidden">
@@ -176,6 +201,89 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
                 })()}
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* Post-Purchase Account Creation Widget for Guest Checkout */}
+        {order && !order.userId && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="w-full max-w-3xl bg-gradient-to-br from-primary to-primary-dark text-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-primary/20 mb-12 relative overflow-hidden"
+          >
+            <div className="absolute top-0 end-0 p-8 opacity-10 pointer-events-none">
+              <Sparkles className="w-48 h-48 text-white" />
+            </div>
+
+            {accountCreated ? (
+              <div className="flex flex-col items-center text-center py-4 space-y-3">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center border border-white/20 mb-2">
+                  <UserCheck className="w-8 h-8 text-accent-light" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-heading font-bold text-white">
+                  {isAr ? "تم إنشاء حسابك بنجاح! 🎉" : "Account Created Successfully! 🎉"}
+                </h3>
+                <p className="text-white/80 text-sm md:text-base max-w-lg leading-relaxed">
+                  {isAr
+                    ? `تم ربط هذا الطلب بحسابك الجديد (${order.clientEmail}). يمكنك تسجيل الدخول في أي وقت لتتبع شحناتك.`
+                    : `This order is now saved under your new account (${order.clientEmail}). You can log in anytime to track your shipments.`}
+                </p>
+                <Link
+                  href={`/${lang}/login`}
+                  className="mt-4 px-8 py-3 bg-white text-primary font-bold rounded-xl hover:bg-cream transition-all text-sm shadow-lg"
+                >
+                  {isAr ? "تسجيل الدخول إلى حسابي" : "Log into My Account"}
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                    <Lock className="w-6 h-6 text-accent-light" />
+                  </div>
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-accent-light/20 text-accent-light rounded-full text-[10px] font-black uppercase tracking-widest mb-2 border border-accent-light/30">
+                      {isAr ? "خطوة سريعة واحدة" : "One-Click Account Setup"}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-heading font-bold text-white leading-tight">
+                      {isAr ? "أنشئ كلمة مرورك وتتبع طلبك بسهولة!" : "Create a password to save your account & track orders!"}
+                    </h3>
+                    <p className="text-white/70 text-xs md:text-sm mt-1">
+                      {isAr ? "طلبك مسجل باسم" : "Your order is registered under"}{" "}
+                      <strong className="text-white font-mono">{order.clientEmail}</strong>. {isAr ? "أنشئ كلمة سر لحفظ بياناتك للطلبات القادمة." : "Set a password below to save your details for future purchases."}
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleCreateAccount} className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <input
+                    type="password"
+                    placeholder={isAr ? "أنشئ كلمة مرور (6 أحرف على الأقل)" : "Create a password (min 6 chars)"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="flex-1 px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmittingAccount || !password}
+                    className="px-8 py-4 bg-white text-primary font-bold rounded-2xl hover:bg-cream active:scale-95 transition-all text-sm disabled:opacity-50 whitespace-nowrap shadow-xl"
+                  >
+                    {isSubmittingAccount
+                      ? (isAr ? "جاري الإنشاء..." : "Saving...")
+                      : (isAr ? "حفظ الحساب" : "Save Account")}
+                  </button>
+                </form>
+
+                {accountError && (
+                  <p className="text-accent-light text-xs font-bold bg-black/20 p-3 rounded-xl border border-accent-light/20">
+                    ⚠️ {accountError}
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
 

@@ -32,7 +32,7 @@ async function main() {
   console.log(`1. INITIAL STATE`);
   console.log(`========================================`);
   console.log(`Order ID: ${order.id}`);
-  console.log(`User Email: ${order.user.email}`);
+  console.log(`User Email: ${order.user?.email || order.clientEmail || "N/A"}`);
   console.log(`Order Status: ${order.status}`);
   
   const initialStocks: { [id: string]: number } = {};
@@ -211,7 +211,7 @@ async function main() {
   const billingData = {
     firstName: order.shippingAddress ? "Test" : "NA",
     lastName: order.shippingAddress ? "User" : "NA",
-    email: order.clientEmail || order.user.email || "test@test.com",
+    email: order.clientEmail || order.user?.email || "test@test.com",
     phone: order.clientPhone || "+20123456789",
     address: order.shippingAddress || "NA",
     city: order.shippingCity || "NA",

@@ -1,19 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import nextDynamic from "next/dynamic";
-const HomeClient = nextDynamic(() => import("@/components/home-client"), {
-  loading: () => <Loading />
-});
+import HomeClient from "@/components/home-client";
 import { Metadata } from "next";
-import { auth } from "@/auth";
-import Loading from "./loading";
-
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
-
 import { getDictionary, hasLocale } from "./dictionaries";
 import { notFound } from "next/navigation";
 
 export const revalidate = 60;
-
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -33,45 +25,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   if (!hasLocale(lang)) notFound();
   
   const dict = await getDictionary(lang as any);
-  // Removed session check to show marketplace home to everyone
 
-  // If user is logged in, show the community platform home page
-  const products = await prisma.product.findMany({
-    where: {
-      status: "APPROVED",
-      artisan: {
-        status: "APPROVED"
-      }
-    },
-    include: {
-      artisan: {
-        include: {
-          user: true
-        }
-      }
-    },
-    take: 6,
-    orderBy: [
-      { isFeatured: 'desc' },
-      { createdAt: 'desc' }
-    ]
-  });
-
-  const artisans = await prisma.artisanProfile.findMany({
-    where: {
-      status: "APPROVED"
-    },
-    include: {
-      user: true
-    },
-    take: 5
-  });
-
-  const artisanCount = await prisma.artisanProfile.count({
-    where: { status: "APPROVED" }
-  });
-
-  // Fetch real counts for the home page category grid
   const categoryNames = [
     "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
     "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
@@ -79,18 +33,80 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     "Wedding", "Personalized", "Art & Collectibles"
   ];
 
-  const categoryCountsRaw = await prisma.product.groupBy({
-    by: ['category'],
-    where: {
-      status: "APPROVED",
-      artisan: {
+  // Run all database queries concurrently in parallel with Promise.all
+  const [products, artisans, artisanCount, categoryCountsRaw] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        badge: true,
+        images: true,
+        isFeatured: true,
+        category: true,
+        artisan: {
+          select: {
+            id: true,
+            studioName: true,
+            slug: true,
+            avatar: true,
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      },
+      take: 6,
+      orderBy: [
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    }),
+    prisma.artisanProfile.findMany({
+      where: {
         status: "APPROVED"
+      },
+      select: {
+        id: true,
+        studioName: true,
+        slug: true,
+        avatar: true,
+        isVerified: true,
+        location: true,
+        bio: true,
+        user: {
+          select: {
+            name: true
+          }
+        }
+      },
+      take: 5
+    }),
+    prisma.artisanProfile.count({
+      where: { status: "APPROVED" }
+    }),
+    prisma.product.groupBy({
+      by: ['category'],
+      where: {
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
+      },
+      _count: {
+        _all: true
       }
-    },
-    _count: {
-      _all: true
-    }
-  });
+    })
+  ]);
 
   // Initialize a map with 0 counts for all official category names (case-insensitive keys)
   const categoryCountsMap = new Map<string, number>();
@@ -123,9 +139,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       count: categoryCountsMap.get(name.toLowerCase()) || 0
     }))
     .sort((a, b) => b.count - a.count);
-
-
-
 
   // Sanitize data to prevent serialization crashes from oversized images in the DB
   const sanitizedProducts = products.map(p => ({

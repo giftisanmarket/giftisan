@@ -702,13 +702,12 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                           <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                          <button
-                            onClick={() => window.print()}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-accent hover:border-accent/20 transition-all active:scale-90"
-                            title={lang === "ar" ? "طباعة قسيمة الطلب" : "Print Order Slip"}
+                          <div
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/20 cursor-not-allowed select-none opacity-40"
+                            title={lang === "ar" ? "الطباعة مُدارة من قِبَل جيفتيسان" : "Printing is managed by Giftisan"}
                           >
                             <Printer className="w-5 h-5 md:w-6 md:h-6" />
-                          </button>
+                          </div>
                           <button
                             onClick={() => setSelectedItem(null)}
                             className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"

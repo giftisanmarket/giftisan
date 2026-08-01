@@ -1376,8 +1376,8 @@ export async function updateArtisanProfile(userId: string, data: any) {
       return { error: "You are not authorized to update this profile" };
     }
 
-    if (!data.studioName?.trim() || !data.slug?.trim() || !data.bio?.trim() || !data.location?.trim() || !data.phoneNumber?.trim()) {
-      return { error: "Studio Name, Handle (Slug), Bio, Location, and Phone Number are all required." };
+    if (!data.studioName?.trim() || !data.slug?.trim() || !data.bio?.trim() || !data.location?.trim() || !data.phoneNumber?.trim() || !data.pickupAddress?.trim() || !data.pickupCity?.trim()) {
+      return { error: "Studio Name, Handle (Slug), Bio, Location, Phone Number, and Pickup Address are all required." };
     }
 
     // Only generate slug if it's not manually provided OR it's a new profile
@@ -1408,7 +1408,12 @@ export async function updateArtisanProfile(userId: string, data: any) {
         bannerImage: bannerUrl || null,
         phoneNumber: data.phoneNumber || null,
         payoutAddress: data.payoutAddress || null,
-        payoutName: data.payoutName || null
+        payoutName: data.payoutName || null,
+        pickupAddress: data.pickupAddress || null,
+        pickupCity: data.pickupCity || null,
+        pickupDistrict: data.pickupDistrict || null,
+        pickupBuilding: data.pickupBuilding || null,
+        pickupNotes: data.pickupNotes || null
       },
       update: {
         studioName: data.studioName || null,
@@ -1425,7 +1430,12 @@ export async function updateArtisanProfile(userId: string, data: any) {
         bannerImage: bannerUrl || null,
         phoneNumber: data.phoneNumber || null,
         payoutAddress: data.payoutAddress || null,
-        payoutName: data.payoutName || null
+        payoutName: data.payoutName || null,
+        pickupAddress: data.pickupAddress || null,
+        pickupCity: data.pickupCity || null,
+        pickupDistrict: data.pickupDistrict || null,
+        pickupBuilding: data.pickupBuilding || null,
+        pickupNotes: data.pickupNotes || null
       }
     });
 

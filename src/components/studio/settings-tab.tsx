@@ -14,7 +14,8 @@ import {
   Phone,
   MapPin,
   Sparkles,
-  Lock
+  Lock,
+  Navigation
 } from "lucide-react";
 import { 
   FaInstagram, 
@@ -33,9 +34,10 @@ import { toast } from "react-hot-toast";
 interface SettingsTabProps {
   artisan: any;
   dict: any;
+  lang?: string;
 }
 
-export function SettingsTab({ artisan, dict }: SettingsTabProps) {
+export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const router = useRouter();
   const { update } = useSession();
   const [studioName, setStudioName] = useState(artisan.studioName || "");
@@ -50,6 +52,50 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
+  const [pickupAddress, setPickupAddress] = useState(artisan.pickupAddress || "");
+  const [pickupCity, setPickupCity] = useState(artisan.pickupCity || "");
+  const [pickupDistrict, setPickupDistrict] = useState(artisan.pickupDistrict || "");
+  const [pickupBuilding, setPickupBuilding] = useState(artisan.pickupBuilding || "");
+  const [pickupNotes, setPickupNotes] = useState(artisan.pickupNotes || "");
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error(lang === "ar" ? "خدمة تحديد الموقع غير مدعومة في متصفحك." : "Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          if (data && data.address) {
+            const detectedCity = data.address.city || data.address.state || data.address.town || data.address.governorate || "Cairo";
+            const detectedDistrict = data.address.suburb || data.address.neighbourhood || data.address.quarter || "";
+            const detectedStreet = [data.address.road, data.address.house_number].filter(Boolean).join(", ") || data.display_name?.split(",")[0] || "";
+
+            if (detectedStreet) setPickupAddress(detectedStreet);
+            if (detectedDistrict) setPickupDistrict(detectedDistrict);
+            if (detectedCity) setPickupCity(detectedCity);
+            if (!location && detectedCity) setLocation(`${detectedDistrict ? detectedDistrict + ", " : ""}${detectedCity}`);
+
+            toast.success(lang === "ar" ? "تم تحديد الموقع بنجاح 📍" : "Location detected successfully 📍");
+          }
+        } catch (err) {
+          toast.error(lang === "ar" ? "تعذر تحديد العنوان تلقائياً." : "Could not fetch address details.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (err) => {
+        setIsDetectingLocation(false);
+        toast.error(lang === "ar" ? "يرجى السماح بالوصول للموقع لتحديد العنوان." : "Location access was denied or unavailable.");
+      }
+    );
+  };
 
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [slug, setSlug] = useState(artisan.slug || "");
@@ -80,8 +126,8 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studioName.trim() || !bio.trim() || !location.trim() || !phoneNumber.trim() || !slug.trim()) {
-      toast.error("Studio Name, Slug/Handle, Bio, Location, and Phone Number are all required.");
+    if (!studioName.trim() || !bio.trim() || !location.trim() || !phoneNumber.trim() || !slug.trim() || !pickupAddress.trim() || !pickupCity.trim()) {
+      toast.error(lang === "ar" ? "جميع البيانات الأساسية وعنوان الاستلام التفصيلي مطلوبة." : "Studio Name, Slug, Bio, Location, Phone Number, and Pickup Address are all required.");
       return;
     }
     setIsSaving(true);
@@ -100,7 +146,11 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
       brandColor,
       bannerImage,
       phoneNumber,
-
+      pickupAddress,
+      pickupCity,
+      pickupDistrict,
+      pickupBuilding,
+      pickupNotes,
     });
 
     if (res.success) {
@@ -307,6 +357,107 @@ export function SettingsTab({ artisan, dict }: SettingsTabProps) {
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
                           placeholder="+20 ..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Exact Courier Pickup Address (Admin & Logistics Only) */}
+                  <div className="p-6 md:p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                          📦
+                        </div>
+                        <div>
+                          <h4 className="text-base md:text-lg font-bold text-primary">
+                            {lang === "ar" ? "عنوان استلام الشحنات (للأدمن وشركة التوصيل)" : "Courier Pickup Address (Admin & Logistics Only)"}
+                          </h4>
+                          <p className="text-xs text-charcoal/60 font-medium">
+                            {lang === "ar" ? "العنوان التفصيلي لوكلاء الشحن لاستلام الطلبات من ورشتك/متجرك." : "Exact doorstep address for courier drivers to pick up completed orders."}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleDetectLocation}
+                        disabled={isDetectingLocation}
+                        className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
+                      >
+                        {isDetectingLocation ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Navigation className="w-3.5 h-3.5" />
+                        )}
+                        <span>{lang === "ar" ? "تحديد موقعي تلقائياً 📍" : "Auto-Detect My Location 📍"}</span>
+                      </button>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {lang === "ar" ? "اسم الشارع والرقم" : "Street Address & Number"} *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={pickupAddress}
+                          onChange={(e) => setPickupAddress(e.target.value)}
+                          className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                          placeholder={lang === "ar" ? "مثال: ١٥ شارع التحرير، الدقي" : "e.g., 15 El-Tahrir St, Dokki"}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {lang === "ar" ? "المنطقة / الحي" : "District / Area"}
+                        </label>
+                        <input
+                          type="text"
+                          value={pickupDistrict}
+                          onChange={(e) => setPickupDistrict(e.target.value)}
+                          className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                          placeholder={lang === "ar" ? "مثال: المعادي / الزمالك" : "e.g., Maadi / Zamalek"}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {lang === "ar" ? "المحافظة / المدينة" : "City / Governorate"} *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={pickupCity}
+                          onChange={(e) => setPickupCity(e.target.value)}
+                          className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                          placeholder={lang === "ar" ? "مثال: القاهرة" : "e.g., Cairo"}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {lang === "ar" ? "رقم المبنى / الدور / الشقة" : "Building / Floor / Apt"}
+                        </label>
+                        <input
+                          type="text"
+                          value={pickupBuilding}
+                          onChange={(e) => setPickupBuilding(e.target.value)}
+                          className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                          placeholder={lang === "ar" ? "مثال: مبنى ٤، الدور ٣، شقة ١٢" : "e.g., Bldg 4, Fl 3, Apt 12"}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {lang === "ar" ? "علامة مميزة / تعليمات للمندوب" : "Pickup Notes & Landmarks"}
+                        </label>
+                        <input
+                          type="text"
+                          value={pickupNotes}
+                          onChange={(e) => setPickupNotes(e.target.value)}
+                          className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                          placeholder={lang === "ar" ? "مثال: بجوار البنك الأهلي، بوابة خضراء" : "e.g., Near NBE Bank, Green Gate"}
                         />
                       </div>
                     </div>

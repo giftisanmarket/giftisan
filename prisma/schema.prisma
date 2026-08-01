@@ -134,6 +134,13 @@ model ArtisanProfile {
   phoneNumber     String?
   rejectionReason String?       @db.Text
 
+  // Courier Pickup Exact Address (Admin & Logistics Only)
+  pickupAddress   String?       @db.Text // Street name and number
+  pickupCity      String?       // Governorate / City
+  pickupDistrict  String?       // District / Neighborhood
+  pickupBuilding  String?       // Building / Floor / Apartment
+  pickupNotes     String?       @db.Text // Landmarks & driver instructions
+
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
   coupons  Coupon[]

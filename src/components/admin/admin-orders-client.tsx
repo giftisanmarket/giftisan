@@ -553,23 +553,34 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                               </p>
                             )}
                             {item.product?.artisan && (
-                              <div className="mt-2 text-[10px] bg-primary/5 p-2.5 rounded-xl border border-primary/10 space-y-1">
+                              <div className="mt-2 text-[10px] bg-primary/5 p-3 rounded-xl border border-primary/10 space-y-1">
                                 <p className="font-bold text-primary flex items-center gap-1.5">
-                                  <Store className="w-3 h-3 text-accent shrink-0" />
+                                  <Store className="w-3.5 h-3.5 text-accent shrink-0" />
                                   <span>Seller Studio: {item.product.artisan.studioName}</span>
                                 </p>
-                                {item.product.artisan.location && (
-                                  <p className="text-charcoal/70 flex items-center gap-1.5">
-                                    <MapPin className="w-3 h-3 text-primary/40 shrink-0" />
-                                    <span>Pickup Location: {item.product.artisan.location}</span>
-                                  </p>
-                                )}
                                 {item.product.artisan.phoneNumber && (
                                   <p className="text-accent font-bold flex items-center gap-1.5">
                                     <Phone className="w-3 h-3 shrink-0" />
-                                    <span>Seller Phone: {item.product.artisan.phoneNumber}</span>
+                                    <span>Phone: {item.product.artisan.phoneNumber}</span>
                                   </p>
                                 )}
+                                <div className="pt-1.5 border-t border-primary/10 mt-1">
+                                  <p className="font-bold text-primary flex items-center gap-1.5 mb-0.5">
+                                    <MapPin className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                                    <span>Exact Pickup Address (Courier):</span>
+                                  </p>
+                                  <p className="text-charcoal/70 ps-5 font-medium leading-relaxed">
+                                    {item.product.artisan.pickupAddress || item.product.artisan.location || "Not specified"}
+                                    {item.product.artisan.pickupBuilding ? `, ${item.product.artisan.pickupBuilding}` : ""}
+                                    {item.product.artisan.pickupDistrict ? `, ${item.product.artisan.pickupDistrict}` : ""}
+                                    {item.product.artisan.pickupCity ? `, ${item.product.artisan.pickupCity}` : ""}
+                                  </p>
+                                  {item.product.artisan.pickupNotes && (
+                                    <p className="text-charcoal/50 ps-5 text-[9px] italic mt-0.5">
+                                      Notes: {item.product.artisan.pickupNotes}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>

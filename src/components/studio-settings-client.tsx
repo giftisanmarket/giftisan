@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock } from "lucide-react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock, Navigation } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
 import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: any }) {
+export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: any; dict: any; lang?: string }) {
   const router = useRouter();
   const { update } = useSession();
   const [studioName, setStudioName] = useState(artisan.studioName || "");
@@ -26,6 +26,47 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
+  const [pickupAddress, setPickupAddress] = useState(artisan.pickupAddress || "");
+  const [pickupCity, setPickupCity] = useState(artisan.pickupCity || "");
+  const [pickupDistrict, setPickupDistrict] = useState(artisan.pickupDistrict || "");
+  const [pickupBuilding, setPickupBuilding] = useState(artisan.pickupBuilding || "");
+  const [pickupNotes, setPickupNotes] = useState(artisan.pickupNotes || "");
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert(lang === "ar" ? "خدمة تحديد الموقع غير مدعومة في متصفحك." : "Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          if (data && data.address) {
+            const detectedCity = data.address.city || data.address.state || data.address.town || data.address.governorate || "Cairo";
+            const detectedDistrict = data.address.suburb || data.address.neighbourhood || data.address.quarter || "";
+            const detectedStreet = [data.address.road, data.address.house_number].filter(Boolean).join(", ") || data.display_name?.split(",")[0] || "";
+
+            if (detectedStreet) setPickupAddress(detectedStreet);
+            if (detectedDistrict) setPickupDistrict(detectedDistrict);
+            if (detectedCity) setPickupCity(detectedCity);
+            if (!location && detectedCity) setLocation(`${detectedDistrict ? detectedDistrict + ", " : ""}${detectedCity}`);
+          }
+        } catch (err) {
+          console.error("Could not fetch location", err);
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (err) => {
+        setIsDetectingLocation(false);
+      }
+    );
+  };
   const [activeSettingsTab, setActiveSettingsTab] = useState("profile");
   const [slug, setSlug] = useState(artisan.slug || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -57,8 +98,8 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studioName || !studioName.trim() || !bio || !bio.trim() || !location || !location.trim() || !phoneNumber || !phoneNumber.trim() || !slug || !slug.trim()) {
-      setErrorStatus("Studio Name, Handle (Slug), Bio, Location, and Phone Number are all required.");
+    if (!studioName || !studioName.trim() || !bio || !bio.trim() || !location || !location.trim() || !phoneNumber || !phoneNumber.trim() || !slug || !slug.trim() || !pickupAddress || !pickupAddress.trim() || !pickupCity || !pickupCity.trim()) {
+      setErrorStatus("Studio Name, Handle (Slug), Bio, Location, Phone Number, and Pickup Address are all required.");
       setTimeout(() => setErrorStatus(null), 4000);
       return;
     }
@@ -77,7 +118,12 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
       facebook,
       brandColor,
       bannerImage,
-      phoneNumber
+      phoneNumber,
+      pickupAddress,
+      pickupCity,
+      pickupDistrict,
+      pickupBuilding,
+      pickupNotes,
     });
 
     if (res.success) {
@@ -478,6 +524,107 @@ export function StudioSettingsClient({ artisan, dict }: { artisan: any; dict: an
                       <div className="w-full h-14 md:h-16 ps-12 pe-8 flex items-center rounded-xl md:rounded-2xl bg-primary/5 border border-primary/5 text-primary/40 font-bold cursor-not-allowed overflow-hidden relative text-sm md:text-base">
                         <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/20"><FaEnvelope className="w-4 h-4" /></span>
                         <span className="truncate w-full">{artisan.user.email}</span>
+                      </div>
+                    </div>
+
+                    {/* Exact Courier Pickup Address (Admin & Logistics Only) */}
+                    <div className="p-6 md:p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                            📦
+                          </div>
+                          <div>
+                            <h4 className="text-base md:text-lg font-bold text-primary">
+                              {lang === "ar" ? "عنوان استلام الشحنات (للأدمن وشركة التوصيل)" : "Courier Pickup Address (Admin & Logistics Only)"}
+                            </h4>
+                            <p className="text-xs text-charcoal/60 font-medium">
+                              {lang === "ar" ? "العنوان التفصيلي لوكلاء الشحن لاستلام الطلبات من ورشتك/متجرك." : "Exact doorstep address for courier drivers to pick up completed orders."}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleDetectLocation}
+                          disabled={isDetectingLocation}
+                          className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
+                        >
+                          {isDetectingLocation ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Navigation className="w-3.5 h-3.5" />
+                          )}
+                          <span>{lang === "ar" ? "تحديد موقعي تلقائياً 📍" : "Auto-Detect My Location 📍"}</span>
+                        </button>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                            {lang === "ar" ? "اسم الشارع والرقم" : "Street Address & Number"} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={pickupAddress}
+                            onChange={(e) => setPickupAddress(e.target.value)}
+                            className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                            placeholder={lang === "ar" ? "مثال: ١٥ شارع التحرير، الدقي" : "e.g., 15 El-Tahrir St, Dokki"}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                            {lang === "ar" ? "المنطقة / الحي" : "District / Area"}
+                          </label>
+                          <input
+                            type="text"
+                            value={pickupDistrict}
+                            onChange={(e) => setPickupDistrict(e.target.value)}
+                            className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                            placeholder={lang === "ar" ? "مثال: المعادي / الزمالك" : "e.g., Maadi / Zamalek"}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                            {lang === "ar" ? "المحافظة / المدينة" : "City / Governorate"} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={pickupCity}
+                            onChange={(e) => setPickupCity(e.target.value)}
+                            className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                            placeholder={lang === "ar" ? "مثال: القاهرة" : "e.g., Cairo"}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                            {lang === "ar" ? "رقم المبنى / الدور / الشقة" : "Building / Floor / Apt"}
+                          </label>
+                          <input
+                            type="text"
+                            value={pickupBuilding}
+                            onChange={(e) => setPickupBuilding(e.target.value)}
+                            className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                            placeholder={lang === "ar" ? "مثال: مبنى ٤، الدور ٣، شقة ١٢" : "e.g., Bldg 4, Fl 3, Apt 12"}
+                          />
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                            {lang === "ar" ? "علامة مميزة / تعليمات للمندوب" : "Pickup Notes & Landmarks"}
+                          </label>
+                          <input
+                            type="text"
+                            value={pickupNotes}
+                            onChange={(e) => setPickupNotes(e.target.value)}
+                            className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
+                            placeholder={lang === "ar" ? "مثال: بجوار البنك الأهلي، بوابة خضراء" : "e.g., Near NBE Bank, Green Gate"}
+                          />
+                        </div>
                       </div>
                     </div>
 

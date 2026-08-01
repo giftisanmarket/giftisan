@@ -657,7 +657,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                 )}
 
                 {activeTab === "reviews" && <ReviewsTab reviews={reviews} dict={dict} />}
-                {activeTab === "settings" && <SettingsTab artisan={artisan} dict={dict} />}
+                {activeTab === "settings" && <SettingsTab artisan={artisan} dict={dict} lang={lang} />}
               </motion.div>
             </AnimatePresence>
           </div>

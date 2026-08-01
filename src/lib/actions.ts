@@ -1548,6 +1548,18 @@ export async function createProduct(artisanId: string, formData: FormData) {
 
 export async function getArtisanSales(artisanId: string) {
   try {
+    // Auth guard: only the artisan who owns this profile or an admin may fetch sales
+    const session = await auth();
+    if (!session?.user) return [];
+    const isAdmin = session.user.role === "ADMIN";
+    if (!isAdmin) {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      if (!artisan || artisan.id !== artisanId) return [];
+    }
+
     const sales = await prisma.orderItem.findMany({
       where: {
         product: {
@@ -1928,25 +1940,33 @@ export async function updateProduct(productId: string, formData: FormData) {
       }
     });
 
-    // Update variants (Sync approach: delete existing and recreate)
+    // Update variants — safe sync: only delete variants NOT referenced by existing order items
+    // to avoid orphaning OrderItem.variantId foreign keys for historical orders.
     const variantsData = JSON.parse(formData.get("variants") as string || "[]");
-    
-    await prisma.productVariant.deleteMany({ 
-      where: { productId } 
+
+    await prisma.productVariant.deleteMany({
+      where: {
+        productId,
+        orderItems: { none: {} }, // Preserve variants referenced by real orders
+      },
     });
 
     if (variantsData.length > 0) {
+      // Re-create all submitted variants (order-referenced ones will remain alongside)
       await prisma.productVariant.createMany({
-        data: await Promise.all(variantsData.map(async (v: any) => ({
-          productId,
-          name: v.name,
-          price: parseFloat(v.price) || 0,
-          stock: parseInt(v.stock) || 0,
-          sku: v.sku || null,
-          options: v.options || null,
-          image: v.image ? await processImage(v.image) : null,
-          badge: v.badge || null
-        })))
+        data: await Promise.all(
+          variantsData.map(async (v: any) => ({
+            productId,
+            name: v.name,
+            price: parseFloat(v.price) || 0,
+            stock: parseInt(v.stock) || 0,
+            sku: v.sku ? `${v.sku}-${Date.now()}` : null, // Avoid unique constraint conflict on recreate
+            options: v.options || null,
+            image: v.image ? await processImage(v.image) : null,
+            badge: v.badge || null,
+          }))
+        ),
+        skipDuplicates: true,
       });
     }
 
@@ -2391,6 +2411,11 @@ export async function toggleProductFeatured(productId: string, isFeatured: boole
 
 export async function toggleArtisanVerification(artisanId: string, isVerified: boolean) {
   try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { error: "Unauthorized: Admin privileges required" };
+    }
+
     await prisma.artisanProfile.update({
       where: { id: artisanId },
       data: { isVerified }
@@ -2608,6 +2633,12 @@ export async function getInbox(userId: string) {
 
 export async function updateUser(userId: string, formData: FormData) {
   try {
+    // Auth guard: a user may only update their own profile unless they are an admin
+    const session = await auth();
+    if (!session?.user || (session.user.id !== userId && session.user.role !== "ADMIN")) {
+      return { error: "Unauthorized" };
+    }
+
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const image = formData.get("image") as string;
@@ -2745,6 +2776,12 @@ export async function markMessagesAsRead(userId: string, senderId: string) {
 
 export async function deleteAccountAction(userId: string) {
   try {
+    // Auth guard: a user may only delete their own account
+    const session = await auth();
+    if (!session?.user || session.user.id !== userId) {
+      return { error: "Unauthorized" };
+    }
+
     await prisma.user.delete({
       where: { id: userId }
     });
@@ -3304,8 +3341,8 @@ export async function convertGuestToAccount({
   password: string;
 }) {
   try {
-    if (!password || password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters long." };
+    if (!password || password.length < 8) {
+      return { success: false, error: "Password must be at least 8 characters long." };
     }
 
     const order = await prisma.order.findUnique({

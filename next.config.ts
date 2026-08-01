@@ -34,9 +34,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: '100mb',
+      bodySizeLimit: '10mb', // Images are pre-processed by Sharp before upload; 100mb was a DoS risk
     },
-    proxyClientMaxBodySize: '100mb',
+    proxyClientMaxBodySize: '10mb',
   },
 };
 

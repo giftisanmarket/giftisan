@@ -56,7 +56,8 @@ export function SalesTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [viewingImage, setViewingImage] = useState<string | null>(null);
 
-  const isArabic = dict.studio.mark_shipped === "تحديد كمشحون";
+  // Use the lang prop directly — avoids brittle string-comparison heuristics
+  const isArabic = lang === 'ar';
 
   const getBulkOrdersLabel = (count: number) => {
     if (isArabic) {

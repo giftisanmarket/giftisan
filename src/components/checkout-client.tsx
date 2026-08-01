@@ -38,8 +38,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [isLoadingMethods, setIsLoadingMethods] = useState(true);
 
-  // Localization detector (Frictionless check for /ar)
-  const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
+  // Use the lang param directly — avoids brittle translation string comparisons
+  const isAr = lang === 'ar';
   const promoPlaceholder = isAr ? "كود الخصم (مثال: GIFT10)" : "Promo Code (e.g. GIFT10)";
   const promoApply = isAr ? "تطبيق" : "Apply";
   const promoRemove = isAr ? "إزالة" : "Remove";

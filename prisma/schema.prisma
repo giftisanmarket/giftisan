@@ -407,6 +407,10 @@ model ArtisanTransaction {
   
   description String?
   createdAt   DateTime          @default(now())
+
+  @@index([artisanId])
+  @@index([orderId])
+  @@index([type, status]) // Used by escrow clearance cron and admin payout queries
 }
 
 enum TransactionType {

@@ -640,10 +640,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             type="text"
                             disabled
                             readOnly
-                            value={instagram || ""}
-                            onChange={(e) => setInstagram(e.target.value)}
+                            value="giftisan_eg"
                             className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder={dict.studio_profile.insta_placeholder}
+                            placeholder="giftisan_eg"
                           />
                         </div>
                       </div>
@@ -658,10 +657,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             type="url"
                             disabled
                             readOnly
-                            value={website || ""}
-                            onChange={(e) => setWebsite(e.target.value)}
+                            value="https://www.giftisan.com"
                             className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder={dict.studio_profile.website_placeholder}
+                            placeholder="https://www.giftisan.com"
                           />
                         </div>
                       </div>
@@ -679,10 +677,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             type="text"
                             disabled
                             readOnly
-                            value={tiktok || ""}
-                            onChange={(e) => setTiktok(e.target.value)}
+                            value="giftisan.eg"
                             className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder={dict.studio_profile.tiktok_placeholder}
+                            placeholder="giftisan.eg"
                           />
                         </div>
                       </div>

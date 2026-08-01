@@ -409,28 +409,23 @@ export function SalesTab({
 
                   <div className="mt-8 pt-8 border-t border-primary/5 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedItem(item);
-                          setTimeout(() => window.print(), 100);
-                        }}
-                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-white border border-primary/10 text-primary/40 hover:text-accent hover:border-accent/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 transition-all active:scale-90"
-                        title={dict.studio.print_slip}
+                      <div
+                        title={lang === "ar" ? "مُدار بواسطة جيفتيسان 🔒" : "Managed by Giftisan 🔒"}
+                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-primary/5 border border-primary/5 text-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 cursor-not-allowed select-none opacity-60"
                       >
                         <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.print_slip}</span>
-                      </button>
+                        <span className="text-[10px]">🔒</span>
+                      </div>
 
-                      <Link
-                        href={`/profile/messages?userId=${item.order.userId}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-white border border-primary/10 text-primary/40 hover:text-primary hover:border-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 transition-all active:scale-90"
-                        title={dict.studio.contact_buyer}
+                      <div
+                        title={lang === "ar" ? "خصوصية المشتري محمية من قِبَل جيفتيسان 🔒" : "Buyer privacy protected by Giftisan 🔒"}
+                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-primary/5 border border-primary/5 text-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 cursor-not-allowed select-none opacity-60"
                       >
                         <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.contact_buyer}</span>
-                      </Link>
+                        <span className="text-[10px]">🔒</span>
+                      </div>
 
                       <button
                         onClick={(e) => {

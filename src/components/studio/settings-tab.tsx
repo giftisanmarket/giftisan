@@ -476,10 +476,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           type="text"
                           disabled
                           readOnly
-                          value={instagram}
-                          onChange={(e) => setInstagram(e.target.value)}
+                          value="giftisan_eg"
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="@handle"
+                          placeholder="giftisan_eg"
                         />
                       </div>
                     </div>
@@ -494,10 +493,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           type="text"
                           disabled
                           readOnly
-                          value={tiktok}
-                          onChange={(e) => setTiktok(e.target.value)}
+                          value="giftisan.eg"
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="@handle"
+                          placeholder="giftisan.eg"
                         />
                       </div>
                     </div>
@@ -512,10 +510,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           type="url"
                           disabled
                           readOnly
-                          value={website}
-                          onChange={(e) => setWebsite(e.target.value)}
+                          value="https://www.giftisan.com"
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="https://..."
+                          placeholder="https://www.giftisan.com"
                         />
                       </div>
                     </div>

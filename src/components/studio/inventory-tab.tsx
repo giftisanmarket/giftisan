@@ -141,7 +141,7 @@ export function InventoryTab({
                   {searchQuery ? dict.studio.no_search_results : dict.studio.empty_studio_title}
                 </h3>
                 <p className="text-charcoal/40 max-w-xs md:max-w-md mx-auto text-sm md:text-base">
-                  {searchQuery ? "Try refining your keywords." : dict.studio.empty_studio_desc}
+                  {searchQuery ? dict.studio.no_search_results_desc : dict.studio.empty_studio_desc}
                 </p>
               </div>
             </div>
@@ -149,7 +149,13 @@ export function InventoryTab({
             filteredProducts.map((p: any) => (
               <div 
                 key={p.id}
-                className="group relative bg-white rounded-[2rem] md:rounded-[3.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden"
+                className={cn(
+                  "group relative bg-white rounded-[2rem] md:rounded-[3.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden",
+                  p.status === "APPROVED" ? "border-l-[3px] border-l-green-500" :
+                  p.status === "REJECTED" ? "border-l-[3px] border-l-red-400"  :
+                  p.status === "DRAFT"    ? "border-l-[3px] border-l-slate-300" :
+                                           "border-l-[3px] border-l-amber-400"
+                )}
               >
                 <div className="relative aspect-square overflow-hidden shrink-0">
                   <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />

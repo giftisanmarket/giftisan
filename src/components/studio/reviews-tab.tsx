@@ -27,7 +27,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
     setIsSubmitting(true);
     const res = await replyToReview(reviewId, replyText);
     if (res.success) {
-      toast.success("Reply posted!");
+      toast.success(dict.studio?.reply_posted || "Reply posted!");
       setReplyingTo(null);
       setReplyText("");
       router.refresh();

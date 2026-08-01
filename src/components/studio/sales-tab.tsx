@@ -250,26 +250,36 @@ export function SalesTab({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["ALL", "PENDING", "SHIPPED", "DELIVERED"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={cn(
-                    "px-6 h-10 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
-                    statusFilter === status 
-                      ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                      : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
-                  )}
-                >
-                  {status === "ALL" ? dict.studio.all_orders : 
-                   status === "PENDING" ? dict.studio.status_pending :
-                   status === "SHIPPED" ? dict.studio.status_shipped :
-                   dict.studio.status_delivered}
-                  <span className="ms-2 opacity-40">
-                    ({status === "ALL" ? sales.length : sales.filter(s => s.status === status).length})
-                  </span>
-                </button>
-              ))}
+              {(["ALL", "PENDING", "PROCESSING", "SHIPPED", "DELIVERED"] as const).map((status) => {
+                const count = status === "ALL" ? sales.length : sales.filter(s => s.status === status).length;
+                const label =
+                  status === "ALL" ? dict.studio.all_orders :
+                  status === "PENDING" ? dict.studio.status_pending :
+                  status === "PROCESSING" ? (lang === "ar" ? "جاهز للشحن" : "Ready to Ship") :
+                  status === "SHIPPED" ? dict.studio.status_shipped :
+                  dict.studio.status_delivered;
+                const isActive = statusFilter === status;
+                return (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={cn(
+                      "px-5 h-10 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2",
+                      isActive
+                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                        : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
+                    )}
+                  >
+                    {label}
+                    <span className={cn(
+                      "text-[9px] font-black rounded-full px-1.5 py-0.5 min-w-[18px] text-center leading-none",
+                      isActive ? "bg-white/20 text-white" : "bg-primary/8 text-primary/40"
+                    )}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -294,7 +304,13 @@ export function SalesTab({
               <div 
                 key={item.id} 
                 onClick={() => setSelectedItem(item)}
-                className="group relative bg-white rounded-2xl md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all overflow-hidden cursor-pointer active:scale-[0.98]"
+                className={cn(
+                  "group relative bg-white rounded-2xl md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all overflow-hidden cursor-pointer active:scale-[0.98]",
+                  item.status === "PENDING"    ? "border-l-[3px] border-l-amber-400" :
+                  item.status === "PROCESSING" ? "border-l-[3px] border-l-teal-500"  :
+                  item.status === "SHIPPED"    ? "border-l-[3px] border-l-blue-400"  :
+                                                 "border-l-[3px] border-l-green-500"
+                )}
               >
                 <div className="p-5 md:p-10">
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
@@ -307,15 +323,16 @@ export function SalesTab({
                         <h4 className="text-xl md:text-2xl font-heading font-bold text-primary line-clamp-2" dir="auto">{item.product.name}</h4>
                         <div className="flex items-center gap-2 flex-wrap justify-center md:justify-start">
                           <span className={cn(
-                            "inline-flex px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border shadow-sm",
-                            item.status === "PENDING" ? "bg-amber-500 text-white border-amber-400" :
-                            item.status === "PROCESSING" ? "bg-purple-500 text-white border-purple-400" :
-                            item.status === "SHIPPED" ? "bg-blue-500 text-white border-blue-400" :
-                            "bg-green-500 text-white border-green-400"
+                            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                            item.status === "PENDING"    ? "bg-amber-500  text-white border-amber-400"  :
+                            item.status === "PROCESSING" ? "bg-teal-500   text-white border-teal-400"   :
+                            item.status === "SHIPPED"    ? "bg-blue-500   text-white border-blue-400"   :
+                                                          "bg-green-500  text-white border-green-400"
                           )}>
-                            {item.status === "PENDING" ? dict.studio.status_pending :
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/60 shrink-0" />
+                            {item.status === "PENDING"    ? dict.studio.status_pending :
                              item.status === "PROCESSING" ? (lang === "ar" ? "جاهز للشحن" : "Ready to Ship") :
-                             item.status === "SHIPPED" ? dict.studio.status_shipped :
+                             item.status === "SHIPPED"    ? dict.studio.status_shipped :
                              dict.studio.status_delivered}
                           </span>
 
@@ -330,7 +347,10 @@ export function SalesTab({
                         <p className="hidden md:block opacity-20">•</p>
                         <p className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 opacity-40" />
-                          {new Date(item.order.createdAt).toLocaleDateString()}
+                          {new Date(item.order.createdAt).toLocaleDateString(
+                            lang === 'ar' ? 'ar-EG' : 'en-GB',
+                            { day: 'numeric', month: 'short', year: 'numeric' }
+                          )}
                         </p>
                         {item.order.isGift && (
                           <div className="bg-accent/10 border border-accent/20 px-3 py-1 rounded-full flex items-center gap-2">
@@ -434,7 +454,7 @@ export function SalesTab({
                           e.stopPropagation();
                           setSelectedItem(item);
                         }}
-                        className="flex shrink-0 h-10 md:h-12 px-4 md:px-6 bg-primary/5 text-primary text-[10px] md:text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-primary/10 transition-all active:scale-95 items-center justify-center gap-2"
+                        className="flex shrink-0 h-10 md:h-12 px-5 md:px-7 bg-primary text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-primary-light transition-all active:scale-95 items-center justify-center gap-2 shadow-lg shadow-primary/20"
                       >
                         {dict.studio.full_details}
                       </button>
@@ -458,7 +478,7 @@ export function SalesTab({
                             <Truck className="w-4 h-4 shrink-0" />
                           )}
                           <span>
-                            {lang === "ar" ? "جاهز" : "Ready"}
+                            {lang === "ar" ? "جاهز للشحن" : "Mark Ready"}
                           </span>
                         </button>
                       )}

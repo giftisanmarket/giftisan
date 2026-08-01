@@ -544,7 +544,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   [
                     { id: "overview", label: dict.studio.overview, icon: BarChart3 },
                     { id: "inventory", label: dict.studio.inventory, icon: ShoppingBag },
-                    { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING").length },
+                    { id: "sales", label: dict.studio.sales, icon: Package, badge: sales.filter((s: any) => s.status === "PENDING" || s.status === "PROCESSING").length },
                     { id: "growth", label: dict.studio.growth, icon: TrendingUp },
                     { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
                     { id: "reviews", label: dict.studio.community, icon: Star },
@@ -559,11 +559,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                       activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
                     )}
                   >
-                    {tab.id === "logistics" && (
-                      <div className="absolute -top-1 -end-1 z-[30] px-1.5 py-0.5 bg-green-500 text-[8px] font-black text-white rounded-full border border-white shadow-sm uppercase tracking-tighter animate-pulse">
-                        Beta
-                      </div>
-                    )}
+
                     {activeTab === tab.id && (
                       <motion.div
                         layoutId="activeTabPill"

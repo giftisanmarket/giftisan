@@ -71,28 +71,28 @@ export function OverviewTab({
             label: dict.studio.stats_impressions,
             value: totalViews.toLocaleString(),
             icon: MousePointer2,
-            color: "bg-purple-500",
+            color: "bg-sky-500",
             tooltip: dict.studio.tooltip_impressions
           },
           {
             label: dict.studio.stats_loves,
             value: totalFavorites,
             icon: Heart,
-            color: "bg-red-500",
+            color: "bg-amber-500",
             tooltip: dict.studio.tooltip_loves
           },
           {
             label: dict.studio.stats_success,
             value: `${conversionRate}%`,
             icon: Percent,
-            color: "bg-indigo-500",
+            color: "bg-teal-600",
             tooltip: dict.studio.tooltip_success
           },
           {
             label: dict.studio.stats_revenue,
             value: `${dict.product.currency} ${totalRevenue.toLocaleString()}`,
             icon: BarChart3,
-            color: "bg-green-500",
+            color: "bg-emerald-600",
             tooltip: dict.studio.tooltip_revenue
           },
         ].map((stat, i) => (

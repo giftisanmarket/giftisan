@@ -17,7 +17,8 @@ import {
   Clock,
   Coins,
   Printer,
-  Camera
+  Camera,
+  Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
@@ -415,7 +416,7 @@ export function SalesTab({
                       >
                         <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.print_slip}</span>
-                        <span className="text-[10px]">🔒</span>
+                        <Lock className="w-3 h-3 shrink-0" />
                       </div>
 
                       <div
@@ -424,7 +425,7 @@ export function SalesTab({
                       >
                         <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
                         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.contact_buyer}</span>
-                        <span className="text-[10px]">🔒</span>
+                        <Lock className="w-3 h-3 shrink-0" />
                       </div>
 
                       <button

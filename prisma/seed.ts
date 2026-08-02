@@ -91,6 +91,18 @@ async function main() {
     });
   }
 
+  // 5. Seed default Shipping Zones for Egypt
+  const countShipping = await prisma.shippingMethod.count();
+  if (countShipping === 0) {
+    await prisma.shippingMethod.createMany({
+      data: [
+        { name: "Cairo & Giza", price: 84, estimatedDays: "1–2 Business Days", isActive: true },
+        { name: "Delta & Canal Cities", price: 96, estimatedDays: "2–3 Business Days", isActive: true },
+        { name: "Upper Egypt", price: 108, estimatedDays: "3–5 Business Days", isActive: true }
+      ]
+    });
+  }
+
   console.log("Seeding complete!");
 }
 

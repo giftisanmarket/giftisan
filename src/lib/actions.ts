@@ -3127,9 +3127,24 @@ export async function createCouponAction(data: {
 
 export async function getAllShippingMethods() {
   try {
-    return await prisma.shippingMethod.findMany({
+    let methods = await prisma.shippingMethod.findMany({
       orderBy: { price: "asc" }
     });
+
+    if (methods.length === 0) {
+      await prisma.shippingMethod.createMany({
+        data: [
+          { name: "Cairo & Giza", price: 84, estimatedDays: "1–2 Business Days", isActive: true },
+          { name: "Delta & Canal Cities", price: 96, estimatedDays: "2–3 Business Days", isActive: true },
+          { name: "Upper Egypt", price: 108, estimatedDays: "3–5 Business Days", isActive: true }
+        ]
+      });
+      methods = await prisma.shippingMethod.findMany({
+        orderBy: { price: "asc" }
+      });
+    }
+
+    return methods;
   } catch (error) {
     console.error("Fetch shipping methods error:", error);
     return [];

@@ -9,6 +9,8 @@ import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, Messag
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
+import { EGYPT_GOVERNORATES, findZoneForGovernorate, matchEgyptGovernorate, translateShippingZone, translateDeliveryDays } from "@/lib/egypt-governorates";
+import { GovernorateSelect } from "@/components/ui/governorate-select";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
@@ -37,6 +39,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+  const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>("cairo");
 
   // Use the lang param directly — avoids brittle translation string comparisons
   const isAr = lang === 'ar';
@@ -96,11 +99,20 @@ export function CheckoutClient({ dict }: { dict: any }) {
           if (data && data.address) {
             const detectedCity = data.address.city || data.address.state || data.address.town || data.address.governorate || "Cairo";
             const detectedStreet = [data.address.road, data.address.suburb, data.address.neighbourhood].filter(Boolean).join(", ") || data.display_name?.split(",")[0] || "";
-            
+
+            // Use the full address object + display name for rich governorate matching
+            const matchedGov = matchEgyptGovernorate(data.address, data.display_name || "");
+            if (matchedGov) {
+              setSelectedGovernorateId(matchedGov.id);
+              // Also sync the shipping method zone
+              const matched = findZoneForGovernorate(matchedGov.id, shippingMethods);
+              if (matched) setSelectedMethod(matched);
+            }
+
             setShippingData(prev => ({
               ...prev,
               address: detectedStreet || prev.address,
-              city: detectedCity || prev.city
+              city: matchedGov ? (isAr ? matchedGov.nameAr : matchedGov.nameEn) : detectedCity
             }));
             toast.success(isAr ? "تم تحديد عنوانك بنجاح 📍" : "Location detected successfully 📍");
           }
@@ -125,20 +137,26 @@ export function CheckoutClient({ dict }: { dict: any }) {
     }
   }, [error]);
 
-  // Load Shipping Methods
+  // Load Shipping Methods ONCE on mount
   useEffect(() => {
     async function loadShipping() {
       const methods = await getAllShippingMethods();
       const activeMethods = methods.filter((m: any) => m.isActive);
       setShippingMethods(activeMethods);
-      // Auto-select first method if available
-      if (activeMethods.length > 0) {
-        setSelectedMethod(activeMethods[0]);
-      }
       setIsLoadingMethods(false);
     }
     loadShipping();
   }, []);
+
+  // Sync selectedMethod instantly whenever selectedGovernorateId or shippingMethods change
+  useEffect(() => {
+    if (shippingMethods.length > 0 && selectedGovernorateId) {
+      const matched = findZoneForGovernorate(selectedGovernorateId, shippingMethods);
+      if (matched) {
+        setSelectedMethod(matched);
+      }
+    }
+  }, [selectedGovernorateId, shippingMethods]);
 
   const updateShippingField = (field: keyof typeof shippingData, value: string) => {
     setShippingData(prev => ({ ...prev, [field]: value }));
@@ -381,7 +399,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                 )}
                 {selectedMethod && (
                   <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
-                    <span>{selectedMethod.name}</span>
+                    <span>{translateShippingZone(selectedMethod.name, isAr)}</span>
                     <span className="text-accent-light">
                       {selectedMethod.price === 0 ? dict.checkout.free : `${dict.product.currency} ${selectedMethod.price}`}
                     </span>
@@ -497,20 +515,23 @@ export function CheckoutClient({ dict }: { dict: any }) {
                 </div>
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6">
                   <div className="space-y-2 lg:col-span-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.city}</label>
-                    <input
-                      type="text"
-                      name="city"
-                      autoComplete="address-level2"
-                      placeholder="Cairo"
-                      value={shippingData.city}
-                      onChange={(e) => updateShippingField("city", e.target.value)}
-                      className={cn(
-                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                        validationErrors.includes("city") 
-                          ? "border-accent ring-2 ring-accent/10" 
-                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
-                      )}
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">
+                      {isAr ? "المحافظة (المنطقة)" : "Governorate (Region)"}
+                    </label>
+                    <GovernorateSelect
+                      value={selectedGovernorateId}
+                      isAr={isAr}
+                      hasError={validationErrors.includes("city")}
+                      onChange={(govId) => {
+                        setSelectedGovernorateId(govId);
+                        const gov = EGYPT_GOVERNORATES.find(g => g.id === govId);
+                        if (gov) {
+                          const name = isAr ? gov.nameAr : gov.nameEn;
+                          updateShippingField("city", name);
+                          const matched = findZoneForGovernorate(govId, shippingMethods);
+                          if (matched) setSelectedMethod(matched);
+                        }
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -563,51 +584,34 @@ export function CheckoutClient({ dict }: { dict: any }) {
                   </div>
                 </div>
 
-                {/* Shipping Method Section: Hide if not loading and no active methods exist */}
-                {(isLoadingMethods || shippingMethods.length > 0) && (
-                  <div className="pt-8 border-t border-primary/5">
-                    <h3 className="text-xl font-heading font-bold text-primary mb-6 flex items-center gap-2">
-                      <Truck className="w-5 h-5 text-accent" />
-                      {dict.checkout.shipping_method}
+                {/* Shipping Rate Confirmation Card */}
+                {selectedMethod && (
+                  <div className="pt-6 border-t border-primary/5">
+                    <h3 className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-accent" />
+                      {isAr ? "خدمة وتكلفة الشحن" : "Shipping & Delivery"}
                     </h3>
                     
-                    {isLoadingMethods ? (
-                      <div className="flex items-center gap-2 text-charcoal/40 text-sm animate-pulse">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {dict.checkout.loading_regions}
+                    <div className="p-4 md:p-5 rounded-2xl bg-accent/5 border border-accent/20 flex items-center justify-between shadow-sm">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-accent text-white flex items-center justify-center shrink-0 shadow-md shadow-accent/20">
+                          <Truck className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-primary">
+                            {translateShippingZone(selectedMethod.name, isAr)}
+                          </p>
+                          <p className="text-xs text-charcoal/60 mt-0.5">
+                            {isAr ? "التوصيل حتى باب المنزل" : "Door-to-door delivery"} • {translateDeliveryDays(selectedMethod.estimatedDays || "1-3 Days", isAr)}
+                          </p>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="grid gap-3">
-                        {shippingMethods.map((method) => (
-                          <div 
-                            key={method.id}
-                            onClick={() => setSelectedMethod(method)}
-                            className={cn(
-                              "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all",
-                              selectedMethod?.id === method.id 
-                                ? "border-accent bg-accent/5" 
-                                : "border-primary/5 bg-white hover:border-primary/10"
-                            )}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className={cn(
-                                "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
-                                selectedMethod?.id === method.id ? "border-accent bg-accent" : "border-primary/20"
-                              )}>
-                                {selectedMethod?.id === method.id && <div className="w-2 h-2 rounded-full bg-white" />}
-                              </div>
-                              <div>
-                                <p className="font-bold text-sm text-primary">{method.name}</p>
-                                {method.estimatedDays && <p className="text-[10px] text-charcoal/40 uppercase font-black tracking-widest">{method.estimatedDays}</p>}
-                              </div>
-                            </div>
-                            <p className="font-bold text-sm text-primary">
-                              {method.price === 0 ? dict.checkout.free : `${dict.product.currency} ${method.price}`}
-                            </p>
-                          </div>
-                        ))}
+                      <div className="text-end shrink-0">
+                        <span className="font-heading font-bold text-base md:text-lg text-primary block">
+                          {selectedMethod.price === 0 ? dict.checkout.free : `EGP ${selectedMethod.price}`}
+                        </span>
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
 

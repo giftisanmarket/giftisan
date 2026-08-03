@@ -206,6 +206,8 @@ model Product {
   @@index([category])
   @@index([status])
   @@index([artisanId])
+  @@index([status, category])
+  @@index([artisanId, status])
   @@index([isFeatured, createdAt(sort: Desc)])
 }
 
@@ -302,6 +304,8 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
 }
 
 model ShippingMethod {

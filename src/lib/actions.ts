@@ -391,29 +391,35 @@ export async function getProductsByCategory(category: string) {
 
 export async function getFeaturedProducts() {
   try {
-    const products = await prisma.product.findMany({
-      where: {
-        status: "APPROVED",
-        artisan: {
-          status: "APPROVED"
-        }
-      },
-      take: 8,
-      include: {
-        artisan: {
+    const getCachedFeatured = unstable_cache(
+      async () => {
+        return await prisma.product.findMany({
+          where: {
+            status: "APPROVED",
+            artisan: {
+              status: "APPROVED"
+            }
+          },
+          take: 8,
           include: {
-            user: true
-          }
-        },
-        reviews: true,
-        variants: true
+            artisan: {
+              include: {
+                user: true
+              }
+            },
+            reviews: true,
+            variants: true
+          },
+          orderBy: [
+            { isFeatured: "desc" },
+            { createdAt: "desc" }
+          ]
+        });
       },
-      orderBy: [
-        { isFeatured: "desc" },
-        { createdAt: "desc" }
-      ]
-    });
-    return products;
+      ["featured-products-cache-key"],
+      { revalidate: 300, tags: ["featured-products", "products"] }
+    );
+    return await getCachedFeatured();
   } catch (error) {
     console.error("Get featured products error:", error);
     return [];
@@ -2102,6 +2108,8 @@ export async function addReview(data: { productId: string, userId: string, ratin
   }
 }
 
+import { unstable_cache } from "next/cache";
+
 export async function getAdminStats() {
   try {
     const session = await auth();
@@ -2114,120 +2122,127 @@ export async function getAdminStats() {
         platformEarnings: 0,
         pendingPayouts: 0,
         artisanPending: 0,
-        artisanWithdrawable: 0
+        artisanWithdrawable: 0,
+        shippingRevenue: 0,
+        readyToShipCount: 0
       };
     }
 
-    const [
-      userCount, 
-      productCount, 
-      orderCount, 
-      totalRevenue,
-      artisanBalances,
-      pendingPayouts,
-      allSales,
-      shippingRevenue,
-      readyToShipCount
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.product.count(),
-      prisma.order.count({
-        where: {
-          status: {
-            notIn: ["PENDING", "CANCELLED"]
-          }
-        }
-      }),
-      prisma.order.aggregate({
-        where: {
-          status: {
-            notIn: ["PENDING", "CANCELLED"]
-          }
-        },
-        _sum: { totalAmount: true }
-      }),
-      prisma.artisanBalance.aggregate({
-        _sum: {
-          pending: true,
-          withdrawable: true
-        }
-      }),
-      prisma.artisanTransaction.aggregate({
-        where: {
-          type: "PAYOUT",
-          status: "PENDING"
-        },
-        _sum: {
-          amount: true
-        }
-      }),
-      prisma.artisanTransaction.findMany({
-        where: {
-          type: "SALE",
-          status: { in: ["PENDING", "CLEARED"] }
-        },
-        select: {
-          amount: true,
-          artisanId: true,
-          orderId: true,
-          order: {
-            include: {
-              items: {
-                select: {
-                  price: true,
-                  quantity: true,
-                  product: {
+    const getCachedStats = unstable_cache(
+      async () => {
+        const [
+          userCount, 
+          productCount, 
+          orderCount, 
+          totalRevenue,
+          artisanBalances,
+          pendingPayouts,
+          allSales,
+          shippingRevenue,
+          readyToShipCount
+        ] = await Promise.all([
+          prisma.user.count(),
+          prisma.product.count(),
+          prisma.order.count({
+            where: {
+              status: {
+                notIn: ["PENDING", "CANCELLED"]
+              }
+            }
+          }),
+          prisma.order.aggregate({
+            where: {
+              status: {
+                notIn: ["PENDING", "CANCELLED"]
+              }
+            },
+            _sum: { totalAmount: true }
+          }),
+          prisma.artisanBalance.aggregate({
+            _sum: {
+              pending: true,
+              withdrawable: true
+            }
+          }),
+          prisma.artisanTransaction.aggregate({
+            where: {
+              type: "PAYOUT",
+              status: "PENDING"
+            },
+            _sum: {
+              amount: true
+            }
+          }),
+          prisma.artisanTransaction.findMany({
+            where: {
+              type: "SALE",
+              status: { in: ["PENDING", "CLEARED"] }
+            },
+            select: {
+              amount: true,
+              artisanId: true,
+              orderId: true,
+              order: {
+                include: {
+                  items: {
                     select: {
-                      artisanId: true
+                      price: true,
+                      quantity: true,
+                      product: {
+                        select: {
+                          artisanId: true
+                        }
+                      }
                     }
                   }
                 }
               }
             }
-          }
-        }
-      }),
-      prisma.order.aggregate({
-        where: { status: { notIn: ["PENDING", "CANCELLED"] } },
-        _sum: { shippingCost: true }
-      }),
-      prisma.order.count({
-        where: {
-          status: { in: ["PENDING", "PROCESSING"] },
-          items: {
-            every: {
-              status: { in: ["PROCESSING", "SHIPPED", "DELIVERED"] }
+          }),
+          prisma.order.aggregate({
+            where: { status: { notIn: ["PENDING", "CANCELLED"] } },
+            _sum: { shippingCost: true }
+          }),
+          prisma.order.count({
+            where: {
+              status: { in: ["PENDING", "PROCESSING"] },
+              items: {
+                every: {
+                  status: { in: ["PROCESSING", "SHIPPED", "DELIVERED"] }
+                }
+              }
             }
+          })
+        ]);
+
+        let platformEarnings = 0;
+        allSales.forEach(sale => {
+          if (sale.order) {
+            const artisanItems = sale.order.items.filter(item => item.product.artisanId === sale.artisanId);
+            const itemTotal = artisanItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const commission = itemTotal - Math.abs(sale.amount);
+            platformEarnings += commission;
           }
-        }
-      })
-    ]);
+        });
 
-    // Calculate platform earnings (The difference between Order Item Total and Artisan Share)
-    // Note: In a production scale, we might want to store platform share directly in the transaction record
-    let platformEarnings = 0;
-    allSales.forEach(sale => {
-      if (sale.order) {
-        // Find items in this order belonging to this artisan
-        const artisanItems = sale.order.items.filter(item => item.product.artisanId === sale.artisanId);
-        const itemTotal = artisanItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const commission = itemTotal - Math.abs(sale.amount);
-        platformEarnings += commission;
-      }
-    });
+        return {
+          userCount,
+          productCount,
+          orderCount,
+          revenue: totalRevenue._sum.totalAmount || 0,
+          platformEarnings,
+          pendingPayouts: Math.abs(pendingPayouts._sum.amount || 0),
+          artisanPending: artisanBalances._sum.pending || 0,
+          artisanWithdrawable: artisanBalances._sum.withdrawable || 0,
+          shippingRevenue: shippingRevenue._sum.shippingCost || 0,
+          readyToShipCount
+        };
+      },
+      ["admin-stats-cache-key"],
+      { revalidate: 60, tags: ["admin-stats"] }
+    );
 
-    return {
-      userCount,
-      productCount,
-      orderCount,
-      revenue: totalRevenue._sum.totalAmount || 0,
-      platformEarnings,
-      pendingPayouts: Math.abs(pendingPayouts._sum.amount || 0),
-      artisanPending: artisanBalances._sum.pending || 0,
-      artisanWithdrawable: artisanBalances._sum.withdrawable || 0,
-      shippingRevenue: shippingRevenue._sum.shippingCost || 0,
-      readyToShipCount
-    };
+    return await getCachedStats();
   } catch (error) {
     console.error("Admin stats error:", error);
     return { 
@@ -2238,7 +2253,9 @@ export async function getAdminStats() {
       platformEarnings: 0,
       pendingPayouts: 0,
       artisanPending: 0,
-      artisanWithdrawable: 0
+      artisanWithdrawable: 0,
+      shippingRevenue: 0,
+      readyToShipCount: 0
     };
   }
 }

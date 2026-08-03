@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "./bespoke-image";
-import { cn } from "@/lib/utils";
+import { cn, getOptimizedImageUrl } from "@/lib/utils";
 
 export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice } = useCart();
@@ -101,7 +101,7 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                       {item.customImage && (
                         <div className="flex items-center gap-2 bg-primary/5 border border-primary/5 rounded-xl p-2 mt-2">
                           <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-primary/10 bg-white">
-                            <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
+                            <img src={getOptimizedImageUrl(item.customImage, { width: 100 })} alt="Custom upload" className="w-full h-full object-cover" />
                           </div>
                           <span className="text-[10px] text-primary font-bold">{dict.product.custom_image_attached || "Custom photo attached"}</span>
                         </div>

@@ -50,9 +50,13 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { updateOrderItemStatus, deleteProduct, bulkDeleteProducts, bulkUpdateProductStatus, subscribeToNewsletter, updateOrderItemNotes } from "@/lib/actions";
 import { toast } from "react-hot-toast";
-import QRCode from "react-qr-code";
-import { EditProductModal } from "@/components/edit-product-modal";
-import { SalesChart } from "@/components/sales-chart";
+import dynamic from "next/dynamic";
+const EditProductModal = dynamic(() => import("@/components/edit-product-modal").then(mod => mod.EditProductModal), {
+  ssr: false
+});
+const SalesChart = dynamic(() => import("@/components/sales-chart").then(mod => mod.SalesChart), {
+  ssr: false
+});
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { OverviewTab } from "./studio/overview-tab";
 import { InventoryTab } from "./studio/inventory-tab";

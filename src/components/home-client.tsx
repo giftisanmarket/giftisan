@@ -112,32 +112,11 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                       className={cn(
                         "p-3 rounded-full transition-all scale-90 active:scale-75 shadow-lg",
                         isFavorite(product.id)
-                          ? "bg-red-50 text-red-500"
+                          ? "bg-red-50 text-red-500 opacity-100"
                           : "bg-white/90 backdrop-blur text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 hover:bg-white"
                       )}
                     >
                       <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        addToCart(product, undefined, true);
-                        toast.success(`${product.name} ${dict.cart.added_to_cart}`, {
-                          icon: '🏺',
-                          style: {
-                            borderRadius: '1rem',
-                            background: '#1A2E2A',
-                            color: '#fff',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                          },
-                        });
-                      }}
-                      className="p-3 rounded-full bg-accent text-white shadow-lg xl:opacity-0 xl:group-hover:opacity-100 xl:translate-y-2 xl:group-hover:translate-y-0 opacity-100 translate-y-0 transition-all duration-300 hover:bg-accent-light active:scale-75"
-                    >
-                      <ShoppingBag className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

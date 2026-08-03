@@ -19,8 +19,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { getDictionary } from "../dictionaries";
-import { Metadata } from "next";
-import { AdminChartClient } from "@/components/admin/admin-chart-client";
+import type { Metadata } from "next";
+import nextDynamic from "next/dynamic";
+const AdminChartClient = nextDynamic(() => import("@/components/admin/admin-chart-client").then(mod => mod.AdminChartClient), {
+  loading: () => <div className="h-64 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />
+});
+import { SystemHealthPanel } from "@/components/admin/system-health-panel";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -283,53 +287,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
           </div>
 
           {/* System Health status panel */}
-          <div className="space-y-4 md:space-y-6">
-            <h2 className="text-xl md:text-2xl font-heading font-bold text-primary px-2 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary" />
-              {dict.admin.system_health}
-            </h2>
-
-            <div className="bg-primary text-white p-8 rounded-[2rem] shadow-2xl shadow-primary/20 space-y-6 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-white/10" />
-              
-              <div className="space-y-2 relative z-10">
-                <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-widest">{dict.admin.auth_service}</p>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="font-bold text-sm md:text-base shrink-0">NextAuth Edge</span>
-                  <span className="text-[8px] md:text-[9px] font-black text-emerald-400 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 whitespace-nowrap flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    {dict.admin.operational}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 relative z-10">
-                <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-widest">{dict.admin.database}</p>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="font-bold text-sm md:text-base shrink-0">Prisma / SQL</span>
-                  <span className="text-[8px] md:text-[9px] font-black text-emerald-400 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 whitespace-nowrap flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    {dict.admin.operational}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 relative z-10">
-                <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-widest">{dict.admin.storage}</p>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="font-bold text-sm md:text-base shrink-0">Global CDN</span>
-                  <span className="text-[8px] md:text-[9px] font-black text-emerald-400 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 whitespace-nowrap flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    {dict.admin.operational}
-                  </span>
-                </div>
-              </div>
-
-              <button className="w-full h-12 bg-white/10 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/20 transition-all text-xs md:text-sm border border-white/5 active:scale-95 relative z-10 mt-2">
-                {dict.admin.infrastructure_test} <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+          <SystemHealthPanel dict={dict} isAr={isAr} />
         </div>
       </div>
     </div>

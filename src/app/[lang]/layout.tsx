@@ -86,7 +86,8 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "react-hot-toast";
 import { NotificationProvider } from "@/components/notification-provider";
-import { FloatingChatHub } from "@/components/floating-chat-hub";
+import dynamic from "next/dynamic";
+const FloatingChatHub = dynamic(() => import("@/components/floating-chat-hub").then(mod => mod.FloatingChatHub));
 
 export async function generateStaticParams() {
   return [{ lang: 'en' }, { lang: 'ar' }];

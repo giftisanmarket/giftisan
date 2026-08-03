@@ -627,22 +627,6 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       <h4 className="text-sm md:text-base font-bold text-primary">{dict.checkout.mark_as_gift}</h4>
                     </div>
                   </div>
-
-                  {shippingData.isGift && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-2"
-                    >
-                      <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.gift_message_label}</label>
-                      <textarea
-                        placeholder={dict.checkout.gift_message_placeholder}
-                        value={shippingData.giftMessage}
-                        onChange={(e) => updateShippingField("giftMessage", e.target.value)}
-                        className="w-full h-32 p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base resize-none"
-                      />
-                    </motion.div>
-                  )}
                 </div>
 
                 <div className="pt-6 border-t border-primary/5">

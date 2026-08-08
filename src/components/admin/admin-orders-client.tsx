@@ -125,7 +125,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                       : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
                   )}
                 >
-                  {status === "READY TO SHIP" ? dict.admin.ready_to_ship : status}
+                  {status === "READY TO SHIP" ? dict.admin.ready_to_ship : status === "PENDING" ? (lang === "ar" ? "في انتظار الدفع" : "UNPAID (PENDING)") : status}
                   <span className="opacity-40">
                     ({status === "ALL" ? orders.length : status === "READY TO SHIP" ? orders.filter(o => ["PENDING", "PROCESSING"].includes(o.status) && (o.items?.length || 0) > 0 && o.items?.filter((i: any) => i.status === "PROCESSING" || i.status === "SHIPPED" || i.status === "DELIVERED").length === o.items?.length).length : orders.filter(o => o.status === status).length})
                   </span>
@@ -228,7 +228,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                           <td className="px-6 md:px-8 py-4 md:py-6">
                             <span className={cn(
                               "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border flex items-center gap-1.5 w-fit whitespace-nowrap",
-                              order.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                              order.status === "PENDING" ? "bg-amber-50 text-amber-700 border-amber-200" :
                               order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-200" :
                               order.status === "PROCESSING" ? "bg-purple-50 text-purple-600 border-purple-200" :
                               order.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
@@ -239,7 +239,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                               {order.status === "CANCELLED" && <X className="w-3 h-3" />}
                               {order.status === "SHIPPED" && <Truck className="w-3 h-3" />}
                               {order.status === "DELIVERED" && <CheckCircle2 className="w-3 h-3" />}
-                              {order.status}
+                              {order.status === "PENDING" ? (lang === "ar" ? "في انتظار الدفع (غير مدفوع)" : "UNPAID (PAYMENT PENDING)") : order.status}
                             </span>
                           </td>
                           <td className="px-6 md:px-8 py-4 md:py-6 text-right">

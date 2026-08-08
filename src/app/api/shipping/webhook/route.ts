@@ -103,10 +103,11 @@ export async function POST(req: Request) {
         console.log(`⚡ [Escrow Security] Reset escrow clock for Order: ${item.orderId} and Artisan: ${item.product.artisanId}. Updated ${affectedTxs.count} transaction(s).`);
 
         // Send beautiful delivery confirmation email notification to buyer
-        if (item.order?.user?.email) {
+        const buyerEmail = item.order?.user?.email || item.order?.clientEmail;
+        if (buyerEmail) {
           sendOrderStatusUpdateEmail(
-            item.order.user.email,
-            item.order.user.name || "Customer",
+            buyerEmail,
+            item.order?.user?.name || "Customer",
             item.orderId,
             "DELIVERED",
             item.product.name,

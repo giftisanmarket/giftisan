@@ -249,7 +249,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
       id: s.id,
       type: 'SALE',
       name: s.product.name,
-      customer: s.order.user.name,
+      customer: s.order.user?.name || s.order.clientEmail || "Guest",
       amount: s.price * s.quantity,
       date: new Date(s.order.createdAt),
     })),

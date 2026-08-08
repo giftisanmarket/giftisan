@@ -79,8 +79,9 @@ export function SalesTab({
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(item => 
-        item.order.user.name.toLowerCase().includes(query) ||
-        item.order.user.email.toLowerCase().includes(query) ||
+        item.order.user?.name?.toLowerCase().includes(query) ||
+        item.order.user?.email?.toLowerCase().includes(query) ||
+        item.order.clientEmail?.toLowerCase().includes(query) ||
         item.product.name.toLowerCase().includes(query) ||
         item.orderId.toLowerCase().includes(query)
       );

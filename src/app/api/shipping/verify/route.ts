@@ -272,7 +272,7 @@ function renderHtmlConfirmationPrompt(item: any, isOrderId: boolean = false) {
       <hr class="border-[#123524]/5" />
       <div>
         <span class="text-[10px] font-extrabold uppercase text-[#123524]/40 tracking-widest">Recipient Address</span>
-        <p class="text-sm font-bold text-[#123524] mt-0.5">${item.order.user.name}</p>
+        <p class="text-sm font-bold text-[#123524] mt-0.5">${item.order.user?.name || item.order.shippingName || "Valued Customer"}</p>
         <p class="text-xs text-[#123524]/60 mt-0.5 leading-relaxed font-medium">${item.order.shippingAddress}<br />${item.order.shippingCity}, ${item.order.shippingZip}</p>
       </div>
     </div>

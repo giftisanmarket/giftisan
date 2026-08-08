@@ -51,7 +51,6 @@ export function ContactClient({ dict }: { dict: any }) {
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
             {/* Contact Info */}
             <div className="space-y-10 order-2 md:order-1">
-
               <div className="flex items-start gap-5 group">
                 <div className="p-4 bg-white rounded-2xl text-accent shadow-sm border border-primary/5 group-hover:bg-primary group-hover:text-white transition-all duration-500">
                   <MapPin className="w-6 h-6" />

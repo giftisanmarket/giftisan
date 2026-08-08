@@ -279,7 +279,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
                 <div className="space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    📱 {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف / واتساب' : 'Phone Number / WhatsApp')} *
+                    📱 {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف' : 'Phone Number')} *
                   </label>
                   <input
                     type="tel"

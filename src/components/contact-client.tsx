@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
-import { Mail, Send, Sparkles, MessageCircle, HelpCircle, Loader2, CheckCircle2, Phone, MapPin } from "lucide-react";
+import { Mail, Send, Sparkles, MessageCircle, HelpCircle, Loader2, CheckCircle2, MapPin } from "lucide-react";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { submitInquiry } from "@/lib/actions";
 import { useParams } from "next/navigation";
@@ -51,16 +51,6 @@ export function ContactClient({ dict }: { dict: any }) {
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
             {/* Contact Info */}
             <div className="space-y-10 order-2 md:order-1">
-              <div className="flex items-start gap-5 group">
-                <div className="p-4 bg-white rounded-2xl text-accent shadow-sm border border-primary/5 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-primary text-xl mb-1">{dict.contact.call_us || 'Call Us Directly'}</h3>
-                  <a href="tel:01050505673" className="text-charcoal/60 font-medium hover:text-accent transition-colors">01050505673</a>
-                  <p className="text-[10px] uppercase font-black tracking-widest text-primary/30 mt-2">{lang === 'ar' ? 'متاح يومياً' : 'Available Daily'}</p>
-                </div>
-              </div>
 
               <div className="flex items-start gap-5 group">
                 <div className="p-4 bg-white rounded-2xl text-accent shadow-sm border border-primary/5 group-hover:bg-primary group-hover:text-white transition-all duration-500">

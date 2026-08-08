@@ -236,12 +236,11 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
                         <td className="px-6 md:px-8 py-4 md:py-5 text-xs font-black">
                           <span className={cn(
                             "px-2.5 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border shrink-0",
-                            order.status === "PENDING" ? "bg-amber-50 text-amber-700 border-amber-200" :
-                            order.status === "PROCESSING" ? "bg-purple-50 text-purple-600 border-purple-200" :
+                            order.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
                             order.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
                             "bg-green-50 text-green-700 border-green-200"
                           )}>
-                            {order.status === "PENDING" ? (isAr ? "غير مدفوع (في انتظار الدفع)" : "UNPAID (PAYMENT PENDING)") : order.status}
+                            {order.status}
                           </span>
                         </td>
                       </tr>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock, Navigation } from "lucide-react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock, Navigation, Package, MapPin } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
 import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -487,7 +487,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                         </div>
                       </div>
                       <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
-                        <span>🌐 {dict.studio_profile.public_link}</span>
+                        <span>{dict.studio_profile.public_link}</span>
                         <span className="font-mono text-accent font-bold dir-ltr">giftisan.eg/artisans/{slug || "your-studio-link"}</span>
                       </p>
                     </div>
@@ -551,7 +551,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                       <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0 mt-0.5">
-                            📦
+                            <Package className="w-5 h-5 text-primary" />
                           </div>
                           <div>
                             <h4 className="text-base md:text-lg font-bold text-primary">
@@ -571,11 +571,11 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                               className="w-full sm:w-auto px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex flex-wrap items-center justify-between sm:justify-center gap-2 hover:bg-emerald-100 transition-all shrink-0"
                             >
                               <span className="flex items-center gap-1.5 shrink-0">
-                                <span>📍</span>
+                                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>{lang === "ar" ? "تم تحديد الدبوس الجغرافي" : "GPS Pin Captured"}</span>
                               </span>
                               <span className="text-[10px] underline bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300/40 shrink-0">
-                                {lang === "ar" ? "فتح الخرائط ↗" : "Open Google Maps ↗"}
+                                {lang === "ar" ? "فتح الخرائط" : "Open Google Maps"}
                               </span>
                             </a>
                           )}
@@ -590,7 +590,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             ) : (
                               <Navigation className="w-3.5 h-3.5" />
                             )}
-                            <span>{lang === "ar" ? "تحديد موقعي تلقائياً 📍" : "Auto-Detect My Location 📍"}</span>
+                            <span>{lang === "ar" ? "تحديد موقعي تلقائياً" : "Auto-Detect My Location"}</span>
                           </button>
                         </div>
                       </div>

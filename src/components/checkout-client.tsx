@@ -122,8 +122,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
 
             toast.success(
               isAr
-                ? "تم تحديد موقعك بدقة 📍 يرجى كتابة رقم المبنى والشقة."
-                : "Exact GPS detected 📍 Please add your Building & Apt/Floor number.",
+                ? "تم تحديد موقعك بدقة. يرجى كتابة رقم المبنى والشقة."
+                : "Exact GPS detected. Please add your Building & Apt/Floor number.",
               { duration: 5000 }
             );
           }
@@ -511,7 +511,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       className="text-[10px] font-bold text-accent hover:text-accent-light flex items-center gap-1 transition-colors disabled:opacity-50"
                     >
                       <MapPin className={cn("w-3.5 h-3.5", isDetectingLocation && "animate-spin")} />
-                      <span>{isDetectingLocation ? (isAr ? "جاري التحديد..." : "Detecting...") : (isAr ? "تحديد موقعي 📍" : "Use current location 📍")}</span>
+                      <span>{isDetectingLocation ? (isAr ? "جاري التحديد..." : "Detecting...") : (isAr ? "تحديد موقعي" : "Use current location")}</span>
                     </button>
                   </div>
                   <input
@@ -529,7 +529,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     )}
                   />
                   <p className="text-[11px] text-charcoal/50 font-medium italic mt-1.5 flex items-center gap-1">
-                    <span>💡 {dict.checkout.address_details_hint}</span>
+                    <span>{dict.checkout.address_details_hint}</span>
                   </p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6">

@@ -40,7 +40,7 @@ export function ShippingAddressDisplay({
           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 text-accent font-black text-xs rounded-xl transition-all shadow-2xs hover:scale-105 active:scale-95 border border-accent/20"
         >
           <MapPin className="w-3.5 h-3.5" />
-          <span>{isAr ? "فتح الموقع الدقيق على خرائط جوجل ↗" : "Open Exact GPS Location on Google Maps ↗"}</span>
+          <span>{isAr ? "فتح الموقع الدقيق على خرائط جوجل" : "Open Exact GPS Location on Google Maps"}</span>
           <ExternalLink className="w-3 h-3 opacity-70" />
         </a>
       )}

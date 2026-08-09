@@ -547,9 +547,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
 
                     {/* Exact Courier Pickup Address (Admin & Logistics Only) */}
                     <div className="p-6 md:p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-6">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0 mt-0.5">
                             📦
                           </div>
                           <div>
@@ -561,13 +561,13 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full xl:w-auto shrink-0">
                           {gpsPinUrl && (
                             <a
                               href={gpsPinUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex items-center gap-1.5 hover:bg-emerald-100 transition-all shrink-0"
+                              className="px-3.5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition-all shrink-0"
                             >
                               <span>📍 Exact GPS Pin Captured</span>
                               <span className="text-[10px] underline">Open Google Maps ↗</span>
@@ -577,7 +577,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             type="button"
                             onClick={handleDetectLocation}
                             disabled={isDetectingLocation}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
+                            className="px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
                           >
                             {isDetectingLocation ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />

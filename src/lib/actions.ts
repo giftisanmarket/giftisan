@@ -13,6 +13,7 @@ import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tok
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
 import { IS_CHAT_LOCKED } from "@/lib/constants";
+import { sendDiscordInquiryNotification } from "@/lib/discord";
 
 export async function uploadImage(base64Data: string, skipWebPConversion = true) {
   try {
@@ -2822,6 +2823,10 @@ export async function submitInquiry(data: { name: string; email: string; message
     // Send notification email to support team
     sendInquiryNotification(data.name, data.email, data.message)
       .catch(err => console.error("Failed to send inquiry email:", err));
+
+    // Send Discord webhook notification
+    sendDiscordInquiryNotification(data.name, data.email, data.message)
+      .catch(err => console.error("Failed to send Discord webhook notification:", err));
 
     return { success: true, data: inquiry };
   } catch (error: any) {

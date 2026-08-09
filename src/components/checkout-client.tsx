@@ -40,6 +40,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [isLoadingMethods, setIsLoadingMethods] = useState(true);
   const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>("cairo");
+  const [gpsPinUrl, setGpsPinUrl] = useState<string>("");
 
   // Use the lang param directly — avoids brittle translation string comparisons
   const isAr = lang === 'ar';
@@ -111,14 +112,11 @@ export function CheckoutClient({ dict }: { dict: any }) {
               if (matched) setSelectedMethod(matched);
             }
 
-            // Append exact Google Maps GPS Pin link to shipping address string
-            const fullAddressWithGps = detectedStreet 
-              ? `${detectedStreet} [GPS Pin: ${googleMapsPin}]`
-              : `[GPS Pin: ${googleMapsPin}]`;
+            setGpsPinUrl(googleMapsPin);
 
             setShippingData(prev => ({
               ...prev,
-              address: fullAddressWithGps,
+              address: detectedStreet || prev.address,
               city: matchedGov ? (isAr ? matchedGov.nameAr : matchedGov.nameEn) : detectedCity
             }));
 
@@ -230,9 +228,13 @@ export function CheckoutClient({ dict }: { dict: any }) {
     const shippingCost = selectedMethod?.price || 0;
     const finalPrice = Math.max(totalPrice - discountValue + shippingCost, 0);
 
+    const fullAddressForOrder = gpsPinUrl && !shippingData.address.includes("[GPS Pin:")
+      ? `${shippingData.address} [GPS Pin: ${gpsPinUrl}]`
+      : shippingData.address;
+
     const res = await createOrder(session?.user?.id || null, finalPrice, cart, {
       ...shippingData,
-      address: shippingData.address,
+      address: fullAddressForOrder,
       couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
       discountApplied: discountValue,
       shippingMethodId: selectedMethod?.id,

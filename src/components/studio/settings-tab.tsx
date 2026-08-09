@@ -317,8 +317,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                             <input
                               type="text"
                               required
+                              maxLength={30}
                               value={slug}
-                              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
+                              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30))}
                               className={cn(
                                 "w-full h-14 ps-14 pe-14 rounded-2xl bg-cream/20 border transition-all font-bold text-sm",
                                 slugAvailability === 'available' ? "border-green-500/50 text-green-700" : 

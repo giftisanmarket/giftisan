@@ -460,8 +460,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                         <input
                           type="text"
                           required
+                          maxLength={30}
                           value={slug || ""}
-                          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
+                          onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30))}
                           className={cn(
                             "w-full h-16 ps-12 pe-12 rounded-2xl bg-white border-2 transition-all font-bold placeholder:text-primary/20",
                             slugAvailability === 'available' ? "border-green-500/50 text-green-700 bg-green-50/10" : 

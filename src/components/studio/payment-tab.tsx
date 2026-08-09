@@ -245,12 +245,25 @@ export function PaymentTab({
             </p>
           </div>
 
-          {balance.withdrawable > 0 && !showWithdrawForm && (
+          {!showWithdrawForm && (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowWithdrawForm(true)}
-              className="px-8 h-14 bg-accent hover:bg-accent-dark text-white font-bold rounded-2xl flex items-center gap-2 shadow-xl shadow-accent/20 transition-all text-sm md:text-base self-stretch md:self-auto justify-center"
+              onClick={() => {
+                setShowWithdrawForm(true);
+                if (balance.withdrawable <= 0) {
+                  toast(isRTL ? "ملاحظة: رصيدك القابل للسحب الحالي 0 ج.م. يمكنك استعراض نموذج السحب الآن، وستتمكن من إرساله فور انتقال الأرباح المعلقة لرصيدك." : "Note: Your withdrawable balance is currently 0 EGP. You can preview the withdrawal request form now, and submit it once your pending escrow clears.", {
+                    icon: <HelpCircle className="w-5 h-5 text-amber-500" />,
+                    style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+                  });
+                }
+              }}
+              className={cn(
+                "px-8 h-14 font-bold rounded-2xl flex items-center gap-2 shadow-xl transition-all text-sm md:text-base self-stretch md:self-auto justify-center",
+                balance.withdrawable > 0 
+                  ? "bg-accent hover:bg-accent-dark text-white shadow-accent/20" 
+                  : "bg-primary/10 hover:bg-primary/20 text-primary border border-primary/10"
+              )}
             >
               <Send className="w-4 h-4 rotate-45" /> {isRTL ? "طلب سحب الأرباح" : "Request Withdrawal"}
             </motion.button>
@@ -669,9 +682,9 @@ export function PaymentTab({
                 : "The funds are held safely as Pending to accommodate cancellations or stock changes. Once 7 days pass after the customer safely receives their unique treasures, the funds clear automatically into your Withdrawable balance."}
             </p>
             <p>
-              3. <strong>{isRTL ? "خيارات سحب متعددة" : "Multiple Withdrawal Channels"}:</strong> {isRTL 
-                ? "يمكنك طلب سحب أموالك في أي وقت عبر حساب إنستاباي، أو محفظة كاش الهاتف، أو تحويل بنكي مباشر. نقوم بمراجعة الطلبات وإرسال الأموال خلال 24 ساعة عمل." 
-                : "You can request payouts via InstaPay, mobile wallet (Vodafone Cash, etc.), or directly into your bank account. Admin approvals are audited and paid out within 24 business hours."}
+              3. <strong>{isRTL ? "كيفية طلب سحب الأرباح" : "How to Request Payouts"}:</strong> {isRTL 
+                ? "بمجرد انتقال أرباحك إلى الرصيد القابل للسحب (بعد مرور 7 أيام على التسليم)، اضغط على زر \"طلب سحب الأرباح\" بأعلى هذه الصفحة. أدخل المبلغ المطلوبة، واختر طريقة السحب المفضلة (إنستاباي، محفظة كاش، أو تحويل بنكي) وأكد طلبك. نقوم بمراجعة الطلبات وتحويل الأموال خلال 24 ساعة عمل." 
+                : "Once your funds clear into your Withdrawable balance (7 days post-delivery), click the 'Request Withdrawal' button at the top of this page. Enter your amount, choose your preferred payout channel (InstaPay, Mobile Wallet, or Bank Transfer), and submit. Admin approvals are verified and transferred within 24 business hours."}
             </p>
           </div>
         </div>

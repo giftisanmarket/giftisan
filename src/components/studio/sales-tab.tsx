@@ -441,14 +441,7 @@ export function SalesTab({
                         <Lock className="w-3 h-3 shrink-0" />
                       </div>
 
-                      <div
-                        title={lang === "ar" ? "خصوصية المشتري محمية من قِبَل جيفتيسان 🔒" : "Buyer privacy protected by Giftisan 🔒"}
-                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-primary/5 border border-primary/5 text-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 cursor-not-allowed select-none opacity-60"
-                      >
-                        <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
-                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.contact_buyer}</span>
-                        <Lock className="w-3 h-3 shrink-0" />
-                      </div>
+
 
                       <button
                         onClick={(e) => {

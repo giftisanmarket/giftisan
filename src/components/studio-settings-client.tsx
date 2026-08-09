@@ -486,8 +486,9 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                           ) : null}
                         </div>
                       </div>
-                      <p className="text-[10px] font-bold text-charcoal/40 ms-4">
-                        {dict.studio_profile.public_link} <span className="text-primary italic">www.giftisan.com/artisans/{slug || "your-path"}</span>
+                      <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
+                        <span>🌐 {dict.studio_profile.public_link}</span>
+                        <span className="font-mono text-accent font-bold dir-ltr">giftisan.eg/artisans/{slug || "your-studio-link"}</span>
                       </p>
                     </div>
 

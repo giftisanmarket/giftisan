@@ -307,8 +307,8 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center gap-2">
-                            {dict.studio_profile.studio_slug_label} *
+                          <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex flex-wrap items-center gap-2">
+                            <span>{dict.studio_profile.studio_slug_label} *</span>
                             <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full uppercase tracking-widest">{dict.studio_profile.studio_slug_permanent}</span>
                           </label>
                           <div className="relative">
@@ -319,12 +319,12 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                               value={slug}
                               onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
                               className={cn(
-                                "w-full h-14 ps-14 pe-14 rounded-2xl bg-cream/20 border transition-all font-bold",
+                                "w-full h-14 ps-14 pe-14 rounded-2xl bg-cream/20 border transition-all font-bold text-sm",
                                 slugAvailability === 'available' ? "border-green-500/50 text-green-700" : 
                                 slugAvailability === 'taken' ? "border-red-500/50 text-red-700" : 
-                                "border-primary/5"
+                                "border-primary/5 focus:border-accent"
                               )}
-                              placeholder="studio-slug"
+                              placeholder={dict.studio_profile.studio_slug_placeholder}
                             />
                             <div className="absolute end-4 top-1/2 -translate-y-1/2">
                               {isCheckingSlug ? <Loader2 className="w-4 h-4 animate-spin text-primary/20" /> :
@@ -332,6 +332,10 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                                slugAvailability === 'taken' ? <AlertCircle className="w-4 h-4 text-red-500" /> : null}
                             </div>
                           </div>
+                          <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
+                            <span>🌐 {dict.studio_profile.public_link}</span>
+                            <span className="font-mono text-accent font-bold dir-ltr">giftisan.eg/artisans/{slug || "your-studio-link"}</span>
+                          </p>
                         </div>
                       </div>
 

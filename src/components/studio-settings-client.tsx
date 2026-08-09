@@ -488,7 +488,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                       </div>
                       <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
                         <span>{dict.studio_profile.public_link}</span>
-                        <span className="font-mono text-accent font-bold dir-ltr">giftisan.eg/artisans/{slug || "your-studio-link"}</span>
+                        <span className="font-mono text-accent font-bold dir-ltr">giftisan.com/artisans/{slug || "your-studio-link"}</span>
                       </p>
                     </div>
 
@@ -660,102 +660,6 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             onChange={(e) => setPickupNotes(e.target.value)}
                             className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
                             placeholder={lang === "ar" ? "مثال: بجوار البنك الأهلي، بوابة خضراء" : "e.g., Near NBE Bank, Green Gate"}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8 pt-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                          <span>{dict.studio_profile.instagram_handle}</span>
-                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
-                        </label>
-                        <div className="relative">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaInstagram className="w-4 h-4" /></span>
-                          <input
-                            type="text"
-                            disabled
-                            readOnly
-                            value="giftisan_eg"
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder="giftisan_eg"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                          <span>{dict.studio_profile.website_url}</span>
-                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
-                        </label>
-                        <div className="relative">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
-                          <input
-                            type="url"
-                            disabled
-                            readOnly
-                            value="https://www.giftisan.com"
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder="https://www.giftisan.com"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8 pt-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                          <span>{dict.studio_profile.tiktok_handle}</span>
-                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
-                        </label>
-                        <div className="relative">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaTiktok className="w-4 h-4" /></span>
-                          <input
-                            type="text"
-                            disabled
-                            readOnly
-                            value="giftisan.eg"
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder="giftisan.eg"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                          <span>{dict.studio_profile.facebook_profile}</span>
-                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
-                        </label>
-                        <div className="relative">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaFacebook className="w-4 h-4" /></span>
-                          <input
-                            type="text"
-                            disabled
-                            readOnly
-                            value={facebook || ""}
-                            onChange={(e) => setFacebook(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder={dict.studio_profile.facebook_placeholder}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                          <span>{dict.studio_profile.pinterest_username}</span>
-                          <Lock className="w-3.5 h-3.5 text-primary/30 me-4" />
-                        </label>
-                        <div className="relative">
-                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40 text-sm font-bold self-center"><FaPinterestP className="w-4 h-4" /></span>
-                          <input
-                            type="text"
-                            disabled
-                            readOnly
-                            value={pinterest || ""}
-                            onChange={(e) => setPinterest(e.target.value)}
-                            className="w-full h-16 ps-12 pe-8 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60 placeholder:text-primary/20"
-                            placeholder={dict.studio_profile.pinterest_placeholder}
                           />
                         </div>
                       </div>

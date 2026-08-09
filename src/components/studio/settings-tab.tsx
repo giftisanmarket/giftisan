@@ -335,7 +335,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           </div>
                           <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
                             <span>{dict.studio_profile.public_link}</span>
-                            <span className="font-mono text-accent font-bold dir-ltr">giftisan.eg/artisans/{slug || "your-studio-link"}</span>
+                            <span className="font-mono text-accent font-bold dir-ltr">giftisan.com/artisans/{slug || "your-studio-link"}</span>
                           </p>
                         </div>
                       </div>
@@ -499,61 +499,6 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           onChange={(e) => setPickupNotes(e.target.value)}
                           className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
                           placeholder={lang === "ar" ? "مثال: بجوار البنك الأهلي، بوابة خضراء" : "e.g., Near NBE Bank, Green Gate"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Socials - Locked for now */}
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                        <span>{dict.studio_profile.instagram_handle}</span>
-                        <Lock className="w-3 h-3 text-primary/30" />
-                      </label>
-                      <div className="relative">
-                        <FaInstagram className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
-                        <input
-                          type="text"
-                          disabled
-                          readOnly
-                          value="giftisan_eg"
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="giftisan_eg"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                        <span>{dict.studio_profile.tiktok_handle}</span>
-                        <Lock className="w-3 h-3 text-primary/30" />
-                      </label>
-                      <div className="relative">
-                        <FaTiktok className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
-                        <input
-                          type="text"
-                          disabled
-                          readOnly
-                          value="giftisan.eg"
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="giftisan.eg"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center justify-between">
-                        <span>{dict.studio_profile.website_url}</span>
-                        <Lock className="w-3 h-3 text-primary/30" />
-                      </label>
-                      <div className="relative">
-                        <Globe className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
-                        <input
-                          type="url"
-                          disabled
-                          readOnly
-                          value="https://www.giftisan.com"
-                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-primary/5 border border-primary/5 font-bold text-primary/40 cursor-not-allowed select-none opacity-60"
-                          placeholder="https://www.giftisan.com"
                         />
                       </div>
                     </div>

@@ -52,7 +52,16 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
-  const [pickupAddress, setPickupAddress] = useState(artisan.pickupAddress || "");
+  const parseGpsFromAddress = (raw: string) => {
+    const match = raw.match(/\[GPS Pin: (https:\/\/[^\]]+)\]/);
+    return match ? match[1] : "";
+  };
+  const getCleanAddress = (raw: string) => {
+    return raw.replace(/\[GPS Pin: https:\/\/[^\]]+\]/, '').trim();
+  };
+
+  const [gpsPinUrl, setGpsPinUrl] = useState(parseGpsFromAddress(artisan.pickupAddress || ""));
+  const [pickupAddress, setPickupAddress] = useState(getCleanAddress(artisan.pickupAddress || ""));
   const [pickupCity, setPickupCity] = useState(artisan.pickupCity || "");
   const [pickupDistrict, setPickupDistrict] = useState(artisan.pickupDistrict || "");
   const [pickupBuilding, setPickupBuilding] = useState(artisan.pickupBuilding || "");
@@ -70,6 +79,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          const googleMapsPin = `https://maps.google.com/?q=${latitude},${longitude}`;
+          setGpsPinUrl(googleMapsPin);
+
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
           const data = await res.json();
           if (data && data.address) {
@@ -82,7 +94,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
             if (detectedCity) setPickupCity(detectedCity);
             if (!location && detectedCity) setLocation(`${detectedDistrict ? detectedDistrict + ", " : ""}${detectedCity}`);
 
-            toast.success(lang === "ar" ? "تم تحديد الموقع بنجاح 📍" : "Location detected successfully 📍");
+            toast.success(lang === "ar" ? "تم تحديد موقعك بدقة وتسجيل الدبوس الجغرافي 📍" : "Exact location detected and GPS pin saved 📍");
           }
         } catch (err) {
           toast.error(lang === "ar" ? "تعذر تحديد العنوان تلقائياً." : "Could not fetch address details.");
@@ -93,7 +105,8 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       (err) => {
         setIsDetectingLocation(false);
         toast.error(lang === "ar" ? "يرجى السماح بالوصول للموقع لتحديد العنوان." : "Location access was denied or unavailable.");
-      }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -132,6 +145,11 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
     }
     setIsSaving(true);
 
+    const cleanPickupAddress = pickupAddress.replace(/\[GPS Pin: https:\/\/[^\]]+\]/, '').trim();
+    const finalPickupAddress = gpsPinUrl && !cleanPickupAddress.includes("[GPS Pin:")
+      ? `${cleanPickupAddress} [GPS Pin: ${gpsPinUrl}]`
+      : pickupAddress;
+
     const res = await updateArtisanProfile(artisan.userId, {
       studioName,
       bio,
@@ -146,7 +164,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       brandColor,
       bannerImage,
       phoneNumber,
-      pickupAddress,
+      pickupAddress: finalPickupAddress,
       pickupCity,
       pickupDistrict,
       pickupBuilding,
@@ -378,19 +396,32 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           </p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleDetectLocation}
-                        disabled={isDetectingLocation}
-                        className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
-                      >
-                        {isDetectingLocation ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Navigation className="w-3.5 h-3.5" />
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        {gpsPinUrl && (
+                          <a
+                            href={gpsPinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex items-center gap-1.5 hover:bg-emerald-100 transition-all shrink-0"
+                          >
+                            <span>📍 Exact GPS Pin Captured</span>
+                            <span className="text-[10px] underline">Open Google Maps ↗</span>
+                          </a>
                         )}
-                        <span>{lang === "ar" ? "تحديد موقعي تلقائياً 📍" : "Auto-Detect My Location 📍"}</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={handleDetectLocation}
+                          disabled={isDetectingLocation}
+                          className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
+                        >
+                          {isDetectingLocation ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Navigation className="w-3.5 h-3.5" />
+                          )}
+                          <span>{lang === "ar" ? "تحديد موقعي تلقائياً 📍" : "Auto-Detect My Location 📍"}</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">

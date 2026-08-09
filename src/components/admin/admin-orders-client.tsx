@@ -559,18 +559,21 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                   </p>
                                 )}
                                 <div className="pt-1.5 border-t border-primary/10 mt-1">
-                                  <p className="font-bold text-primary flex items-center gap-1.5 mb-0.5">
+                                  <p className="font-bold text-primary flex items-center gap-1.5 mb-1">
                                     <MapPin className="w-3.5 h-3.5 text-primary/60 shrink-0" />
                                     <span>Exact Pickup Address (Courier):</span>
                                   </p>
-                                  <p className="text-charcoal/70 ps-5 font-medium leading-relaxed">
-                                    {item.product.artisan.pickupAddress || item.product.artisan.location || "Not specified"}
-                                    {item.product.artisan.pickupBuilding ? `, ${item.product.artisan.pickupBuilding}` : ""}
-                                    {item.product.artisan.pickupDistrict ? `, ${item.product.artisan.pickupDistrict}` : ""}
-                                    {item.product.artisan.pickupCity ? `, ${item.product.artisan.pickupCity}` : ""}
-                                  </p>
+                                  <ShippingAddressDisplay 
+                                    address={[
+                                      item.product.artisan.pickupAddress || item.product.artisan.location || "Not specified",
+                                      item.product.artisan.pickupBuilding ? `Bldg/Fl: ${item.product.artisan.pickupBuilding}` : null,
+                                      item.product.artisan.pickupDistrict ? `District: ${item.product.artisan.pickupDistrict}` : null
+                                    ].filter(Boolean).join(", ")} 
+                                    city={item.product.artisan.pickupCity || item.product.artisan.location}
+                                    className="text-xs text-charcoal/70 ps-5"
+                                  />
                                   {item.product.artisan.pickupNotes && (
-                                    <p className="text-charcoal/50 ps-5 text-[9px] italic mt-0.5">
+                                    <p className="text-charcoal/50 ps-5 text-[9px] italic mt-1">
                                       Notes: {item.product.artisan.pickupNotes}
                                     </p>
                                   )}

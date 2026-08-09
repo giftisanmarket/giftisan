@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { cn } from "@/lib/utils";
 import { convertGuestToAccount } from "@/lib/actions";
+import { ShippingAddressDisplay } from "@/lib/location-utils";
 
 interface SuccessClientProps {
   dict: any;
@@ -164,8 +165,11 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
                   <h3 className="text-xs font-black uppercase tracking-widest text-primary/40">{dict.checkout.shipping_address}</h3>
                   <div className="text-sm text-charcoal/70 leading-relaxed font-bold">
                     <p className="text-primary font-black mb-1">{order.clientName}</p>
-                    <p>{order.shippingAddress}</p>
-                    <p>{order.shippingCity}, {order.shippingCountry || "EG"}</p>
+                    <ShippingAddressDisplay 
+                      address={order.shippingAddress} 
+                      city={order.shippingCity}
+                      country={order.shippingCountry || "Egypt"}
+                    />
                     <p className="font-mono text-xs mt-2 text-charcoal/50">📞 {order.clientPhone}</p>
                   </div>
                 </div>

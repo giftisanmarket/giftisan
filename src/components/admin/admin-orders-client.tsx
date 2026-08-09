@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import QRCode from "react-qr-code";
+import { ShippingAddressDisplay } from "@/lib/location-utils";
 
 interface AdminOrdersClientProps {
   orders: any[];
@@ -597,10 +598,12 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                         </div>
                         <div className="pt-4 border-t border-primary/10">
                           <p className="text-[8px] font-black text-primary/40 uppercase tracking-widest mb-2">{dict.admin.ship_to}</p>
-                          <p className="text-xs text-charcoal/60 leading-relaxed font-medium">
-                            {selectedOrderDetails.shippingAddress}<br />
-                            {selectedOrderDetails.shippingCity}{selectedOrderDetails.shippingZip ? `, ${selectedOrderDetails.shippingZip}` : ''}
-                          </p>
+                          <ShippingAddressDisplay 
+                            address={selectedOrderDetails.shippingAddress} 
+                            city={selectedOrderDetails.shippingCity}
+                            country={selectedOrderDetails.shippingCountry}
+                            className="text-xs text-charcoal/60"
+                          />
                         </div>
                       </div>
                     </div>
@@ -676,9 +679,12 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
               <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.ship_to}</h3>
               <div className="space-y-1">
                 <p className="text-lg font-black text-primary">{orderToPrint.user?.name || "Customer"}</p>
-                <p className="text-sm font-bold text-charcoal/60">{orderToPrint.shippingAddress}</p>
-                <p className="text-sm font-bold text-charcoal/60">{orderToPrint.shippingCity}{orderToPrint.shippingZip ? `, ${orderToPrint.shippingZip}` : ''}</p>
-                <p className="text-sm font-bold text-charcoal/60">{orderToPrint.shippingCountry || "Egypt"}</p>
+                <ShippingAddressDisplay 
+                  address={orderToPrint.shippingAddress} 
+                  city={orderToPrint.shippingCity}
+                  country={orderToPrint.shippingCountry}
+                  className="text-sm font-bold text-charcoal/60"
+                />
                 <p className="text-sm font-black text-accent mt-4">{orderToPrint.clientPhone || orderToPrint.user?.phone}</p>
               </div>
             </div>

@@ -94,6 +94,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          const googleMapsPin = `https://maps.google.com/?q=${latitude},${longitude}`;
+
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
           const data = await res.json();
           if (data && data.address) {
@@ -109,12 +111,23 @@ export function CheckoutClient({ dict }: { dict: any }) {
               if (matched) setSelectedMethod(matched);
             }
 
+            // Append exact Google Maps GPS Pin link to shipping address string
+            const fullAddressWithGps = detectedStreet 
+              ? `${detectedStreet} [GPS Pin: ${googleMapsPin}]`
+              : `[GPS Pin: ${googleMapsPin}]`;
+
             setShippingData(prev => ({
               ...prev,
-              address: detectedStreet || prev.address,
+              address: fullAddressWithGps,
               city: matchedGov ? (isAr ? matchedGov.nameAr : matchedGov.nameEn) : detectedCity
             }));
-            toast.success(isAr ? "تم تحديد عنوانك بنجاح 📍" : "Location detected successfully 📍");
+
+            toast.success(
+              isAr
+                ? "تم تحديد موقعك بدقة 📍 يرجى كتابة رقم المبنى والشقة."
+                : "Exact GPS detected 📍 Please add your Building & Apt/Floor number.",
+              { duration: 5000 }
+            );
           }
         } catch (err) {
           setError(isAr ? "تعذر تحديد العنوان تلقائياً." : "Could not fetch address details.");
@@ -125,7 +138,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
       (err) => {
         setIsDetectingLocation(false);
         setError(isAr ? "يرجى السماح بالوصول للموقع لتحديد العنوان." : "Location access was denied or unavailable.");
-      }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -512,6 +526,9 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         : "border-primary/20 focus:ring-accent/20 focus:border-accent"
                     )}
                   />
+                  <p className="text-[11px] text-charcoal/50 font-medium italic mt-1.5 flex items-center gap-1">
+                    <span>💡 {dict.checkout.address_details_hint}</span>
+                  </p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6">
                   <div className="space-y-2 lg:col-span-2">

@@ -102,17 +102,17 @@ export function GrowthTab({ dict, coupons, sales }: GrowthTabProps) {
         <div className="absolute top-0 end-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
 
         <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8 md:gap-12 mb-12 md:mb-16 text-center lg:text-start">
+          <div className="flex flex-col xl:flex-row justify-between items-center xl:items-start gap-6 md:gap-10 mb-8 md:mb-12 text-center xl:text-start">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-bold text-primary mb-4 md:mb-8 leading-tight">{dict.studio.growth_title} <span className="serif italic font-normal text-accent">{dict.studio.growth_title_accent}</span></h2>
-              <p className="text-base md:text-xl text-charcoal/60 leading-relaxed font-medium">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-primary mb-3 md:mb-6 leading-tight">{dict.studio.growth_title} <span className="serif italic font-normal text-accent">{dict.studio.growth_title_accent}</span></h2>
+              <p className="text-sm md:text-lg text-charcoal/60 leading-relaxed font-medium">
                 {dict.studio.growth_desc}
               </p>
             </div>
 
             {nextTier && (
-              <div className="bg-cream/30 p-6 md:p-8 rounded-[2rem] border border-primary/5 min-w-[280px]">
-                <div className="flex justify-between items-end mb-4">
+              <div className="w-full xl:w-auto xl:min-w-[300px] bg-cream/30 p-5 md:p-7 rounded-[2rem] border border-primary/5">
+                <div className="flex justify-between items-end mb-3">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-1">Next Milestone</p>
                     <p className="font-bold text-primary">{nextTier.title}</p>

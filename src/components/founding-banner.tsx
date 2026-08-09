@@ -47,7 +47,7 @@ export function FoundingBanner({ dict }: { dict: any }) {
           style={{ backgroundColor: '#064E3B' }}
           onClick={() => router.push(`/${lang}/become-artisan`)}
         >
-          <div className="container mx-auto px-4 py-2.5 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 text-center relative z-10">
+          <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-2.5 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 text-center relative z-10">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-[#D97706] rounded-full flex items-center justify-center shadow-lg">
                 <BadgeCheck className="w-4 h-4 text-white" />

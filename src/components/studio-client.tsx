@@ -269,7 +269,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
           <Navbar dict={dict} />
         </div>
 
-        <main className="no-print max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
+        <main className="no-print max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
 
           <AnimatePresence>
             {productToDelete && (
@@ -327,7 +327,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
             isDestructive={true}
           />
 
-          <div className="max-w-[1400px] mx-auto px-4 pt-24 md:pt-32 pb-20">
+          <div className="max-w-[1600px] mx-auto pt-4 md:pt-6 pb-16">
             {/* Verification Status Banner */}
             {artisan.status === "PENDING" && (
               <motion.div
@@ -536,11 +536,11 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
               <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-30" />
             </div>
 
-            <div className="relative mb-8">
+            <div className="relative mb-6">
               <div
                 onScroll={handleScroll}
                 className={cn(
-                  "flex gap-2 md:gap-4 overflow-x-auto pt-4 pb-12 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
+                  "flex gap-2 md:gap-3 overflow-x-auto pt-2 pb-4 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
                   showMask ? "mask-fade-right" : ""
                 )}
               >
@@ -559,7 +559,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "px-5 md:px-8 h-10 md:h-12 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0 text-xs md:text-sm",
+                      "px-4 md:px-6 h-10 md:h-11 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0 text-xs md:text-sm",
                       activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
                     )}
                   >

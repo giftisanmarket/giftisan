@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin, Gift } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin, Gift, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
@@ -382,9 +382,10 @@ export function CheckoutClient({ dict }: { dict: any }) {
                     <motion.p
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider"
+                      className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider flex items-center gap-1"
                     >
-                      ⚠️ {couponError}
+                      <AlertCircle className="w-3 h-3 text-accent-light shrink-0" />
+                      {couponError}
                     </motion.p>
                   )}
 
@@ -395,7 +396,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-2.5 rounded-xl text-xs font-bold mt-3"
                     >
                       <span className="flex items-center gap-1.5">
-                        🎉 {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
                       </span>
                     </motion.div>
                   )}
@@ -680,7 +682,7 @@ export function CheckoutClient({ dict }: { dict: any }) {
                         className="w-full p-4 rounded-xl border border-primary/10 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none font-medium bg-white shadow-xs resize-none transition-all placeholder:text-primary/30"
                       />
                       <p className="text-[11px] text-charcoal/50 font-medium italic">
-                        ✨ {dict.checkout.gift_message_subtitle || "Your message will be printed on a card included inside the gift package."}
+                        {dict.checkout.gift_message_subtitle || "Your message will be printed on a card included inside the gift package."}
                       </p>
                     </motion.div>
                   )}

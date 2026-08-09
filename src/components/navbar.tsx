@@ -173,7 +173,7 @@ export function Navbar({ dict }: { dict?: any }) {
       <FoundingBanner dict={d} />
       <VerificationBanner dict={d} />
       <nav className="w-full glass border-b border-primary/10">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-20 flex items-center justify-between gap-3 md:gap-4 lg:gap-6 xl:gap-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="relative w-10 h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md">
@@ -438,7 +438,7 @@ export function Navbar({ dict }: { dict?: any }) {
             </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 md:gap-4">
+          <div className="flex items-center gap-1 md:gap-2 xl:gap-4">
             <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative active:scale-90">
               <Heart className="w-6 h-6" />
               {totalFavorites > 0 && (
@@ -449,7 +449,7 @@ export function Navbar({ dict }: { dict?: any }) {
             </Link>
 
             {session ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 xl:gap-3">
                 {/* Contextual Action Badge (Studio or Sell) */}
                 {session.user?.role === "ARTISAN" ? (
                   <Link
@@ -483,10 +483,10 @@ export function Navbar({ dict }: { dict?: any }) {
                 </Link>
 
                 {/* Consolidated Profile Hub (Desktop only) */}
-                <div className="hidden md:flex items-center gap-2 border-l border-primary/10 ps-3">
+                <div className="hidden md:flex items-center gap-1 xl:gap-2 border-l border-primary/10 ps-2 xl:ps-3">
                   <Link
                     href="/profile"
-                    className="group flex items-center lg:gap-3 ps-1 lg:pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
+                    className="group flex items-center xl:gap-3 ps-1 xl:pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
                   >
                     <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
                       {session.user?.image ? (
@@ -505,7 +505,7 @@ export function Navbar({ dict }: { dict?: any }) {
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
 
-                    <div className="hidden lg:block">
+                    <div className="hidden xl:block">
                       <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">{d.common.account}</p>
                       <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
                         {session.user?.name?.split(' ')[0]}
@@ -567,7 +567,7 @@ export function Navbar({ dict }: { dict?: any }) {
           </div>
         </div>
         <div className="hidden md:block border-t border-primary/5 py-3">
-          <div className="container mx-auto px-4 flex items-center justify-between gap-8">
+          <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between gap-8">
             <div className="flex items-center gap-6 lg:gap-10 overflow-x-auto no-scrollbar whitespace-nowrap flex-1 py-1">
               {[
                 { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },

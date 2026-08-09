@@ -24,10 +24,10 @@ const MAX_VIDEO_DURATION = 30; // 30 seconds
 // --- Memoized Sub-Components for Performance ---
 
 const EssentialsSection = memo(({ name, price, category, description, setTextData, readOnly, dict }: any) => (
-  <section className="space-y-8">
+  <section className="space-y-6">
     <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
       <Sparkles className="w-5 h-5 text-accent" />
-      <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">{dict.edit_product.core_details}</h3>
+      <h3 className="text-xs md:text-sm font-black uppercase tracking-widest text-primary/40">{dict.edit_product.core_details}</h3>
     </div>
 
     <div className="space-y-4">
@@ -40,13 +40,13 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
           onChange={(e) => setTextData((prev: any) => ({...prev, name: e.target.value}))}
           disabled={readOnly}
           className={cn(
-            "w-full py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+            "w-full py-3 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm text-sm",
             readOnly && "bg-cream/20 cursor-default"
           )}
         />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.price_label}</label>
           <input 
@@ -56,7 +56,7 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
             onChange={(e) => setTextData((prev: any) => ({...prev, price: e.target.value}))}
             disabled={readOnly}
             className={cn(
-              "w-full py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm",
+              "w-full py-3 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm text-sm",
               readOnly && "bg-cream/20 cursor-default"
             )}
           />
@@ -80,7 +80,7 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
           onChange={(e) => setTextData((prev: any) => ({...prev, description: e.target.value}))}
           disabled={readOnly}
           className={cn(
-            "w-full h-32 p-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none shadow-sm",
+            "w-full h-28 md:h-32 p-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none shadow-sm text-sm",
             readOnly && "bg-cream/20 cursor-default"
           )}
         />
@@ -954,47 +954,47 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
           />
           
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] bg-cream rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            className="relative w-full max-w-3xl md:max-w-4xl max-h-[88vh] md:max-h-[85vh] bg-cream rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {/* Header */}
-            <div className="p-5 md:p-8 border-b border-primary/5 flex justify-between items-center bg-white">
+            <div className="px-6 py-4 md:px-8 md:py-5 border-b border-primary/5 flex justify-between items-center bg-white shrink-0">
               <div>
-                <h2 className={cn("text-xl md:text-3xl font-heading font-bold text-primary", isRTL && "font-black")}>
+                <h2 className={cn("text-lg md:text-2xl font-heading font-bold text-primary", isRTL && "font-black")}>
                   {dict.edit_product.edit_treasure} <span className="serif italic font-normal text-accent">{dict.edit_product.treasure_accent || "Treasure"}</span>
                 </h2>
-                <p className="text-charcoal/40 text-[10px] md:text-sm mt-1">{dict.edit_product.refine_details}</p>
+                <p className="text-charcoal/40 text-[10px] md:text-xs mt-0.5">{dict.edit_product.refine_details}</p>
               </div>
-              <button onClick={onClose} className="p-2 md:p-3 hover:bg-primary/5 rounded-full transition-colors">
-                <X className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+              <button onClick={onClose} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
+                <X className="w-5 h-5 text-primary" />
               </button>
             </div>
 
             {/* Form Content */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-14 space-y-10 md:space-y-12 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-5 md:p-8 lg:p-10 space-y-6 md:space-y-8 custom-scrollbar">
               {product.status === "REJECTED" && product.rejectionReason && (
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-5 md:p-8 bg-red-50 border border-red-100 rounded-[1.5rem] md:rounded-[2.5rem] flex items-start gap-4 md:gap-6 mb-8 md:mb-12"
+                  className="p-4 md:p-6 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-4 mb-6"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-red-100">
-                    <X className="w-5 h-5 md:w-6 md:h-6 text-red-500" />
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-red-100">
+                    <X className="w-4 h-4 text-red-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-heading font-bold text-red-900 mb-1">{dict.edit_product.feedback_title}</h3>
-                    <p className="text-red-700/80 text-sm italic font-medium leading-relaxed">"{product.rejectionReason}"</p>
-                    <p className="text-red-900/40 text-[10px] font-black uppercase tracking-widest mt-4 flex items-center gap-2">
+                    <h3 className="text-base font-heading font-bold text-red-900 mb-1">{dict.edit_product.feedback_title}</h3>
+                    <p className="text-red-700/80 text-xs italic font-medium leading-relaxed">"{product.rejectionReason}"</p>
+                    <p className="text-red-900/40 text-[10px] font-black uppercase tracking-widest mt-3 flex items-center gap-2">
                        <CheckCircle2 className="w-3 h-3" /> {dict.edit_product.feedback_desc}
                     </p>
                   </div>
                 </motion.div>
               )}
               
-              <form onSubmit={handleSubmit} className="space-y-14">
+              <form onSubmit={handleSubmit} className="space-y-8 md:space-y-10">
                 <EssentialsSection 
                   name={textData.name}
                   price={textData.price}
@@ -1038,18 +1038,18 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
             </div>
 
             {/* Footer */}
-            <div className="p-5 md:p-8 bg-white/50 backdrop-blur-xl border-t border-primary/5 flex flex-col-reverse sm:flex-row justify-end gap-3 md:gap-6">
+            <div className="px-6 py-4 md:px-8 md:py-5 bg-white/90 backdrop-blur-xl border-t border-primary/5 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
               <button 
                 type="button"
                 onClick={onClose}
-                className="px-8 h-12 text-primary font-bold hover:bg-primary/5 rounded-full transition-all text-sm md:text-base"
+                className="px-6 h-11 text-primary font-bold hover:bg-primary/5 rounded-full transition-all text-xs md:text-sm"
               >
                 {dict.common.cancel}
               </button>
               {readOnly ? (
                 <button 
                   onClick={onClose}
-                  className="px-12 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-sm md:text-base"
+                  className="px-8 h-11 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 text-xs md:text-sm"
                 >
                   {dict.common.done || "Done Reviewing"}
                 </button>
@@ -1058,7 +1058,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                   onClick={handleSubmit}
                   disabled={isLoading}
                   className={cn(
-                    "px-10 h-12 font-bold rounded-full transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base",
+                    "px-8 h-11 font-bold rounded-full transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 text-xs md:text-sm",
                     product.status === "REJECTED" 
                       ? "bg-accent text-white hover:bg-accent-light shadow-accent/20" 
                       : "bg-primary text-white hover:bg-primary-light shadow-primary/20"

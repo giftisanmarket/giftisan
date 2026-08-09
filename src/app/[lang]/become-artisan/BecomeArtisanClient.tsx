@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users } from "lucide-react";
+import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
@@ -279,7 +279,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
                 <div className="space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    📱 {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف / واتساب' : 'Phone Number / WhatsApp')} *
+                    <Phone className="w-3 h-3" /> {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف / واتساب' : 'Phone Number / WhatsApp')} *
                   </label>
                   <input
                     type="tel"

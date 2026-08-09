@@ -233,16 +233,20 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                   className="space-y-10"
                 >
                   {/* Identity Section */}
-                  <div className="grid md:grid-cols-[200px_1fr] gap-10">
-                    <div className="space-y-4">
-                      <div className="relative group mx-auto md:mx-0 w-40 h-40">
-                        <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+                  <div className="grid grid-cols-1 lg:grid-cols-[180px_1fr] xl:grid-cols-[200px_1fr] gap-6 lg:gap-8 xl:gap-10">
+                    <div className="space-y-4 flex flex-col items-center lg:items-start">
+                      <div className="relative group mx-auto lg:mx-0 w-36 h-36 xl:w-40 xl:h-40">
+                        <div className="relative w-36 h-36 xl:w-40 xl:h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl">
                           <Image
                             src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`}
-                            alt="" fill className="object-cover"
+                            alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
-                        <label className="absolute inset-0 flex items-center justify-center bg-primary/20 lg:bg-primary/40 backdrop-blur-[2px] lg:backdrop-blur-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white">
+                        {/* Permanent Camera Action Badge */}
+                        <div className="absolute bottom-1 end-1 w-9 h-9 rounded-full bg-accent text-white border-2 border-white shadow-xl flex items-center justify-center z-10 pointer-events-none group-hover:scale-110 transition-transform">
+                          <Camera className="w-4 h-4" />
+                        </div>
+                        <label className="absolute inset-0 flex items-center justify-center bg-primary/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white z-20" title={dict.studio_profile.change_avatar || "Click to Change Logo"}>
                           <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-xl">
                             <Camera className="w-5 h-5 md:w-6 md:h-6" />
                           </div>
@@ -288,11 +292,57 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           />
                         </label>
                       </div>
-                      <p className="text-center md:text-start text-[10px] font-black uppercase tracking-widest text-primary/20">{dict.studio_profile.studio_avatar}</p>
+                      <div className="text-center lg:text-start space-y-0.5">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio_profile.studio_avatar}</p>
+                        <label className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center justify-center lg:justify-start gap-1.5 cursor-pointer">
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>{dict.studio_profile.change_avatar || "Click to Change Logo"}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  const img = new (window as any).Image();
+                                  img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    const MAX_SIZE = 1000;
+                                    let width = img.width;
+                                    let height = img.height;
+                                    if (width > height) {
+                                      if (width > MAX_SIZE) {
+                                        height *= MAX_SIZE / width;
+                                        width = MAX_SIZE;
+                                      }
+                                    } else {
+                                      if (height > MAX_SIZE) {
+                                        width *= MAX_SIZE / height;
+                                        height = MAX_SIZE;
+                                      }
+                                    }
+                                     canvas.width = width;
+                                     canvas.height = height;
+                                     const ctx = canvas.getContext('2d');
+                                     if (ctx) ctx.imageSmoothingQuality = 'high';
+                                     ctx?.drawImage(img, 0, 0, width, height);
+                                     const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                     setAvatar(canvas.toDataURL(outType, 0.9));
+                                   };
+                                  img.src = reader.result as string;
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
 
-                    <div className="space-y-8">
-                      <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-8 min-w-0">
+                      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_name_label} *</label>
                           <div className="relative">
@@ -307,13 +357,13 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                             />
                           </div>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 min-w-0">
                           <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex flex-wrap items-center gap-2">
                             <span>{dict.studio_profile.studio_slug_label} *</span>
-                            <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full uppercase tracking-widest">{dict.studio_profile.studio_slug_permanent}</span>
+                            <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full uppercase tracking-widest shrink-0">{dict.studio_profile.studio_slug_permanent}</span>
                           </label>
-                          <div className="relative">
-                            <Globe className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
+                          <div className="relative min-w-0">
+                            <Globe className="absolute start-4 md:start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
                             <input
                               type="text"
                               required
@@ -321,7 +371,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                               value={slug}
                               onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30))}
                               className={cn(
-                                "w-full h-14 ps-14 pe-14 rounded-2xl bg-cream/20 border transition-all font-bold text-sm",
+                                "w-full h-14 ps-11 md:ps-14 pe-11 md:pe-14 rounded-2xl bg-cream/20 border transition-all font-bold text-sm min-w-0",
                                 slugAvailability === 'available' ? "border-green-500/50 text-green-700" : 
                                 slugAvailability === 'taken' ? "border-red-500/50 text-red-700" : 
                                 "border-primary/5 focus:border-accent"
@@ -334,9 +384,9 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                                slugAvailability === 'taken' ? <AlertCircle className="w-4 h-4 text-red-500" /> : null}
                             </div>
                           </div>
-                          <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
-                            <span>{dict.studio_profile.public_link}</span>
-                            <span className="font-mono text-accent font-bold dir-ltr">giftisan.com/artisans/{slug || "your-studio-link"}</span>
+                          <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap min-w-0">
+                            <span className="shrink-0">{dict.studio_profile.public_link}</span>
+                            <span className="font-mono text-accent font-bold dir-ltr break-all">giftisan.com/artisans/{slug || "your-studio-link"}</span>
                           </p>
                         </div>
                       </div>

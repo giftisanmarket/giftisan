@@ -38,7 +38,7 @@ export function PreLaunchBanner({ dict }: { dict?: any }) {
           exit={{ height: 0, opacity: 0 }}
           className="relative z-[60] bg-primary text-white overflow-hidden shadow-2xl"
         >
-          <div className="container mx-auto px-4 py-3 md:py-3.5 flex flex-col items-center justify-center text-center relative">
+          <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-3 md:py-3.5 flex flex-col items-center justify-center text-center relative">
             <div className="flex items-center gap-2 text-accent-light mb-1.5">
               <Sparkles className="w-3 h-3 animate-pulse shrink-0" />
               <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">{d.common.prelaunch_protocol}</span>

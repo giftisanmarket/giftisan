@@ -83,9 +83,9 @@ export function InventoryTab({
   return (
     <div id="inventory" className="relative">
       <div className="bg-white rounded-[2rem] md:rounded-[3.5rem] p-5 md:p-8 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5 mb-32">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 md:gap-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-6 md:gap-10">
           <div className="space-y-2 text-center md:text-start w-full md:w-auto">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-heading font-bold text-primary leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight">
               {dict.studio.studio_inventory} <span className="serif italic font-normal text-accent">{dict.studio.studio_inventory_accent}</span>
             </h2>
             <div className="flex flex-col md:flex-row items-center gap-4">
@@ -95,12 +95,12 @@ export function InventoryTab({
           {!isAdminPreview ? (
             <Link
               href="/studio/new-product"
-              className="w-full md:w-auto h-14 md:h-16 px-8 md:px-12 bg-accent text-white font-bold rounded-xl md:rounded-full hover:bg-accent-light transition-all flex items-center justify-center gap-3 shadow-xl shadow-accent/20 active:scale-95 duration-200"
+              className="w-full md:w-auto h-13 md:h-15 px-6 md:px-10 bg-accent text-white font-bold rounded-xl md:rounded-full hover:bg-accent-light transition-all flex items-center justify-center gap-3 shadow-xl shadow-accent/20 active:scale-95 duration-200 text-sm md:text-base"
             >
-              <Plus className="w-5 h-5 md:w-6 md:h-6" /> {dict.studio.add_treasure}
+              <Plus className="w-5 h-5" /> {dict.studio.add_treasure}
             </Link>
           ) : (
-            <div className="w-full md:w-auto h-14 md:h-16 px-8 bg-primary text-white font-bold rounded-xl md:rounded-full flex items-center justify-center gap-3 shadow-xl opacity-80">
+            <div className="w-full md:w-auto h-13 md:h-15 px-6 md:px-8 bg-primary text-white font-bold rounded-xl md:rounded-full flex items-center justify-center gap-3 shadow-xl opacity-80 text-sm md:text-base">
               <Lock className="w-4 h-4 md:w-5 md:h-5" /> {dict.studio.management_locked}
             </div>
           )}
@@ -108,7 +108,7 @@ export function InventoryTab({
 
         {/* Search Bar */}
         {products.length > 0 && (
-          <div className="mb-10 relative group">
+          <div className="mb-8 md:mb-10 relative group">
             <div className="absolute inset-y-0 start-0 ps-6 flex items-center pointer-events-none">
               <Search className="w-5 h-5 text-primary/20 group-focus-within:text-accent transition-colors" />
             </div>
@@ -117,7 +117,7 @@ export function InventoryTab({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={dict.studio.search_treasures}
-              className="w-full h-16 md:h-20 ps-16 pe-8 bg-cream/30 border border-primary/5 rounded-[1.5rem] md:rounded-[2.5rem] focus:outline-none focus:border-accent focus:bg-white transition-all text-sm md:text-lg font-bold text-primary placeholder:text-primary/20 shadow-inner"
+              className="w-full h-14 md:h-16 ps-16 pe-8 bg-cream/30 border border-primary/5 rounded-[1.5rem] md:rounded-[2rem] focus:outline-none focus:border-accent focus:bg-white transition-all text-sm md:text-base font-bold text-primary placeholder:text-primary/20 shadow-inner"
             />
             {searchQuery && (
               <button
@@ -130,7 +130,7 @@ export function InventoryTab({
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
           {filteredProducts.length === 0 ? (
             <div className="col-span-full py-20 md:py-32 text-center space-y-6 md:space-y-8 bg-cream/20 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-primary/5">
               <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary/5">
@@ -150,7 +150,7 @@ export function InventoryTab({
               <div 
                 key={p.id}
                 className={cn(
-                  "group relative bg-white rounded-[2rem] md:rounded-[3.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden",
+                  "group relative bg-white rounded-[2rem] md:rounded-[2.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden",
                   p.status === "APPROVED" ? "border-l-[3px] border-l-green-500" :
                   p.status === "REJECTED" ? "border-l-[3px] border-l-red-400"  :
                   p.status === "DRAFT"    ? "border-l-[3px] border-l-slate-300" :
@@ -163,7 +163,7 @@ export function InventoryTab({
 
 
                   {/* Status Overlay - Premium Look */}
-                  <div className="absolute top-4 start-4 md:top-8 md:start-8 z-10 flex flex-col gap-2">
+                  <div className="absolute top-4 start-4 z-10 flex flex-col gap-2">
                     <span className={cn(
                       "px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-xl border",
                       p.status === "APPROVED" ? "bg-green-500/90 text-white border-white/20" :
@@ -177,67 +177,43 @@ export function InventoryTab({
                     </span>
                   </div>
 
-                  <div className="absolute inset-0 bg-primary/60 transition-opacity hidden xl:flex items-center justify-center gap-4 opacity-0 xl:group-hover:opacity-100">
+                  {/* Permanent Accessible Action Buttons */}
+                  <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20">
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedProductForEdit(p);
                         setIsEditModalOpen(true);
                       }}
-                      className="w-14 h-14 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90"
+                      title={isAdminPreview ? "View" : "Edit"}
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10"
                     >
-                      {isAdminPreview ? <Eye className="w-6 h-6" /> : <Edit2 className="w-6 h-6" />}
+                      {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setProductToDelete(p.id);
                       }}
                       disabled={isDeleting === p.id}
-                      className="w-14 h-14 rounded-full bg-white text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90 disabled:opacity-50"
+                      title="Delete"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-red-500 flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50 border border-primary/10"
                     >
-                      <Trash2 className="w-6 h-6" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                     <Link
                       href={`/products/${p.slug || p.id}`}
-                      className="w-14 h-14 rounded-full bg-white text-primary flex items-center justify-center hover:bg-accent hover:text-white transition-all shadow-2xl hover:scale-110 active:scale-90"
+                      title="View Product Page"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90 border border-primary/10"
                     >
-                      <ArrowUpRight className="w-6 h-6" />
-                    </Link>
-                  </div>
-
-                  {/* Mobile Actions - Refined */}
-                  <div className="xl:hidden absolute bottom-4 end-4 flex gap-2 z-20">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedProductForEdit(p);
-                        setIsEditModalOpen(true);
-                      }}
-                      className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
-                    >
-                      {isAdminPreview ? <Eye className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setProductToDelete(p.id);
-                      }}
-                      disabled={isDeleting === p.id}
-                      className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-red-500 flex items-center justify-center shadow-xl active:scale-90 disabled:opacity-50"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                    <Link
-                      href={`/products/${p.slug || p.id}`}
-                      className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-sm text-primary flex items-center justify-center shadow-xl active:scale-90"
-                    >
-                      <ArrowUpRight className="w-5 h-5" />
+                      <ArrowUpRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
 
-                <div className="p-6 md:p-10 flex-1 flex flex-col">
+                <div className="p-5 md:p-6 lg:p-7 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-4 gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg md:text-2xl font-heading font-bold text-primary truncate leading-tight group-hover:text-accent transition-colors">{p.name}</h3>

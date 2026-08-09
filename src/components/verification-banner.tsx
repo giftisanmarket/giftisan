@@ -43,7 +43,7 @@ export function VerificationBanner({ dict }: { dict?: any }) {
         exit={{ height: 0, opacity: 0 }}
         className="bg-accent text-white border-b border-accent-light/20 relative z-[45]"
       >
-        <div className="container mx-auto px-4 py-3 md:py-2 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-3 md:py-2 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-4 h-4 text-white" />

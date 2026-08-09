@@ -8,8 +8,8 @@ import { useSession } from "next-auth/react";
 
 export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: any }) {
   return (
-    <section className="relative w-full overflow-hidden bg-cream pt-24 md:pt-32 pb-16 md:pb-24 lg:pb-32">
-      <div className="container mx-auto px-4 grid lg:grid-cols-2 items-center gap-12 lg:gap-20">
+    <section className="relative w-full overflow-hidden bg-cream pt-12 md:pt-20 pb-16 md:pb-24 lg:pb-32">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 grid lg:grid-cols-2 items-center gap-8 lg:gap-10 xl:gap-16 2xl:gap-20">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -20,7 +20,7 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
             <Sparkles className="w-3 h-3" /> {dict.common.explore}
           </div>
           
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-bold text-primary leading-[1.1] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-heading font-bold text-primary leading-[1.1] tracking-tight">
             {dict.home.hero_elevate}
           </h1>
           
@@ -92,7 +92,7 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
           <div className="absolute -bottom-10 -start-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl -z-10" />
           <div className="absolute -top-10 -end-10 w-60 h-60 bg-primary/10 rounded-full blur-3xl -z-10" />
           
-          <div className="absolute bottom-6 end-6 lg:-bottom-12 lg:-end-12 glass p-6 md:p-8 rounded-3xl shadow-2xl max-w-[180px] md:max-w-[240px] border border-white/50 backdrop-blur-xl animate-in slide-in-from-bottom-4 duration-1000 delay-500">
+          <div className="absolute bottom-4 end-4 md:bottom-6 md:end-6 lg:bottom-4 lg:end-4 xl:-bottom-10 xl:-end-10 glass p-5 md:p-6 lg:p-6 xl:p-8 rounded-3xl shadow-2xl max-w-[180px] md:max-w-[240px] border border-white/50 backdrop-blur-xl animate-in slide-in-from-bottom-4 duration-1000 delay-500">
             <p className="text-xs md:text-base font-medium text-charcoal/80 leading-relaxed italic">
               "{dict.home.testimonial_quote}"
             </p>

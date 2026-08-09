@@ -63,7 +63,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       <Hero artisanCount={artisanCount} dict={dict} />
 
       {/* Featured Treasures */}
-      <section className="py-20 container mx-auto px-4">
+      <section className="py-16 md:py-20 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
             <h2 className="text-3xl font-heading font-bold text-primary italic serif">{dict.home.treasures_week}</h2>
@@ -134,7 +134,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
       </section>
 
       {/* Featured Categories */}
-      <section id="categories" className="py-20 container mx-auto px-4">
+      <section id="categories" className="py-16 md:py-20 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
           <div>
             <h2 className="text-3xl font-heading font-bold text-primary">{dict.home.browse_category}</h2>
@@ -149,7 +149,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
           {categoryCounts.slice(0, 12).map((cat) => {
             const icons: Record<string, any> = {
               "Ceramics": Shapes,
@@ -195,7 +195,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
       {/* Trust Bar */}
       <section className="bg-primary/5 py-16 border-y border-primary/5 relative z-10">
-        <div className="container mx-auto px-4 grid md:grid-cols-3 gap-12">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 grid md:grid-cols-3 gap-12">
           {[
             {
               title: dict.home.direct_artisans,
@@ -224,7 +224,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
         </div>
       </section>
       <section className="py-24 bg-white overflow-hidden">
-        <div className="container mx-auto px-4 mb-12 flex justify-between items-end">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 mb-12 flex justify-between items-end">
           <div>
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">{(dict.home.meet_masters_base || dict.home.meet_masters.split('Makers')[0])}{' '}<span className="serif italic font-normal text-accent">{(dict.home.meet_masters_accent || (dict.home.meet_masters.includes('Masters') ? 'Masters' : 'المبدعين'))}</span></h2>
             <p className="text-charcoal/60 max-w-lg">{dict.home.meet_masters_desc}</p>
@@ -288,7 +288,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
       {/* Newsletter */}
       <section id="newsletter" className="py-24 bg-primary text-white overflow-hidden relative border-t border-white/10">
-        <div className="container mx-auto px-4 relative z-10 text-center space-y-8">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 relative z-10 text-center space-y-8">
           <h2 className="text-4xl md:text-5xl font-heading font-bold">{dict.home.waitlist_title}</h2>
           <p className="text-white/70 max-w-xl mx-auto text-lg text-balance">
             {dict.home.waitlist_desc}
@@ -303,7 +303,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
       {/* Footer */}
       <footer className="py-12 bg-cream border-t border-primary/10">
-        <div className="container mx-auto px-4 text-center">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="relative w-8 h-8 overflow-hidden rounded-lg">
               <BespokeImage

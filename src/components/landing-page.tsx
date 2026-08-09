@@ -170,7 +170,7 @@ export default function LandingPage({ dict }: { dict: any }) {
           </motion.div>
 
           <motion.h1
-            className="text-5xl sm:text-7xl md:text-8xl lg:text-[130px] font-heading font-black leading-[0.85] tracking-tighter text-primary mb-8"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[120px] 2xl:text-[130px] font-heading font-black leading-[0.9] md:leading-[0.85] tracking-tighter text-primary mb-8"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}

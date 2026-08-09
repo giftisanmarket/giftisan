@@ -202,11 +202,11 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
     <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
       <Navbar dict={dict} />
 
-      <div className="container mx-auto px-4 py-8 md:py-16">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-12">
         {/* Status Banner for Owner/Admin */}
         {product.status !== "APPROVED" && (isAdmin || isOwner) && (
           <div className={cn(
-            "mb-12 p-6 md:p-8 rounded-[2rem] border-2 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-8",
+            "mb-8 md:mb-12 p-6 md:p-8 rounded-[2rem] border-2 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-8",
             product.status === "REJECTED" ? "bg-red-50 border-red-100" : "bg-amber-50 border-amber-100"
           )}>
             <div className={cn(
@@ -237,7 +237,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 min-w-0">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-10 lg:gap-14 min-w-0">
           {/* Image Gallery */}
           <div className="space-y-6 min-w-0">
             <div className="relative group">
@@ -251,12 +251,12 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   setLightboxIndex(selectedImage);
                   setIsLightboxOpen(true);
                 }}
-                className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-transparent cursor-zoom-in"
+                className="relative aspect-[4/5] sm:aspect-square rounded-3xl overflow-hidden shadow-2xl bg-cream/30 cursor-zoom-in"
               >
                 {isVideo(selectedVariant?.image || product.images[selectedImage]) ? (
                   <video
                     src={selectedVariant?.image || product.images[selectedImage]}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     autoPlay
                     loop
                     muted
@@ -267,7 +267,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     src={selectedVariant?.image || product.images[selectedImage]}
                     alt={product.name}
                     fill
-                    className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority
                   />
@@ -341,25 +341,25 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
           <div className="flex flex-col min-w-0">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
-                <p className="text-accent font-bold tracking-widest uppercase text-sm mb-2">{dict.common.categories_list?.[product.category.toLowerCase()] || product.category}</p>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4 leading-tight break-words">
+                <p className="text-accent font-bold tracking-widest uppercase text-xs md:text-sm mb-1.5">{dict.common.categories_list?.[product.category.toLowerCase()] || product.category}</p>
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-primary mb-3 md:mb-4 leading-tight break-words">
                   {product.name}
                 </h1>
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-4 md:mb-6">
                   <div className="flex text-accent">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="w-4 h-4 fill-current" />
+                      <Star key={s} className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" />
                     ))}
                   </div>
-                  <span className="text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} {dict.product.reviews})</span>
+                  <span className="text-xs md:text-sm text-charcoal/40 font-medium">({product.reviews?.length || 0} {dict.product.reviews})</span>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={handleShare}
-                  className="p-3 border border-primary/10 rounded-full hover:bg-white transition-all text-primary group"
+                  className="p-2.5 md:p-3 border border-primary/10 rounded-full hover:bg-white transition-all text-primary group"
                 >
-                  <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <Share2 className="w-4 h-4 md:w-5 md:h-5 group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             </div>
@@ -380,17 +380,17 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               )}
             </AnimatePresence>
 
-            <div className="flex items-center justify-between mb-8">
-              <p className="text-3xl font-heading font-bold text-primary">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-6 md:mb-8">
+              <p className="text-2xl sm:text-3xl font-heading font-bold text-primary">
                 {dict.product.currency} {displayPrice}.00
               </p>
               <div className="flex items-center gap-2">
                 <div className={cn(
-                  "w-2 h-2 rounded-full",
+                  "w-2 h-2 rounded-full shrink-0",
                   (displayStock || 0) > 5 ? "bg-green-500" : (displayStock || 0) > 0 ? "bg-orange-500" : "bg-red-500"
                 )} />
                 <span className={cn(
-                  "text-xs font-black uppercase tracking-widest",
+                  "text-[10px] sm:text-xs font-black uppercase tracking-widest",
                   (displayStock || 0) > 0 ? "text-primary/60" : "text-red-500"
                 )}>
                   {(displayStock || 0) > 0 ? (
@@ -1092,21 +1092,21 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
         )}
       </AnimatePresence>
       {/* Sticky Mobile Add to Cart Bar */}
-      <div className="fixed bottom-0 start-0 end-0 z-[55] md:hidden bg-white/80 backdrop-blur-xl border-t border-primary/5 p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <p className="text-[8px] font-black uppercase tracking-widest text-charcoal/40 mb-0.5">{dict.common.price || "Price"}</p>
-            <p className="text-lg font-heading font-bold text-primary leading-none">{dict.product.currency} {product.price}</p>
+      <div className="fixed bottom-0 start-0 end-0 z-40 md:hidden bg-white/95 backdrop-blur-xl border-t border-primary/10 p-3 md:p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-between gap-3">
+          <div className="shrink-0 min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-widest text-primary/40 leading-tight mb-0.5">{dict.common.price || "Price"}</p>
+            <p className="text-base sm:text-lg font-heading font-bold text-primary leading-tight">{dict.product.currency} {displayPrice}</p>
           </div>
           <button
-            onClick={() => addToCart(product, personalization)}
-            disabled={(product.stock || 0) <= 0}
+            onClick={() => addToCart(product, personalization, false, customImage || undefined)}
+            disabled={(displayStock || 0) <= 0}
             className={cn(
-              "flex-[2.5] h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-lg active:scale-95 text-xs",
-              (product.stock || 0) > 0 ? "shadow-primary/20" : "opacity-30 grayscale"
+              "flex-1 h-12 bg-primary text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-xs flex items-center justify-center gap-2",
+              (displayStock || 0) > 0 ? "shadow-primary/20 hover:bg-primary-light" : "opacity-30 grayscale"
             )}
           >
-            {(product.stock || 0) > 0 ? dict.product.add_to_cart : dict.product.sold_out}
+            {(displayStock || 0) > 0 ? dict.product.add_to_cart : dict.product.sold_out}
           </button>
         </div>
       </div>

@@ -379,12 +379,16 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
                         <Image
                           src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`}
-                          alt="" fill className="object-cover"
+                          alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
-                      <label className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm lg:opacity-0 lg:group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white opacity-100">
-                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                          <Camera className="w-5 h-5 text-white" />
+                      {/* Permanent Camera Action Badge */}
+                      <div className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-accent text-white border-2 border-white shadow-md flex items-center justify-center z-10 pointer-events-none group-hover:scale-110 transition-transform">
+                        <Camera className="w-3.5 h-3.5" />
+                      </div>
+                      <label className="absolute inset-0 flex items-center justify-center bg-primary/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white z-20" title={dict.studio_profile.change_avatar || "Click to Change Logo"}>
+                        <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-xl">
+                          <Camera className="w-4 h-4" />
                         </div>
                         <input
                           type="file"
@@ -430,7 +434,50 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                     </div>
                     <div>
                       <h3 className="text-xl font-heading font-bold text-primary">{studioName || dict.studio_profile.studio_name_placeholder}</h3>
-                      <p className="text-charcoal/40 font-bold text-[10px] uppercase tracking-widest">{dict.studio_profile.studio_avatar}</p>
+                      <label className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer mt-1">
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>{dict.studio_profile.change_avatar || "Click to Change Logo"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const img = new (window as any).Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  const MAX_SIZE = 1000;
+                                  let width = img.width;
+                                  let height = img.height;
+                                  if (width > height) {
+                                    if (width > MAX_SIZE) {
+                                      height *= MAX_SIZE / width;
+                                      width = MAX_SIZE;
+                                    }
+                                  } else {
+                                    if (height > MAX_SIZE) {
+                                      width *= MAX_SIZE / height;
+                                      height = MAX_SIZE;
+                                    }
+                                  }
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  if (ctx) ctx.imageSmoothingQuality = 'high';
+                                  ctx?.drawImage(img, 0, 0, width, height);
+                                  const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                  setAvatar(canvas.toDataURL(outType, 0.9));
+                                };
+                                img.src = reader.result as string;
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
                     </div>
                   </div>
 
@@ -450,13 +497,13 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex items-center gap-2">
-                        {dict.studio_profile.studio_slug_label} *
-                        <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full">{dict.studio_profile.studio_slug_permanent}</span>
+                    <div className="space-y-2 min-w-0">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4 flex flex-wrap items-center gap-2">
+                        <span>{dict.studio_profile.studio_slug_label} *</span>
+                        <span className="text-[8px] font-bold text-accent px-2 py-0.5 bg-accent/10 rounded-full shrink-0">{dict.studio_profile.studio_slug_permanent}</span>
                       </label>
-                      <div className="relative">
-                        <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
+                      <div className="relative min-w-0">
+                        <span className="absolute start-4 md:start-6 top-1/2 -translate-y-1/2 text-primary/40"><FaGlobe className="w-4 h-4" /></span>
                         <input
                           type="text"
                           required
@@ -464,32 +511,32 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                           value={slug || ""}
                           onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30))}
                           className={cn(
-                            "w-full h-16 ps-12 pe-12 rounded-2xl bg-white border-2 transition-all font-bold placeholder:text-primary/20",
+                            "w-full h-16 ps-11 md:ps-12 pe-12 md:pe-28 rounded-2xl bg-white border-2 transition-all font-bold placeholder:text-primary/20 min-w-0",
                             slugAvailability === 'available' ? "border-green-500/50 text-green-700 bg-green-50/10" : 
                             slugAvailability === 'taken' ? "border-red-500/50 text-red-700 bg-red-50/10" : 
                             "border-primary/5 focus:border-accent text-accent"
                           )}
                           placeholder={dict.studio_profile.studio_slug_placeholder}
                         />
-                        <div className="absolute end-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                        <div className="absolute end-4 md:end-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
                           {isCheckingSlug ? (
                             <Loader2 className="w-5 h-5 text-primary/40 animate-spin" />
                           ) : slugAvailability === 'available' ? (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-100/50 rounded-full border border-green-200">
+                            <div className="flex items-center gap-1.5 px-2 py-1 md:px-2.5 bg-green-100/50 rounded-full border border-green-200">
                               <Check className="w-3.5 h-3.5 text-green-600" />
-                              <span className="text-[9px] font-black text-green-700 uppercase tracking-widest">{dict.studio_profile.slug_available || "Available"}</span>
+                              <span className="hidden sm:inline text-[9px] font-black text-green-700 uppercase tracking-widest">{dict.studio_profile.slug_available || "Available"}</span>
                             </div>
                           ) : slugAvailability === 'taken' ? (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100/50 rounded-full border border-red-200">
+                            <div className="flex items-center gap-1.5 px-2 py-1 md:px-2.5 bg-red-100/50 rounded-full border border-red-200">
                               <AlertCircle className="w-3.5 h-3.5 text-red-600" />
-                              <span className="text-[9px] font-black text-red-700 uppercase tracking-widest">{dict.studio_profile.slug_taken || "Taken"}</span>
+                              <span className="hidden sm:inline text-[9px] font-black text-red-700 uppercase tracking-widest">{dict.studio_profile.slug_taken || "Taken"}</span>
                             </div>
                           ) : null}
                         </div>
                       </div>
-                      <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap">
-                        <span>{dict.studio_profile.public_link}</span>
-                        <span className="font-mono text-accent font-bold dir-ltr">giftisan.com/artisans/{slug || "your-studio-link"}</span>
+                      <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap min-w-0">
+                        <span className="shrink-0">{dict.studio_profile.public_link}</span>
+                        <span className="font-mono text-accent font-bold dir-ltr break-all">giftisan.com/artisans/{slug || "your-studio-link"}</span>
                       </p>
                     </div>
 

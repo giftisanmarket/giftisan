@@ -96,7 +96,7 @@ export function OverviewTab({
             tooltip: dict.studio.tooltip_revenue
           },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
+          <div key={i} className="bg-white p-4 md:p-6 lg:p-7 rounded-[1.5rem] md:rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5">
             <div className={cn("w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white mb-4 md:mb-6", stat.color)}>
               <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
             </div>
@@ -217,7 +217,7 @@ export function OverviewTab({
             <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.studio.top_5_favorites}</span>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
             {topVariants.map((v: any, i: number) => (
               <div key={i} className="flex flex-col gap-4 group cursor-default">
                 <div className="relative aspect-square rounded-2xl overflow-hidden border border-primary/5 shrink-0 transition-transform group-hover:scale-105">

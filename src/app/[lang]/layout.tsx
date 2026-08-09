@@ -86,8 +86,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "react-hot-toast";
 import { NotificationProvider } from "@/components/notification-provider";
-import dynamic from "next/dynamic";
-const FloatingChatHub = dynamic(() => import("@/components/floating-chat-hub").then(mod => mod.FloatingChatHub));
+
 
 export async function generateStaticParams() {
   return [{ lang: 'en' }, { lang: 'ar' }];
@@ -235,7 +234,6 @@ export default async function RootLayout({
               <CartProvider>
                 {children}
                 <CartDrawer dict={dict} lang={lang} />
-                <FloatingChatHub dict={dict} lang={lang} />
               </CartProvider>
             </FavoritesProvider>
           </NotificationProvider>

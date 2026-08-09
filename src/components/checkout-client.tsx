@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin } from "lucide-react";
+import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
@@ -615,18 +615,56 @@ export function CheckoutClient({ dict }: { dict: any }) {
                   </div>
                 )}
 
-                <div className="pt-8 space-y-6 border-t border-primary/5">
-                  <div className="flex items-center gap-4 group cursor-pointer" onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}>
-                    <div className={cn(
-                      "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
-                      shippingData.isGift ? "bg-accent border-accent shadow-lg shadow-accent/20" : "border-primary/20 bg-white"
-                    )}>
-                      {shippingData.isGift && <CheckCircle2 className="w-4 h-4 text-white" />}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm md:text-base font-bold text-primary">{dict.checkout.mark_as_gift}</h4>
+                <div className="pt-8 space-y-4 border-t border-primary/5">
+                  <div
+                    className={cn(
+                      "p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer",
+                      shippingData.isGift ? "bg-accent/5 border-accent shadow-sm" : "bg-white border-primary/5 hover:border-primary/20"
+                    )}
+                    onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className={cn(
+                        "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 mt-0.5 shrink-0",
+                        shippingData.isGift ? "bg-accent border-accent shadow-md shadow-accent/20" : "border-primary/20 bg-white"
+                      )}>
+                        {shippingData.isGift && <CheckCircle2 className="w-4 h-4 text-white" />}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Gift className="w-4 h-4 text-accent" />
+                          <h4 className="text-sm md:text-base font-bold text-primary">{dict.checkout.mark_as_gift}</h4>
+                        </div>
+                        <p className="text-xs text-charcoal/60 font-medium leading-relaxed">
+                          {dict.checkout.mark_as_gift_desc || "Prices will be hidden on the package receipt, and artisans will wrap your items with special gift care."}
+                        </p>
+                      </div>
                     </div>
                   </div>
+
+                  {shippingData.isGift && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 pt-2 px-1"
+                    >
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 flex items-center gap-1.5">
+                        <MessageSquare className="w-3 h-3 text-accent" />
+                        {dict.checkout.gift_message_label || "Gift Message (Optional)"}
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={shippingData.giftMessage}
+                        onChange={(e) => setShippingData(prev => ({ ...prev, giftMessage: e.target.value }))}
+                        placeholder={dict.checkout.gift_message_placeholder || "Write a heartfelt note for the recipient..."}
+                        className="w-full p-4 rounded-xl border border-primary/10 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none font-medium bg-white shadow-xs resize-none transition-all placeholder:text-primary/30"
+                      />
+                      <p className="text-[11px] text-charcoal/50 font-medium italic">
+                        ✨ {dict.checkout.gift_message_subtitle || "Your message will be printed on a card included inside the gift package."}
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-primary/5">

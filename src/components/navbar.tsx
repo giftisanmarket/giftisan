@@ -447,16 +447,7 @@ export function Navbar({ dict }: { dict?: any }) {
                 </span>
               )}
             </Link>
-            {session && (
-              <Link href="/profile/messages" className="hidden md:block relative p-2 text-charcoal/60 hover:text-primary transition-colors active:scale-90">
-                <MessageSquare className="w-6 h-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -end-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
-            )}
+
             {session ? (
               <div className="flex items-center gap-3">
                 {/* Contextual Action Badge (Studio or Sell) */}
@@ -672,14 +663,7 @@ export function Navbar({ dict }: { dict?: any }) {
                     <User className="w-5 h-5 text-primary/40 mb-2" />
                     <span className="text-xs font-bold text-primary uppercase">{d.common.profile}</span>
                   </Link>
-                  <Link
-                    href="/profile/messages"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
-                  >
-                    <MessageSquare className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">{d.common.messages}</span>
-                  </Link>
+
                   <Link
                     href="/favorites"
                     onClick={() => setIsMenuOpen(false)}

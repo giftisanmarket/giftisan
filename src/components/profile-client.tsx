@@ -263,9 +263,16 @@ Trace
                             </div>
                           </div>
                           {order.isGift && (
-                            <div className="shrink-0 flex items-center gap-2">
-                              <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</span>
+                            <div className="shrink-0 flex flex-col gap-1 items-end">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</span>
+                              </div>
+                              {order.giftMessage && (
+                                <p className="text-xs italic text-charcoal/70 bg-accent/5 p-2.5 rounded-xl border border-accent/10 max-w-xs text-start">
+                                  "{order.giftMessage}"
+                                </p>
+                              )}
                             </div>
                           )}
                         </div>
@@ -399,13 +406,6 @@ Trace
                                         dict.profile.delivered}
                                       </div>
                                     )}
-                                    <Link 
-                                      href={`/profile/messages?userId=${item.product.artisan.userId}`}
-                                      className="flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-primary/40 hover:text-accent transition-colors"
-                                    >
-                                      <MessageCircle className="w-3 h-3" />
-                                      {dict.profile.contact}
-                                    </Link>
                                   </div>
 
                                   {item.personalization && (

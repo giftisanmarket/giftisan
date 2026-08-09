@@ -9,7 +9,6 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
-import { ContactArtisanButton } from "@/components/contact-artisan-button";
 import { addReview, trackProductView } from "@/lib/actions";
 import { useSession } from "next-auth/react";
 import { BespokeImage } from "./bespoke-image";
@@ -461,18 +460,6 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                   <p className="text-xs text-charcoal/60 truncate">{dict.product.operating_out_of} {product.artisan.location}</p>
                 </div>
               </Link>
-
-              <div className="px-0">
-                <ContactArtisanButton
-                  artisanId={product.artisan.id}
-                  artisanName={product.artisan.studioName || product.artisan.user.name}
-                  productId={product.id}
-                  productName={product.name}
-                  productImage={product.images[0]}
-                  artisanUserId={product.artisan.user.id}
-                  dict={dict}
-                />
-              </div>
             </div>
 
             {product.canPersonalize && (

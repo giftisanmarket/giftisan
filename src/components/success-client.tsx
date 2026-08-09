@@ -303,15 +303,6 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
               <p className="text-xs md:text-sm text-charcoal/50 leading-relaxed mt-1">{dict.checkout.artisan_prep_desc}</p>
             </div>
           </div>
-          <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-            <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0">
-              <MessageSquare className="w-7 h-7 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-bold text-primary text-lg">{dict.checkout.direct_dialogue_title}</h3>
-              <p className="text-xs md:text-sm text-charcoal/50 leading-relaxed mt-1">{dict.checkout.direct_dialogue_desc}</p>
-            </div>
-          </div>
         </motion.div>
 
         {/* Action Buttons */}

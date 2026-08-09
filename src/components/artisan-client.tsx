@@ -269,7 +269,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
           
           {/* Custom Request Card */}
           <Link 
-            href={`/profile/messages?userId=${artisan.userId}`}
+            href={`/contact`}
             className="aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-6 md:p-12 text-center bg-cream/10 group hover:border-brand/40 transition-all cursor-pointer active:scale-95"
           >
             <div className="w-12 h-12 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center shadow-xl mb-6 md:mb-8 group-hover:scale-110 transition-transform shadow-brand/10">

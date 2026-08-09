@@ -278,7 +278,7 @@ export default function MaintenancePage() {
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/30">{copy.followLabel}</p>
             <div className="flex justify-center gap-6 md:gap-8">
               {[
-                { icon: FaInstagram, href: "https://www.instagram.com/giftisan.eg/" },
+                { icon: FaInstagram, href: "https://www.instagram.com/giftisan_eg/" },
                 { icon: FaFacebook, href: "https://www.facebook.com/giftisan.eg" },
                 { icon: FaTiktok, href: "https://www.tiktok.com/@giftisan.eg" },
                 { icon: FaPinterest, href: "https://www.pinterest.com/giftisaneg" },

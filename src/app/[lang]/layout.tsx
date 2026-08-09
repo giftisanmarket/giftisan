@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
       title: dict.seo.title,
       description: lang === 'ar' ? "اكتشف كنوزاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted treasures from local artisans.",
       images: ["/hero.webp"],
-      creator: "@giftisan.eg",
+      creator: "@giftisan_eg",
     },
     openGraph: {
       type: "website",
@@ -126,7 +126,7 @@ export default async function RootLayout({
               "foundingDate": "2024",
               "knowsAbout": ["Egyptian Handicrafts", "Artisanal Gifts", "Handmade Jewelry", "Egyptian Heritage", "Eco-friendly Products"],
               "sameAs": [
-                "https://instagram.com/giftisan.eg",
+                "https://instagram.com/giftisan_eg",
                 "https://tiktok.com/@giftisan.eg",
                 "https://facebook.com/giftisan.eg",
                 "https://pinterest.com/giftisaneg"

@@ -567,17 +567,22 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                               href={gpsPinUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition-all shrink-0"
+                              className="w-full sm:w-auto px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs flex flex-wrap items-center justify-between sm:justify-center gap-2 hover:bg-emerald-100 transition-all shrink-0"
                             >
-                              <span>📍 Exact GPS Pin Captured</span>
-                              <span className="text-[10px] underline">Open Google Maps ↗</span>
+                              <span className="flex items-center gap-1.5 shrink-0">
+                                <span>📍</span>
+                                <span>{lang === "ar" ? "تم تحديد الدبوس الجغرافي" : "GPS Pin Captured"}</span>
+                              </span>
+                              <span className="text-[10px] underline bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300/40 shrink-0">
+                                {lang === "ar" ? "فتح الخرائط ↗" : "Open Google Maps ↗"}
+                              </span>
                             </a>
                           )}
                           <button
                             type="button"
                             onClick={handleDetectLocation}
                             disabled={isDetectingLocation}
-                            className="px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
+                            className="w-full sm:w-auto px-5 py-2.5 bg-accent/10 border border-accent/20 hover:bg-accent hover:text-white text-accent rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm shrink-0"
                           >
                             {isDetectingLocation ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />

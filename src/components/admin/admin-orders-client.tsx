@@ -571,6 +571,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                     ].filter(Boolean).join(", ")} 
                                     city={item.product.artisan.pickupCity || item.product.artisan.location}
                                     className="text-xs text-charcoal/70 ps-5"
+                                    lang={lang}
                                   />
                                   {item.product.artisan.pickupNotes && (
                                     <p className="text-charcoal/50 ps-5 text-[9px] italic mt-1">
@@ -606,6 +607,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                             city={selectedOrderDetails.shippingCity}
                             country={selectedOrderDetails.shippingCountry}
                             className="text-xs text-charcoal/60"
+                            lang={lang}
                           />
                         </div>
                       </div>
@@ -687,6 +689,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                   city={orderToPrint.shippingCity}
                   country={orderToPrint.shippingCountry}
                   className="text-sm font-bold text-charcoal/60"
+                  lang={lang}
                 />
                 <p className="text-sm font-black text-accent mt-4">{orderToPrint.clientPhone || orderToPrint.user?.phone}</p>
               </div>

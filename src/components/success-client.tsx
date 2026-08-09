@@ -169,6 +169,7 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
                       address={order.shippingAddress} 
                       city={order.shippingCity}
                       country={order.shippingCountry || "Egypt"}
+                      lang={lang}
                     />
                     <p className="font-mono text-xs mt-2 text-charcoal/50">📞 {order.clientPhone}</p>
                   </div>

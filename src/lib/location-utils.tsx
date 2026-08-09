@@ -15,18 +15,21 @@ export function ShippingAddressDisplay({
   address, 
   city, 
   country = "Egypt",
-  className = "" 
+  className = "",
+  lang = "en"
 }: { 
   address: string | null | undefined; 
   city?: string | null; 
   country?: string | null;
   className?: string; 
+  lang?: string;
 }) {
   const { cleanAddress, gpsUrl } = parseAddressWithGps(address);
+  const isAr = lang === "ar";
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <p className="font-medium">{cleanAddress || "No street address provided"}</p>
+      <p className="font-medium">{cleanAddress || (isAr ? "لم يتم توفير عنوان الشارع" : "No street address provided")}</p>
       {city && <p className="text-xs text-charcoal/60 font-semibold">{city}{country ? `, ${country}` : ""}</p>}
       {gpsUrl && (
         <a
@@ -37,7 +40,7 @@ export function ShippingAddressDisplay({
           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 text-accent font-black text-xs rounded-xl transition-all shadow-2xs hover:scale-105 active:scale-95 border border-accent/20"
         >
           <MapPin className="w-3.5 h-3.5" />
-          <span>Open Exact GPS Location on Google Maps</span>
+          <span>{isAr ? "فتح الموقع الدقيق على خرائط جوجل ↗" : "Open Exact GPS Location on Google Maps ↗"}</span>
           <ExternalLink className="w-3 h-3 opacity-70" />
         </a>
       )}

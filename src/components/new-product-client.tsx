@@ -275,6 +275,8 @@ VariantCard.displayName = "VariantCard";
 
 const VariationsSection = memo(({ dict, options, setOptions, variants, setVariants, basePrice }: any) => {
   const [newOptionName, setNewOptionName] = useState("");
+  const [showBulkStockModal, setShowBulkStockModal] = useState(false);
+  const [bulkStockVal, setBulkStockVal] = useState("5");
 
   const addOption = () => {
     if (newOptionName.trim()) {
@@ -452,18 +454,11 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
 
                 <button 
                   type="button"
-                  onClick={() => {
-                    const stockVal = prompt("Enter stock quantity for all variants:", "5");
-                    if (stockVal !== null && !isNaN(Number(stockVal))) {
-                      const newVariants = variants.map((v: any) => ({ ...v, stock: stockVal }));
-                      setVariants(newVariants);
-                      toast.success(`Set stock to ${stockVal} for all variants`);
-                    }
-                  }}
+                  onClick={() => setShowBulkStockModal(true)}
                   className="px-6 py-4 bg-primary/5 text-primary border border-primary/10 font-bold rounded-2xl hover:bg-primary/10 transition-all flex items-center justify-center gap-2 text-xs md:text-sm"
                 >
                   <Tag className="w-4 h-4 text-accent" />
-                  Set Bulk Stock
+                  {dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}
                 </button>
               </div>
             )}
@@ -502,6 +497,102 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
             </div>
           </div>
         )}
+        {/* Bulk Stock Modal */}
+        <AnimatePresence>
+          {showBulkStockModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-primary/40 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-primary/10 space-y-6"
+              >
+                <div className="flex items-center justify-between pb-4 border-b border-primary/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+                      <Tag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-lg text-primary">
+                        {dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}
+                      </h3>
+                      <p className="text-xs text-primary/50 font-medium">
+                        {dict.edit_product?.bulk_stock_desc || "Enter stock quantity for all variants"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkStockModal(false)}
+                    className="p-2 rounded-xl text-primary/40 hover:text-primary hover:bg-primary/5 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-primary/60 uppercase tracking-wider">
+                      {dict.new_product?.initial_stock_label || "Quantity"}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      autoFocus
+                      value={bulkStockVal}
+                      onChange={(e) => setBulkStockVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (bulkStockVal !== "" && !isNaN(Number(bulkStockVal))) {
+                            const newVariants = variants.map((v: any) => ({ ...v, stock: bulkStockVal }));
+                            setVariants(newVariants);
+                            toast.success(
+                              dict.edit_product?.stock_set_success
+                                ? dict.edit_product.stock_set_success.replace("{count}", bulkStockVal)
+                                : `Set stock to ${bulkStockVal} for all variants`
+                            );
+                            setShowBulkStockModal(false);
+                          }
+                        }
+                      }}
+                      placeholder="e.g. 5"
+                      className="w-full h-12 px-4 bg-cream/30 border border-primary/10 rounded-2xl font-bold text-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkStockModal(false)}
+                      className="flex-1 py-3.5 px-4 bg-cream hover:bg-cream/70 text-primary font-bold rounded-2xl transition-all text-sm"
+                    >
+                      {dict.common?.cancel || "Cancel"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (bulkStockVal !== "" && !isNaN(Number(bulkStockVal))) {
+                          const newVariants = variants.map((v: any) => ({ ...v, stock: bulkStockVal }));
+                          setVariants(newVariants);
+                          toast.success(
+                            dict.edit_product?.stock_set_success
+                              ? dict.edit_product.stock_set_success.replace("{count}", bulkStockVal)
+                              : `Set stock to ${bulkStockVal} for all variants`
+                          );
+                          setShowBulkStockModal(false);
+                        }
+                      }}
+                      className="flex-1 py-3.5 px-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl transition-all shadow-md shadow-accent/20 active:scale-95 text-sm"
+                    >
+                      {dict.common?.apply || "Apply Stock"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
@@ -1032,38 +1123,52 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
                           {/* COVER BADGE */}
                           {isCover && (
-                            <div className="absolute top-2.5 start-2.5 z-20 px-2.5 py-1 bg-gradient-to-r from-accent to-amber-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-white" />
+                            <div className="absolute top-2 start-2 z-20 px-2 py-0.5 bg-gradient-to-r from-accent to-amber-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-md flex items-center gap-1 pointer-events-none">
+                              <Star className="w-2.5 h-2.5 fill-white" />
                               <span>{dict.new_product.main_cover}</span>
                             </div>
                           )}
 
                           {/* RESOLUTION BADGE */}
                           {resolutions[idx] && (
-                            <div className="absolute bottom-2.5 start-2.5 z-20 px-2 py-0.5 bg-black/50 backdrop-blur-md rounded-md text-[8px] font-mono font-bold text-white/90">
+                            <div className="absolute bottom-2 start-2 z-20 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-mono font-bold text-white/90 pointer-events-none">
                               {resolutions[idx]}
                             </div>
                           )}
 
-                          {/* HOVER GLASSMORPHISM OVERLAY & CONTROLS */}
-                          <div className="absolute inset-0 z-30 bg-primary/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center p-3 gap-2 rounded-2xl overflow-hidden">
+                          {/* ALWAYS-VISIBLE DELETE BUTTON ON SMALL SCREENS / HOVER ON DESKTOP */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageChange(idx, "");
+                            }}
+                            className="absolute top-2 end-2 z-40 p-1.5 sm:p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg border border-white/20 transition-all active:scale-90 cursor-pointer flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                            title={dict.new_product.remove}
+                            aria-label={dict.new_product.remove || "Delete"}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* BOTTOM GRADIENT OVERLAY & CONTROLS */}
+                          <div className="absolute inset-0 z-30 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 flex flex-col justify-end p-2 sm:p-2.5 gap-1.5 rounded-2xl overflow-hidden">
                             {/* Make Main Cover Button (if not already cover) */}
                             {!isCover && (
                               <button
                                 type="button"
                                 onClick={() => handleSetAsCover(idx)}
-                                className="w-full py-1.5 px-3 bg-white/20 hover:bg-accent hover:text-white border border-white/30 text-white rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                                className="w-full py-1 px-2 bg-amber-500/90 hover:bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95 border border-amber-300/30"
                               >
-                                <Star className="w-3 h-3" />
+                                <Star className="w-2.5 h-2.5 fill-white" />
                                 <span>{dict.new_product?.set_as_cover || "Set Cover"}</span>
                               </button>
                             )}
 
-                            <div className="flex items-center gap-2 w-full">
+                            <div className="flex items-center gap-1.5 w-full">
                               {/* Change File Button */}
-                              <label className="flex-1 py-1.5 px-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all flex items-center justify-center gap-1 active:scale-95">
-                                <Upload className="w-3 h-3" />
-                                <span>{dict.new_product.change}</span>
+                              <label className="w-full py-1.5 px-2 bg-white hover:bg-cream text-primary font-extrabold text-[10px] sm:text-xs rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95 border border-white/40">
+                                <Upload className="w-3.5 h-3.5 text-accent shrink-0" />
+                                <span className="font-bold">{dict.new_product.change}</span>
                                 <input
                                   type="file"
                                   accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
@@ -1074,16 +1179,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                   }}
                                 />
                               </label>
-
-                              {/* Remove Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleImageChange(idx, "")}
-                                className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-xl transition-all active:scale-95 shadow-md"
-                                title={dict.new_product.remove}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
                             </div>
                           </div>
 

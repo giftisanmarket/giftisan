@@ -65,9 +65,9 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
   const categoryCountsRaw = await prisma.product.groupBy({
     by: ['category'],
     where: {
-      status: { in: ["APPROVED", "PENDING"] },
+      status: "APPROVED",
       artisan: {
-        status: { in: ["APPROVED", "PENDING"] }
+        status: "APPROVED"
       }
     },
     _count: {

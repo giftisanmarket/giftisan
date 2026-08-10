@@ -23,6 +23,69 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
+const categoryImageMap: Record<string, string> = {
+  // English Names & Slugs
+  "gift-boxes-sets": "/images/categories/gift-boxes-sets.png",
+  "gift boxes & sets": "/images/categories/gift-boxes-sets.png",
+  "jewelry": "/images/categories/jewelry.png",
+  "ceramics": "/images/categories/ceramics.png",
+  "woodwork": "/images/categories/woodwork.png",
+  "textiles": "/images/categories/textiles.png",
+  "fashion": "/images/categories/fashion.png",
+  "art-collectibles": "/images/categories/art-collectibles.png",
+  "art & collectibles": "/images/categories/art-collectibles.png",
+  "personalized": "/images/categories/personalized.png",
+  "wedding": "/images/categories/wedding.png",
+  "vintage": "/images/categories/vintage.png",
+  "stationery": "/images/categories/stationery.png",
+  "metalwork": "/images/categories/metalwork.png",
+  "beauty-apothecary": "/images/categories/beauty-apothecary.png",
+  "beauty & apothecary": "/images/categories/beauty-apothecary.png",
+  "leatherwork": "/images/categories/fashion.png",
+  "culinary-arts": "/images/categories/gift-boxes-sets.png",
+  "basketry": "/images/categories/textiles.png",
+  "glasswork": "/images/categories/ceramics.png",
+
+  // Arabic Names
+  "مجموعات الهدايا": "/images/categories/gift-boxes-sets.png",
+  "صناديق وهدايا": "/images/categories/gift-boxes-sets.png",
+  "مجوهرات": "/images/categories/jewelry.png",
+  "خزف وفخار": "/images/categories/ceramics.png",
+  "خزف": "/images/categories/ceramics.png",
+  "أعمال خشبية": "/images/categories/woodwork.png",
+  "خشبيات": "/images/categories/woodwork.png",
+  "منسوجات": "/images/categories/textiles.png",
+  "أزياء وموضة": "/images/categories/fashion.png",
+  "أزياء": "/images/categories/fashion.png",
+  "الأزياء": "/images/categories/fashion.png",
+  "فنون ومقتنيات": "/images/categories/art-collectibles.png",
+  "فن ومقتنيات": "/images/categories/art-collectibles.png",
+  "منتجات حسب الطلب": "/images/categories/personalized.png",
+  "هدايا مخصصة": "/images/categories/personalized.png",
+  "هدايا الزفاف": "/images/categories/wedding.png",
+  "زفاف": "/images/categories/wedding.png",
+  "عتيق": "/images/categories/vintage.png",
+  "قرطاسية": "/images/categories/stationery.png",
+  "أعمال معادن": "/images/categories/metalwork.png",
+  "جمال وعناية": "/images/categories/beauty-apothecary.png",
+  "منتجات جلدية": "/images/categories/fashion.png",
+  "فنون الطهي": "/images/categories/gift-boxes-sets.png",
+  "الخوص والسلال": "/images/categories/textiles.png",
+  "أعمال الزجاج": "/images/categories/ceramics.png",
+};
+
+function getCategoryCoverImage(name: string, slug: string): string {
+  const cleanName = (name || "").toLowerCase().trim();
+  const cleanSlug = (slug || "").toLowerCase().trim();
+
+  return (
+    categoryImageMap[name] ||
+    categoryImageMap[cleanName] ||
+    categoryImageMap[slug] ||
+    categoryImageMap[cleanSlug] ||
+    "/images/categories/gift-boxes-sets.png"
+  );
+}
 
 interface CategoryCount {
   name: string;
@@ -149,43 +212,37 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
           {categoryCounts.slice(0, 12).map((cat) => {
-            const icons: Record<string, any> = {
-              "Ceramics": Shapes,
-              "Jewelry": Gem,
-              "Gift Boxes & Sets": Package,
-              "Stationery": PencilLine,
-              "Vintage": History,
-              "Textiles": Scissors,
-              "Woodwork": Hammer,
-              "Leatherwork": Briefcase,
-              "Culinary Arts": Utensils,
-              "Beauty & Apothecary": Sparkles,
-              "Metalwork": Flame,
-              "Glasswork": Lightbulb,
-              "Basketry": Grid,
-              "Fashion": Shirt,
-              "Wedding": Heart,
-              "Personalized": Wand2,
-              "Art & Collectibles": Brush,
-            };
-            const Icon = icons[cat.name] || ShoppingBag;
+            const slug = cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+            const imageUrl = getCategoryCoverImage(cat.name, slug);
+            const categoryTitle = dict.common.categories_list?.[slug] || cat.name;
 
             return (
               <Link
                 key={cat.name}
-                href={`/category/${cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`}
-                className="group cursor-pointer aspect-square bg-white border border-primary/5 rounded-3xl p-6 flex flex-col items-center justify-center gap-3 hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all"
+                href={`/category/${slug}`}
+                className="group relative block aspect-[4/3] sm:aspect-square bg-white border border-primary/5 rounded-3xl overflow-hidden shadow-md shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1.5 transition-all"
               >
-                <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                  <Icon className="w-7 h-7" />
+                <BespokeImage
+                  src={imageUrl}
+                  alt={cat.name}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-108"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent" />
+
+                <div className="absolute top-3 start-3 z-10 px-2.5 py-0.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-primary uppercase tracking-wider shadow-sm">
+                  {cat.count} {cat.count === 1 ? (dict.common.treasure_single || "Treasure") : (dict.common.treasure_plural || "Treasures")}
                 </div>
-                <div className="text-center">
-                  <span className="block font-heading font-bold text-primary text-sm tracking-tight">{dict.common.categories_list?.[cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")] || cat.name}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/30 group-hover:text-accent transition-colors">
-                    {dict.home.items_count.replace('{count}', cat.count.toString())}
+
+                <div className="absolute bottom-4 inset-x-4 z-10 text-white flex items-center justify-between gap-2">
+                  <span className="font-heading font-bold text-white text-sm md:text-base tracking-tight truncate group-hover:text-accent-light transition-colors">
+                    {categoryTitle}
                   </span>
+                  <div className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 group-hover:bg-accent group-hover:scale-110 transition-all">
+                    <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                  </div>
                 </div>
               </Link>
             );

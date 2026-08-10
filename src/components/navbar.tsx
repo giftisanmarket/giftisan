@@ -570,22 +570,30 @@ export function Navbar({ dict }: { dict?: any }) {
           <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between gap-8">
             <div className="flex items-center gap-6 lg:gap-10 overflow-x-auto no-scrollbar whitespace-nowrap flex-1 py-1">
               {[
-                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                 { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                 { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
                 { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
-              ].map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/category/${cat.id}`}
-                  className="text-[11px] lg:text-sm font-bold text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8 transition-all uppercase tracking-wide whitespace-nowrap"
-                >
-                  {cat.label}
-                </Link>
-              ))}
+              ].map((cat) => {
+                const isActive = pathname.includes(`/category/${cat.id}`);
+                return (
+                  <Link
+                    key={cat.id}
+                    href={`/category/${cat.id}`}
+                    className={cn(
+                      "text-[11px] lg:text-sm font-bold transition-all uppercase tracking-wide whitespace-nowrap",
+                      isActive
+                        ? "text-accent font-black underline decoration-accent decoration-2 underline-offset-8"
+                        : "text-charcoal/60 hover:text-primary hover:underline decoration-accent decoration-2 underline-offset-8"
+                    )}
+                  >
+                    {cat.label}
+                  </Link>
+                );
+              })}
             </div>
             <Link
               href="/categories"
@@ -719,26 +727,32 @@ export function Navbar({ dict }: { dict?: any }) {
               <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.categories}</p>
               <div className="grid grid-cols-1 gap-2">
                 {[
-                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-                  { id: "vintage", label: d.common.categories_list?.vintage || d.common.vintage },
-                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                  { id: "stationery", label: d.common.categories_list?.stationery || d.common.stationery },
-                  { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                   { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                  { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                  { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
                   { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+                  { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
                   { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
-                ].map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/category/${cat.id}`}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex justify-between items-center p-4 bg-white rounded-2xl border border-primary/5 text-primary font-bold hover:bg-primary/5 transition-colors active:scale-[0.98] transition-transform"
-                  >
-                    {cat.label}
-                    <span className="text-accent">→</span>
-                  </Link>
-                ))}
+                ].map((cat) => {
+                  const isActive = pathname.includes(`/category/${cat.id}`);
+                  return (
+                    <Link
+                      key={cat.id}
+                      href={`/category/${cat.id}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={cn(
+                        "flex justify-between items-center p-4 rounded-2xl border text-sm font-bold transition-all active:scale-[0.98]",
+                        isActive
+                          ? "bg-accent/10 border-accent/30 text-accent font-black"
+                          : "bg-white border-primary/5 text-primary hover:bg-primary/5"
+                      )}
+                    >
+                      <span>{cat.label}</span>
+                      <span className="text-accent">→</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>

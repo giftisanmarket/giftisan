@@ -536,11 +536,11 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
               <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-30" />
             </div>
 
-            <div className="relative mb-6">
+            <div className="relative mb-4">
               <div
                 onScroll={handleScroll}
                 className={cn(
-                  "flex gap-2 md:gap-3 overflow-x-auto pt-2 pb-4 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
+                  "flex gap-2 md:gap-3 overflow-x-auto pt-3 pb-8 -mb-4 scrollbar-hide whitespace-nowrap relative z-20 transition-all duration-300",
                   showMask ? "mask-fade-right" : ""
                 )}
               >
@@ -567,7 +567,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     {activeTab === tab.id && (
                       <motion.div
                         layoutId="activeTabPill"
-                        className="absolute inset-0 bg-primary rounded-full z-0 shadow-[0_10px_30px_-5px_rgba(6,78,59,0.3)]"
+                        className="absolute inset-0 bg-primary rounded-full z-0 shadow-lg shadow-primary/30"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}

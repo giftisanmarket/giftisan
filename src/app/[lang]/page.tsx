@@ -74,7 +74,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     }),
     prisma.artisanProfile.findMany({
       where: {
-        status: "APPROVED"
+        status: "APPROVED",
+        NOT: [
+          { studioName: { contains: "khashab", mode: "insensitive" } },
+          { studioName: { contains: "تمارا", mode: "insensitive" } }
+        ]
       },
       select: {
         id: true,
@@ -84,13 +88,27 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         isVerified: true,
         location: true,
         bio: true,
+        _count: {
+          select: {
+            products: {
+              where: {
+                status: "APPROVED"
+              }
+            }
+          }
+        },
         user: {
           select: {
             name: true
           }
         }
       },
-      take: 5
+      orderBy: [
+        { isVerified: 'desc' },
+        { products: { _count: 'desc' } },
+        { updatedAt: 'desc' }
+      ],
+      take: 8
     }),
     prisma.artisanProfile.count({
       where: { status: "APPROVED" }

@@ -232,10 +232,6 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent" />
 
-                <div className="absolute top-3 start-3 z-10 px-2.5 py-0.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-primary uppercase tracking-wider shadow-sm">
-                  {cat.count} {cat.count === 1 ? (dict.common.treasure_single || "Treasure") : (dict.common.treasure_plural || "Treasures")}
-                </div>
-
                 <div className="absolute bottom-4 inset-x-4 z-10 text-white flex items-center justify-between gap-2">
                   <span className="font-heading font-bold text-white text-sm md:text-base tracking-tight truncate group-hover:text-accent-light transition-colors">
                     {categoryTitle}
@@ -294,49 +290,60 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
 
         <div className="relative">
           <div className="flex gap-8 px-4 pt-4 overflow-x-auto pb-8 snap-x no-scrollbar">
-            {artisans.map((artisan, idx) => (
-              <motion.div
-                key={artisan.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.1 }}
-                className="flex-shrink-0 w-80 snap-center"
-              >
-                <Link href={`/artisans/${artisan.slug || artisan.user.name.toLowerCase().replace(/ /g, "-")}`} className="group block h-full">
-                  <div className="bg-cream rounded-[3rem] p-8 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 h-full flex flex-col">
-                    <div className="relative w-24 h-24 mb-6">
-                      <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
-                      <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
-                        <BespokeImage 
-                          type="artisan"
-                          id={artisan.id}
-                          src={artisan.avatar} 
-                          alt={artisan.user.name} 
-                          fill 
-                          className="object-cover" 
-                        />
+            {artisans.map((artisan, idx) => {
+              const rawName = artisan.studioName || artisan.user?.name || "Artisan";
+              const safeSlug = artisan.slug || rawName.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]+/g, "-").replace(/^-|-$/g, "");
+              const itemCount = artisan._count?.products ?? 0;
+              const itemCountText = itemCount > 0 
+                ? (dict.home.items_count || "{count} Items").replace("{count}", itemCount.toString())
+                : (dict.product.master_artisan || "Master Artisan");
+
+              return (
+                <motion.div
+                  key={artisan.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="flex-shrink-0 w-80 snap-center"
+                >
+                  <Link href={`/artisans/${safeSlug}`} className="group block h-full">
+                    <div className="bg-cream rounded-[3rem] p-8 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 h-full flex flex-col">
+                      <div className="relative w-24 h-24 mb-6">
+                        <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
+                        <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <BespokeImage 
+                            type="artisan"
+                            id={artisan.id}
+                            src={artisan.avatar} 
+                            alt={rawName} 
+                            fill 
+                            className="object-cover" 
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-2xl font-heading font-bold text-primary truncate">{rawName}</h3>
+                        {artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />}
+                      </div>
+                      <p className="text-xs text-accent font-black uppercase tracking-[0.2em] mb-4">{artisan.location}</p>
+                      <p className="text-charcoal/60 text-sm leading-relaxed mb-6 flex-1 italic group-hover:text-charcoal transition-colors line-clamp-3">
+                        "{artisan.bio}"
+                      </p>
+
+                      <div className="pt-6 border-t border-primary/5 flex items-center justify-between mt-auto">
+                        <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest flex items-center gap-1">
+                          {itemCountText}
+                        </span>
+                        <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm xl:opacity-0 xl:group-hover:opacity-100 opacity-100 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-2xl font-heading font-bold text-primary">{artisan.studioName || artisan.user.name}</h3>
-                      {artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent" />}
-                    </div>
-                    <p className="text-xs text-accent font-black uppercase tracking-[0.2em] mb-4">{artisan.location}</p>
-                    <p className="text-charcoal/60 text-sm leading-relaxed mb-8 flex-1 italic group-hover:text-charcoal transition-colors">
-                      "{artisan.bio}"
-                    </p>
-
-                    <div className="pt-6 border-t border-primary/5 flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.product.master_artisan}</span>
-                    <div className="w-10 h-10 rounded-full bg-white border border-primary/10 flex items-center justify-center text-primary shadow-sm xl:opacity-0 xl:group-hover:opacity-100 opacity-100 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -247,11 +247,25 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(_e, { offset, velocity }) => {
+                  if (product.images.length <= 1) return;
+                  const swipePower = Math.abs(offset.x) * velocity.x;
+                  if (swipePower < -10000 || offset.x < -50) {
+                    setSelectedImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
+                    if (selectedVariant?.image) setSelectedVariant((prev: any) => prev ? { ...prev, image: null } : null);
+                  } else if (swipePower > 10000 || offset.x > 50) {
+                    setSelectedImage(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
+                    if (selectedVariant?.image) setSelectedVariant((prev: any) => prev ? { ...prev, image: null } : null);
+                  }
+                }}
                 onClick={() => {
                   setLightboxIndex(selectedImage);
                   setIsLightboxOpen(true);
                 }}
-                className="relative aspect-[4/5] sm:aspect-square rounded-3xl overflow-hidden shadow-2xl bg-cream/30 cursor-zoom-in"
+                className="relative aspect-[4/5] sm:aspect-square rounded-3xl overflow-hidden shadow-2xl bg-cream/30 cursor-zoom-in touch-pan-y select-none"
               >
                 {isVideo(selectedVariant?.image || product.images[selectedImage]) ? (
                   <video
@@ -312,7 +326,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               )}
             </div>
 
-            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide" dir="ltr">
+            <div className="flex gap-3 md:gap-4 overflow-x-auto pt-3 pb-4 px-2 -mx-2 custom-scrollbar scrollbar-hide" dir="ltr">
               {product.images.map((img: string, idx: number) => {
                 const isSelected = selectedImage === idx && !selectedVariant?.image;
                 return (
@@ -1041,28 +1055,22 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        // In RTL, Start is Right, so this moves "Previous"
-                        if (lang === 'ar') {
-                          setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
-                        } else {
-                          setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
-                        }
+                        setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
                       }}
-                      className="absolute start-0 md:-start-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                      className="absolute start-2 sm:start-4 md:start-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-2xl transition-all z-50"
+                      aria-label="Previous image"
                     >
-                      {/* Points Away from content: Right in AR, Left in EN */}
-                      <ArrowRight className={cn("w-8 h-8", lang === 'ar' ? "" : "rotate-180")} />
+                      <ArrowRight className={cn("w-7 h-7 md:w-8 md:h-8", lang === 'ar' ? "" : "rotate-180")} />
                     </button>
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        // In RTL, End is Left, so this moves "Next"
                         setLightboxIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
                       }}
-                      className="absolute end-0 md:-end-20 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all z-50"
+                      className="absolute end-2 sm:end-4 md:end-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-2xl transition-all z-50"
+                      aria-label="Next image"
                     >
-                      {/* Points Away from content: Left in AR, Right in EN */}
-                      <ArrowRight className={cn("w-8 h-8", lang === 'ar' ? "rotate-180" : "")} />
+                      <ArrowRight className={cn("w-7 h-7 md:w-8 md:h-8", lang === 'ar' ? "rotate-180" : "")} />
                     </button>
                   </>
                )}
@@ -1072,7 +1080,20 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                  initial={{ opacity: 0, scale: 0.9 }}
                  animate={{ opacity: 1, scale: 1 }}
                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                 className="relative w-full h-full flex items-center justify-center"
+                 drag="x"
+                 dragConstraints={{ left: 0, right: 0 }}
+                 dragElastic={0.2}
+                 onDragEnd={(_e, { offset, velocity }) => {
+                   if (product.images.length <= 1) return;
+                   const swipePower = Math.abs(offset.x) * velocity.x;
+                   if (swipePower < -10000 || offset.x < -50) {
+                     setLightboxIndex(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
+                   } else if (swipePower > 10000 || offset.x > 50) {
+                     setLightboxIndex(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
+                   }
+                 }}
+                 onClick={(e) => e.stopPropagation()}
+                 className="relative w-full h-full flex items-center justify-center touch-pan-y select-none cursor-grab active:cursor-grabbing"
                >
                   {isVideo(product.images[lightboxIndex]) ? (
                     <video 

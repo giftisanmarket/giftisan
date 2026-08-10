@@ -384,6 +384,11 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                                slugAvailability === 'taken' ? <AlertCircle className="w-4 h-4 text-red-500" /> : null}
                             </div>
                           </div>
+                          {dict.studio_profile.studio_slug_help && (
+                            <p className="text-[11px] font-medium text-accent/80 ms-2 mt-1 flex items-center gap-1.5">
+                              <span>{dict.studio_profile.studio_slug_help}</span>
+                            </p>
+                          )}
                           <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap min-w-0">
                             <span className="shrink-0">{dict.studio_profile.public_link}</span>
                             <span className="font-mono text-accent font-bold dir-ltr break-all">giftisan.com/artisans/{slug || "your-studio-link"}</span>

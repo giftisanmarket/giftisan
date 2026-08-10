@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, memo, useMemo, useCallback } from "react";
-import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video, Loader2, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video, Loader2, ShieldCheck, Trash2, Upload, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateProduct } from "@/lib/actions";
 import { cn } from "@/lib/utils";
@@ -641,6 +641,70 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
 
 VariantCard.displayName = "VariantCard";
 
+const OptionValueInput = memo(({ optIdx, onAddValue, dict }: { optIdx: number; onAddValue: (optIdx: number, val: string) => void; dict: any }) => {
+  const [val, setVal] = useState("");
+
+  const handleCommit = useCallback(() => {
+    const trimmed = val.trim().replace(/,/g, "");
+    if (trimmed) {
+      onAddValue(optIdx, trimmed);
+      setVal("");
+    }
+  }, [optIdx, onAddValue, val]);
+
+  return (
+    <div className="flex items-center gap-1.5 bg-white border border-primary/15 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/10 rounded-full px-3 py-1 shadow-sm transition-all">
+      <input
+        type="text"
+        value={val}
+        placeholder={dict.edit_product?.add_value || "Add value..."}
+        onChange={(e) => {
+          const text = e.target.value;
+          if (text.includes(",")) {
+            const parts = text.split(",");
+            parts.forEach((p) => {
+              const cleaned = p.trim();
+              if (cleaned) onAddValue(optIdx, cleaned);
+            });
+            setVal("");
+          } else {
+            setVal(text);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.keyCode === 13 || e.which === 13) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleCommit();
+          }
+        }}
+        onBlur={() => {
+          handleCommit();
+        }}
+        className="bg-transparent border-none focus:outline-none text-xs font-bold w-24 sm:w-32 text-primary placeholder:text-primary/30"
+      />
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleCommit();
+        }}
+        className={cn(
+          "w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-95",
+          val.trim() ? "bg-accent text-white hover:bg-accent/90 cursor-pointer shadow-sm" : "bg-primary/10 text-primary/30 cursor-default"
+        )}
+        title={dict.edit_product?.add_value || "Add value"}
+      >
+        <Plus className="w-3 h-3" />
+      </button>
+    </div>
+  );
+});
+
+OptionValueInput.displayName = "OptionValueInput";
+
 const VariationsSection = memo(({ options, setOptions, variants, setVariants, basePrice, dict }: any) => {
   const [newOptionName, setNewOptionName] = useState("");
   const [showBulkStockModal, setShowBulkStockModal] = useState(false);
@@ -711,8 +775,9 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
             onChange={(e) => setNewOptionName(e.target.value)}
             className="flex-1 py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold text-sm md:text-base"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' || e.keyCode === 13 || e.which === 13) {
                 e.preventDefault();
+                e.stopPropagation();
                 addOption();
               }
             }}
@@ -747,19 +812,8 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                     <button type="button" onClick={() => removeValue(optIdx, valIdx)} className="text-red-400 hover:text-red-500 transition-colors"><X className="w-3 h-3" /></button>
                   </span>
                 ))}
-                <input 
-                  type="text" 
-                  placeholder={dict.edit_product.add_value}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addValue(optIdx, (e.target as HTMLInputElement).value);
-                      (e.target as HTMLInputElement).value = "";
-                    }
-                  }}
-                  className="bg-transparent border-none focus:outline-none text-xs font-bold min-w-[120px] placeholder:text-primary/20"
-                />
-                <span className="text-[9px] font-bold text-accent/40 uppercase tracking-tighter">{dict.edit_product.enter_to_add}</span>
+                <OptionValueInput optIdx={optIdx} onAddValue={addValue} dict={dict} />
+                <span className="text-[9px] font-bold text-accent/40 uppercase tracking-tighter self-center">{dict.edit_product.enter_to_add}</span>
               </div>
             </div>
           ))}
@@ -779,7 +833,11 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                 <button 
                   type="button"
                   onClick={() => {
-                    const newVariants = variants.map((v: any) => ({ ...v, price: basePrice }));
+                    if (!basePrice || String(basePrice).trim() === "" || Number(basePrice) <= 0) {
+                      toast.error(dict.edit_product?.enter_base_price_first || "Please enter a Base Price first!");
+                      return;
+                    }
+                    const newVariants = variants.map((v: any) => ({ ...v, price: String(basePrice) }));
                     setVariants(newVariants);
                     toast.success(dict.edit_product.prices_synced);
                   }}

@@ -1148,6 +1148,7 @@
     "variant_name": "Variant",
     "enter_to_add": "Press Enter to add",
     "apply_base_price": "Apply Base Price",
+    "enter_base_price_first": "Please enter a Base Price first",
     "set_bulk_stock": "Set Bulk Stock",
     "bulk_stock_desc": "Enter stock quantity for all variants",
     "prices_synced": "Prices synced",

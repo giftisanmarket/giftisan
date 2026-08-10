@@ -1211,6 +1211,7 @@
     "enter_to_add": "اضغط Enter للإضافة",
     "sku_label": "رمز المنتج",
     "apply_base_price": "تطبيق السعر الأساسي",
+    "enter_base_price_first": "يرجى إدخال السعر الأساسي أولاً",
     "set_bulk_stock": "تحديد المخزون للكل",
     "bulk_stock_desc": "أدخل الكمية المتاحة لجميع الخيارات",
     "prices_synced": "تم مزامنة الأسعار",

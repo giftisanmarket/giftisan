@@ -266,19 +266,6 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
               <p className="text-charcoal/30 font-black uppercase tracking-[0.2em] text-[10px] md:text-base">{dict.artisan_detail.no_pieces}</p>
             </div>
           )}
-          
-          {/* Custom Request Card */}
-          <Link 
-            href={`/contact`}
-            className="aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-6 md:p-12 text-center bg-cream/10 group hover:border-brand/40 transition-all cursor-pointer active:scale-95"
-          >
-            <div className="w-12 h-12 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center shadow-xl mb-6 md:mb-8 group-hover:scale-110 transition-transform shadow-brand/10">
-              <Globe className="w-6 h-6 md:w-10 md:h-10 text-brand" />
-            </div>
-            <h3 className="text-sm md:text-2xl font-heading font-bold text-primary mb-2 md:mb-4">{dict.artisan_detail.bespoke_request}</h3>
-            <p className="text-[10px] md:text-base text-charcoal/60 mb-6 md:mb-10 line-clamp-3 leading-relaxed">{dict.artisan_detail.bespoke_desc}</p>
-            <div className="text-[10px] md:text-sm font-black text-brand uppercase tracking-[0.2em] group-hover:text-primary transition-colors">{dict.artisan_detail.begin_dialogue} →</div>
-          </Link>
         </div>
       </section>
 

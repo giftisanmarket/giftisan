@@ -312,28 +312,41 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               )}
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide" dir="ltr">
-              {product.images.map((img: string, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`relative w-20 md:w-24 aspect-square rounded-xl overflow-hidden border-2 transition-all shrink-0 ${selectedImage === idx ? "border-primary shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                >
-                  {isVideo(img) ? (
-                    <div className="relative w-full h-full">
-                      <video src={img} className="w-full h-full object-contain" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
-                              <Video className="w-4 h-4 text-white" />
+            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 custom-scrollbar scrollbar-hide" dir="ltr">
+              {product.images.map((img: string, idx: number) => {
+                const isSelected = selectedImage === idx && !selectedVariant?.image;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSelectedImage(idx);
+                      // Clear variant image override when user manually clicks a gallery thumbnail
+                      if (selectedVariant?.image) {
+                        setSelectedVariant((prev: any) => prev ? { ...prev, image: null } : null);
+                      }
+                    }}
+                    className={cn(
+                      "relative w-20 md:w-24 aspect-square rounded-2xl overflow-hidden border-2 transition-all shrink-0 shadow-sm",
+                      isSelected
+                        ? "border-primary ring-2 ring-primary/20 scale-105 shadow-md"
+                        : "border-transparent opacity-65 hover:opacity-100 hover:scale-102"
+                    )}
+                  >
+                    {isVideo(img) ? (
+                      <div className="relative w-full h-full">
+                        <video src={img} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+                          <div className="w-8 h-8 rounded-full bg-white/40 backdrop-blur-md flex items-center justify-center shadow-md">
+                            <Video className="w-4 h-4 text-white" />
                           </div>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <BespokeImage src={img} alt="" fill className="object-contain" sizes="96px" />
-                  )}
-                </button>
-              ))}
+                    ) : (
+                      <BespokeImage src={img} alt="" fill className="object-cover" sizes="96px" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

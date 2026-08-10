@@ -55,6 +55,9 @@ const emailFooter = `
 `;
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
+  // TEMPORARILY DISABLED: Welcome email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: WELCOME EMAIL ---\nTarget: ${email}\nName: ${name}\n-----------------------------\n`);
     return { success: true };
@@ -98,9 +101,13 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
     console.error('Error sending welcome email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number) => {
+  // TEMPORARILY DISABLED: Order Notification email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ORDER NOTIFICATION ---\nTarget: ${artisanEmail}\nOrder: ${orderId}\nAmount: EGP ${totalAmount}\n----------------------------------\n`);
     return { success: true };
@@ -163,9 +170,13 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     console.error('Error sending order notification email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string) => {
+  // TEMPORARILY DISABLED: Message Notification email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: MESSAGE NOTIFICATION ---\nTarget: ${receiverEmail}\nSender: ${senderName}\n------------------------------------\n`);
     return { success: true };
@@ -196,6 +207,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
     console.error('Error sending message notification email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
@@ -248,6 +260,9 @@ export const sendOrderStatusUpdateEmail = async (
   trackingNumber?: string,
   carrier?: string
 ) => {
+  // TEMPORARILY DISABLED: Order Status Update email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\nCarrier: ${carrier || 'None'}\nTracking: ${trackingNumber || 'None'}\n----------------------------------\n`);
     return { success: true };
@@ -320,6 +335,7 @@ export const sendOrderStatusUpdateEmail = async (
     console.error('Error sending order status update email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
@@ -363,6 +379,9 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
 };
 
 export const sendInquiryNotification = async (name: string, email: string, message: string) => {
+  // TEMPORARILY DISABLED: Inquiry Notification email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log("\n--- 📧 DEV: NEW INQUIRY NOTIFICATION ---\nFrom:", name, "<", email, ">\nMessage:", message, "\n--------------------------------------\n");
     return { success: true };
@@ -399,9 +418,13 @@ export const sendInquiryNotification = async (name: string, email: string, messa
     console.error('Error sending inquiry notification:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendArtisanApprovalEmail = async (email: string, name: string) => {
+  // TEMPORARILY DISABLED: Artisan Approval email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ARTISAN APPROVAL EMAIL ---\nTarget: ${email}\nName: ${name}\n--------------------------------------\n`);
     return { success: true };
@@ -478,9 +501,13 @@ export const sendArtisanApprovalEmail = async (email: string, name: string) => {
     console.error('Error sending artisan approval email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendArtisanOutreachEmail = async (email: string, name: string, product: string, subject: string, lang: 'ar' | 'en' = 'ar') => {
+  // TEMPORARILY DISABLED: Artisan Outreach email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: OUTREACH EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nProduct: ${product}\n------------------------------\n`);
     return { success: true };
@@ -568,9 +595,13 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
     console.error('Error sending outreach email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendCustomEmail = async (to: string, subject: string, body: string, dir: 'ltr' | 'rtl' = 'ltr') => {
+  // TEMPORARILY DISABLED: Custom Email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: CUSTOM EMAIL (${dir.toUpperCase()}) ---\nTarget: ${to}\nSubject: ${subject}\n------------------------------\n`);
     return { success: true };
@@ -603,10 +634,14 @@ export const sendCustomEmail = async (to: string, subject: string, body: string,
     console.error('Error sending custom email:', error);
     return { success: false, error };
   }
+  */
 };
 
 
 export const sendProductStatusUpdateEmail = async (email: string, name: string, productName: string, status: "APPROVED" | "REJECTED" | "PENDING", reason?: string) => {
+  // TEMPORARILY DISABLED: Product Status Update email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PRODUCT STATUS UPDATE ---\nTarget: ${email}\nProduct: ${productName}\nStatus: ${status}\nReason: ${reason || 'N/A'}\n-------------------------------------\n`);
     return { success: true };
@@ -671,9 +706,13 @@ export const sendProductStatusUpdateEmail = async (email: string, name: string, 
     console.error('Error sending product status email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendPayoutRequestEmail = async (artisanName: string, amount: number, method: string, address: string) => {
+  // TEMPORARILY DISABLED: Payout Request email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PAYOUT REQUEST SUBMITTED ---\nArtisan: ${artisanName}\nAmount: ${amount} EGP\nMethod: ${method}\nAddress: ${address}\n---------------------------------------\n`);
     return { success: true };
@@ -711,9 +750,13 @@ export const sendPayoutRequestEmail = async (artisanName: string, amount: number
     console.error('Error sending payout request notification:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string) => {
+  // TEMPORARILY DISABLED: Payout Approved email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PAYOUT APPROVED EMAIL ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\n--------------------------------------\n`);
     return { success: true };
@@ -770,9 +813,13 @@ export const sendPayoutApprovedEmail = async (email: string, name: string, amoun
     console.error('Error sending payout approved email:', error);
     return { success: false, error };
   }
+  */
 };
 
 export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string) => {
+  // TEMPORARILY DISABLED: Payout Declined email
+  return { success: true };
+  /*
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PAYOUT DECLINED EMAIL ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\nReason: ${reason}\n--------------------------------------\n`);
     return { success: true };
@@ -821,4 +868,5 @@ export const sendPayoutDeclinedEmail = async (email: string, name: string, amoun
     console.error('Error sending payout declined email:', error);
     return { success: false, error };
   }
+  */
 };

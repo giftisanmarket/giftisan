@@ -32,10 +32,16 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
 
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.product_title_label}</label>
+        <div className="flex justify-between items-center">
+          <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.product_title_label}</label>
+          <span className={cn("text-[10px] font-mono font-bold", (name || "").length > 90 ? "text-amber-500" : "text-primary/30")}>
+            {(name || "").length}/100
+          </span>
+        </div>
         <input 
           type="text" 
           required
+          maxLength={100}
           value={name}
           onChange={(e) => setTextData((prev: any) => ({...prev, name: e.target.value}))}
           disabled={readOnly}
@@ -49,17 +55,24 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
       <div className="grid md:grid-cols-2 gap-4 md:gap-6">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.price_label}</label>
-          <input 
-            type="number" 
-            required
-            value={price}
-            onChange={(e) => setTextData((prev: any) => ({...prev, price: e.target.value}))}
-            disabled={readOnly}
-            className={cn(
-              "w-full py-3 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm text-sm",
-              readOnly && "bg-cream/20 cursor-default"
-            )}
-          />
+          <div className="relative flex items-center">
+            <input 
+              type="number" 
+              required
+              min="0"
+              step="0.01"
+              value={price}
+              onChange={(e) => setTextData((prev: any) => ({...prev, price: e.target.value}))}
+              disabled={readOnly}
+              className={cn(
+                "w-full py-3 px-5 pe-14 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm text-sm",
+                readOnly && "bg-cream/20 cursor-default"
+              )}
+            />
+            <div className="absolute end-3 px-2 py-0.5 bg-cream/60 border border-primary/10 rounded-lg text-[10px] font-black text-primary/60 pointer-events-none">
+              EGP
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.category_label}</label>
@@ -73,9 +86,15 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.description_label}</label>
+        <div className="flex justify-between items-center">
+          <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.description_label}</label>
+          <span className={cn("text-[10px] font-mono font-bold", (description || "").length > 1400 ? "text-amber-500" : "text-primary/30")}>
+            {(description || "").length}/1500
+          </span>
+        </div>
         <textarea 
           required
+          maxLength={1500}
           value={description}
           onChange={(e) => setTextData((prev: any) => ({...prev, description: e.target.value}))}
           disabled={readOnly}
@@ -139,6 +158,8 @@ const MediaSection = memo(({ images, resolutions, isCompressing, onImageChange, 
 MediaSection.displayName = "MediaSection";
 
 const MediaSlot = memo(({ idx, img, resolution, isCompressing, onImageChange, readOnly, dict }: any) => {
+  const isCover = idx === 0;
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -162,67 +183,86 @@ const MediaSlot = memo(({ idx, img, resolution, isCompressing, onImageChange, re
   };
 
   return (
-    <div className="space-y-3">
-      <div className="relative aspect-square rounded-[1.5rem] bg-cream/30 overflow-hidden border border-primary/10 group shadow-inner">
+    <div className="space-y-2">
+      <div
+        className={cn(
+          "relative aspect-square rounded-2xl overflow-hidden transition-all duration-300 group border",
+          isCover && img
+            ? "border-2 border-accent shadow-md shadow-accent/10"
+            : img
+            ? "border-primary/10 bg-white shadow-sm hover:shadow-md"
+            : "border-dashed border-primary/20 bg-cream/30 hover:border-accent/40 hover:bg-accent/5"
+        )}
+      >
         {img ? (
           img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
             <video 
               src={img} 
-              className="w-full h-full object-cover" 
+              className="w-full h-full object-cover rounded-2xl" 
               muted 
               loop 
               onMouseOver={e => e.currentTarget.play()}
               onMouseOut={e => e.currentTarget.pause()}
             />
           ) : (
-            <Image src={img} alt="Preview" fill className="object-cover" />
+            <Image src={img} alt="Preview" fill className="object-cover rounded-2xl" />
           )
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-             <ImageIcon className="w-8 h-8 text-primary/10" />
-             <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
-          </div>
-        )}
-
-        {resolution && (
-          <div className="absolute top-4 start-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-tighter">
-            {resolution}
-          </div>
-        )}
-
-        {!readOnly && (
-          <label className="absolute inset-0 z-30 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all">
+          <label className="w-full h-full flex flex-col items-center justify-center p-3 cursor-pointer group/upload rounded-2xl">
             <input 
               type="file" 
               accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
               className="hidden"
+              disabled={readOnly}
               onChange={handleFileChange}
             />
-            {isCompressing ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              </div>
-            ) : (
-              <div className="px-4 py-2 bg-white text-primary text-[9px] font-black uppercase rounded-full shadow-lg">
-                {img ? dict.new_product.change : dict.new_product.upload}
-              </div>
-            )}
+            <div className="w-9 h-9 rounded-xl bg-primary/5 group-hover/upload:bg-accent/10 transition-all flex items-center justify-center mb-1">
+              <ImageIcon className="w-4 h-4 text-primary/30 group-hover/upload:text-accent" />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-wider text-primary/40 group-hover/upload:text-accent text-center">
+              {isCover ? dict.new_product.main_cover : `Angle ${idx + 1}`}
+            </span>
           </label>
         )}
+
+        {resolution && (
+          <div className="absolute top-3 start-3 z-20 px-2 py-0.5 bg-black/50 backdrop-blur-md rounded-md text-[8px] font-mono font-bold text-white uppercase">
+            {resolution}
+          </div>
+        )}
+
+        {img && !readOnly && (
+          <div className="absolute inset-0 z-30 bg-primary/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center p-3 gap-2 rounded-2xl overflow-hidden">
+            <label className="flex-1 py-1.5 px-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all flex items-center justify-center gap-1 active:scale-95">
+              <span>{dict.new_product.change}</span>
+              <input 
+                type="file" 
+                accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
+            <button 
+              type="button"
+              onClick={() => onImageChange(idx, null)}
+              className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-xl transition-all active:scale-95 shadow-md"
+              title={dict.new_product.remove}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {isCompressing && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 rounded-2xl">
+            <Loader2 className="w-6 h-6 text-accent animate-spin" />
+          </div>
+        )}
       </div>
-      <div className="flex justify-between items-center px-2">
-         <span className="text-[9px] font-black uppercase tracking-widest text-primary/20">
-           Slot {idx + 1}
-         </span>
-         {img && !readOnly && (
-           <button 
-             type="button"
-             onClick={() => onImageChange(idx, null)}
-             className="text-[9px] font-black uppercase text-red-400 hover:text-red-500"
-           >
-             {dict.new_product.remove}
-           </button>
-         )}
+      <div className="flex justify-between items-center px-1">
+        <span className="text-[9px] font-black uppercase tracking-widest text-primary/30">
+          {isCover ? dict.new_product.main_cover : `Angle ${idx + 1}`}
+        </span>
       </div>
     </div>
   );
@@ -316,6 +356,28 @@ const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, req
 
       <div className="space-y-2">
         <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
+        
+        {/* Preset Badge Chips */}
+        {!readOnly && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Treasure"].map((badgePreset) => (
+              <button
+                key={badgePreset}
+                type="button"
+                onClick={() => setTextData((prev: any) => ({ ...prev, badge: badgePreset }))}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border",
+                  badge === badgePreset
+                    ? "bg-accent text-white border-accent shadow-sm"
+                    : "bg-cream/40 text-primary/70 border-primary/10 hover:border-accent/40"
+                )}
+              >
+                {badgePreset}
+              </button>
+            ))}
+          </div>
+        )}
+
         <input 
           type="text" 
           value={badge}
@@ -439,7 +501,8 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
       <button 
         type="button"
         onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-        className="text-red-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+        className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg active:scale-95"
+        title="Delete variant"
       >
         <Trash2 className="w-5 h-5" />
       </button>

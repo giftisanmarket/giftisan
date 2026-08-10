@@ -246,27 +246,31 @@ export function PaymentTab({
           </div>
 
           {!showWithdrawForm && (
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                setShowWithdrawForm(true);
-                if (balance.withdrawable <= 0) {
-                  toast(isRTL ? "ملاحظة: رصيدك القابل للسحب الحالي 0 ج.م. يمكنك استعراض نموذج السحب الآن، وستتمكن من إرساله فور انتقال الأرباح المعلقة لرصيدك." : "Note: Your withdrawable balance is currently 0 EGP. You can preview the withdrawal request form now, and submit it once your pending escrow clears.", {
-                    icon: <HelpCircle className="w-5 h-5 text-amber-500" />,
-                    style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
-                  });
-                }
-              }}
-              className={cn(
-                "px-8 h-14 font-bold rounded-2xl flex items-center gap-2 shadow-xl transition-all text-sm md:text-base self-stretch md:self-auto justify-center",
-                balance.withdrawable > 0 
-                  ? "bg-accent hover:bg-accent-dark text-white shadow-accent/20" 
-                  : "bg-primary/10 hover:bg-primary/20 text-primary border border-primary/10"
+            <div className="flex flex-col items-center md:items-end gap-1.5 self-stretch md:self-auto">
+              <motion.button
+                whileHover={balance.withdrawable > 0 ? { scale: 1.02 } : undefined}
+                whileTap={balance.withdrawable > 0 ? { scale: 0.98 } : undefined}
+                disabled={balance.withdrawable <= 0}
+                onClick={() => {
+                  if (balance.withdrawable > 0) {
+                    setShowWithdrawForm(true);
+                  }
+                }}
+                className={cn(
+                  "px-8 h-14 font-bold rounded-2xl flex items-center gap-2 transition-all text-sm md:text-base w-full md:w-auto justify-center",
+                  balance.withdrawable > 0 
+                    ? "bg-accent hover:bg-accent-dark text-white shadow-xl shadow-accent/20 cursor-pointer" 
+                    : "bg-charcoal/10 text-charcoal/40 border border-primary/5 cursor-not-allowed shadow-none"
+                )}
+              >
+                <Send className="w-4 h-4 rotate-45" /> {isRTL ? "طلب سحب الأرباح" : "Request Withdrawal"}
+              </motion.button>
+              {balance.withdrawable <= 0 && (
+                <span className="text-[10px] font-medium text-charcoal/40">
+                  {isRTL ? "متاح عند وجود رصيد قابل للسحب" : "Available when withdrawable balance > 0 EGP"}
+                </span>
               )}
-            >
-              <Send className="w-4 h-4 rotate-45" /> {isRTL ? "طلب سحب الأرباح" : "Request Withdrawal"}
-            </motion.button>
+            </div>
           )}
         </div>
 

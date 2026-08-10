@@ -19,7 +19,9 @@ import {
   Loader2,
   ShieldCheck,
   X,
-  Trash2
+  Trash2,
+  Star,
+  Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
@@ -195,10 +197,14 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
         <p className="font-bold text-primary truncate">{v.name}</p>
         <button 
           type="button"
-          onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-          className="text-[10px] font-black uppercase text-red-400 mt-1"
+          onClick={() => {
+            setVariants(variants.filter((_: any, idx: number) => idx !== i));
+            toast.success("Variant removed");
+          }}
+          className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all flex items-center gap-1 active:scale-95 mt-1"
         >
-          {dict.common.remove}
+          <Trash2 className="w-3.5 h-3.5" />
+          <span>{dict.common?.remove || "Delete Variant"}</span>
         </button>
       </div>
     </div>
@@ -329,6 +335,27 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
       </div>
 
       <div className="space-y-6">
+        {/* Quick Option Preset Chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-primary/40 me-1">Quick Presets:</span>
+          {["Color", "Size", "Material", "Finish", "Style"].map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => {
+                if (!options.some((o: any) => o.name.toLowerCase() === preset.toLowerCase())) {
+                  setOptions([...options, { name: preset, values: [] }]);
+                  toast.success(`Added option: ${preset}`);
+                }
+              }}
+              className="px-3 py-1 bg-primary/5 hover:bg-accent/10 hover:text-accent border border-primary/10 rounded-full text-xs font-bold text-primary transition-all active:scale-95 flex items-center gap-1"
+            >
+              <Plus className="w-3 h-3 text-accent" />
+              <span>{preset}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <input 
             type="text" 
@@ -346,8 +373,9 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
           <button 
             type="button"
             onClick={addOption}
-            className="h-14 px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95 whitespace-nowrap"
+            className="h-14 px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95 whitespace-nowrap flex items-center justify-center gap-2"
           >
+            <Plus className="w-4 h-4 text-accent" />
             {dict.edit_product.add_option}
           </button>
         </div>
@@ -357,13 +385,20 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
           {options.map((opt: any, optIdx: number) => (
             <div key={optIdx} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 space-y-4">
               <div className="flex justify-between items-center">
-                <h4 className="text-xs font-black uppercase tracking-widest text-primary">{opt.name}</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Tag className="w-3.5 h-3.5 text-accent" />
+                  <span>{opt.name}</span>
+                </h4>
                 <button 
                   type="button" 
-                  onClick={() => setOptions(options.filter((_: any, i: number) => i !== optIdx))}
-                  className="text-[10px] font-bold text-red-500 uppercase hover:text-red-600"
+                  onClick={() => {
+                    setOptions(options.filter((_: any, i: number) => i !== optIdx));
+                    toast.success(`Removed option: ${opt.name}`);
+                  }}
+                  className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
                 >
-                  {dict.common.remove}
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{dict.common?.remove || "Delete Option"}</span>
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -401,18 +436,36 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
               {dict.edit_product.generate_variants}
             </button>
             {variants.length > 0 && (
-              <button 
-                type="button"
-                onClick={() => {
-                  const newVariants = variants.map((v: any) => ({ ...v, price: basePrice }));
-                  setVariants(newVariants);
-                  toast.success(dict.edit_product.prices_synced);
-                }}
-                className="px-8 py-4 bg-cream text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream/50 transition-all flex items-center justify-center gap-2 text-xs md:text-base"
-              >
-                <DollarSign className="w-5 h-5 text-accent" />
-                {dict.edit_product.apply_base_price}
-              </button>
+              <div className="flex flex-wrap gap-3">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const newVariants = variants.map((v: any) => ({ ...v, price: basePrice }));
+                    setVariants(newVariants);
+                    toast.success(dict.edit_product.prices_synced);
+                  }}
+                  className="px-6 py-4 bg-cream text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream/50 transition-all flex items-center justify-center gap-2 text-xs md:text-sm"
+                >
+                  <DollarSign className="w-4 h-4 text-accent" />
+                  {dict.edit_product.apply_base_price}
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const stockVal = prompt("Enter stock quantity for all variants:", "5");
+                    if (stockVal !== null && !isNaN(Number(stockVal))) {
+                      const newVariants = variants.map((v: any) => ({ ...v, stock: stockVal }));
+                      setVariants(newVariants);
+                      toast.success(`Set stock to ${stockVal} for all variants`);
+                    }
+                  }}
+                  className="px-6 py-4 bg-primary/5 text-primary border border-primary/10 font-bold rounded-2xl hover:bg-primary/10 transition-all flex items-center justify-center gap-2 text-xs md:text-sm"
+                >
+                  <Tag className="w-4 h-4 text-accent" />
+                  Set Bulk Stock
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -480,6 +533,11 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
 
+  // Ensure page scrolls to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, []);
+
   // Detect resolutions for existing media
   useEffect(() => {
     formData.images.forEach((img, idx) => {
@@ -543,6 +601,133 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
       });
     }
   }, [formData.images]);
+
+  // Media Gallery Best Practice Helpers
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  const handleSetAsCover = useCallback((idx: number) => {
+    if (idx === 0 || !formData.images[idx]) return;
+    setFormData((prev: any) => {
+      const newImages = [...prev.images];
+      const temp = newImages[0];
+      newImages[0] = newImages[idx];
+      newImages[idx] = temp;
+      return { ...prev, images: newImages };
+    });
+
+    setResolutions(prev => {
+      const next = { ...prev };
+      const tempRes = next[0];
+      next[0] = next[idx];
+      next[idx] = tempRes;
+      return next;
+    });
+
+    toast.success(dict.new_product?.set_as_cover_success || "Set as main cover photo!");
+  }, [formData.images, dict]);
+
+  const processSingleFile = useCallback((file: File, idx: number) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(dict.home?.upload_rules?.format_error || "Invalid file format");
+      return;
+    }
+
+    if (file.type.startsWith('image/') && file.size > MAX_IMAGE_SIZE) {
+      toast.error(dict.home?.upload_rules?.image_size_error || "Image size exceeds limit");
+      return;
+    }
+    if (file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE) {
+      toast.error(dict.home?.upload_rules?.video_size_error || "Video size exceeds limit");
+      return;
+    }
+
+    setIsCompressing(prev => ({ ...prev, [idx]: true }));
+
+    if (file.type.startsWith('video/')) {
+      const videoElement = document.createElement('video');
+      videoElement.preload = 'metadata';
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        if (videoElement.duration > MAX_VIDEO_DURATION) {
+          toast.error(dict.home?.upload_rules?.video_duration_error || "Video duration exceeds limit");
+          setIsCompressing(prev => ({ ...prev, [idx]: false }));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          handleImageChange(idx, reader.result as string);
+          setResolutions(prev => ({ ...prev, [idx]: `${videoElement.videoWidth}×${videoElement.videoHeight}` }));
+          setIsCompressing(prev => ({ ...prev, [idx]: false }));
+        };
+        reader.readAsDataURL(file);
+      };
+      videoElement.src = URL.createObjectURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new (window as any).Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_RES = 1280;
+          if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+          else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          handleImageChange(idx, canvas.toDataURL(outType, 0.85));
+          setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
+          setIsCompressing(prev => ({ ...prev, [idx]: false }));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [dict, handleImageChange]);
+
+  const handleBatchFilesUpload = useCallback((files: FileList | File[], targetStartIdx?: number) => {
+    const fileArray = Array.from(files);
+    if (!fileArray.length) return;
+
+    let emptyIndices = formData.images
+      .map((img: string, idx: number) => (img ? -1 : idx))
+      .filter((idx: number) => idx !== -1);
+
+    if (targetStartIdx !== undefined && !formData.images[targetStartIdx]) {
+      emptyIndices = [targetStartIdx, ...emptyIndices.filter((i: number) => i !== targetStartIdx)];
+    }
+
+    fileArray.forEach((file, i) => {
+      if (i < emptyIndices.length) {
+        processSingleFile(file, emptyIndices[i]);
+      }
+    });
+  }, [formData.images, processSingleFile]);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleBatchFilesUpload(e.dataTransfer.files);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -621,13 +806,18 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
-                  <Type className="w-3 h-3" /> {dict.new_product.product_title_label}
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                    <Type className="w-3 h-3" /> {dict.new_product.product_title_label}
+                  </label>
+                  <span className={cn("text-[10px] font-mono font-bold", formData.name.length > 90 ? "text-amber-500" : "text-primary/30")}>
+                    {formData.name.length}/100
+                  </span>
+                </div>
                 <input
                   type="text"
                   required
-                  autoFocus
+                  maxLength={100}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={dict.new_product.product_title_placeholder}
@@ -640,14 +830,21 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                     <DollarSign className="w-3 h-3" /> {dict.new_product.price_label}
                   </label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder={dict.new_product.price_placeholder}
-                    className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
-                  />
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder={dict.new_product.price_placeholder}
+                      className="w-full py-4 px-8 pe-16 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                    />
+                    <div className="absolute end-4 px-3 py-1 bg-cream/60 border border-primary/10 rounded-xl text-xs font-black text-primary/60 pointer-events-none">
+                      EGP
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2 relative" ref={dropdownRef}>
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
@@ -697,11 +894,17 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
-                  {dict.new_product.description_label}
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                    {dict.new_product.description_label}
+                  </label>
+                  <span className={cn("text-[10px] font-mono font-bold", formData.description.length > 1400 ? "text-amber-500" : "text-primary/30")}>
+                    {formData.description.length}/1500
+                  </span>
+                </div>
                 <textarea
                   required
+                  maxLength={1500}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder={dict.new_product.description_placeholder}
@@ -711,165 +914,220 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
             </div>
           </section>
 
-          <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8">
-            <div className="flex items-center gap-3 pb-5 md:pb-6 border-b border-primary/5">
-              <ImageIcon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
-              <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">{dict.new_product.media_gallery}</h2>
-            </div>
-            
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <p className="text-xs md:text-sm text-charcoal/40 italic">{dict.new_product.media_desc}</p>
-                <div className="flex items-center gap-2 px-3 py-1 bg-accent/5 border border-accent/10 rounded-full w-fit">
-                  <Sparkles className="w-3 h-3 text-accent" />
-                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-accent">{dict.new_product.optimal_size}</span>
-                </div>
-              </div>
-              
-              {/* No Logos Warning */}
-              <div className="flex items-center gap-3 px-5 py-3 bg-red-50/50 border border-red-100 rounded-2xl">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-red-500" />
+          <section
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              "bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border transition-all duration-300 space-y-6 md:space-y-8 relative overflow-hidden",
+              isDraggingOver ? "border-accent ring-4 ring-accent/10 bg-accent/5" : "border-primary/5"
+            )}
+          >
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 md:pb-6 border-b border-primary/5">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-accent/10 rounded-2xl text-accent">
+                  <ImageIcon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] md:text-xs font-bold text-red-600 uppercase tracking-wide">
-                    {dict.home.upload_rules.no_logos_note}
-                  </p>
-                  <p className="text-[9px] md:text-[10px] text-red-400 font-medium">
-                    {dict.home.upload_rules.clean_media_note}
-                  </p>
+                  <h2 className="text-xl md:text-2xl font-heading font-bold text-primary flex items-center gap-2">
+                    {dict.new_product.media_gallery}
+                    <span className="text-xs font-bold text-primary/40 font-mono">
+                      ({formData.images.filter(Boolean).length}/10)
+                    </span>
+                  </h2>
+                  <p className="text-xs text-charcoal/50 italic mt-0.5">{dict.new_product.media_desc}</p>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-accent/5 border border-accent/10 rounded-full">
+                  <Sparkles className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">
+                    {dict.new_product.optimal_size}
+                  </span>
+                </div>
+
+                {/* Batch Upload Button */}
+                <label className="cursor-pointer px-4 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-light transition-all flex items-center gap-2 shadow-md active:scale-95">
+                  <Upload className="w-4 h-4" />
+                  <span>{dict.new_product?.add_media || "Add Media"}</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleBatchFilesUpload(e.target.files);
+                      }
+                    }}
+                  />
+                </label>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-              {formData.images.map((img, idx) => (
-                <div key={idx} className="space-y-3 md:space-y-4">
-                  <div className="relative aspect-square rounded-[1.5rem] md:rounded-2xl bg-cream/50 flex flex-col items-center justify-center overflow-hidden border border-dashed border-primary/20 group">
-                    {img ? (
-                      img.includes('video') || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
-                        <video src={img} className="w-full h-full object-cover" muted loop onMouseOver={e => e.currentTarget.play()} onMouseOut={e => e.currentTarget.pause()} />
-                      ) : (
-                        <Image src={img} alt="Preview" fill className="object-cover" />
-                      )
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-6 h-6 md:w-8 md:h-8 text-primary/10" />
-                        <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-primary/20">Optimal 1080px</span>
-                      </div>
-                    )}
+            {/* Upload Rules Warning Banner */}
+            <div className="flex items-center gap-3 px-5 py-3.5 bg-amber-50/60 border border-amber-200/60 rounded-2xl">
+              <div className="w-8 h-8 bg-amber-100/80 rounded-xl flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-amber-700" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-amber-900 flex items-center gap-2">
+                  {dict.home?.upload_rules?.no_logos_note || "NO LOGOS OR WATERMARKS ALLOWED"}
+                </p>
+                <p className="text-[10px] text-amber-700 font-medium mt-0.5">
+                  {dict.home?.upload_rules?.clean_media_note || "High quality photos without text, borders or studio logos."}
+                </p>
+              </div>
+            </div>
 
-                    {resolutions[idx] && (
-                      <div className="absolute top-3 start-3 md:top-4 md:start-4 z-20 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md text-[7px] md:text-[8px] font-black text-white uppercase tracking-tighter">
-                        {resolutions[idx]}
-                      </div>
-                    )}
+            {/* Drag & Drop Visual Indicator overlay when dragging files */}
+            {isDraggingOver && (
+              <div className="absolute inset-0 z-50 bg-accent/10 backdrop-blur-md border-2 border-dashed border-accent rounded-[2rem] flex flex-col items-center justify-center text-accent animate-in fade-in zoom-in-95">
+                <Upload className="w-12 h-12 animate-bounce mb-3" />
+                <p className="text-base font-black uppercase tracking-widest">Drop your files here to upload</p>
+                <p className="text-xs font-bold text-accent/70 mt-1">Supports JPG, PNG, WEBP, MP4 (Max 10)</p>
+              </div>
+            )}
 
-                    <label className="absolute inset-0 z-30 cursor-pointer lg:opacity-0 lg:group-hover:opacity-100 opacity-100 flex items-center justify-center bg-primary/20 backdrop-blur-sm transition-all active:scale-[0.98]">
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          
-                          // Rule 1: Format Validation
-                          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
-                          if (!allowedTypes.includes(file.type)) {
-                            toast.error(dict.home.upload_rules.format_error);
-                            return;
-                          }
+            {/* Media Gallery Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+              {formData.images.map((img, idx) => {
+                const isCover = idx === 0;
+                const isFilled = Boolean(img);
 
-                          // Rule 2: Size Validation
-                          if (file.type.startsWith('image/') && file.size > MAX_IMAGE_SIZE) {
-                            toast.error(dict.home.upload_rules.image_size_error);
-                            return;
-                          }
-                          if (file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE) {
-                            toast.error(dict.home.upload_rules.video_size_error);
-                            return;
-                          }
-
-                          setIsCompressing(prev => ({ ...prev, [idx]: true }));
-                          
-                          if (file.type.startsWith('video/')) {
-                            // Rule 3: Video Duration Validation
-                            const videoElement = document.createElement('video');
-                            videoElement.preload = 'metadata';
-                            videoElement.onloadedmetadata = () => {
-                              window.URL.revokeObjectURL(videoElement.src);
-                              if (videoElement.duration > MAX_VIDEO_DURATION) {
-                                toast.error(dict.home.upload_rules.video_duration_error);
-                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
-                                return;
-                              }
-
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                handleImageChange(idx, reader.result as string);
-                                setResolutions(prev => ({ ...prev, [idx]: `${videoElement.videoWidth}×${videoElement.videoHeight}` }));
-                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
-                              };
-                              reader.readAsDataURL(file);
-                            };
-                            videoElement.src = URL.createObjectURL(file);
-                          } else {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const img = new (window as any).Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                const MAX_RES = 1280;
-                                if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
-                                else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
-                                canvas.width = width; canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                                handleImageChange(idx, canvas.toDataURL(outType, 0.85));
-                                setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
-                                setIsCompressing(prev => ({ ...prev, [idx]: false }));
-                              };
-                              img.src = reader.result as string;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      {isCompressing[idx] ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-50">
-                          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-lg">
-                          <div className="flex items-center gap-2">
-                             <Upload className="w-3 h-3 md:w-4 md:h-4" />
-                             {img ? dict.new_product.change : dict.new_product.upload}
-                          </div>
-                        </div>
+                return (
+                  <div key={idx} className="flex flex-col gap-2">
+                    <div
+                      className={cn(
+                        "relative aspect-square rounded-2xl overflow-hidden transition-all duration-300 group border",
+                        isCover && isFilled
+                          ? "border-2 border-accent shadow-lg shadow-accent/10"
+                          : isFilled
+                          ? "border-primary/10 bg-white shadow-sm hover:shadow-md"
+                          : "border-dashed border-primary/20 bg-cream/30 hover:border-accent/40 hover:bg-accent/5"
                       )}
-                    </label>
-                  </div>
-                  <div className="flex flex-col gap-1 px-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/20">
-                        {idx === 0 ? dict.new_product.main_cover : dict.new_product.angle.replace('{count}', (idx + 1).toString())}
-                      </span>
-                      {img && (
-                        <button type="button" onClick={() => handleImageChange(idx, "")} className="text-[8px] md:text-[9px] font-black uppercase text-red-400 hover:text-red-500 active:scale-90">
-                          {dict.new_product.remove}
-                        </button>
+                    >
+                      {/* FILLED CARD CONTENT */}
+                      {isFilled ? (
+                        <>
+                          {img.includes("video") || img.match(/\.(mp4|webm|ogg|mov)/i) ? (
+                            <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                              <video
+                                src={img}
+                                className="w-full h-full object-cover"
+                                muted
+                                loop
+                                onMouseOver={(e) => e.currentTarget.play()}
+                                onMouseOut={(e) => e.currentTarget.pause()}
+                              />
+                              <div className="absolute bottom-2 end-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase flex items-center gap-1">
+                                <Video className="w-2.5 h-2.5" /> Video
+                              </div>
+                            </div>
+                          ) : (
+                            <Image src={img} alt={`Media ${idx + 1}`} fill className="object-cover rounded-2xl transition-transform duration-500 group-hover:scale-105" />
+                          )}
+
+                          {/* COVER BADGE */}
+                          {isCover && (
+                            <div className="absolute top-2.5 start-2.5 z-20 px-2.5 py-1 bg-gradient-to-r from-accent to-amber-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-white" />
+                              <span>{dict.new_product.main_cover}</span>
+                            </div>
+                          )}
+
+                          {/* RESOLUTION BADGE */}
+                          {resolutions[idx] && (
+                            <div className="absolute bottom-2.5 start-2.5 z-20 px-2 py-0.5 bg-black/50 backdrop-blur-md rounded-md text-[8px] font-mono font-bold text-white/90">
+                              {resolutions[idx]}
+                            </div>
+                          )}
+
+                          {/* HOVER GLASSMORPHISM OVERLAY & CONTROLS */}
+                          <div className="absolute inset-0 z-30 bg-primary/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center p-3 gap-2 rounded-2xl overflow-hidden">
+                            {/* Make Main Cover Button (if not already cover) */}
+                            {!isCover && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetAsCover(idx)}
+                                className="w-full py-1.5 px-3 bg-white/20 hover:bg-accent hover:text-white border border-white/30 text-white rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                              >
+                                <Star className="w-3 h-3" />
+                                <span>{dict.new_product?.set_as_cover || "Set Cover"}</span>
+                              </button>
+                            )}
+
+                            <div className="flex items-center gap-2 w-full">
+                              {/* Change File Button */}
+                              <label className="flex-1 py-1.5 px-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all flex items-center justify-center gap-1 active:scale-95">
+                                <Upload className="w-3 h-3" />
+                                <span>{dict.new_product.change}</span>
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) processSingleFile(file, idx);
+                                  }}
+                                />
+                              </label>
+
+                              {/* Remove Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleImageChange(idx, "")}
+                                className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-xl transition-all active:scale-95 shadow-md"
+                                title={dict.new_product.remove}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Compression Spinner */}
+                          {isCompressing[idx] && (
+                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-40 flex items-center justify-center rounded-2xl">
+                              <Loader2 className="w-6 h-6 text-accent animate-spin" />
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        /* EMPTY SLOT CONTENT */
+                        <label className="w-full h-full flex flex-col items-center justify-center p-3 cursor-pointer group/upload rounded-2xl">
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                handleBatchFilesUpload(e.target.files, idx);
+                              }
+                            }}
+                          />
+                          <div className="w-10 h-10 rounded-2xl bg-primary/5 group-hover/upload:bg-accent/10 group-hover/upload:scale-110 transition-all flex items-center justify-center mb-2">
+                            {isCover ? (
+                              <Star className="w-5 h-5 text-accent/60 group-hover/upload:text-accent" />
+                            ) : (
+                              <Plus className="w-5 h-5 text-primary/30 group-hover/upload:text-accent" />
+                            )}
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 group-hover/upload:text-accent text-center">
+                            {isCover
+                              ? dict.new_product.main_cover
+                              : typeof dict.new_product.angle === "string" && dict.new_product.angle.includes("{count}")
+                              ? dict.new_product.angle.replace("{count}", (idx + 1).toString())
+                              : `Angle ${idx + 1}`}
+                          </span>
+                        </label>
                       )}
                     </div>
-                    <p className="text-[7px] text-charcoal/30 font-bold uppercase tracking-tighter">
-                      {idx % 2 === 0 ? dict.home.upload_rules.resolution_note : dict.home.upload_rules.video_note}
-                    </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -888,76 +1146,181 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">{dict.new_product.special_details}</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-              <div className="flex items-start gap-4 p-5 md:p-6 bg-cream/20 rounded-2xl md:rounded-[2rem] border border-primary/5">
-                <div className="pt-1">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-10">
+              {/* Interactive Personalization Toggle Card */}
+              <div
+                onClick={() => setFormData((prev: any) => ({ ...prev, canPersonalize: !prev.canPersonalize }))}
+                className={cn(
+                  "flex items-start gap-4 p-6 rounded-2xl md:rounded-[2rem] border transition-all cursor-pointer select-none",
+                  formData.canPersonalize
+                    ? "bg-accent/5 border-accent/40 shadow-md ring-2 ring-accent/10"
+                    : "bg-cream/20 border-primary/5 hover:border-primary/20"
+                )}
+              >
+                <div className="pt-0.5">
                   <input
                     type="checkbox"
                     id="personalize"
                     checked={formData.canPersonalize}
                     onChange={(e) => setFormData({ ...formData, canPersonalize: e.target.checked })}
-                    className="w-4 h-4 md:w-5 md:h-5 rounded border-primary/20 text-accent focus:ring-accent"
+                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer"
                   />
                 </div>
-                <label htmlFor="personalize" className="cursor-pointer">
-                  <p className="font-bold text-primary text-sm md:text-base">{dict.new_product.allow_personalization}</p>
-                  <p className="text-[10px] md:text-xs text-charcoal/50">{dict.new_product.personalization_desc}</p>
-                </label>
+                <div className="flex-1">
+                  <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
+                    <span>{dict.new_product.allow_personalization}</span>
+                    {formData.canPersonalize && (
+                      <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">Active</span>
+                    )}
+                  </p>
+                  <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">{dict.new_product.personalization_desc}</p>
+                </div>
               </div>
 
               <AnimatePresence>
                 {formData.canPersonalize && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-2 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-3 overflow-hidden">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
                     <textarea value={formData.personalizationPrompt} onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })} placeholder={dict.new_product.personalization_prompt_placeholder} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
+                    
+                    {/* Live Buyer Preview Pill */}
+                    <div className="p-3 bg-cream/40 border border-primary/10 rounded-xl text-xs flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-accent shrink-0" />
+                      <span className="font-bold text-primary/60">Live Buyer Preview:</span>
+                      <span className="text-primary font-medium italic">"{formData.personalizationPrompt || "Enter custom name or message..."}"</span>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="flex items-start gap-4 p-5 md:p-6 bg-cream/20 rounded-2xl md:rounded-[2rem] border border-primary/5">
-                <div className="pt-1">
+              {/* Interactive Client Image Toggle Card */}
+              <div
+                onClick={() => setFormData((prev: any) => ({ ...prev, requiresClientImage: !prev.requiresClientImage }))}
+                className={cn(
+                  "flex items-start gap-4 p-6 rounded-2xl md:rounded-[2rem] border transition-all cursor-pointer select-none",
+                  formData.requiresClientImage
+                    ? "bg-accent/5 border-accent/40 shadow-md ring-2 ring-accent/10"
+                    : "bg-cream/20 border-primary/5 hover:border-primary/20"
+                )}
+              >
+                <div className="pt-0.5">
                   <input
                     type="checkbox"
                     id="requireClientImage"
                     checked={formData.requiresClientImage}
                     onChange={(e) => setFormData({ ...formData, requiresClientImage: e.target.checked })}
-                    className="w-4 h-4 md:w-5 md:h-5 rounded border-primary/20 text-accent focus:ring-accent"
+                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer"
                   />
                 </div>
-                <label htmlFor="requireClientImage" className="cursor-pointer">
-                  <p className="font-bold text-primary text-sm md:text-base">{dict.new_product.require_client_image || "Require Customer Image Upload"}</p>
-                  <p className="text-[10px] md:text-xs text-charcoal/50">{dict.new_product.client_image_desc || "Require buyers to upload an image/photo before purchasing."}</p>
-                </label>
+                <div className="flex-1">
+                  <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
+                    <span>{dict.new_product.require_client_image || "Require Customer Image Upload"}</span>
+                    {formData.requiresClientImage && (
+                      <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">Active</span>
+                    )}
+                  </p>
+                  <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">{dict.new_product.client_image_desc || "Require buyers to upload an image/photo before purchasing."}</p>
+                </div>
               </div>
 
               <AnimatePresence>
                 {formData.requiresClientImage && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-2 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-3 overflow-hidden">
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.client_image_prompt_label || "Image Upload Instructions"}</label>
                     <textarea value={formData.clientImagePrompt} onChange={(e) => setFormData({ ...formData, clientImagePrompt: e.target.value })} placeholder={dict.new_product.client_image_prompt_placeholder || "What photo should the buyer upload?"} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="space-y-2">
+              {/* Promo Badge Input with Presets */}
+              <div className="space-y-3 col-span-full md:col-span-1">
                 <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
-                <input type="text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder={dict.new_product.promo_badge_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm" />
+                
+                {/* Preset Badge Chips */}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Treasure"].map((badgePreset) => (
+                    <button
+                      key={badgePreset}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, badge: badgePreset })}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border",
+                        formData.badge === badgePreset
+                          ? "bg-accent text-white border-accent shadow-sm"
+                          : "bg-cream/40 text-primary/70 border-primary/10 hover:border-accent/40"
+                      )}
+                    >
+                      {badgePreset}
+                    </button>
+                  ))}
+                </div>
+
+                <input type="text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder={dict.new_product.promo_badge_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm" />
               </div>
 
-              <div className="space-y-2">
+              {/* Initial Stock Input (for non-variant products) */}
+              <div className="space-y-3 col-span-full md:col-span-1">
                 <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.initial_stock_label}</label>
-                <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm" />
+                <input type="number" min="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm" />
               </div>
             </div>
           </section>
 
-          <div className="flex justify-end pt-8">
-            <button type="submit" disabled={isLoading} className="py-5 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200">
-              {isLoading ? dict.new_product.listing_treasure : dict.new_product.list_product_btn}
-              <Sparkles className="w-5 h-5" />
+          {/* Form Bottom Submit Button */}
+          <div className="flex justify-end pt-8 pb-20">
+            <button type="submit" disabled={isLoading} className="py-5 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200 text-base">
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin text-accent" />
+                  <span>{dict.new_product.listing_treasure}</span>
+                </>
+              ) : (
+                <>
+                  <span>{dict.new_product.list_product_btn}</span>
+                  <Sparkles className="w-5 h-5 text-accent" />
+                </>
+              )}
             </button>
           </div>
         </form>
+
+        {/* Floating Sticky Action Bar */}
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-xl border-t border-primary/10 py-3.5 px-4 md:px-8 shadow-2xl transition-all">
+          <div className="container mx-auto max-w-4xl flex items-center justify-between gap-4">
+            <div className="min-w-0 hidden sm:block">
+              <p className="text-xs font-bold text-primary truncate max-w-xs">
+                {formData.name || "Untitled Treasure"}
+              </p>
+              <p className="text-[10px] font-medium text-primary/40 font-mono">
+                {formData.price ? `${formData.price} EGP` : "Set Price"} • {formData.images.filter(Boolean).length}/10 Photos
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 ms-auto">
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="px-4 py-2.5 text-xs font-bold text-primary/60 hover:text-primary transition-colors hidden md:block"
+              >
+                ↑ Top
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="py-3 px-8 bg-primary text-white font-bold text-xs md:text-sm rounded-xl hover:bg-primary-light transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                ) : (
+                  <Sparkles className="w-4 h-4 text-accent" />
+                )}
+                <span>{dict.new_product.list_product_btn}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );

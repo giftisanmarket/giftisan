@@ -28,7 +28,11 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 
 // Standard singleton: reuse global instance in dev to avoid hot-reload leaks,
-// and reuse it in production to avoid creating a new client per request invocation.
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+// but re-instantiate if schema has been regenerated with new models.
+const existingPrisma = globalForPrisma.prisma;
+export const prisma = (existingPrisma && (existingPrisma as any).artisanBioLink)
+  ? existingPrisma
+  : new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+

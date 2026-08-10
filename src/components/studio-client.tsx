@@ -43,7 +43,8 @@ import {
   User,
   Calendar,
   Printer,
-  MapPin
+  MapPin,
+  Link2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,8 @@ import { GrowthTab } from "./studio/growth-tab";
 import { PaymentTab } from "./studio/payment-tab";
 import { ReviewsTab } from "./studio/reviews-tab";
 import { SettingsTab } from "./studio/settings-tab";
+import { BioLinkTab } from "./studio/bio-link-tab";
+
 
 interface StudioClientProps {
   artisan: any;
@@ -79,7 +82,7 @@ interface StudioClientProps {
 export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview = false, dict, lang }: StudioClientProps) {
   const router = useRouter();
   const [showMask, setShowMask] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "reviews" | "settings" | "bio-link">("overview");
   const contentRef = useRef<HTMLDivElement>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
@@ -552,12 +555,13 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     { id: "growth", label: dict.studio.growth, icon: TrendingUp },
                     { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
                     { id: "reviews", label: dict.studio.community, icon: Star },
+                    { id: "bio-link", label: lang === "ar" ? "رابط البايو & QR" : "Bio Link & QR", icon: Link2 },
                     { id: "settings", label: dict.studio.studio_settings, icon: Settings },
-                  ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings"; label: string; icon: any; badge?: number }[]
+                  ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings" | "bio-link"; label: string; icon: any; badge?: number }[]
                 ).map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
                       "px-4 md:px-6 h-10 md:h-11 rounded-full font-bold transition-all flex items-center gap-2 relative group shrink-0 text-xs md:text-sm",
                       activeTab === tab.id ? "text-white" : "text-primary/60 hover:text-primary bg-white/50 backdrop-blur-sm border border-primary/5"
@@ -657,7 +661,9 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                 )}
 
                 {activeTab === "reviews" && <ReviewsTab reviews={reviews} dict={dict} />}
+                {activeTab === "bio-link" && <BioLinkTab artisan={artisan} lang={lang} />}
                 {activeTab === "settings" && <SettingsTab artisan={artisan} dict={dict} lang={lang} />}
+
               </motion.div>
             </AnimatePresence>
           </div>

@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 
 export default async function CategoriesPage({ params }: { params: Promise<{ lang: string }> }) {
@@ -80,19 +81,32 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
     categoryCountsMap.set(name.toLowerCase(), 0);
   });
 
+  // Category aliases for custom DB values
+  const categoryAliasMap: Record<string, string> = {
+    "home decor": "Woodwork",
+    "home-decor": "Woodwork",
+    "accessories": "Fashion",
+    "leatherwork": "Fashion",
+    "culinary": "Culinary Arts",
+    "beauty": "Beauty & Apothecary"
+  };
+
   // Accumulate counts from the database grouping, translating various database formats back to official names
   categoryCountsRaw.forEach(item => {
     const rawCategory = item.category;
     if (!rawCategory) return;
     
-    const officialName = categoryNames.find(name => {
+    const normalizedRaw = rawCategory.toLowerCase().trim();
+    const aliasedName = categoryAliasMap[normalizedRaw];
+
+    const officialName = aliasedName || categoryNames.find(name => {
       const slug1 = name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
       const slug2 = name.toLowerCase().replace(/\s+/g, "-");
       const slug3 = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-      return slug1 === rawCategory.toLowerCase() || 
-             slug2 === rawCategory.toLowerCase() || 
-             slug3 === rawCategory.toLowerCase() || 
-             name.toLowerCase() === rawCategory.toLowerCase();
+      return slug1 === normalizedRaw || 
+             slug2 === normalizedRaw || 
+             slug3 === normalizedRaw || 
+             name.toLowerCase() === normalizedRaw;
     }) || rawCategory;
 
     const currentCount = categoryCountsMap.get(officialName.toLowerCase()) || 0;

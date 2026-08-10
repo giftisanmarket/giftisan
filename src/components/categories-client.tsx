@@ -12,18 +12,65 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 const categoryImageMap: Record<string, string> = {
-  "Gift Boxes & Sets": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800&auto=format&fit=crop",
-  "Jewelry": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800&auto=format&fit=crop",
-  "Ceramics": "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?q=80&w=800&auto=format&fit=crop",
-  "Woodwork": "https://images.unsplash.com/photo-1546484475-7f7bd55792da?q=80&w=800&auto=format&fit=crop",
-  "Textiles": "https://images.unsplash.com/photo-1606744888344-49423b812d02?q=80&w=800&auto=format&fit=crop",
-  "Fashion": "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
-  "Art & Collectibles": "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop",
-  "Personalized": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800&auto=format&fit=crop",
-  "Wedding": "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
-  "Vintage": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=800&auto=format&fit=crop",
-  "Stationery": "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?q=80&w=800&auto=format&fit=crop",
+  // English Names & Slugs
+  "gift-boxes-sets": "/images/categories/gift-boxes-sets.png",
+  "gift boxes & sets": "/images/categories/gift-boxes-sets.png",
+  "jewelry": "/images/categories/jewelry.png",
+  "ceramics": "/images/categories/ceramics.png",
+  "woodwork": "/images/categories/woodwork.png",
+  "textiles": "/images/categories/textiles.png",
+  "fashion": "/images/categories/fashion.png",
+  "art-collectibles": "/images/categories/art-collectibles.png",
+  "art & collectibles": "/images/categories/art-collectibles.png",
+  "personalized": "/images/categories/personalized.png",
+  "wedding": "/images/categories/wedding.png",
+  "vintage": "/images/categories/vintage.png",
+  "stationery": "/images/categories/stationery.png",
+  "metalwork": "/images/categories/metalwork.png",
+  "beauty-apothecary": "/images/categories/beauty-apothecary.png",
+  "beauty & apothecary": "/images/categories/beauty-apothecary.png",
+  "leatherwork": "/images/categories/fashion.png",
+  "culinary-arts": "/images/categories/gift-boxes-sets.png",
+  "culinary arts": "/images/categories/gift-boxes-sets.png",
+  "basketry": "/images/categories/textiles.png",
+  "glasswork": "/images/categories/ceramics.png",
+
+  // Arabic Names
+  "مجموعات الهدايا": "/images/categories/gift-boxes-sets.png",
+  "صناديق وهدايا": "/images/categories/gift-boxes-sets.png",
+  "مجوهرات": "/images/categories/jewelry.png",
+  "خزف وفخار": "/images/categories/ceramics.png",
+  "خزف": "/images/categories/ceramics.png",
+  "أعمال خشبية": "/images/categories/woodwork.png",
+  "خشبيات": "/images/categories/woodwork.png",
+  "منسوجات": "/images/categories/textiles.png",
+  "أزياء وموضة": "/images/categories/fashion.png",
+  "أزياء": "/images/categories/fashion.png",
+  "فنون ومقتنيات": "/images/categories/art-collectibles.png",
+  "منتجات حسب الطلب": "/images/categories/personalized.png",
+  "هدايا الزفاف": "/images/categories/wedding.png",
+  "عتيق": "/images/categories/vintage.png",
+  "قرطاسية": "/images/categories/stationery.png",
+  "أعمال معادن": "/images/categories/metalwork.png",
+  "جمال وعناية": "/images/categories/beauty-apothecary.png",
+  "منتجات جلدية": "/images/categories/fashion.png",
+  "فنون الطهي": "/images/categories/gift-boxes-sets.png",
+  "الخوص والسلال": "/images/categories/textiles.png",
+  "أعمال الزجاج": "/images/categories/ceramics.png",
 };
+
+function getCategoryCoverImage(name: string, slug: string): string {
+  const cleanName = (name || "").toLowerCase().trim();
+  const cleanSlug = (slug || "").toLowerCase().trim();
+
+  return (
+    categoryImageMap[name] ||
+    categoryImageMap[cleanName] ||
+    categoryImageMap[slug] ||
+    categoryImageMap[cleanSlug] ||
+    "/images/categories/gift-boxes-sets.png"
+  );
+}
 
 const descMap: Record<string, string> = {
   "Gift Boxes & Sets": "Curated collections and beautifully packaged gift boxes ready to surprise.",
@@ -76,16 +123,20 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
     "Stationery"
   ];
 
-  // Smart sorted category list
+  // Smart sorted category list driven strictly by database product count
   const sortedCategories = useMemo(() => {
     return [...categories].sort((a, b) => {
+      // First priority: highest DB item count first
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      // Tie-breaker: priority order
       const idxA = priorityOrder.indexOf(a.name);
       const idxB = priorityOrder.indexOf(b.name);
-
       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
       if (idxA !== -1) return -1;
       if (idxB !== -1) return 1;
-      return b.count - a.count;
+      return 0;
     });
   }, [categories]);
 
@@ -95,8 +146,10 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
     return sortedCategories.filter(cat => categoryGroupMap[cat.name] === activeFilter);
   }, [sortedCategories, activeFilter]);
 
+  // Spotlight cards only feature top active categories with actual items
   const spotlightCategories = useMemo(() => {
-    return sortedCategories.slice(0, 2);
+    const activeWithProducts = sortedCategories.filter(c => c.count > 0);
+    return activeWithProducts.slice(0, 2);
   }, [sortedCategories]);
 
   return (
@@ -113,7 +166,7 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
           >
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-accent/10 rounded-full text-accent text-xs font-bold mb-4">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Curated Artisan Collections</span>
+              <span>{dict.common.curated_collections || "Curated Artisan Collections"}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold text-primary mb-4 leading-tight">
@@ -127,11 +180,11 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
           {/* Quick Category Group Filters */}
           <div className="flex flex-wrap gap-2 mb-10 pb-2 border-b border-primary/5">
             {[
-              { id: "all", label: "All Collections" },
-              { id: "gifting", label: "Gift Sets & Personalized" },
-              { id: "home", label: "Home & Craft Decor" },
-              { id: "wearables", label: "Jewelry & Wearables" },
-              { id: "art", label: "Fine Art & Collectibles" },
+              { id: "all", label: dict.common.all_collections || "All Collections" },
+              { id: "gifting", label: dict.common.filter_gifting || "Gift Sets & Personalized" },
+              { id: "home", label: dict.common.filter_home || "Home & Craft Decor" },
+              { id: "wearables", label: dict.common.filter_wearables || "Jewelry & Wearables" },
+              { id: "art", label: dict.common.filter_art || "Fine Art & Collectibles" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -153,8 +206,8 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
             <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-12">
               {spotlightCategories.map((cat, idx) => {
                 const slug = cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-                const imageUrl = categoryImageMap[cat.name] || categoryImageMap["Gift Boxes & Sets"];
-                const desc = descMap[cat.name] || "Discover unique handcrafted items.";
+                const imageUrl = getCategoryCoverImage(cat.name, slug);
+                const desc = dict.common[`${slug.replace(/-/g, '_')}_desc`] || dict.common[`${slug}_desc`] || dict.common.gift_sets_desc || descMap[cat.name] || "Discover unique handcrafted items.";
 
                 return (
                   <motion.div
@@ -177,7 +230,7 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent" />
 
                       <div className="absolute top-6 start-6 z-10 px-3.5 py-1 bg-white/90 backdrop-blur-md rounded-full text-xs font-black text-primary uppercase tracking-wider shadow-sm">
-                        {cat.count} {cat.count === 1 ? "Treasure" : "Treasures"}
+                        {cat.count} {cat.count === 1 ? (dict.common.treasure_single || "Treasure") : (dict.common.treasure_plural || "Treasures")}
                       </div>
 
                       <div className="absolute bottom-8 inset-x-8 z-10 text-white space-y-2">
@@ -186,11 +239,11 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
                             {dict.common.categories_list?.[slug] || cat.name}
                           </h3>
                           <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-accent group-hover:scale-110 transition-all">
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-5 h-5 rtl:rotate-180" />
                           </div>
                         </div>
                         <p className="text-white/80 text-xs md:text-sm line-clamp-2 font-medium">
-                          {dict.common[`${slug.replace(/-/g, '_')}_desc`] || desc}
+                          {desc}
                         </p>
                       </div>
                     </Link>
@@ -204,8 +257,8 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredCategories.map((cat, idx) => {
               const slug = cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-              const imageUrl = categoryImageMap[cat.name] || categoryImageMap["Gift Boxes & Sets"];
-              const desc = descMap[cat.name] || "Discover unique handcrafted items.";
+              const imageUrl = getCategoryCoverImage(cat.name, slug);
+              const desc = dict.common[`${slug.replace(/-/g, '_')}_desc`] || dict.common[`${slug}_desc`] || dict.common.gift_sets_desc || descMap[cat.name] || "Discover unique handcrafted items.";
 
               return (
                 <motion.div
@@ -230,7 +283,7 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
                       <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-500" />
                       
                       <div className="absolute top-4 start-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-primary uppercase tracking-widest shadow-sm">
-                        {cat.count} {cat.count === 1 ? "Item" : "Items"}
+                        {cat.count} {cat.count === 1 ? (dict.common.treasure_single || "Treasure") : (dict.common.treasure_plural || "Treasures")}
                       </div>
                     </div>
 
@@ -241,16 +294,16 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
                           {dict.common.categories_list?.[slug] || cat.name}
                         </h3>
                         <p className="text-charcoal/60 text-xs md:text-sm leading-relaxed font-medium mb-6 line-clamp-2">
-                          {dict.common[`${slug.replace(/-/g, '_')}_desc`] || desc}
+                          {desc}
                         </p>
                       </div>
 
                       <div className="pt-4 border-t border-primary/5 flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          Explore Collection <ArrowRight className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent flex items-center gap-1 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
+                          {dict.common.explore_collection || "Explore Collection"} <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
                         </span>
                         <div className="w-9 h-9 rounded-full bg-cream border border-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
-                          <ArrowRight className="w-4 h-4" />
+                          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                         </div>
                       </div>
                     </div>

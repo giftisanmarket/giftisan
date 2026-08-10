@@ -296,7 +296,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       e.stopPropagation();
                       setSelectedImage(prev => (prev === 0 ? product.images.length - 1 : prev - 1));
                     }}
-                    className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
+                    className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg hidden md:flex items-center justify-center text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
                   >
                     <ArrowRight className="w-6 h-6 rtl:rotate-0 ltr:rotate-180" />
                   </button>
@@ -305,7 +305,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       e.stopPropagation();
                       setSelectedImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
                     }}
-                    className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
+                    className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 backdrop-blur shadow-lg hidden md:flex items-center justify-center text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 transition-all hover:bg-white z-10"
                   >
                     <ArrowRight className="w-6 h-6 rtl:rotate-180 ltr:rotate-0" />
                   </button>
@@ -1057,7 +1057,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         e.stopPropagation();
                         setLightboxIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
                       }}
-                      className="absolute start-2 sm:start-4 md:start-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-2xl transition-all z-50"
+                      className="absolute start-2 sm:start-4 md:start-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md hidden md:flex items-center justify-center text-white shadow-2xl transition-all z-50"
                       aria-label="Previous image"
                     >
                       <ArrowRight className={cn("w-7 h-7 md:w-8 md:h-8", lang === 'ar' ? "" : "rotate-180")} />
@@ -1067,7 +1067,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         e.stopPropagation();
                         setLightboxIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
                       }}
-                      className="absolute end-2 sm:end-4 md:end-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-2xl transition-all z-50"
+                      className="absolute end-2 sm:end-4 md:end-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 hover:bg-white/40 border border-white/20 backdrop-blur-md hidden md:flex items-center justify-center text-white shadow-2xl transition-all z-50"
                       aria-label="Next image"
                     >
                       <ArrowRight className={cn("w-7 h-7 md:w-8 md:h-8", lang === 'ar' ? "rotate-180" : "")} />

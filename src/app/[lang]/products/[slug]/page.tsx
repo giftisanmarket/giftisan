@@ -15,12 +15,23 @@ import { getDictionary } from "@/app/[lang]/dictionaries";
 import { cookies } from "next/headers";
 
 // Cached product fetch to deduplicate queries between metadata generation and page rendering
-const getProduct = cache(async (slug: string) => {
+const getProduct = cache(async (rawSlug: string) => {
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug).trim();
+  } catch (e) {
+    console.error("Failed to decode slug:", e);
+  }
+
+  // 1. Try exact match first for UTF-8 / Arabic support
   let product = await prisma.product.findFirst({
     where: {
       OR: [
-        { id: { equals: slug, mode: "insensitive" } },
-        { slug: { equals: slug, mode: "insensitive" } }
+        { id: decodedSlug },
+        { slug: decodedSlug },
+        { id: rawSlug },
+        { slug: rawSlug },
+        { slug: { equals: decodedSlug, mode: "insensitive" } }
       ]
     },
     include: {
@@ -38,11 +49,16 @@ const getProduct = cache(async (slug: string) => {
     }
   });
 
-  // RESILIENCE FALLBACK: If not found, try a hyphenated version
+  // 2. RESILIENCE FALLBACK: Try hyphenated and space-replaced versions
   if (!product) {
-    const cleanSlug = slug.replace(/%20/g, '-').replace(/\s+/g, '-');
+    const cleanSlug = decodedSlug.replace(/%20/g, '-').replace(/\s+/g, '-');
     product = await prisma.product.findFirst({
-      where: { slug: { equals: cleanSlug, mode: "insensitive" } },
+      where: {
+        OR: [
+          { slug: cleanSlug },
+          { slug: { equals: cleanSlug, mode: "insensitive" } }
+        ]
+      },
       include: {
         artisan: { include: { user: true } },
         variants: true,

@@ -5,11 +5,22 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 // Cached fetch to deduplicate queries between generateMetadata and page rendering
-const getArtisanBySlug = cache(async (slug: string) => {
+const getArtisanBySlug = cache(async (rawSlug: string) => {
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug).trim();
+  } catch (e) {
+    console.error("Failed to decode artisan slug:", e);
+  }
+
   // Try to find by the new slug field first
   const artisanBySlug = await prisma.artisanProfile.findFirst({
     where: { 
-      slug: { equals: slug, mode: "insensitive" },
+      OR: [
+        { slug: decodedSlug },
+        { slug: rawSlug },
+        { slug: { equals: decodedSlug, mode: "insensitive" } }
+      ],
       status: { in: ["APPROVED", "PENDING"] }
     },
     include: {
@@ -73,7 +84,7 @@ const getArtisanBySlug = cache(async (slug: string) => {
     }
   });
 
-  const matchingUser = users.find(u => u.name?.toLowerCase().replace(/ /g, "-") === slug);
+  const matchingUser = users.find(u => u.name?.toLowerCase().replace(/ /g, "-") === decodedSlug);
   return matchingUser ? { 
     artisanProfile: matchingUser.artisanProfile, 
     name: matchingUser.artisanProfile?.studioName || matchingUser.name 

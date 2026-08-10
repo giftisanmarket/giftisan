@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 function slugify(text: string) {
   return text
@@ -8,10 +6,33 @@ function slugify(text: string) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
+    .replace(/[^\w\u0600-\u06FF-]+/g, '')
     .replace(/--+/g, '-')
     .replace(/^-+/, '')
     .replace(/-+$/, '');
+}
+
+async function generateUniqueProductSlug(name: string, productId: string): Promise<string> {
+  const baseSlug = slugify(name);
+  if (!baseSlug) return `product-${productId.slice(-4)}`;
+
+  let candidateSlug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await prisma.product.findFirst({
+      where: {
+        slug: { equals: candidateSlug, mode: "insensitive" },
+        id: { not: productId }
+      },
+      select: { id: true }
+    });
+
+    if (!existing) return candidateSlug;
+
+    counter++;
+    candidateSlug = `${baseSlug}-${counter}`;
+  }
 }
 
 async function main() {
@@ -19,7 +40,7 @@ async function main() {
   
   const products = await prisma.product.findMany();
   for (const product of products) {
-    const slug = `${slugify(product.name)}-${product.id.slice(-4)}`;
+    const slug = await generateUniqueProductSlug(product.name, product.id);
     await prisma.product.update({
       where: { id: product.id },
       data: { slug }
@@ -32,7 +53,21 @@ async function main() {
   });
   for (const artisan of artisans) {
     const nameToUse = artisan.studioName || artisan.user.name || "artisan";
-    const slug = `${slugify(nameToUse)}-${artisan.userId.slice(-4)}`;
+    const baseSlug = slugify(nameToUse);
+    let slug = baseSlug;
+    
+    // Check collision for artisan
+    const existing = await prisma.artisanProfile.findFirst({
+      where: {
+        slug: { equals: baseSlug, mode: "insensitive" },
+        id: { not: artisan.id }
+      }
+    });
+
+    if (existing) {
+      slug = `${baseSlug}-${artisan.userId.slice(-4)}`;
+    }
+
     await prisma.artisanProfile.update({
       where: { id: artisan.id },
       data: { slug }

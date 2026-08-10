@@ -3,6 +3,7 @@ import { slugify } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { generateUniqueProductSlug } from "@/lib/actions";
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,9 +28,10 @@ export async function GET(request: NextRequest) {
     if (isProd && !isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     const products = await prisma.product.findMany();
     for (const product of products) {
-      const slug = `${slugify(product.name)}-${product.id.slice(-4)}`;
+      const slug = await generateUniqueProductSlug(product.name, product.id);
       await prisma.product.update({
         where: { id: product.id },
         data: { slug }

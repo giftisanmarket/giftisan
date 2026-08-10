@@ -7,8 +7,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch real data from Prisma
   const [products, artisans] = await Promise.all([
-    prisma.product.findMany({ select: { slug: true, updatedAt: true } }),
-    prisma.artisanProfile.findMany({ select: { slug: true, updatedAt: true }, where: { status: "APPROVED" } }),
+    prisma.product.findMany({ 
+      where: { status: "APPROVED", artisan: { status: "APPROVED" } },
+      select: { id: true, slug: true, updatedAt: true } 
+    }),
+    prisma.artisanProfile.findMany({ 
+      where: { status: "APPROVED" },
+      select: { id: true, slug: true, updatedAt: true } 
+    }),
   ]);
 
   const locales = ["en", "ar"];
@@ -34,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Product URLs
   const productUrls = products.flatMap((p) => 
     locales.map(lang => ({
-      url: `${baseUrl}/${lang}/products/${p.slug}`,
+      url: `${baseUrl}/${lang}/products/${p.slug || p.id}`,
       lastModified: p.updatedAt,
       changeFrequency: "daily" as const,
       priority: 0.8,
@@ -44,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Artisan URLs
   const artisanUrls = artisans.flatMap((a) => 
     locales.map(lang => ({
-      url: `${baseUrl}/${lang}/artisans/${a.slug}`,
+      url: `${baseUrl}/${lang}/artisans/${a.slug || a.id}`,
       lastModified: a.updatedAt,
       changeFrequency: "daily" as const,
       priority: 0.7,

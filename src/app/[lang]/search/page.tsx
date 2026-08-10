@@ -28,6 +28,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         "ar-EG": `${SITE_URL}/ar/search${q ? `?q=${encodeURIComponent(q)}` : ''}`,
       }
     },
+    robots: {
+      index: false,
+      follow: true,
+    },
     openGraph: {
       title: q ? `${dict.home.search_results_for} "${q}"` : dict.common.explore,
       description: dict.home.treasures_desc,

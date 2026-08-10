@@ -1471,6 +1471,31 @@ export async function updateArtisanProfile(userId: string, data: any) {
   }
 }
 
+export async function generateUniqueProductSlug(name: string, productId?: string): Promise<string> {
+  const baseSlug = slugify(name);
+  if (!baseSlug) return `product-${Math.random().toString(36).substring(2, 7)}`;
+
+  let candidateSlug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await prisma.product.findFirst({
+      where: {
+        slug: { equals: candidateSlug, mode: "insensitive" },
+        ...(productId ? { id: { not: productId } } : {})
+      },
+      select: { id: true }
+    });
+
+    if (!existing) {
+      return candidateSlug;
+    }
+
+    counter++;
+    candidateSlug = `${baseSlug}-${counter}`;
+  }
+}
+
 export async function createProduct(artisanId: string, formData: FormData) {
   try {
     const session = await auth();
@@ -1505,7 +1530,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
       if (img) images.push(img as string);
     }
 
-    const slug = `${slugify(data.name)}-${Math.random().toString(36).substring(2, 7)}`;
+    const slug = await generateUniqueProductSlug(data.name);
     const uploadedImages = await Promise.all(
       images.map((img: string) => processImage(img))
     );

@@ -12,12 +12,39 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
   
+  const title = (dict.common.categories_list as any)?.[slug] || categoryName;
+  const description = `${dict.home.category_desc_prefix || "Discover unique handcrafted" } ${title} ${dict.home.category_desc_suffix || "from authentic Egyptian artisans."}`;
+  const ogImage = `${SITE_URL}/images/categories/${slug}.png`;
+
   return {
-    title: (dict.common.categories_list as any)?.[slug] || categoryName,
-    description: `${dict.home.category_desc_prefix}${(dict.common.categories_list as any)?.[slug] || categoryName} ${dict.home.category_desc_suffix}`,
+    title,
+    description,
+    keywords: [title, categoryName, lang === 'ar' ? "هدايا مصرية" : "Egyptian Handmade", "Giftisan"],
     alternates: {
       canonical: `${SITE_URL}/${lang}/category/${slug}`,
+      languages: {
+        "en-US": `${SITE_URL}/en/category/${slug}`,
+        "ar-EG": `${SITE_URL}/ar/category/${slug}`,
+        "x-default": `${SITE_URL}/en/category/${slug}`,
+      }
     },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/${lang}/category/${slug}`,
+      images: [{
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: title
+      }]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage]
+    }
   };
 }
 

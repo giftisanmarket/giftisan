@@ -66,7 +66,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           }
         }
       },
-      take: 6,
+      take: 12,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
@@ -170,7 +170,14 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       name,
       count: categoryCountsMap.get(name.toLowerCase()) || 0
     }))
-    .sort((a, b) => b.count - a.count);
+    .sort((a, b) => {
+      // 1. Categories with available items come before 0-item categories
+      if (a.count > 0 && b.count === 0) return -1;
+      if (a.count === 0 && b.count > 0) return 1;
+
+      // 2. Sort by item count descending
+      return b.count - a.count;
+    });
 
   // Sanitize data to prevent serialization crashes from oversized images in the DB
   const sanitizedProducts = products.map(p => ({

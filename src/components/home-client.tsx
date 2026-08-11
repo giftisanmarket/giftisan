@@ -141,14 +141,14 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {products.map((product) => (
             <div
               key={product.id}
               className="group cursor-pointer block"
             >
               <Link href={`/products/${product.slug || product.id}`}>
-                <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5">
+                <div className="relative aspect-[3/4] rounded-2xl md:rounded-[2rem] overflow-hidden mb-3 md:mb-6 shadow-xl shadow-primary/5 border border-primary/5">
                   <BespokeImage
                     type="product"
                     id={product.id}
@@ -156,16 +156,16 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                   {product.badge && (
-                    <div className="absolute top-4 start-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
+                    <div className="absolute top-2 start-2 md:top-4 md:start-4 z-10 px-2 py-0.5 md:px-3 md:py-1 bg-white/90 backdrop-blur-md text-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
                       {product.badge}
                     </div>
                   )}
 
                   {/* Actions Layer */}
-                  <div className="absolute top-4 end-4 z-10 flex flex-col gap-2">
+                  <div className="absolute top-2 end-2 md:top-4 md:end-4 z-10 flex flex-col gap-2">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -173,24 +173,24 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                         toggleFavorite(product);
                       }}
                       className={cn(
-                        "p-3 rounded-full transition-all scale-90 active:scale-75 shadow-lg",
+                        "p-2 md:p-3 rounded-full transition-all scale-90 active:scale-75 shadow-lg",
                         isFavorite(product.id)
                           ? "bg-red-50 text-red-500 opacity-100"
                           : "bg-white/90 backdrop-blur text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 hover:bg-white"
                       )}
                     >
-                      <Heart className={cn("w-5 h-5", isFavorite(product.id) && "fill-current")} />
+                      <Heart className={cn("w-4 h-4 md:w-5 md:h-5", isFavorite(product.id) && "fill-current")} />
                     </button>
                   </div>
                 </div>
               </Link>
-              <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">
+              <p className="text-[10px] md:text-xs font-bold text-accent uppercase tracking-widest mb-1 truncate">
                 {product.artisan.studioName || product.artisan.user.name}
               </p>
-              <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
+              <h3 className="text-sm md:text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors line-clamp-2">
                 <Link href={`/products/${product.slug || product.id}`}>{product.name}</Link>
               </h3>
-              <p className="font-heading font-bold text-primary mt-2">{dict.product.currency} {product.price}.00</p>
+              <p className="font-heading font-bold text-primary text-xs md:text-base mt-1 md:mt-2">{dict.product.currency} {product.price}.00</p>
             </div>
           ))}
         </div>
@@ -212,34 +212,46 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-          {categoryCounts.slice(0, 12).map((cat) => {
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {categoryCounts.slice(0, 6).map((cat) => {
+            const icons: Record<string, any> = {
+              "Ceramics": Shapes,
+              "Jewelry": Gem,
+              "Gift Boxes & Sets": Package,
+              "Stationery": PencilLine,
+              "Vintage": History,
+              "Textiles": Scissors,
+              "Woodwork": Hammer,
+              "Leatherwork": Briefcase,
+              "Culinary Arts": Utensils,
+              "Beauty & Apothecary": Sparkles,
+              "Metalwork": Flame,
+              "Glasswork": Lightbulb,
+              "Basketry": Grid,
+              "Fashion": Shirt,
+              "Wedding": Heart,
+              "Personalized": Wand2,
+              "Art & Collectibles": Brush,
+            };
+            const Icon = icons[cat.name] || ShoppingBag;
             const slug = cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-            const imageUrl = getCategoryCoverImage(cat.name, slug);
             const categoryTitle = dict.common.categories_list?.[slug] || cat.name;
 
             return (
               <Link
                 key={cat.name}
                 href={`/category/${slug}`}
-                className="group relative block aspect-[4/3] sm:aspect-square bg-white border border-primary/5 rounded-3xl overflow-hidden shadow-md shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1.5 transition-all"
+                className="bg-white rounded-3xl p-6 md:p-8 border border-primary/5 shadow-lg shadow-primary/5 flex flex-col items-center justify-center text-center group hover:shadow-2xl hover:-translate-y-1.5 transition-all"
               >
-                <BespokeImage
-                  src={imageUrl}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-108"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent" />
-
-                <div className="absolute bottom-4 inset-x-4 z-10 text-white flex items-center justify-between gap-2">
-                  <span className="font-heading font-bold text-white text-sm md:text-base tracking-tight truncate group-hover:text-accent-light transition-colors">
-                    {categoryTitle}
-                  </span>
-                  <div className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 group-hover:bg-accent group-hover:scale-110 transition-all">
-                    <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-                  </div>
+                <div className="w-12 h-12 rounded-full bg-cream flex items-center justify-center text-primary group-hover:bg-accent group-hover:text-white transition-all mb-4">
+                  <Icon className="w-6 h-6" />
                 </div>
+                <h3 className="font-heading font-bold text-primary text-base group-hover:text-accent transition-colors">
+                  {categoryTitle}
+                </h3>
+                <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest mt-1">
+                  {(dict.home.items_count || "{count} ITEMS").replace("{count}", cat.count.toString()).toUpperCase()}
+                </p>
               </Link>
             );
           })}

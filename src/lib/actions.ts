@@ -1822,6 +1822,76 @@ export async function updateOrderItemStatus(itemId: string, status: string, trac
   }
 }
 
+export async function processOrderUncancellationInTx(tx: any, order: any) {
+  // 1. Re-decrement inventory stock for all items
+  for (const item of order.items) {
+    if (item.variantId) {
+      await tx.productVariant.update({
+        where: { id: item.variantId },
+        data: { stock: { decrement: item.quantity } }
+      });
+    } else if (item.productId) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity } }
+      });
+    }
+  }
+
+  // 2. Re-instate failed transactions or create if missing
+  const existingFailedTxs = await tx.artisanTransaction.findMany({
+    where: {
+      orderId: order.id,
+      status: "FAILED"
+    }
+  });
+
+  if (existingFailedTxs.length > 0) {
+    for (const t of existingFailedTxs) {
+      await tx.artisanTransaction.update({
+        where: { id: t.id },
+        data: { status: "PENDING" }
+      });
+
+      await tx.artisanBalance.upsert({
+        where: { artisanId: t.artisanId },
+        update: { pending: { increment: Math.abs(t.amount) } },
+        create: { artisanId: t.artisanId, pending: Math.abs(t.amount), withdrawable: 0, withdrawn: 0 }
+      });
+    }
+  } else {
+    for (const item of order.items) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+        include: { artisan: true }
+      });
+      if (product?.artisan) {
+        const itemTotal = item.price * item.quantity;
+        const commission = product.artisan.commissionRate ?? 0.0;
+        const adminShare = itemTotal * commission;
+        const artisanShare = itemTotal - adminShare;
+
+        await tx.artisanTransaction.create({
+          data: {
+            artisanId: product.artisan.id,
+            orderId: order.id,
+            amount: artisanShare,
+            type: "SALE",
+            status: "PENDING",
+            description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP`
+          }
+        });
+
+        await tx.artisanBalance.upsert({
+          where: { artisanId: product.artisan.id },
+          update: { pending: { increment: artisanShare } },
+          create: { artisanId: product.artisan.id, pending: artisanShare, withdrawable: 0, withdrawn: 0 }
+        });
+      }
+    }
+  }
+}
+
 export async function updateOrderStatus(orderId: string, status: string, trackingNumber?: string, carrier?: string) {
   try {
     const session = await auth();
@@ -1845,6 +1915,8 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       return { error: "Order not found" };
     }
 
+    const isUncancelling = order.status === "CANCELLED" && status !== "CANCELLED";
+
     await prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: orderId },
@@ -1858,6 +1930,9 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       if (status === "CANCELLED") {
         await processOrderCancellationInTx(tx, orderId);
       } else {
+        if (isUncancelling) {
+          await processOrderUncancellationInTx(tx, order);
+        }
         await tx.orderItem.updateMany({
           where: { orderId },
           data: {

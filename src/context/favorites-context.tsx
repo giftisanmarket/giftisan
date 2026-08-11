@@ -17,35 +17,42 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState<Product[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from localStorage on mount, then sync with DB if logged in
   useEffect(() => {
     const loadFavorites = async () => {
-      // Defer execution to next tick to avoid synchronous setState inside mount effect body
-      await Promise.resolve();
+      try {
+        const savedFavorites = localStorage.getItem("giftisan-favorites");
+        if (savedFavorites) {
+          const parsed = JSON.parse(savedFavorites);
+          if (Array.isArray(parsed)) {
+            setFavorites(parsed);
+          }
+        }
 
-      // 1. Load from localStorage as baseline
-      const savedFavorites = localStorage.getItem("giftisan-favorites");
-      if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
-      }
-
-      // 2. If logged in, prioritize DB favorites (including empty list)
-      if (session?.user?.id) {
-        const dbFavorites = await getUserFavorites(session.user.id);
-        const mappedDbFavorites = dbFavorites as any;
-        setFavorites(mappedDbFavorites);
-        localStorage.setItem("giftisan-favorites", JSON.stringify(mappedDbFavorites));
+        if (session?.user?.id) {
+          const dbFavorites = await getUserFavorites(session.user.id);
+          const mappedDbFavorites = dbFavorites as any;
+          setFavorites(mappedDbFavorites);
+          localStorage.setItem("giftisan-favorites", JSON.stringify(mappedDbFavorites));
+        }
+      } catch (e) {
+        console.error("Failed to load favorites", e);
+      } finally {
+        setIsInitialized(true);
       }
     };
 
     loadFavorites();
   }, [session?.user?.id]);
 
-  // Save to localStorage whenever favorites change
+  // Save to localStorage whenever favorites change ONLY AFTER initialization
   useEffect(() => {
-    localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
-  }, [favorites]);
+    if (isInitialized) {
+      localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
+    }
+  }, [favorites, isInitialized]);
 
   const toggleFavorite = async (product: any) => {
     // Optimistic update

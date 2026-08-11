@@ -30,21 +30,31 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load cart from localStorage
+  // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('giftisan-cart');
-    if (savedCart) {
-      Promise.resolve().then(() => {
-        setCart(JSON.parse(savedCart));
-      });
+    try {
+      const savedCart = localStorage.getItem('giftisan-cart');
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          setCart(parsed);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse cart from localStorage", e);
+    } finally {
+      setIsInitialized(true);
     }
   }, []);
 
-  // Save cart to localStorage
+  // Save cart to localStorage ONLY AFTER initialization
   useEffect(() => {
-    localStorage.setItem('giftisan-cart', JSON.stringify(cart));
-  }, [cart]);
+    if (isInitialized) {
+      localStorage.setItem('giftisan-cart', JSON.stringify(cart));
+    }
+  }, [cart, isInitialized]);
 
   const addToCart = (product: any, personalization?: string, skipOpen = false, customImage?: string) => {
     const itemCustomImage = customImage || product.customImage;

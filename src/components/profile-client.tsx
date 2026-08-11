@@ -381,7 +381,7 @@ Trace
                                   <Link href={`/products/${item.product.slug || item.product.id}`} className="block text-sm md:text-base font-heading font-bold text-primary hover:text-accent transition-colors line-clamp-1">
                                     {item.product.name}
                                   </Link>
-                                  <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity} • {item.product.artisan.studioName || item.product.artisan.user.name}</p>
+                                  <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.profile.qty}: {item.quantity}{item.product.artisan ? ` • ${item.product.artisan.studioName || item.product.artisan.user?.name || item.product.artisan.name || ""}` : ""}</p>
                                   
                                   <div className="mt-2 flex flex-wrap items-center gap-2">
                                     {order.status === "PENDING" ? (

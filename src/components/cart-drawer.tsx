@@ -64,25 +64,29 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                   </div>
                 </div>
               ) : (
-                cart.map((item) => (
-                  <div key={item.id + (item.personalization || "") + (item.variantId || "") + (item.customImage || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
-                      <BespokeImage src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-heading font-bold text-sm md:text-base text-primary leading-tight line-clamp-2 md:line-clamp-1">{item.name}</h3>
-                          <div className="flex flex-wrap gap-1 items-center">
-                            <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{item.artisan.studioName || item.artisan.name}</p>
-                            {item.variantName && (
-                              <>
-                                <span className="text-[10px] text-primary/20">•</span>
-                                <span className="text-[9px] md:text-xs text-primary/60 font-bold">{item.variantName}</span>
-                              </>
-                            )}
+                cart.map((item) => {
+                  const artisanName = item.artisan ? (item.artisan.studioName || item.artisan.name || item.artisan.user?.name) : null;
+                  return (
+                    <div key={item.id + (item.personalization || "") + (item.variantId || "") + (item.customImage || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
+                      <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
+                        <BespokeImage src={item.image || item.images?.[0] || ""} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-heading font-bold text-sm md:text-base text-primary leading-tight line-clamp-2 md:line-clamp-1">{item.name}</h3>
+                            <div className="flex flex-wrap gap-1 items-center">
+                              {artisanName && (
+                                <p className="text-[9px] md:text-xs text-accent font-bold uppercase tracking-widest truncate">{artisanName}</p>
+                              )}
+                              {item.variantName && (
+                                <>
+                                  {artisanName && <span className="text-[10px] text-primary/20">•</span>}
+                                  <span className="text-[9px] md:text-xs text-primary/60 font-bold">{item.variantName}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
                         <div className="text-end shrink-0">
                           <p className="font-bold text-primary text-sm md:text-base">{dict.product.currency} {item.price * item.quantity}</p>
                           {(item.stock || 0) <= 0 && (
@@ -134,7 +138,8 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                       </div>
                     </div>
                   </div>
-                ))
+                );
+              })
               )}
             </div>
 

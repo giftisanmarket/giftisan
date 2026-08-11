@@ -14,17 +14,20 @@ async function main() {
   console.log("Seeding database...");
 
   for (const product of MOCK_PRODUCTS) {
+    const artisan = product.artisan;
+    if (!artisan || !artisan.name) continue;
+    const artisanName: string = artisan.name;
     // 1. Create User/Artisan if they don't exist
-    const email = `${product.artisan.name.toLowerCase().replace(/ /g, ".")}@giftisan.com`;
+    const email = `${artisanName.toLowerCase().replace(/ /g, ".")}@giftisan.com`;
     
     const artisanUser = await prisma.user.upsert({
       where: { email },
       update: {},
       create: {
-        name: product.artisan.name,
+        name: artisanName,
         email,
         role: "ARTISAN",
-        image: product.artisan.avatar,
+        image: artisan.avatar,
       },
     });
 
@@ -34,10 +37,10 @@ async function main() {
       update: {},
       create: {
         userId: artisanUser.id,
-        bio: product.artisan.bio,
-        location: product.artisan.location,
-        avatar: product.artisan.avatar,
-        studioName: `${product.artisan.name}'s Studio`,
+        bio: artisan.bio || "",
+        location: artisan.location || "",
+        avatar: artisan.avatar || "",
+        studioName: `${artisanName}'s Studio`,
       },
     });
 

@@ -3,12 +3,15 @@ export interface Product {
   name: string;
   price: number;
   description: string;
-  artisan: {
-    name: string;
+  artisan?: {
+    name?: string;
     studioName?: string;
-    location: string;
-    avatar: string;
-    bio: string;
+    location?: string;
+    avatar?: string;
+    bio?: string;
+    user?: {
+      name?: string;
+    };
   };
   images: string[];
   category: string;

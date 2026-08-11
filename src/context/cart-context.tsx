@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '@/lib/data';
+import toast from 'react-hot-toast';
 
 interface CartItem extends Product {
   quantity: number;
@@ -47,25 +48,56 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = (product: any, personalization?: string, skipOpen = false, customImage?: string) => {
     const itemCustomImage = customImage || product.customImage;
+    const maxStock = typeof product.stock === 'number' ? product.stock : 999;
+
+    if (maxStock <= 0) {
+      toast.error(
+        typeof window !== 'undefined' && (document.dir === 'rtl' || document.documentElement.lang === 'ar')
+          ? "عذراً، هذا المنتج غير متوفر حالياً بالمخزون."
+          : "Sorry, this treasure is out of stock.",
+        { id: "cart-stock-limit", style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
+      );
+      return;
+    }
+
+    const existingItem = cart.find(
+      (item) => 
+        item.id === product.id && 
+        item.personalization === personalization && 
+        item.variantId === product.variantId &&
+        item.customImage === itemCustomImage
+    );
+
+    if (existingItem && existingItem.quantity >= maxStock) {
+      toast.error(
+        typeof window !== 'undefined' && (document.dir === 'rtl' || document.documentElement.lang === 'ar')
+          ? `وصلت للحد الأقصى للمخزون المتاح (${maxStock})`
+          : `Maximum available stock reached (${maxStock})`,
+        { id: "cart-stock-limit", style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
+      );
+      if (!skipOpen) setIsCartOpen(true);
+      return;
+    }
+
     setCart((prevCart) => {
-      const existingItem = prevCart.find(
+      const itemInPrev = prevCart.find(
         (item) => 
           item.id === product.id && 
           item.personalization === personalization && 
           item.variantId === product.variantId &&
           item.customImage === itemCustomImage
       );
-      if (existingItem) {
+      if (itemInPrev) {
         return prevCart.map((item) =>
           item.id === product.id && 
           item.personalization === personalization && 
           item.variantId === product.variantId &&
           item.customImage === itemCustomImage
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: Math.min(maxStock, item.quantity + 1) }
             : item
         );
       }
-      return [...prevCart, { ...product, quantity: 1, personalization, customImage: itemCustomImage }];
+      return [...prevCart, { ...product, quantity: Math.min(1, maxStock), personalization, customImage: itemCustomImage }];
     });
     if (!skipOpen) setIsCartOpen(true);
   };
@@ -81,15 +113,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateQuantity = (productId: string, quantity: number, personalization?: string, variantId?: string | null, customImage?: string) => {
     if (quantity < 1) return;
-    setCart((prevCart) =>
-      prevCart.map((item) =>
+
+    const targetItem = cart.find(
+      (item) =>
         item.id === productId && 
         item.personalization === personalization && 
         item.variantId === variantId &&
         item.customImage === customImage
-          ? { ...item, quantity } 
-          : item
-      )
+    );
+
+    if (targetItem) {
+      const maxStock = typeof targetItem.stock === 'number' ? targetItem.stock : 999;
+      if (quantity > maxStock) {
+        toast.error(
+          typeof window !== 'undefined' && (document.dir === 'rtl' || document.documentElement.lang === 'ar')
+            ? `الحد الأقصى للمخزون المتاح هو ${maxStock}`
+            : `Maximum available stock reached (${maxStock})`,
+          { id: "cart-stock-limit", style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
+        );
+      }
+    }
+
+    setCart((prevCart) =>
+      prevCart.map((item) => {
+        if (
+          item.id === productId && 
+          item.personalization === personalization && 
+          item.variantId === variantId &&
+          item.customImage === customImage
+        ) {
+          const maxStock = typeof item.stock === 'number' ? item.stock : 999;
+          return { ...item, quantity: Math.min(quantity, maxStock) };
+        }
+        return item;
+      })
     );
   };
 

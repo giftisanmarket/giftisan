@@ -58,7 +58,22 @@ export default function FavoritesClient({ dict }: { dict: any }) {
                     {/* Image */}
                     <div className="relative w-full md:w-48 aspect-square rounded-[2rem] overflow-hidden shrink-0 shadow-lg">
                       {product.images?.[0] && (
-                        <Image src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <Image 
+                          src={product.images[0]} 
+                          alt={product.name} 
+                          fill 
+                          className={cn(
+                            "object-cover group-hover:scale-105 transition-transform duration-700",
+                            (product.stock || 0) <= 0 && "grayscale"
+                          )} 
+                        />
+                      )}
+                      {(product.stock || 0) <= 0 && (
+                        <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-[2px] flex items-center justify-center">
+                          <span className="px-3.5 py-1.5 bg-red-600 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-white/20">
+                            {dict.product.sold_out || "Sold Out"}
+                          </span>
+                        </div>
                       )}
                     </div>
 

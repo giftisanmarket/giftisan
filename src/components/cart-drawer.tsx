@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { BespokeImage } from "./bespoke-image";
 import { cn, getOptimizedImageUrl } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice } = useCart();
@@ -111,30 +112,65 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                         </div>
                       )}
                       
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center border border-primary/5 rounded-full h-8 md:h-9 px-3 gap-3 md:gap-4 bg-white shadow-sm">
+                      <div className="flex flex-col mt-4 gap-1">
+                        <div className="flex items-center justify-between">
+                          {(() => {
+                            const maxStock = typeof item.stock === 'number' ? item.stock : 999;
+                            const isMaxStock = item.quantity >= maxStock;
+                            return (
+                              <div className="flex items-center border border-primary/5 rounded-full h-8 md:h-9 px-3 gap-3 md:gap-4 bg-white shadow-sm">
+                                <button 
+                                  onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization, item.variantId, item.customImage)}
+                                  className="p-1 text-primary hover:text-accent transition-all active:scale-75 cursor-pointer"
+                                >
+                                  <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                </button>
+                                <span className="text-[11px] md:text-sm font-bold w-3 md:w-4 text-center text-primary leading-none">
+                                  {item.quantity}
+                                </span>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    if (isMaxStock) {
+                                      toast.error(
+                                        lang === 'ar'
+                                          ? `وصلت للحد الأقصى للمخزون المتاح (${maxStock})`
+                                          : `Maximum available stock reached (${maxStock})`,
+                                        { id: "cart-stock-limit", style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
+                                      );
+                                    } else {
+                                      updateQuantity(item.id, item.quantity + 1, item.personalization, item.variantId, item.customImage);
+                                    }
+                                  }}
+                                  title={isMaxStock ? (lang === 'ar' ? `الحد الأقصى للمخزون هو ${maxStock}` : `Max stock is ${maxStock}`) : undefined}
+                                  className={cn(
+                                    "p-1 transition-all active:scale-75",
+                                    isMaxStock ? "text-primary/20 cursor-not-allowed opacity-30" : "text-primary hover:text-accent cursor-pointer"
+                                  )}
+                                >
+                                  <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                </button>
+                              </div>
+                            );
+                          })()}
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.personalization, item.variantId, item.customImage)}
-                            className="p-1 text-primary hover:text-accent transition-all active:scale-75"
+                            onClick={() => removeFromCart(item.id, item.personalization, item.variantId, item.customImage)}
+                            className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95 cursor-pointer"
                           >
-                            <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                          </button>
-                          <span className="text-[11px] md:text-sm font-bold w-3 md:w-4 text-center text-primary leading-none">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.personalization, item.variantId, item.customImage)}
-                            className="p-1 text-primary hover:text-accent transition-all active:scale-75"
-                          >
-                            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            {dict.cart.remove}
                           </button>
                         </div>
-                        <button 
-                          onClick={() => removeFromCart(item.id, item.personalization, item.variantId, item.customImage)}
-                          className="text-[9px] md:text-xs font-black uppercase tracking-widest text-charcoal/30 hover:text-red-500 transition-all active:scale-95"
-                        >
-                          {dict.cart.remove}
-                        </button>
+                        {(() => {
+                          const maxStock = typeof item.stock === 'number' ? item.stock : 999;
+                          if (item.quantity >= maxStock && maxStock > 0 && maxStock < 999) {
+                            return (
+                              <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest leading-none mt-1">
+                                {lang === 'ar' ? `الحد الأقصى للمخزون (${maxStock})` : `Max available stock (${maxStock})`}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                   </div>

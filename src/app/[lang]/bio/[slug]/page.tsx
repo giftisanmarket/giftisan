@@ -69,8 +69,10 @@ interface Props {
   params: Promise<{ slug: string; lang: string }>;
 }
 
+import { SITE_URL, SITE_NAME } from "@/lib/constants";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, lang } = await params;
   const artisan = await getArtisanBioBySlug(slug);
 
   if (!artisan) {
@@ -80,14 +82,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const name = artisan.studioName || artisan.user.name || "Artisan";
+  const bioDesc = artisan.bio || `Explore handcrafted creations and bio links for ${name} on Giftisan.`;
+  
+  const getAbsoluteUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const ogImage = getAbsoluteUrl(artisan.avatar || artisan.bannerImage) || `${SITE_URL}/hero.webp`;
+
   return {
     title: `${name} | Giftisan Bio`,
-    description: artisan.bio || `Explore handcrafted creations and bio links for ${name} on Giftisan.`,
-    openGraph: {
-      title: `${name} | Giftisan Bio Links`,
-      description: artisan.bio || `Explore handcrafted creations by ${name}`,
-      images: artisan.avatar ? [{ url: artisan.avatar }] : [],
+    description: bioDesc.slice(0, 160),
+    alternates: {
+      canonical: `${SITE_URL}/${lang}/bio/${slug}`,
     },
+    openGraph: {
+      title: `${name} | ${SITE_NAME} Studio Bio`,
+      description: bioDesc.slice(0, 160),
+      url: `${SITE_URL}/${lang}/bio/${slug}`,
+      siteName: SITE_NAME,
+      images: [{
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${name} Studio`
+      }],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} | ${SITE_NAME} Studio Bio`,
+      description: bioDesc.slice(0, 160),
+      images: [ogImage],
+    }
   };
 }
 

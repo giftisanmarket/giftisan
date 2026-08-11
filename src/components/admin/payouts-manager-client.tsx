@@ -41,6 +41,8 @@ export function PayoutsManagerClient({
   const [rejectReason, setRejectReason] = useState("");
   const [activeRejectId, setActiveRejectId] = useState<string | null>(null);
   const [historySearch, setHistorySearch] = useState("");
+  const [channelFilter, setChannelFilter] = useState<string>("ALL");
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<string>("ALL");
   const [confirmPayoutData, setConfirmPayoutData] = useState<{ id: string; amount: number } | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [isClearingEscrow, setIsClearingEscrow] = useState(false);
@@ -67,12 +69,10 @@ export function PayoutsManagerClient({
     }
   };
 
-  // Bulletproof Isolated Print handler (forces pure vector receipt page printing/PDF saving via sandboxed iframe)
   const handlePrint = () => {
     const printElement = document.getElementById("print-receipt-container");
     if (!printElement) return;
 
-    // Create a temporary hidden iframe
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
     iframe.style.right = "0";
@@ -85,7 +85,6 @@ export function PayoutsManagerClient({
     const doc = iframe.contentWindow?.document || iframe.contentDocument;
     if (!doc) return;
 
-    // Inject all active stylesheets to maintain flawless vector graphics and typography
     const styles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
       .map(el => el.outerHTML)
       .join("\n");
@@ -98,51 +97,24 @@ export function PayoutsManagerClient({
           <title>Giftisan Administrative Receipt</title>
           ${styles}
           <style>
-            body {
-              background: white !important;
-              color: black !important;
-              padding: 40px !important;
-              font-family: system-ui, -apple-system, sans-serif;
-            }
-            #print-receipt-container {
-              box-shadow: none !important;
-              border: 1px solid rgba(0,0,0,0.1) !important;
-              width: 100% !important;
-              max-width: 500px !important;
-              margin: 0 auto !important;
-              padding: 30px !important;
-              background: white !important;
-              color: black !important;
-              border-radius: 16px !important;
-            }
-            /* Clean up any standard print styling headers/footers */
-            @page {
-              size: auto;
-              margin: 0mm;
+            @media print {
+              body { margin: 0; padding: 20px; background: #fff !important; }
+              #print-receipt-container { border: none !important; shadow: none !important; width: 100% !important; max-width: 100% !important; }
             }
           </style>
         </head>
-        <body class="bg-white" dir="${isRtlLayout ? "rtl" : "ltr"}">
-          <div id="print-receipt-container">
-            ${printElement.innerHTML}
-          </div>
-          <script>
-            window.addEventListener('DOMContentLoaded', () => {
-              setTimeout(() => {
-                window.focus();
-                window.print();
-              }, 350);
-            });
-          </script>
+        <body dir="${isRtlLayout ? "rtl" : "ltr"}">
+          ${printElement.outerHTML}
         </body>
       </html>
     `);
     doc.close();
 
-    // Clean up frame after print dialogue is handled
     setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 4000);
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 300);
   };
 
   const handleApprove = async () => {
@@ -152,7 +124,7 @@ export function PayoutsManagerClient({
     setIsProcessing(txId);
     const res = await approvePayoutAction(txId);
     setIsProcessing(null);
-    setConfirmPayoutData(null); // Close the modal
+    setConfirmPayoutData(null); 
 
     if (res.success) {
       toast.success(lang === "ar" ? "تم اعتماد طلب السحب بنجاح وتحديث السجلات المالية!" : "Payout request successfully completed and ledger updated!", {
@@ -167,13 +139,20 @@ export function PayoutsManagerClient({
     }
   };
 
-  const handleReject = async (txId: string) => {
-    setIsProcessing(txId);
-    const res = await rejectPayoutAction(txId, rejectReason);
+  const handleReject = async (id: string) => {
+    if (!rejectReason.trim()) {
+      toast.error(lang === "ar" ? "يرجى كتابة سبب الرفض." : "Please provide a rejection reason.", {
+        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+      });
+      return;
+    }
+
+    setIsProcessing(id);
+    const res = await rejectPayoutAction(id, rejectReason);
     setIsProcessing(null);
 
     if (res.success) {
-      toast.success(lang === "ar" ? "تم رفض طلب السحب واسترجاع المبلغ لرصيد العارض بنجاح!" : "Payout declined and funds successfully refunded to artisan!", {
+      toast.success(lang === "ar" ? "تم رفض طلب السحب وإعادة الأرباح للرصيد." : "Payout request rejected. Funds returned to balance.", {
         style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
       });
       setActiveRejectId(null);
@@ -230,7 +209,6 @@ export function PayoutsManagerClient({
     });
   };
 
-  // Calculate quick metrics
   const pendingTotalAmount = pendingPayouts.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
   const pastTotalAmount = pastPayouts
     .filter(tx => tx.status === "COMPLETED")
@@ -240,7 +218,17 @@ export function PayoutsManagerClient({
     const studio = (tx.artisan?.studioName || tx.artisan?.user?.name || "").toLowerCase();
     const desc = (tx.description || "").toLowerCase();
     const query = historySearch.toLowerCase();
-    return studio.includes(query) || desc.includes(query);
+    const matchesSearch = studio.includes(query) || desc.includes(query);
+
+    const matchesChannel = channelFilter === "ALL" || (
+      channelFilter === "INSTAPAY" ? desc.includes("INSTAPAY") :
+      channelFilter === "VODAFONE_CASH" ? (desc.includes("VODAFONE_CASH") || desc.includes("Mobile Wallet") || desc.includes("محفظة")) :
+      (desc.includes("BANK") || desc.includes("IBAN"))
+    );
+
+    const matchesStatus = historyStatusFilter === "ALL" || tx.status === historyStatusFilter;
+
+    return matchesSearch && matchesChannel && matchesStatus;
   });
 
   return (
@@ -498,6 +486,32 @@ export function PayoutsManagerClient({
               </button>
             )}
           </div>
+        </div>
+
+        {/* Channel Filter Pills Bar */}
+        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-primary/5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 me-1">
+            {isRTL ? "وسيلة التحويل:" : "Payout Method:"}
+          </span>
+          {[
+            { key: "ALL", label: isRTL ? "الكل" : "All Methods" },
+            { key: "INSTAPAY", label: isRTL ? "إنستا باي (InstaPay)" : "InstaPay" },
+            { key: "VODAFONE_CASH", label: isRTL ? "محفظة هاتف (Vodafone/Cash)" : "Mobile Wallet" },
+            { key: "BANK", label: isRTL ? "تحويل بنكي (IBAN)" : "Bank Transfer" },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setChannelFilter(tab.key)}
+              className={cn(
+                "px-3.5 h-8 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer",
+                channelFilter === tab.key
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {filteredHistory.length === 0 ? (

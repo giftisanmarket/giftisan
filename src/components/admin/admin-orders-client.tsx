@@ -20,6 +20,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
   const [orders, setOrders] = useState(initialOrders);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [dateFilter, setDateFilter] = useState("ALL");
   const [editingOrder, setEditingOrder] = useState<any | null>(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState<any | null>(null);
   const [orderToPrint, setOrderToPrint] = useState<any | null>(null);
@@ -30,6 +31,8 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const isAr = lang === "ar";
+
   const filteredOrders = orders.filter((order) => {
     if (statusFilter === "READY TO SHIP") {
       const totalItems = order.items?.length || 0;
@@ -38,6 +41,22 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
     } else if (statusFilter !== "ALL" && order.status !== statusFilter) {
       return false;
     }
+
+    if (dateFilter !== "ALL") {
+      const created = new Date(order.createdAt).getTime();
+      const now = new Date().getTime();
+      if (dateFilter === "TODAY") {
+        const isToday = new Date(order.createdAt).toDateString() === new Date().toDateString();
+        if (!isToday) return false;
+      } else if (dateFilter === "THIS_WEEK") {
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        if (now - created > oneWeek) return false;
+      } else if (dateFilter === "THIS_MONTH") {
+        const oneMonth = 30 * 24 * 60 * 60 * 1000;
+        if (now - created > oneMonth) return false;
+      }
+    }
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const matchId = order.id.toLowerCase().includes(q);
@@ -133,6 +152,32 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Date Filter Pills Row */}
+          <div className="flex items-center gap-2 flex-wrap pt-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 me-1">
+              {isAr ? "الفترة الزمنية:" : "Timeframe:"}
+            </span>
+            {[
+              { key: "ALL", label: isAr ? "جميع الأوقات" : "All Time" },
+              { key: "TODAY", label: isAr ? "اليوم" : "Today" },
+              { key: "THIS_WEEK", label: isAr ? "هذا الأسبوع" : "This Week" },
+              { key: "THIS_MONTH", label: isAr ? "هذا الشهر" : "This Month" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setDateFilter(tab.key)}
+                className={cn(
+                  "px-3.5 h-8 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer",
+                  dateFilter === tab.key
+                    ? "bg-accent text-white border-accent shadow-sm font-black"
+                    : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">

@@ -24,6 +24,7 @@ import nextDynamic from "next/dynamic";
 const AdminChartClient = nextDynamic(() => import("@/components/admin/admin-chart-client").then(mod => mod.AdminChartClient), {
   loading: () => <div className="h-64 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />
 });
+import { AdminActionCenter } from "@/components/admin/admin-action-center";
 import { SystemHealthPanel } from "@/components/admin/system-health-panel";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
@@ -156,6 +157,9 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
           ))}
         </div>
       </div>
+
+      {/* Priority Action Center */}
+      <AdminActionCenter stats={stats} dict={dict} isAr={isAr} />
 
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

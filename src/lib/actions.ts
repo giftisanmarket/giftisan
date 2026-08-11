@@ -2302,7 +2302,10 @@ export async function getAdminStats() {
           pendingPayouts,
           allSales,
           shippingRevenue,
-          readyToShipCount
+          readyToShipCount,
+          pendingArtisansCount,
+          pendingProductsCount,
+          pendingPayoutsCount
         ] = await Promise.all([
           prisma.user.count(),
           prisma.product.count(),
@@ -2375,7 +2378,10 @@ export async function getAdminStats() {
                 }
               }
             }
-          })
+          }),
+          prisma.artisanProfile.count({ where: { status: "PENDING" } }),
+          prisma.product.count({ where: { status: "PENDING" } }),
+          prisma.artisanTransaction.count({ where: { type: "PAYOUT", status: "PENDING" } })
         ]);
 
         let platformEarnings = 0;
@@ -2398,7 +2404,10 @@ export async function getAdminStats() {
           artisanPending: artisanBalances._sum.pending || 0,
           artisanWithdrawable: artisanBalances._sum.withdrawable || 0,
           shippingRevenue: shippingRevenue._sum.shippingCost || 0,
-          readyToShipCount
+          readyToShipCount,
+          pendingArtisansCount,
+          pendingProductsCount,
+          pendingPayoutsCount
         };
       },
       ["admin-stats-cache-key"],

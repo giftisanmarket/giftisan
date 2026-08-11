@@ -776,10 +776,17 @@ export function PaymentTab({
                     </div>
                     <div>
                       <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "حالة المعاملة" : "Transaction Status"}</p>
-                      <p className="font-bold text-green-600">
+                      <p className={cn(
+                        "font-bold",
+                        (selectedReceipt.status === "COMPLETED" || selectedReceipt.status === "CLEARED")
+                          ? "text-green-600"
+                          : selectedReceipt.status === "PENDING"
+                            ? "text-amber-600"
+                            : "text-red-600"
+                      )}>
                         {isRTL 
-                          ? (selectedReceipt.status === "COMPLETED" ? "تم التحويل" : selectedReceipt.status === "CLEARED" ? "جاهز للسحب" : selectedReceipt.status === "PENDING" ? "في الانتظار" : "ملغي/مرفوض")
-                          : selectedReceipt.status
+                          ? (selectedReceipt.status === "COMPLETED" ? "تم التحويل" : selectedReceipt.status === "CLEARED" ? "جاهز للسحب" : selectedReceipt.status === "PENDING" ? "في الانتظار" : (selectedReceipt.type === "SALE" ? "طلب ملغي" : "مرفوض"))
+                          : (selectedReceipt.status === "FAILED" ? (selectedReceipt.type === "SALE" ? "CANCELLED" : "FAILED") : selectedReceipt.status)
                         }
                       </p>
                     </div>
@@ -794,9 +801,19 @@ export function PaymentTab({
                   {/* Pricing / Total block */}
                   <div className="bg-cream/20 rounded-xl p-4 flex justify-between items-center border border-primary/5">
                     <span className="text-xs font-black text-primary/60 uppercase tracking-wider">{isRTL ? "المبلغ الإجمالي" : "Total Amount"}</span>
-                    <span className="text-xl font-black text-primary">
-                      {selectedReceipt.amount > 0 ? "+" : ""}{selectedReceipt.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
-                    </span>
+                    <div className="text-end">
+                      <span className={cn(
+                        "text-xl font-black",
+                        selectedReceipt.status === "FAILED" ? "text-red-600 line-through" : "text-primary"
+                      )}>
+                        {selectedReceipt.amount > 0 ? "+" : ""}{selectedReceipt.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
+                      </span>
+                      {selectedReceipt.status === "FAILED" && (
+                        <span className="block text-[9px] font-bold text-red-500 uppercase tracking-widest mt-0.5">
+                          {isRTL ? "(تم إلغاء الطلب - 0.00 ج.م)" : "(Order Cancelled - 0.00 EGP)"}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Footer message / Verification Code */}

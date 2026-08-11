@@ -177,8 +177,8 @@ export function InventoryTab({
                     </span>
                   </div>
 
-                  {/* Permanent Accessible Action Buttons */}
-                  <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20">
+                  {/* Action Buttons: Always visible on Mobile & Tablets (including Landscape), Hover on Large Desktop */}
+                  <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20 transition-all duration-300 xl:opacity-0 xl:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -187,7 +187,7 @@ export function InventoryTab({
                         setIsEditModalOpen(true);
                       }}
                       title={isAdminPreview ? "View" : "Edit"}
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
                     >
                       {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
                     </button>
@@ -199,14 +199,14 @@ export function InventoryTab({
                       }}
                       disabled={isDeleting === p.id}
                       title="Delete"
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-red-500 flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50 border border-primary/10"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-red-500 flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50 border border-primary/10 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <Link
                       href={`/products/${p.slug || p.id}`}
                       title="View Product Page"
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90 border border-primary/10"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
                     >
                       <ArrowUpRight className="w-4 h-4" />
                     </Link>

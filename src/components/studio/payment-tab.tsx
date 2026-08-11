@@ -637,8 +637,8 @@ export function PaymentTab({
                         )}>
                           {tx.status === "PENDING" && <Clock className="w-2.5 h-2.5" />}
                           {isRTL 
-                            ? (tx.status === "COMPLETED" ? "تم التحويل" : tx.status === "CLEARED" ? "جاهز للسحب" : tx.status === "PENDING" ? "في الانتظار" : "ملغي/مرفوض")
-                            : tx.status}
+                            ? (tx.status === "COMPLETED" ? "تم التحويل" : tx.status === "CLEARED" ? "جاهز للسحب" : tx.status === "PENDING" ? "في الانتظار" : (isSale ? "طلب ملغي" : "مرفوض"))
+                            : (tx.status === "FAILED" ? (isSale ? "CANCELLED" : "FAILED") : tx.status)}
                         </span>
                       </td>
                       <td className={cn(

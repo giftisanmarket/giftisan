@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn, auth } from "@/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
@@ -913,11 +913,83 @@ export async function retryPaymentAction(orderId: string) {
   }
 }
 
-export async function cancelPendingOrderAction(orderId: string) {
+export async function processOrderCancellationInTx(tx: any, orderId: string) {
+  // 1. Mark all order items as CANCELLED
+  await tx.orderItem.updateMany({
+    where: { orderId },
+    data: { status: "CANCELLED" }
+  });
+
+  // 2. Fetch order items to restore stock
+  const orderItems = await tx.orderItem.findMany({
+    where: { orderId },
+    select: { variantId: true, productId: true, quantity: true }
+  });
+
+  for (const item of orderItems) {
+    if (item.variantId) {
+      await tx.productVariant.update({
+        where: { id: item.variantId },
+        data: {
+          stock: {
+            increment: item.quantity
+          }
+        }
+      });
+    } else if (item.productId) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            increment: item.quantity
+          }
+        }
+      });
+    }
+  }
+
+  // 3. Reverse financial transactions and artisan balances
+  const transactions = await tx.artisanTransaction.findMany({
+    where: {
+      orderId,
+      status: { in: ["PENDING", "CLEARED"] }
+    }
+  });
+
+  for (const t of transactions) {
+    const amountToDeduct = Math.abs(t.amount);
+    const balance = await tx.artisanBalance.findUnique({
+      where: { artisanId: t.artisanId }
+    });
+
+    if (balance) {
+      if (t.status === "PENDING") {
+        const newPending = Math.max(0, balance.pending - amountToDeduct);
+        await tx.artisanBalance.update({
+          where: { artisanId: t.artisanId },
+          data: { pending: newPending }
+        });
+      } else if (t.status === "CLEARED") {
+        const newWithdrawable = Math.max(0, balance.withdrawable - amountToDeduct);
+        await tx.artisanBalance.update({
+          where: { artisanId: t.artisanId },
+          data: { withdrawable: newWithdrawable }
+        });
+      }
+    }
+
+    await tx.artisanTransaction.update({
+      where: { id: t.id },
+      data: { status: "FAILED" }
+    });
+  }
+}
+
+export async function cancelOrder(orderId: string) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return { error: "You must be signed in to perform this action" };
+    if (!session?.user) {
+      return { error: "You must be signed in to cancel an order" };
     }
 
     const order = await prisma.order.findUnique({
@@ -935,7 +1007,7 @@ export async function cancelPendingOrderAction(orderId: string) {
       return { error: "You are not authorized to cancel this order" };
     }
 
-    if (order.status !== "PENDING") {
+    if (order.status !== "PENDING" && session.user.role !== "ADMIN") {
       return { error: `This order is already ${order.status.toLowerCase()} and cannot be cancelled directly.` };
     }
 
@@ -946,30 +1018,12 @@ export async function cancelPendingOrderAction(orderId: string) {
         data: { status: "CANCELLED" }
       });
 
-      // Restore stock
-      for (const item of order.items) {
-        if (item.variantId) {
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              stock: {
-                increment: item.quantity
-              }
-            }
-          });
-        } else {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                increment: item.quantity
-              }
-            }
-          });
-        }
-      }
+      // Process stock restoration and financial ledger reversals
+      await processOrderCancellationInTx(tx, orderId);
     });
 
+    revalidatePath("/admin", "layout");
+    revalidatePath("/admin/orders");
     revalidatePath("/profile");
     revalidatePath("/studio");
     revalidatePath("/");
@@ -980,6 +1034,7 @@ export async function cancelPendingOrderAction(orderId: string) {
   }
 }
 
+export const cancelPendingOrderAction = cancelOrder;
 
 export async function getUserOrders(userId: string) {
   try {
@@ -1790,21 +1845,27 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       return { error: "Order not found" };
     }
 
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { 
-        status,
-        trackingNumber: trackingNumber || undefined,
-        carrier: carrier || undefined
-      }
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { 
+          status,
+          trackingNumber: trackingNumber || undefined,
+          carrier: carrier || undefined
+        }
+      });
 
-    await prisma.orderItem.updateMany({
-      where: { orderId },
-      data: {
-        status,
-        ...(trackingNumber ? { trackingNumber } : {}),
-        ...(carrier ? { carrier } : {})
+      if (status === "CANCELLED") {
+        await processOrderCancellationInTx(tx, orderId);
+      } else {
+        await tx.orderItem.updateMany({
+          where: { orderId },
+          data: {
+            status,
+            ...(trackingNumber ? { trackingNumber } : {}),
+            ...(carrier ? { carrier } : {})
+          }
+        });
       }
     });
 
@@ -1838,6 +1899,7 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       ).catch(err => console.error("Failed to send order status email:", err));
     }
 
+    revalidatePath("/admin", "layout");
     revalidatePath("/admin/orders");
     revalidatePath("/studio");
     revalidatePath("/profile");

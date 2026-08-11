@@ -377,7 +377,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     {[
                       {
                         label: dict.studio.checklist_settings || "Fill required studio details in Settings",
-                        done: !!artisan.studioName && !!artisan.bio && !!artisan.location && !!artisan.phoneNumber,
+                        done: !!artisan.studioName?.trim() && !!artisan.slug?.trim() && !!artisan.bio?.trim() && !!artisan.location?.trim() && !!artisan.phoneNumber?.trim() && !!artisan.pickupAddress?.trim() && !!artisan.pickupCity?.trim(),
                         link: "#settings"
                       },
                       {

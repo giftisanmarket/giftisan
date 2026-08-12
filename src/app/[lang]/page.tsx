@@ -77,7 +77,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         status: "APPROVED",
         NOT: [
           { studioName: { contains: "khashab", mode: "insensitive" } },
-          { studioName: { contains: "تمارا", mode: "insensitive" } }
+          { studioName: { contains: "تمارا", mode: "insensitive" } },
+          { studioName: { contains: "giftisan", mode: "insensitive" } },
+          { user: { email: { contains: "giftisan", mode: "insensitive" } } }
         ]
       },
       select: {

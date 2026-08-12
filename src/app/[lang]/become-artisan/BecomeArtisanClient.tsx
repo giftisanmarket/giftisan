@@ -33,32 +33,40 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!(session?.user as any)?.emailVerified && !(session?.user as any)?.isOAuth) {
-      toast.error(dict.home.verify_email_error);
-      setIsLoading(false);
-      return;
-    }
+    try {
+      if (!(session?.user as any)?.emailVerified && !(session?.user as any)?.isOAuth) {
+        toast.error(dict.home.verify_email_error);
+        setIsLoading(false);
+        return;
+      }
 
-    if (!formData.studioName.trim() || !formData.bio.trim() || !formData.location.trim() || !formData.phoneNumber.trim()) {
-      toast.error(lang === 'ar' ? 'جميع الحقول (اسم الاستوديو، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Studio name, location, phone number, and bio are all required.');
-      setIsLoading(false);
-      return;
-    }
+      if (!formData.studioName.trim() || !formData.bio.trim() || !formData.location.trim() || !formData.phoneNumber.trim()) {
+        toast.error(lang === 'ar' ? 'جميع الحقول (اسم الاستوديو، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Studio name, location, phone number, and bio are all required.');
+        setIsLoading(false);
+        return;
+      }
 
-    const res = await promoteToArtisan(session?.user?.id as string, formData);
+      const res = await promoteToArtisan(session?.user?.id as string, formData);
 
-    if (res.success) {
-      toast.success(dict.home.onboarding_success || "Welcome to the circle!");
-      // Force session update so the role reflects in the UI
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          role: "ARTISAN"
-        }
-      });
-    } else {
-      toast.error(res.error || "Something went wrong.");
+      if (res.success) {
+        toast.success(dict.home.onboarding_success || "Welcome to the circle!");
+        // Force session update so the role reflects in the UI
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            role: "ARTISAN"
+          }
+        });
+        router.push(`/${lang}/studio`);
+        router.refresh();
+      } else {
+        toast.error(res.error || "Something went wrong.");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Promote artisan submit error:", error);
+      toast.error(lang === 'ar' ? 'حدث خطأ أثناء الإنشاء. يرجى المحاولة لاحقاً.' : 'An error occurred during creation. Please try again.');
       setIsLoading(false);
     }
   };

@@ -111,6 +111,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name;
         if (session.role) token.role = session.role;
+        if (session.user?.name) token.name = session.user.name;
+        if (session.user?.role) token.role = session.user.role;
+        token.lastChecked = 0;
       }
 
       // ⚠️ CRITICAL: Scrub the image data out of the token to prevent 431 errors
@@ -122,8 +125,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const now = Date.now();
       const lastCheck = (token.lastChecked as number) || 0;
 
-      // Query database at most once every 30 seconds to fetch latest role/name
-      if (!token.role || now - lastCheck > 30000) {
+      // Query database at most once every 30 seconds to fetch latest role/name, or immediately on session update
+      if (!token.role || now - lastCheck > 30000 || trigger === "update") {
         try {
           // Fetch latest role and name, but avoid fetching the large image blob
           const dbUser = await prisma.user.findUnique({

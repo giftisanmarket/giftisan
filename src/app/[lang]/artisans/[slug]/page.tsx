@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { ArtisanClient } from "@/components/artisan-client";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { slugify } from "@/lib/utils";
 
 // Cached fetch to deduplicate queries between generateMetadata and page rendering
 const getArtisanBySlug = cache(async (rawSlug: string) => {
@@ -50,7 +51,7 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
     name: artisanBySlug.studioName || artisanBySlug.user.name 
   };
 
-  // Fallback: match by name (old behavior)
+  // Fallback: match by studioName or user name using slugify
   const users = await prisma.user.findMany({
     where: { 
       role: 'ARTISAN',
@@ -84,7 +85,16 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
     }
   });
 
-  const matchingUser = users.find(u => u.name?.toLowerCase().replace(/ /g, "-") === decodedSlug);
+  const matchingUser = users.find(u => {
+    const userNameSlug = u.name ? slugify(u.name) : "";
+    const studioSlug = u.artisanProfile?.studioName ? slugify(u.artisanProfile.studioName) : "";
+    return (
+      userNameSlug === decodedSlug ||
+      studioSlug === decodedSlug ||
+      u.name?.toLowerCase().replace(/\s+/g, "-") === decodedSlug
+    );
+  });
+
   return matchingUser ? { 
     artisanProfile: matchingUser.artisanProfile, 
     name: matchingUser.artisanProfile?.studioName || matchingUser.name 

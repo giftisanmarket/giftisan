@@ -128,9 +128,12 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
     });
 
     if (role === "ARTISAN") {
+      const baseSlug = slugify(name);
+      const artisanSlug = baseSlug ? `${baseSlug}-${user.id.slice(-4)}` : `artisan-${user.id.slice(-4)}`;
       await prisma.artisanProfile.create({
         data: {
           userId: user.id,
+          slug: artisanSlug,
           bio: "",
           location: "",
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
@@ -2213,10 +2216,14 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       return { error: "Studio Name, Bio, Location, and Phone Number are all required for artisan registration." };
     }
 
+    const baseSlug = slugify(studioData.studioName);
+    const artisanSlug = baseSlug ? baseSlug : `artisan-${userId.slice(-4)}`;
+
     await prisma.artisanProfile.create({
       data: {
         userId,
         studioName: studioData.studioName,
+        slug: artisanSlug,
         bio: studioData.bio || "",
         location: studioData.location || "",
         phoneNumber: studioData.phoneNumber.trim(),

@@ -16,7 +16,8 @@ import {
   Sparkles,
   Lock,
   Navigation,
-  Package
+  Package,
+  Award
 } from "lucide-react";
 import { 
   FaInstagram, 
@@ -44,6 +45,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const [studioName, setStudioName] = useState(artisan.studioName || "");
   const [bio, setBio] = useState(artisan.bio || "");
   const [location, setLocation] = useState(artisan.location || "");
+  const [yearsOfExperience, setYearsOfExperience] = useState<number>(artisan.yearsOfExperience ?? 1);
   const [avatar, setAvatar] = useState(artisan.avatar || "");
   const [instagram, setInstagram] = useState(artisan.instagram || "");
   const [website, setWebsite] = useState(artisan.website || "");
@@ -155,6 +157,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       studioName,
       bio,
       location,
+      yearsOfExperience: Number(yearsOfExperience) || 1,
       avatar,
       slug,
       instagram,
@@ -405,7 +408,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-primary/5">
+                  <div className="grid md:grid-cols-3 gap-6 pt-6 border-t border-primary/5">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label} *</label>
                       <div className="relative">
@@ -431,6 +434,24 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
                           placeholder="+20 ..."
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                        {dict.artisan_detail?.yrs_mastery || "Years of Mastery / Experience"} *
+                      </label>
+                      <div className="relative">
+                        <Award className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
+                        <input
+                          type="number"
+                          min="1"
+                          max="80"
+                          required
+                          value={yearsOfExperience}
+                          onChange={(e) => setYearsOfExperience(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
+                          placeholder="1"
                         />
                       </div>
                     </div>

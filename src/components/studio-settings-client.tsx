@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock, Navigation, Package, MapPin } from "lucide-react";
+import { User, Palette, Bell, Shield, Camera, Save, ArrowLeft, Check, AlertCircle, Loader2, Lock, Navigation, Package, MapPin, Award } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe, FaLocationDot, FaEnvelope } from "react-icons/fa6";
 import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
   const [studioName, setStudioName] = useState(artisan.studioName || "");
   const [bio, setBio] = useState(artisan.bio || "");
   const [location, setLocation] = useState(artisan.location || "");
+  const [yearsOfExperience, setYearsOfExperience] = useState<number>(artisan.yearsOfExperience ?? 1);
   const [avatar, setAvatar] = useState(artisan.avatar || "");
   const [instagram, setInstagram] = useState(artisan.instagram || "");
   const [website, setWebsite] = useState(artisan.website || "");
@@ -127,6 +128,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
       studioName,
       bio,
       location,
+      yearsOfExperience: Number(yearsOfExperience) || 1,
       avatar,
       slug,
       instagram,
@@ -551,7 +553,7 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.studio_profile.studio_location_label} *</label>
                         <div className="relative">
@@ -581,6 +583,26 @@ export function StudioSettingsClient({ artisan, dict, lang = "en" }: { artisan: 
                             onChange={(e) => setPhoneNumber(e.target.value)}
                             className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
                             placeholder={dict.checkout?.phone_number || "Phone Number"}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
+                          {dict.artisan_detail?.yrs_mastery || "Years of Mastery / Experience"} *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute start-6 top-1/2 -translate-y-1/2 text-primary/40">
+                            <Award className="w-4 h-4" />
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            max="80"
+                            required
+                            value={yearsOfExperience}
+                            onChange={(e) => setYearsOfExperience(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-full h-14 md:h-16 ps-12 pe-8 rounded-xl md:rounded-2xl bg-cream/30 border border-primary/5 transition-all font-bold text-primary focus:outline-none focus:border-accent placeholder:text-primary/40 text-sm md:text-base"
+                            placeholder="1"
                           />
                         </div>
                       </div>

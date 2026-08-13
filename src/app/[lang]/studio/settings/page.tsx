@@ -20,6 +20,7 @@ export default async function StudioSettingsPage({ params }: { params: Promise<{
     studioName: artisan.studioName,
     bio: artisan.bio,
     location: artisan.location,
+    yearsOfExperience: artisan.yearsOfExperience,
     avatar: artisan.avatar,
     slug: artisan.slug,
     instagram: artisan.instagram,

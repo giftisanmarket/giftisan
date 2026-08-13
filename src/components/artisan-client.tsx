@@ -35,7 +35,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
     return acc + (p.orderItems?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0);
   }, 0);
   const followersCount = Math.round(totalSales * 2.4 + (products.length * 8)) + (isFollowing ? 1 : 0);
-  const yearsExp = (new Date().getFullYear() - new Date(artisan.createdAt).getFullYear()) + 1;
+  const yearsExp = artisan.yearsOfExperience ?? ((new Date().getFullYear() - new Date(artisan.createdAt).getFullYear()) + 1);
 
   useEffect(() => {
     if (session?.user?.id) {

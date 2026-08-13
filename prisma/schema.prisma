@@ -119,6 +119,7 @@ model ArtisanProfile {
   userId          String        @unique
   bio             String?       @db.Text
   location        String?
+  yearsOfExperience Int?        @default(1)
   avatar          String?       @db.Text
   studioName      String?
   slug            String?       @unique

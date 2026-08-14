@@ -6,6 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const LOGO_URL = `${SITE_URL}/icon.png`;
 const SENDER = "Giftisan <support@giftisan.com>";
+const AUTH_SENDER = "Giftisan <auth@giftisan.com>";
 
 const getBaseUrl = () => {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
@@ -223,7 +224,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: AUTH_SENDER,
       to: email,
       subject: 'Verify your identity | Giftisan',
       html: `
@@ -351,7 +352,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: AUTH_SENDER,
       to: email,
       subject: 'Security: Access Recovery | Giftisan',
       html: `

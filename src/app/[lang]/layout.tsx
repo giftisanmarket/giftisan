@@ -120,11 +120,22 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": SITE_NAME,
+              "alternateName": ["Giftisan Egypt", "منصة جيفتيزان"],
               "description": SITE_DESCRIPTION,
+              "disambiguatingDescription": "An online curated marketplace exclusively featuring handmade goods from independent Egyptian artisans and small heritage workshops. Not a generic or mass-produced e-commerce platform.",
+              "slogan": "Authentic Egyptian Handmade Gifts & Artisan Marketplace",
               "url": SITE_URL,
               "logo": `${SITE_URL}/icon.png`,
               "foundingDate": "2024",
-              "knowsAbout": ["Egyptian Handicrafts", "Artisanal Gifts", "Handmade Jewelry", "Egyptian Heritage", "Eco-friendly Products"],
+              "knowsAbout": [
+                "Egyptian Handicrafts",
+                "Artisanal Gifts",
+                "Handmade Jewelry",
+                "Egyptian Heritage",
+                "Fayoum Pottery",
+                "Akhmim Textiles",
+                "Handmade Home Decor"
+              ],
               "sameAs": [
                 "https://instagram.com/giftisan_eg",
                 "https://tiktok.com/@giftisan.eg",

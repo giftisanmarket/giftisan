@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { PAYMOB_HMAC } from "@/lib/paymob";
-import { sendOrderNotification } from "@/lib/mail";
+import { sendOrderNotification, sendBuyerOrderReceiptEmail } from "@/lib/mail";
 
 export async function POST(req: NextRequest) {
   try {
@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       const order = await prisma.order.findUnique({
         where: { id: orderId },
         include: {
+          user: true,
           items: {
             include: {
               product: {
@@ -137,6 +138,23 @@ export async function POST(req: NextRequest) {
           }
         });
         console.log(`Order ${orderId} marked as PROCESSING and financial ledger updated via Paymob webhook.`);
+
+        // Send confirmation receipt to the buyer
+        try {
+          const buyerEmail = order.clientEmail || order.user?.email;
+          const buyerName = order.user?.name || "Customer";
+          if (buyerEmail) {
+            const receiptItems = order.items.map(i => ({
+              name: i.product.name,
+              quantity: i.quantity,
+              price: i.price
+            }));
+            sendBuyerOrderReceiptEmail(buyerEmail, buyerName, order.id, order.totalAmount, receiptItems, order.shippingCity || undefined)
+              .catch(err => console.error(`Failed to send buyer receipt email to ${buyerEmail}:`, err));
+          }
+        } catch (err) {
+          console.error("Failed to process buyer receipt email inside webhook:", err);
+        }
 
         // Send email notifications to artisans
         try {

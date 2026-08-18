@@ -5,8 +5,19 @@ import { SITE_URL } from './constants';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const LOGO_URL = `${SITE_URL}/icon.png`;
-const SENDER = "Giftisan <support@giftisan.com>";
-const AUTH_SENDER = "Giftisan <auth@giftisan.com>";
+// Receiver inbox for all incoming replies & customer inquiries
+export const SUPPORT_INBOX = "support@giftisan.com";
+
+// Sender addresses (Categorized for clean branding & deliverability)
+export const SENDER_SUPPORT = "Giftisan Support <support@giftisan.com>";
+export const SENDER_AUTH = "Giftisan Security <auth@giftisan.com>";
+export const SENDER_ORDERS = "Giftisan Orders <orders@giftisan.com>";
+export const SENDER_FINANCE = "Giftisan Finance <payouts@giftisan.com>";
+export const SENDER_STUDIO = "Giftisan Studio <studio@giftisan.com>";
+
+// Fallback aliases
+const SENDER = SENDER_SUPPORT;
+const AUTH_SENDER = SENDER_AUTH;
 
 const getBaseUrl = () => {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
@@ -65,7 +76,8 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_STUDIO,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: 'Welcome to the Circle | Giftisan',
       html: `
@@ -115,7 +127,8 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_ORDERS,
+      replyTo: SUPPORT_INBOX,
       to: artisanEmail,
       subject: 'New Sale: A treasure has been claimed! | مبيعة جديدة: تم اقتناء كنز من استوديو الخاص بك',
       html: `
@@ -184,7 +197,8 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_STUDIO,
+      replyTo: SUPPORT_INBOX,
       to: receiverEmail,
       subject: `New Dialogue from ${senderName} | Giftisan`,
       html: `
@@ -224,7 +238,8 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: AUTH_SENDER,
+      from: SENDER_AUTH,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: 'Verify your identity | Giftisan',
       html: `
@@ -293,7 +308,8 @@ export const sendOrderStatusUpdateEmail = async (
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_ORDERS,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: subject,
       html: `
@@ -352,7 +368,8 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: AUTH_SENDER,
+      from: SENDER_AUTH,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: 'Security: Access Recovery | Giftisan',
       html: `
@@ -389,8 +406,9 @@ export const sendInquiryNotification = async (name: string, email: string, messa
   }
   try {
     await resend.emails.send({
-      from: SENDER,
-      to: "support@giftisan.com",
+      from: SENDER_SUPPORT,
+      to: SUPPORT_INBOX,
+      replyTo: email,
       subject: `New Inquiry: ${name} is reaching out | Giftisan`,
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">
@@ -432,7 +450,8 @@ export const sendArtisanApprovalEmail = async (email: string, name: string) => {
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_STUDIO,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: 'Welcome to the Guild: Your Studio is Live! | مرحباً بك في الدائرة: استوديو جيفتيزان الخاص بك جاهز!',
       html: `
@@ -586,7 +605,8 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_SUPPORT,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: subject,
       html: lang === 'en' ? enHtml : arHtml,
@@ -625,7 +645,8 @@ export const sendCustomEmail = async (to: string, subject: string, body: string,
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_SUPPORT,
+      replyTo: SUPPORT_INBOX,
       to: to,
       subject: subject,
       html: html,
@@ -667,7 +688,8 @@ export const sendProductStatusUpdateEmail = async (email: string, name: string, 
 
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_STUDIO,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: subject,
       html: `
@@ -720,8 +742,9 @@ export const sendPayoutRequestEmail = async (artisanName: string, amount: number
   }
   try {
     await resend.emails.send({
-      from: SENDER,
-      to: "support@giftisan.com",
+      from: SENDER_FINANCE,
+      to: SUPPORT_INBOX,
+      replyTo: SUPPORT_INBOX,
       subject: `Withdrawal Requested: ${artisanName} is requesting ${amount} EGP | Giftisan Admin`,
       html: `
         <div style="background-color: ${CREAM_BG}; padding: 30px;">
@@ -764,7 +787,8 @@ export const sendPayoutApprovedEmail = async (email: string, name: string, amoun
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_FINANCE,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: `Your payout of ${amount} EGP has been successfully sent! | تم إيداع مستحقاتك المالية بقيمة ${amount} ج.م!`,
       html: `
@@ -827,7 +851,8 @@ export const sendPayoutDeclinedEmail = async (email: string, name: string, amoun
   }
   try {
     await resend.emails.send({
-      from: SENDER,
+      from: SENDER_FINANCE,
+      replyTo: SUPPORT_INBOX,
       to: email,
       subject: `Fulfillment Update: Withdrawal Request declined | تحديث حسابات: تم إلغاء طلب سحب المستحقات`,
       html: `

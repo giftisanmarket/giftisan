@@ -1,8 +1,9 @@
+import "dotenv/config";
 import { Resend } from 'resend';
 
 import { SITE_URL } from './constants';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 const LOGO_URL = `${SITE_URL}/icon.png`;
 
@@ -32,6 +33,8 @@ const BASE_URL = getBaseUrl();
 const PRIMARY_COLOR = "#1a2c2c";
 const ACCENT_COLOR = "#da7b5a";
 const CREAM_BG = "#fcf9f1";
+
+const isDevOnly = () => process.env.NODE_ENV === "development" && process.env.FORCE_SEND_EMAIL !== "true";
 
 const emailStyles = `
   <style>
@@ -84,7 +87,7 @@ const wrapEmail = (content: string, lang: 'ar' | 'en' = 'en') => `
 `;
 
 export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: WELCOME EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\n-----------------------------\n`);
     return { success: true };
   }
@@ -126,7 +129,7 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
 };
 
 export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: ORDER NOTIFICATION (${lang.toUpperCase()}) ---\nTarget: ${artisanEmail}\nOrder: ${orderId}\nAmount: EGP ${totalAmount}\n----------------------------------\n`);
     return { success: true };
   }
@@ -188,7 +191,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
 };
 
 export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: MESSAGE NOTIFICATION (${lang.toUpperCase()}) ---\nTarget: ${receiverEmail}\nSender: ${senderName}\n------------------------------------\n`);
     return { success: true };
   }
@@ -230,7 +233,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
 export const sendVerificationEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
   const confirmLink = `${BASE_URL}/api/auth/verify-email?token=${token}`;
 
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log("\n--- 📧 DEV: VERIFICATION EMAIL ---");
     console.log(`Target: ${email}`);
     console.log(`Link:   ${confirmLink}`);
@@ -285,7 +288,7 @@ export const sendOrderStatusUpdateEmail = async (
   carrier?: string,
   lang: 'ar' | 'en' = 'en'
 ) => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE (${lang.toUpperCase()}) ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\nCarrier: ${carrier || 'None'}\nTracking: ${trackingNumber || 'None'}\n----------------------------------\n`);
     return { success: true };
   }
@@ -403,7 +406,7 @@ export const sendOrderStatusUpdateEmail = async (
 export const sendPasswordResetEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
   const resetLink = `${BASE_URL}/reset-password?token=${token}`;
 
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log("\n--- 📧 DEV: PASSWORD RESET EMAIL ---");
     console.log(`Target: ${email}`);
     console.log(`Link:   ${resetLink}`);
@@ -448,7 +451,7 @@ export const sendPasswordResetEmail = async (email: string, token: string, lang:
 };
 
 export const sendInquiryNotification = async (name: string, email: string, message: string) => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log("\n--- 📧 DEV: NEW INQUIRY NOTIFICATION ---\nFrom:", name, "<", email, ">\nMessage:", message, "\n--------------------------------------\n");
     return { success: true };
   }
@@ -483,7 +486,7 @@ export const sendInquiryNotification = async (name: string, email: string, messa
 };
 
 export const sendArtisanApprovalEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: ARTISAN APPROVAL EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\n--------------------------------------\n`);
     return { success: true };
   }
@@ -559,7 +562,7 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
 };
 
 export const sendArtisanOutreachEmail = async (email: string, name: string, product: string, subject: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: OUTREACH EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nProduct: ${product}\n------------------------------\n`);
     return { success: true };
   }
@@ -634,7 +637,7 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
 };
 
 export const sendCustomEmail = async (to: string, subject: string, body: string, dir: 'ltr' | 'rtl' = 'ltr') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: CUSTOM EMAIL (${dir.toUpperCase()}) ---\nTarget: ${to}\nSubject: ${subject}\n------------------------------\n`);
     return { success: true };
   }
@@ -668,7 +671,7 @@ export const sendProductStatusUpdateEmail = async (
   reason?: string,
   lang: 'ar' | 'en' = 'en'
 ) => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: PRODUCT STATUS UPDATE (${lang.toUpperCase()}) ---\nTarget: ${email}\nProduct: ${productName}\nStatus: ${status}\nReason: ${reason || 'N/A'}\n-------------------------------------\n`);
     return { success: true };
   }
@@ -737,7 +740,7 @@ export const sendProductStatusUpdateEmail = async (
 };
 
 export const sendPayoutRequestEmail = async (artisanName: string, amount: number, method: string, address: string) => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: PAYOUT REQUEST SUBMITTED ---\nArtisan: ${artisanName}\nAmount: ${amount} EGP\nMethod: ${method}\nAddress: ${address}\n---------------------------------------\n`);
     return { success: true };
   }
@@ -773,7 +776,7 @@ export const sendPayoutRequestEmail = async (artisanName: string, amount: number
 };
 
 export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: PAYOUT APPROVED EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\n--------------------------------------\n`);
     return { success: true };
   }
@@ -831,7 +834,7 @@ export const sendPayoutApprovedEmail = async (email: string, name: string, amoun
 };
 
 export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string, lang: 'ar' | 'en' = 'en') => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: PAYOUT DECLINED EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\nReason: ${reason}\n--------------------------------------\n`);
     return { success: true };
   }
@@ -891,7 +894,7 @@ export const sendBuyerOrderReceiptEmail = async (
   shippingCity?: string,
   lang: 'ar' | 'en' = 'en'
 ) => {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevOnly()) {
     console.log(`\n--- 📧 DEV: BUYER ORDER RECEIPT (${lang.toUpperCase()}) ---\nTarget: ${email}\nOrder: ${orderId}\nTotal: ${totalAmount} EGP\n--------------------------------------\n`);
     return { success: true };
   }

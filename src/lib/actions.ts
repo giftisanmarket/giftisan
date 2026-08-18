@@ -2233,6 +2233,11 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       }
     });
 
+    if (session.user.email) {
+      sendArtisanApprovalEmail(session.user.email, session.user.name || studioData.studioName || "Artisan")
+        .catch(err => console.error("Failed to send artisan welcome email:", err));
+    }
+
     revalidatePath("/studio");
     revalidatePath("/become-artisan");
     revalidatePath("/artisans");

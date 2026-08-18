@@ -125,8 +125,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const now = Date.now();
       const lastCheck = (token.lastChecked as number) || 0;
 
-      // Query database at most once every 30 seconds to fetch latest role/name, or immediately on session update
-      if (!token.role || now - lastCheck > 30000 || trigger === "update") {
+      // Query database if email is unverified, role is missing, 30 seconds passed, or on session update
+      if (!token.role || !token.emailVerified || now - lastCheck > 30000 || trigger === "update") {
         try {
           // Fetch latest role and name, but avoid fetching the large image blob
           const dbUser = await prisma.user.findUnique({

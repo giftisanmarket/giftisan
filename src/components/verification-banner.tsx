@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, Mail, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { resendVerificationEmailAction } from "@/lib/actions";
 
 export function VerificationBanner({ dict }: { dict?: any }) {
@@ -16,10 +16,27 @@ export function VerificationBanner({ dict }: { dict?: any }) {
       resend_link: "Resend Link"
     }
   };
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [isResending, setIsResending] = useState(false);
   const [resent, setResent] = useState(false);
+
+  // Auto-sync session from DB when mounting or switching back to the tab
+  useEffect(() => {
+    if (session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth) {
+      update();
+    }
+  }, [session?.user, update]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (session?.user && !(session.user as any).emailVerified && !(session.user as any).isOAuth) {
+        update();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [session?.user, update]);
 
   // If session is loading, or not logged in, or already verified, or signed up via Google/OAuth, don't show
   if (status === "loading" || !session?.user || (session.user as any).isOAuth || (session.user as any).emailVerified || !isVisible) {

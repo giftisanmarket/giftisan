@@ -57,7 +57,7 @@ const getEmailHeader = () => `
   </div>
 `;
 
-const getEmailFooter = (lang: 'ar' | 'en' = 'ar') => `
+const getEmailFooter = (lang: 'ar' | 'en' = 'en') => `
   <div style="text-align: center; padding: 35px 20px; border-top: 1px solid rgba(0,0,0,0.05);" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
     <p style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">
       ${lang === 'ar' ? 'فريق جيفتيزان • ننطلق من مصر لدعم الحرفيين المحليين' : 'Proudly Based in Egypt • Supporting Local Artisans'}
@@ -71,7 +71,7 @@ const getEmailFooter = (lang: 'ar' | 'en' = 'ar') => `
   </div>
 `;
 
-const wrapEmail = (content: string, lang: 'ar' | 'en' = 'ar') => `
+const wrapEmail = (content: string, lang: 'ar' | 'en' = 'en') => `
   <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
     <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: ${lang === 'ar' ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
       ${getEmailHeader()}
@@ -83,7 +83,7 @@ const wrapEmail = (content: string, lang: 'ar' | 'en' = 'ar') => `
   </div>
 `;
 
-export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: WELCOME EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\n-----------------------------\n`);
     return { success: true };
@@ -125,7 +125,7 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
   }
 };
 
-export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number, lang: 'ar' | 'en' = 'ar') => {
+export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ORDER NOTIFICATION (${lang.toUpperCase()}) ---\nTarget: ${artisanEmail}\nOrder: ${orderId}\nAmount: EGP ${totalAmount}\n----------------------------------\n`);
     return { success: true };
@@ -187,7 +187,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   }
 };
 
-export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: MESSAGE NOTIFICATION (${lang.toUpperCase()}) ---\nTarget: ${receiverEmail}\nSender: ${senderName}\n------------------------------------\n`);
     return { success: true };
@@ -227,7 +227,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
   }
 };
 
-export const sendVerificationEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendVerificationEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
   const confirmLink = `${BASE_URL}/api/auth/verify-email?token=${token}`;
 
   if (process.env.NODE_ENV === "development") {
@@ -283,7 +283,7 @@ export const sendOrderStatusUpdateEmail = async (
   productSlug?: string,
   trackingNumber?: string,
   carrier?: string,
-  lang: 'ar' | 'en' = 'ar'
+  lang: 'ar' | 'en' = 'en'
 ) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ORDER STATUS UPDATE (${lang.toUpperCase()}) ---\nTarget: ${email}\nOrder: ${orderId}\nStatus: ${status}\nCarrier: ${carrier || 'None'}\nTracking: ${trackingNumber || 'None'}\n----------------------------------\n`);
@@ -400,7 +400,7 @@ export const sendOrderStatusUpdateEmail = async (
   }
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendPasswordResetEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
   const resetLink = `${BASE_URL}/reset-password?token=${token}`;
 
   if (process.env.NODE_ENV === "development") {
@@ -482,7 +482,7 @@ export const sendInquiryNotification = async (name: string, email: string, messa
   }
 };
 
-export const sendArtisanApprovalEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendArtisanApprovalEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: ARTISAN APPROVAL EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\n--------------------------------------\n`);
     return { success: true };
@@ -558,7 +558,7 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
   }
 };
 
-export const sendArtisanOutreachEmail = async (email: string, name: string, product: string, subject: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendArtisanOutreachEmail = async (email: string, name: string, product: string, subject: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: OUTREACH EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nProduct: ${product}\n------------------------------\n`);
     return { success: true };
@@ -666,7 +666,7 @@ export const sendProductStatusUpdateEmail = async (
   productName: string,
   status: "APPROVED" | "REJECTED" | "PENDING",
   reason?: string,
-  lang: 'ar' | 'en' = 'ar'
+  lang: 'ar' | 'en' = 'en'
 ) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PRODUCT STATUS UPDATE (${lang.toUpperCase()}) ---\nTarget: ${email}\nProduct: ${productName}\nStatus: ${status}\nReason: ${reason || 'N/A'}\n-------------------------------------\n`);
@@ -772,7 +772,7 @@ export const sendPayoutRequestEmail = async (artisanName: string, amount: number
   }
 };
 
-export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PAYOUT APPROVED EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\n--------------------------------------\n`);
     return { success: true };
@@ -830,7 +830,7 @@ export const sendPayoutApprovedEmail = async (email: string, name: string, amoun
   }
 };
 
-export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string, lang: 'ar' | 'en' = 'ar') => {
+export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string, lang: 'ar' | 'en' = 'en') => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: PAYOUT DECLINED EMAIL (${lang.toUpperCase()}) ---\nTarget: ${email}\nName: ${name}\nAmount: ${amount} EGP\nReason: ${reason}\n--------------------------------------\n`);
     return { success: true };
@@ -889,7 +889,7 @@ export const sendBuyerOrderReceiptEmail = async (
   totalAmount: number,
   items: Array<{ name: string; quantity: number; price: number }>,
   shippingCity?: string,
-  lang: 'ar' | 'en' = 'ar'
+  lang: 'ar' | 'en' = 'en'
 ) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n--- 📧 DEV: BUYER ORDER RECEIPT (${lang.toUpperCase()}) ---\nTarget: ${email}\nOrder: ${orderId}\nTotal: ${totalAmount} EGP\n--------------------------------------\n`);

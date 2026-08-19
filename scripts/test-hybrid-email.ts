@@ -28,7 +28,7 @@ async function main() {
   if (brevoResult.success) {
     console.log(`✅ [Brevo SMTP] Order email dispatched successfully!`);
   } else {
-    console.error(`❌ [Brevo SMTP] Failed:`, brevoResult.error);
+    console.error(`❌ [Brevo SMTP] Failed:`, (brevoResult as { error?: unknown }).error);
   }
 
   console.log(`\n⏳ 2. Testing Resend API (Security/Auth Email)...`);
@@ -40,7 +40,7 @@ async function main() {
   if (resendResult.success) {
     console.log(`✅ [Resend API] Verification email dispatched successfully!`);
   } else {
-    console.error(`❌ [Resend API] Failed:`, resendResult.error);
+    console.error(`❌ [Resend API] Failed:`, (resendResult as { error?: unknown }).error);
   }
 
   console.log(`\n======================================================`);

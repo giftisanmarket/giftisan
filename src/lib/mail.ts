@@ -1,9 +1,46 @@
 import "dotenv/config";
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 import { SITE_URL } from './constants';
 
+// 1. Resend instance (Reserved EXCLUSIVELY for Auth & Security)
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
+
+// 2. Nodemailer Transporter (Powered by Brevo for Orders, Studio, Finance & Inquiries)
+const smtpTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === "true",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+interface OperationalEmailPayload {
+  from: string;
+  to: string | string[];
+  subject: string;
+  html: string;
+  replyTo?: string;
+}
+
+const sendOperationalEmail = async ({ from, to, subject, html, replyTo = SUPPORT_INBOX }: OperationalEmailPayload) => {
+  try {
+    const info = await smtpTransporter.sendMail({
+      from,
+      to,
+      subject,
+      html,
+      replyTo,
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending operational email via Brevo SMTP:', error);
+    return { success: false, error };
+  }
+};
 
 const LOGO_URL = `${SITE_URL}/icon.png`;
 
@@ -113,19 +150,13 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
     <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center;">Happy discovery!</p>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_STUDIO,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending welcome email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_STUDIO,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendOrderNotification = async (artisanEmail: string, artisanName: string, orderId: string, totalAmount: number, lang: 'ar' | 'en' = 'en') => {
@@ -175,19 +206,13 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_ORDERS,
-      replyTo: SUPPORT_INBOX,
-      to: artisanEmail,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending order notification email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_ORDERS,
+    replyTo: SUPPORT_INBOX,
+    to: artisanEmail,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendMessageNotification = async (receiverEmail: string, receiverName: string, senderName: string, lang: 'ar' | 'en' = 'en') => {
@@ -215,19 +240,13 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_STUDIO,
-      replyTo: SUPPORT_INBOX,
-      to: receiverEmail,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending message notification email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_STUDIO,
+    replyTo: SUPPORT_INBOX,
+    to: receiverEmail,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendVerificationEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
@@ -388,19 +407,13 @@ export const sendOrderStatusUpdateEmail = async (
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_ORDERS,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending order status update email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_ORDERS,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string, lang: 'ar' | 'en' = 'en') => {
@@ -470,19 +483,13 @@ export const sendInquiryNotification = async (name: string, email: string, messa
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_SUPPORT,
-      to: SUPPORT_INBOX,
-      replyTo: email,
-      subject: `New Inquiry from ${name} | Giftisan Support`,
-      html: wrapEmail(content, 'en'),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending inquiry notification:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    to: SUPPORT_INBOX,
+    replyTo: email,
+    subject: `New Inquiry from ${name} | Giftisan Support`,
+    html: wrapEmail(content, 'en'),
+  });
 };
 
 export const sendArtisanApprovalEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
@@ -546,19 +553,13 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
     <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center; margin-top: 25px;">We can't wait to see what you create and grow with us!</p>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_STUDIO,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending artisan approval email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_STUDIO,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendArtisanOutreachEmail = async (email: string, name: string, product: string, subject: string, lang: 'ar' | 'en' = 'en') => {
@@ -621,19 +622,13 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_SUPPORT,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(lang === 'en' ? enContent : arContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending outreach email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(lang === 'en' ? enContent : arContent, lang),
+  });
 };
 
 export const sendCustomEmail = async (to: string, subject: string, body: string, dir: 'ltr' | 'rtl' = 'ltr') => {
@@ -648,19 +643,13 @@ export const sendCustomEmail = async (to: string, subject: string, body: string,
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_SUPPORT,
-      replyTo: SUPPORT_INBOX,
-      to,
-      subject,
-      html: wrapEmail(content, dir === 'rtl' ? 'ar' : 'en'),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending custom email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    replyTo: SUPPORT_INBOX,
+    to,
+    subject,
+    html: wrapEmail(content, dir === 'rtl' ? 'ar' : 'en'),
+  });
 };
 
 export const sendProductStatusUpdateEmail = async (
@@ -724,19 +713,13 @@ export const sendProductStatusUpdateEmail = async (
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_STUDIO,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending product status email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_STUDIO,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendPayoutRequestEmail = async (artisanName: string, amount: number, method: string, address: string) => {
@@ -760,19 +743,13 @@ export const sendPayoutRequestEmail = async (artisanName: string, amount: number
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_FINANCE,
-      to: SUPPORT_INBOX,
-      replyTo: SUPPORT_INBOX,
-      subject: `Withdrawal Requested: ${artisanName} (${amount} EGP) | Giftisan Admin`,
-      html: wrapEmail(content, 'en'),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending payout request notification:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_FINANCE,
+    to: SUPPORT_INBOX,
+    replyTo: SUPPORT_INBOX,
+    subject: `Withdrawal Requested: ${artisanName} (${amount} EGP) | Giftisan Admin`,
+    html: wrapEmail(content, 'en'),
+  });
 };
 
 export const sendPayoutApprovedEmail = async (email: string, name: string, amount: number, method: string, address: string, lang: 'ar' | 'en' = 'en') => {
@@ -818,19 +795,13 @@ export const sendPayoutApprovedEmail = async (email: string, name: string, amoun
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_FINANCE,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending payout approved email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_FINANCE,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendPayoutDeclinedEmail = async (email: string, name: string, amount: number, reason: string, lang: 'ar' | 'en' = 'en') => {
@@ -870,19 +841,13 @@ export const sendPayoutDeclinedEmail = async (email: string, name: string, amoun
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_FINANCE,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending payout declined email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_FINANCE,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };
 
 export const sendBuyerOrderReceiptEmail = async (
@@ -978,17 +943,11 @@ export const sendBuyerOrderReceiptEmail = async (
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: SENDER_ORDERS,
-      replyTo: SUPPORT_INBOX,
-      to: email,
-      subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending buyer receipt email:', error);
-    return { success: false, error };
-  }
+  return sendOperationalEmail({
+    from: SENDER_ORDERS,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
 };

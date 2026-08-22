@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin, RotateCcw, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateOrderStatus } from "@/lib/actions";
 import toast from "react-hot-toast";
@@ -134,7 +134,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["ALL", "READY TO SHIP", "PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].map((status) => (
+              {["ALL", "READY TO SHIP", "PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "REFUNDED", "CANCELLED"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
@@ -145,7 +145,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                       : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
                   )}
                 >
-                  {status === "READY TO SHIP" ? dict.admin.ready_to_ship : status}
+                  {status === "READY TO SHIP" ? dict.admin.ready_to_ship : status === "REFUNDED" ? (isAr ? "مسترجع" : "Refunded") : status}
                   <span className="opacity-40">
                     ({status === "ALL" ? orders.length : status === "READY TO SHIP" ? orders.filter(o => ["PENDING", "PROCESSING"].includes(o.status) && (o.items?.length || 0) > 0 && o.items?.filter((i: any) => i.status === "PROCESSING" || i.status === "SHIPPED" || i.status === "DELIVERED").length === o.items?.length).length : orders.filter(o => o.status === status).length})
                   </span>
@@ -207,7 +207,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                         <tr key={order.id} className="hover:bg-cream/30 transition-colors group">
                           <td className="px-6 md:px-8 py-4 md:py-6">
                             <div>
-                              <p className="font-mono text-[10px] md:text-xs font-bold text-primary uppercase">{order.id.slice(0, 8)}</p>
+                              <p className="font-mono text-[10px] md:text-xs font-bold text-primary break-all">#{order.id}</p>
                               <p className="text-[8px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">
                                 {new Date(order.createdAt).toLocaleDateString()}
                               </p>
@@ -216,6 +216,15 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                   <Sparkles className="w-2.5 h-2.5 text-accent" />
                                   <span className="text-[8px] font-black uppercase text-accent tracking-widest">{dict.checkout?.mark_as_gift || "GIFT"}</span>
                                 </div>
+                              )}
+                              {order.refundRequests?.some((r: any) => r.status === "PENDING") && (
+                                <Link 
+                                  href={`/${lang}/admin/refunds`}
+                                  className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 bg-amber-500 text-white font-bold rounded-lg text-[9px] uppercase tracking-wider animate-pulse hover:bg-amber-600 transition-colors shadow-sm"
+                                >
+                                  <AlertTriangle className="w-3 h-3" />
+                                  <span>{isAr ? "نزاع معلق" : "Dispute Pending"}</span>
+                                </Link>
                               )}
                             </div>
                           </td>
@@ -278,12 +287,14 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                               order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-200" :
                               order.status === "PROCESSING" ? "bg-purple-50 text-purple-600 border-purple-200" :
                               order.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                              order.status === "REFUNDED" ? "bg-rose-50 text-rose-700 border-rose-200" :
                               "bg-green-50 text-green-700 border-green-200"
                             )}>
                               {order.status === "PENDING" && <Clock className="w-3 h-3" />}
                               {order.status === "PROCESSING" && <RefreshCw className="w-3 h-3 animate-spin" />}
                               {order.status === "CANCELLED" && <X className="w-3 h-3" />}
                               {order.status === "SHIPPED" && <Truck className="w-3 h-3" />}
+                              {order.status === "REFUNDED" && <RotateCcw className="w-3 h-3" />}
                               {order.status === "DELIVERED" && <CheckCircle2 className="w-3 h-3" />}
                               {order.status}
                             </span>
@@ -336,6 +347,15 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                         <Edit className="w-4 h-4 text-accent" />
                                         {dict.admin.update_state}
                                       </button>
+                                      {order.refundRequests && order.refundRequests.length > 0 && (
+                                        <Link
+                                          href={`/${lang}/admin/refunds`}
+                                          className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition-colors"
+                                        >
+                                          <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                          {isAr ? "مراجعة النزاع / الاسترجاع" : "Review Dispute Claim"}
+                                        </Link>
+                                      )}
                                       <button
                                         onClick={() => {
                                           setOpenMenuId(null);
@@ -400,7 +420,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                   <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">
                     Update Order State
                   </h2>
-                  <p className="font-mono text-xs font-bold text-accent mt-1">#{editingOrder.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="font-mono text-xs font-bold text-accent mt-1 break-all">#{editingOrder.id}</p>
                 </div>
                 <button
                   onClick={() => setEditingOrder(null)}
@@ -423,6 +443,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                       {newStatus === "PROCESSING" && <RefreshCw className="w-4 h-4 text-purple-600" />}
                       {newStatus === "SHIPPED" && <Truck className="w-4 h-4 text-blue-600" />}
                       {newStatus === "DELIVERED" && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+                      {newStatus === "REFUNDED" && <RotateCcw className="w-4 h-4 text-rose-600" />}
                       {newStatus === "CANCELLED" && <X className="w-4 h-4 text-red-600" />}
                       {newStatus}
                     </span>
@@ -445,6 +466,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                             { value: "PROCESSING", icon: RefreshCw, color: "text-purple-600", bg: "hover:bg-purple-50/50" },
                             { value: "SHIPPED", icon: Truck, color: "text-blue-600", bg: "hover:bg-blue-50/50" },
                             { value: "DELIVERED", icon: CheckCircle2, color: "text-green-600", bg: "hover:bg-green-50/50" },
+                            { value: "REFUNDED", icon: RotateCcw, color: "text-rose-600", bg: "hover:bg-rose-50/50" },
                             { value: "CANCELLED", icon: X, color: "text-red-600", bg: "hover:bg-red-50/50" },
                           ].map((item) => (
                             <button
@@ -545,8 +567,8 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
               <div className="overflow-y-auto custom-scrollbar p-8 md:p-12 space-y-10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                      {dict.admin.order_details} #{selectedOrderDetails.id.slice(0, 8).toUpperCase()}
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4 break-all">
+                      {dict.admin.order_details} #{selectedOrderDetails.id}
                     </div>
                     <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.admin.full_order_details} <span className="serif italic">{dict.admin.overview_accent}</span></h2>
                   </div>
@@ -719,7 +741,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
             </div>
             <div className="text-right">
               <h2 className="text-2xl font-bold text-primary mb-1 uppercase tracking-tight">{dict.admin.packing_slip}</h2>
-              <p className="font-mono text-sm font-bold text-charcoal/40">#{orderToPrint.id.slice(0, 8).toUpperCase()}</p>
+              <p className="font-mono text-sm font-bold text-charcoal/40 break-all">#{orderToPrint.id}</p>
               <p className="text-xs font-bold text-primary mt-2">{new Date(orderToPrint.createdAt).toLocaleDateString()}</p>
             </div>
           </div>

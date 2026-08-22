@@ -5,6 +5,7 @@ import { Pool } from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
 };
 
 // DATABASE_URL must be set via environment variables — never hardcode credentials here
@@ -15,7 +16,7 @@ if (!connectionString) {
   );
 }
 
-const pool = new Pool({
+const pool = globalForPrisma.pool ?? new Pool({
   connectionString,
   ssl: {
     rejectUnauthorized: false,
@@ -27,12 +28,14 @@ const pool = new Pool({
 
 const adapter = new PrismaPg(pool);
 
-// Standard singleton: reuse global instance in dev to avoid hot-reload leaks,
-// but re-instantiate if schema has been regenerated with new models.
-const existingPrisma = globalForPrisma.prisma;
-export const prisma = (existingPrisma && (existingPrisma as any).artisanBioLink)
-  ? existingPrisma
-  : new PrismaClient({ adapter });
+const createPrismaClient = () => new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+  globalForPrisma.pool = pool;
+}
+
+
 

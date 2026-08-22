@@ -706,8 +706,8 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     <div className="p-5 md:p-16 space-y-6 md:space-y-10">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                            {dict.studio.sale_receipt} #{selectedItem.orderId.slice(0, 8).toUpperCase()}
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4 break-all">
+                            {dict.studio.sale_receipt} #{selectedItem.orderId}
                           </div>
                           <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
                         </div>
@@ -846,7 +846,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   </div>
                   <div className="text-right">
                     <h2 className="text-2xl font-bold text-primary mb-1 uppercase tracking-tight">{dict.admin.packing_slip || "PACKING SLIP"}</h2>
-                    <p className="font-mono text-sm font-bold text-charcoal/40">#{selectedItem.orderId.slice(0, 8).toUpperCase()}</p>
+                    <p className="font-mono text-sm font-bold text-charcoal/40 break-all">#{selectedItem.orderId}</p>
                     <p className="text-xs font-bold text-primary mt-2">{new Date(selectedItem.order.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>

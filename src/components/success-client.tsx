@@ -99,7 +99,7 @@ export function SuccessClient({ dict, lang, order }: SuccessClientProps) {
             <div className="bg-cream/30 px-6 md:px-10 py-6 border-b border-primary/5 flex flex-wrap justify-between items-center gap-4">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-1">{dict.profile.reference}</p>
-                <h2 className="text-lg md:text-xl font-mono font-bold text-primary uppercase tracking-tight">#{order.id.slice(0, 8)}</h2>
+                <h2 className="text-base md:text-xl font-mono font-bold text-primary tracking-tight break-all">#{order.id}</h2>
               </div>
               <div className="flex items-center gap-4 text-right">
                 <div>

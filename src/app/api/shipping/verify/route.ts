@@ -267,7 +267,7 @@ function renderHtmlConfirmationPrompt(item: any, isOrderId: boolean = false) {
       <div>
         <span class="text-[10px] font-extrabold uppercase text-[#123524]/40 tracking-widest">Order Package</span>
         <p class="text-base font-bold text-[#123524] mt-0.5">${item.product.name} ${item.order.items && item.order.items.length > 1 ? `and ${item.order.items.length - 1} other items` : ''}</p>
-        <p class="text-xs font-bold text-[#123524]/60 mt-1">Order #${item.orderId.slice(0, 8).toUpperCase()}</p>
+        <p class="text-xs font-bold text-[#123524]/60 mt-1 break-all">Order #${item.orderId}</p>
       </div>
       <hr class="border-[#123524]/5" />
       <div>
@@ -344,7 +344,7 @@ function renderHtmlSuccess(item: any) {
     
     <div class="my-8 p-6 bg-[#FAF8F5] rounded-2xl border border-[#123524]/5 text-left">
       <p class="text-sm font-bold text-[#123524]">${item.product.name} ${item.order.items && item.order.items.length > 1 ? `and ${item.order.items.length - 1} other items` : ''}</p>
-      <p class="text-xs font-bold text-[#123524]/60 mt-1">Order #${item.orderId.slice(0, 8).toUpperCase()} • Delivered</p>
+      <p class="text-xs font-bold text-[#123524]/60 mt-1 break-all">Order #${item.orderId} • Delivered</p>
     </div>
 
     <div class="py-3 px-4 bg-[#123524]/5 rounded-xl text-[#123524] text-xs font-bold flex items-center justify-center gap-2">

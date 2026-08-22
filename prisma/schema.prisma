@@ -30,9 +30,10 @@ model User {
   artisanProfile ArtisanProfile?
 
   // Client specific
-  orders    Order[]
-  favorites Favorite[]
-  reviews   Review[]
+  orders         Order[]
+  favorites      Favorite[]
+  reviews        Review[]
+  refundRequests RefundRequest[]
 
   // Messaging
   sentMessages     Message[] @relation("SentMessages")
@@ -303,8 +304,9 @@ model Order {
   isGift      Boolean @default(false)
   giftMessage String? @db.Text
 
-  user  User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items OrderItem[]
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          OrderItem[]
+  refundRequests RefundRequest[]
 
   // Coupon / Discount Integration
   couponId        String?
@@ -356,9 +358,10 @@ model OrderItem {
   carrier         String?
   artisanNotes    String? @db.Text
 
-  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  refundRequests RefundRequest[]
 
   @@index([orderId])
   @@index([productId])
@@ -450,3 +453,77 @@ enum TransactionStatus {
   COMPLETED     // For payout requests: payment sent to artisan bank/wallet
   FAILED        // Transaction cancelled or failed
 }
+
+enum RefundReason {
+  DAMAGED_IN_TRANSIT
+  DEFECTIVE_OR_WRONG_ITEM
+  NOT_AS_DESCRIBED
+  ORDER_NOT_RECEIVED
+  OTHER
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REPLACEMENT_ISSUED
+}
+
+model RefundRequest {
+  id              String         @id @default(cuid())
+  orderId         String
+  orderItemId     String?
+  userId          String
+  
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem       OrderItem?     @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  reason          RefundReason
+  details         String         @db.Text
+  images          String[]       // Photo evidence URLs
+  preferredAction String         // "REFUND" or "REPLACEMENT"
+  status          RefundStatus   @default(PENDING)
+  adminNote       String?        @db.Text
+  refundAmount    Float?
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum ExpenseCategory {
+  MARKETING
+  PACKAGING_SUPPLIES
+  LOGISTICS_SHIPPING
+  SOFTWARE_SERVICES
+  EQUIPMENT_TOOLS
+  OFFICE_OPERATIONS
+  SALARIES_CONTRACTORS
+  OTHER
+}
+
+model PlatformExpense {
+  id            String          @id @default(cuid())
+  title         String
+  category      ExpenseCategory @default(OTHER)
+  amount        Float
+  currency      String          @default("EGP")
+  date          DateTime        @default(now())
+  paidBy        String?         // Person or payment source (e.g., "Hazem", "Company Card", "Vodafone Cash")
+  paymentMethod String?         // e.g. "CASH", "BANK_TRANSFER", "CARD", "WALLET"
+  receiptUrl    String?         @db.Text
+  notes         String?         @db.Text
+  createdById   String?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([date])
+  @@index([category])
+  @@index([createdById])
+}
+

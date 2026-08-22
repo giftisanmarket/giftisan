@@ -87,12 +87,21 @@ export default async function RefundPage({ params }: { params: Promise<{ lang: s
             <p className="text-white/70 mb-10 max-w-lg mx-auto font-medium">
               {dict.refund.more_details_desc}
             </p>
-            <Link 
-              href={`/${lang}/contact`}
-              className="inline-flex items-center gap-3 bg-accent text-white px-10 py-4 rounded-2xl font-black text-lg hover:bg-accent-light transition-all shadow-xl shadow-black/20"
-            >
-              {dict.refund.contact_support} <ChevronRight className="w-5 h-5" />
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Link 
+                href={`/${lang}/profile`}
+                className="inline-flex items-center gap-3 bg-accent text-white px-8 py-4 rounded-2xl font-black text-base hover:bg-accent-light transition-all shadow-xl shadow-black/20"
+              >
+                <span>{lang === "ar" ? "تقديم طلب استرجاع من طلباتك" : "Submit Claim from Your Orders"}</span>
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+              <Link 
+                href={`/${lang}/contact`}
+                className="inline-flex items-center gap-2 bg-white/10 text-white px-8 py-4 rounded-2xl font-bold text-base hover:bg-white/20 transition-all border border-white/10"
+              >
+                <span>{dict.refund.contact_support}</span>
+              </Link>
+            </div>
           </div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
         </div>

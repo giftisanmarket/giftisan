@@ -15,7 +15,9 @@ import {
   ArrowLeft,
   Tag,
   DollarSign,
-  Truck
+  Truck,
+  RotateCcw,
+  ReceiptText
 } from "lucide-react";
 
 import Image from "next/image";
@@ -28,6 +30,8 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
     { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
     { label: dict.admin.shipping_management || (isAr ? "إدارة الشحن" : "Shipping"), href: "/admin/shipping", icon: Truck },
+    { label: isAr ? "الاسترجاع والنزاعات" : "Refunds & Claims", href: "/admin/refunds", icon: RotateCcw },
+    { label: isAr ? "مصاريف المنصة" : "Platform Expenses", href: "/admin/expenses", icon: ReceiptText },
     { label: dict.admin.payouts_requests || (isAr ? "إدارة المدفوعات" : "Payout Requests"), href: "/admin/payouts", icon: DollarSign },
     { label: dict.admin.coupons || (isAr ? "كوبونات الخصم" : "Coupons"), href: "/admin/coupons", icon: Tag },
     { label: dict.admin.subscribers, href: "/admin/subscribers", icon: Mail },

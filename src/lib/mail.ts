@@ -166,7 +166,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   }
 
   const isAr = lang === 'ar';
-  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId.slice(0, 8)})` : `New Sale Alert: A product has been claimed! (#${orderId.slice(0, 8)})`;
+  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId})` : `New Sale Alert: A product has been claimed! (#${orderId})`;
 
   const arContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 12px;">تنبيه مبيعة جديدة!</h1>
@@ -174,7 +174,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     
     <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">رقم الطلب</p>
-      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</p>
       
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">أرباحك المحققة (0% عمولة للمنصة)</p>
       <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 28px; font-weight: bold;">${totalAmount.toLocaleString()} ج.م</p>
@@ -193,7 +193,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     
     <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">Order Reference</p>
-      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</p>
+      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</p>
       
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">Your Earnings (0% Platform Fee)</p>
       <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 28px; font-weight: bold;">EGP ${totalAmount.toLocaleString()}</p>
@@ -340,7 +340,7 @@ export const sendOrderStatusUpdateEmail = async (
     : `${BASE_URL}/profile`;
 
   const subject = isAr
-    ? isDelivered ? `وصلت قطعتك الفنية! شاركنا رأيك | جيفتيزان` : `تحديث لطلبك #${orderId.slice(0, 8)}: ${statusTextAr[status] || status}`
+    ? isDelivered ? `وصلت قطعتك الفنية! شاركنا رأيك | جيفتيزان` : `تحديث لطلبك #${orderId}: ${statusTextAr[status] || status}`
     : isDelivered ? `Share Your Story: Your product has arrived! | Giftisan` : `Journey Update: Your product ${statusTextEn[status] || status}`;
 
   const arContent = `
@@ -354,7 +354,7 @@ export const sendOrderStatusUpdateEmail = async (
       <p style="margin: 0; font-size: 26px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">
         ${status === 'PROCESSING' ? 'قيد التجهيز' : status === 'SHIPPED' ? 'تم الشحن' : status === 'DELIVERED' ? 'تم التوصيل' : 'ملغي'}
       </p>
-      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace;">رقم الطلب: #${orderId.slice(0, 8)}</p>
+      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace; word-break: break-all;">رقم الطلب: #${orderId}</p>
     </div>
 
     ${status === 'SHIPPED' && trackingNumber ? `
@@ -385,7 +385,7 @@ export const sendOrderStatusUpdateEmail = async (
     <div style="margin: 30px 0; background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; text-align: center;">
       <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em; color: #9ca3af;">Current Milestone</p>
       <p style="margin: 0; font-size: 26px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
-      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace;">Ref: #${orderId.slice(0, 8)}</p>
+      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace; word-break: break-all;">Ref: #${orderId}</p>
     </div>
 
     ${status === 'SHIPPED' && trackingNumber ? `
@@ -866,8 +866,8 @@ export const sendBuyerOrderReceiptEmail = async (
 
   const isAr = lang === 'ar';
   const subject = isAr
-    ? `تم تأكيد طلبك بنجاح (#${orderId.slice(0, 8)}) | شكراً لدعمك الحرفيين`
-    : `Order Confirmed: #${orderId.slice(0, 8)} | Thank you for supporting authentic craft`;
+    ? `تم تأكيد طلبك بنجاح (#${orderId}) | شكراً لدعمك الحرفيين`
+    : `Order Confirmed: #${orderId} | Thank you for supporting authentic craft`;
 
   const itemsHtmlAr = items.map(item => `
     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px;">
@@ -890,7 +890,7 @@ export const sendBuyerOrderReceiptEmail = async (
     <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
         <span style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">رقم الطلب</span>
-        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</span>
       </div>
       ${shippingCity ? `
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -920,7 +920,7 @@ export const sendBuyerOrderReceiptEmail = async (
     <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
         <span style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">Order Reference</span>
-        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace;">#${orderId.slice(0, 8)}</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</span>
       </div>
       ${shippingCity ? `
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -951,3 +951,245 @@ export const sendBuyerOrderReceiptEmail = async (
     html: wrapEmail(isAr ? arContent : enContent, lang),
   });
 };
+
+export const sendRefundRequestSubmittedEmail = async ({
+  email,
+  customerName,
+  orderId,
+  productName,
+  reason,
+  preferredAction,
+  ticketId,
+  lang = 'en'
+}: {
+  email: string;
+  customerName: string;
+  orderId: string;
+  productName?: string;
+  reason: string;
+  preferredAction: string;
+  ticketId: string;
+  lang?: 'ar' | 'en';
+}) => {
+  if (isDevOnly()) {
+    console.log(`\n--- 📧 DEV: REFUND CLAIM SUBMITTED (${lang.toUpperCase()}) ---\nTarget: ${email}\nOrder: ${orderId}\nTicket: ${ticketId}\n-----------------------------\n`);
+    return { success: true };
+  }
+
+  const isAr = lang === 'ar';
+  const subject = isAr 
+    ? `تم استلام طلب الاسترجاع / الشكوى الخاص بك (#${orderId}) | Giftisan`
+    : `Refund / Dispute Claim Received (#${orderId}) | Giftisan Support`;
+
+  const arContent = `
+    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 15px;">تم استلام طلبك، ${customerName}</h1>
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 22px;">
+      نؤكد لك استلام طلب الاسترجاع / الإبلاغ عن مشكلة بخصوص طلبك رقم <strong>#${orderId}</strong>. يقوم فريق ضمان الجودة ومتابعة العملاء بمراجعة تفاصيل المشكلة والصور المرفقة لضمان حقك وحل الأمر بأسرع وقت.
+    </p>
+
+    <div style="background-color: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase;">رقم الشكوى / التذكرة</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace; word-break: break-all;">#${ticketId}</span>
+      </div>
+      ${productName ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">المنتج</span>
+          <span style="color: #1a2c2c; font-size: 13px; font-weight: bold;">${productName}</span>
+        </div>
+      ` : ''}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">سبب الطلب</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold;">${reason}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">الإجراء المفضل</span>
+        <span style="color: ${ACCENT_COLOR}; font-size: 13px; font-weight: bold;">${preferredAction === 'REPLACEMENT' ? 'استبدال القطعة' : 'استرداد المبلغ'}</span>
+      </div>
+    </div>
+
+    <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin-bottom: 25px;">
+      سنوافيك بالرد خلال 24-48 ساعة عمل. تم تعليق دورة الإفراج عن الأموال مؤقتاً لحين حل الشكوى بالكامل.
+    </p>
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 14px; display: inline-block;">متابعة الطلب من حسابك</a>
+    </div>
+  `;
+
+  const enContent = `
+    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 15px;">Claim Received, ${customerName}</h1>
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 22px;">
+      We have received your refund/dispute claim for order <strong>#${orderId}</strong>. Our customer assurance and mediation team is currently reviewing your submission and photo evidence.
+    </p>
+
+    <div style="background-color: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase;">Ticket Reference</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold; font-family: monospace; word-break: break-all;">#${ticketId}</span>
+      </div>
+      ${productName ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">Product</span>
+          <span style="color: #1a2c2c; font-size: 13px; font-weight: bold;">${productName}</span>
+        </div>
+      ` : ''}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">Reason</span>
+        <span style="color: #1a2c2c; font-size: 13px; font-weight: bold;">${reason}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #9ca3af; font-size: 11px; font-weight: bold;">Preferred Action</span>
+        <span style="color: ${ACCENT_COLOR}; font-size: 13px; font-weight: bold;">${preferredAction === 'REPLACEMENT' ? 'Replacement' : 'Full Refund'}</span>
+      </div>
+    </div>
+
+    <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin-bottom: 25px;">
+      You will receive a formal resolution update within 24-48 business hours. The artisan payout hold has been safely secured.
+    </p>
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 14px; display: inline-block;">View in Profile</a>
+    </div>
+  `;
+
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
+};
+
+export const sendRefundResolvedEmail = async ({
+  email,
+  customerName,
+  orderId,
+  status,
+  adminNote,
+  refundAmount,
+  lang = 'en'
+}: {
+  email: string;
+  customerName: string;
+  orderId: string;
+  status: 'APPROVED' | 'REJECTED' | 'REPLACEMENT_ISSUED';
+  adminNote?: string;
+  refundAmount?: number;
+  lang?: 'ar' | 'en';
+}) => {
+  if (isDevOnly()) {
+    console.log(`\n--- 📧 DEV: REFUND RESOLVED (${lang.toUpperCase()}) ---\nTarget: ${email}\nStatus: ${status}\n-----------------------------\n`);
+    return { success: true };
+  }
+
+  const isAr = lang === 'ar';
+  const isApproved = status === 'APPROVED';
+  const isReplacement = status === 'REPLACEMENT_ISSUED';
+
+  const subject = isAr
+    ? isApproved
+      ? `تم قبول طلب الاسترجاع لطلبك (#${orderId}) | Giftisan`
+      : isReplacement
+      ? `تحديث بخصوص طلبك: جاري تجهيز قطعة بديلة (#${orderId}) | Giftisan`
+      : `تحديث بشأن طلب الاسترجاع لطلبك (#${orderId}) | Giftisan`
+    : isApproved
+    ? `Refund Approved for Order (#${orderId}) | Giftisan`
+    : isReplacement
+    ? `Replacement Dispatched for Order (#${orderId}) | Giftisan`
+    : `Update on Refund Claim for Order (#${orderId}) | Giftisan`;
+
+  const arContent = `
+    <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 24px; margin-bottom: 15px;">
+      ${isApproved ? 'تمت الموافقة على طلب الاسترداد' : isReplacement ? 'تمت الموافقة على إرسال قطعة بديلة' : 'تحديث بخصوص طلبك'}
+    </h1>
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 22px;">
+      مرحباً ${customerName}، تمت مراجعة مطالبتك بخصوص الطلب <strong>#${orderId}</strong> من قِبل إدارة جيفتيزان.
+    </p>
+
+    ${isApproved ? `
+      <div style="background-color: #f0fdf4; padding: 20px; border-radius: 16px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
+        <p style="color: #166534; font-size: 14px; font-weight: bold; margin-bottom: 8px;">تمت معالجة استرداد المبلغ بنجاح</p>
+        <p style="color: #15803d; font-size: 13px; margin: 0;">
+          ${refundAmount ? `سيتم تحويل مبلغ <strong>${refundAmount.toLocaleString()} ج.م</strong> ` : 'سيتم تحويل المبلغ المسترد '}إلى نفس وسيلة الدفع الأصلية (البطاقة البنكية أو المحفظة الإلكترونية) خلال 5 إلى 10 أيام عمل.
+        </p>
+      </div>
+    ` : isReplacement ? `
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 16px; border: 1px solid #bfdbfe; margin-bottom: 25px;">
+        <p style="color: #1e40af; font-size: 14px; font-weight: bold; margin-bottom: 8px;">جاري تصنيع وشحن قطعة بديلة</p>
+        <p style="color: #1d4ed8; font-size: 13px; margin: 0;">
+          تم إخطار الحرفي لتجهيز قطعة بديلة خالية من أي عيوب وشحنها لك مجاناً مع أولوية في التوصيل.
+        </p>
+      </div>
+    ` : `
+      <div style="background-color: #fef2f2; padding: 20px; border-radius: 16px; border: 1px solid #fecaca; margin-bottom: 25px;">
+        <p style="color: #991b1b; font-size: 14px; font-weight: bold; margin-bottom: 8px;">لم نتمكن من قبول المطالبة</p>
+        <p style="color: #b91c1c; font-size: 13px; margin: 0;">
+          ${adminNote || 'بعد فحص تفاصيل وصور المنتج، تعذر قبول طلب الاسترداد وفقاً لسياسة الإرجاع للمنتجات المصنوعة خصيصاً.'}
+        </p>
+      </div>
+    `}
+
+    ${adminNote && isApproved ? `
+      <p style="color: #6b7280; font-size: 13px; font-style: italic; margin-bottom: 25px;">
+        ملاحظة من الدعم: "${adminNote}"
+      </p>
+    ` : ''}
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 14px; display: inline-block;">عرض التفاصيل</a>
+    </div>
+  `;
+
+  const enContent = `
+    <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 24px; margin-bottom: 15px;">
+      ${isApproved ? 'Refund Claim Approved' : isReplacement ? 'Replacement Approved' : 'Claim Decision Update'}
+    </h1>
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 22px;">
+      Hi ${customerName}, your claim for order <strong>#${orderId}</strong> has been reviewed by Giftisan support.
+    </p>
+
+    ${isApproved ? `
+      <div style="background-color: #f0fdf4; padding: 20px; border-radius: 16px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
+        <p style="color: #166534; font-size: 14px; font-weight: bold; margin-bottom: 8px;">Refund Approved & Initiated</p>
+        <p style="color: #15803d; font-size: 13px; margin: 0;">
+          ${refundAmount ? `An amount of <strong>EGP ${refundAmount.toLocaleString()}</strong> ` : 'The refund amount '}is being credited back to your original payment method (Credit/Debit card or Mobile Wallet) within 5-10 business days.
+        </p>
+      </div>
+    ` : isReplacement ? `
+      <div style="background-color: #eff6ff; padding: 20px; border-radius: 16px; border: 1px solid #bfdbfe; margin-bottom: 25px;">
+        <p style="color: #1e40af; font-size: 14px; font-weight: bold; margin-bottom: 8px;">Replacement Initiated</p>
+        <p style="color: #1d4ed8; font-size: 13px; margin: 0;">
+          The artisan has been notified to craft and dispatch a pristine replacement piece to your address at no additional charge.
+        </p>
+      </div>
+    ` : `
+      <div style="background-color: #fef2f2; padding: 20px; border-radius: 16px; border: 1px solid #fecaca; margin-bottom: 25px;">
+        <p style="color: #991b1b; font-size: 14px; font-weight: bold; margin-bottom: 8px;">Claim Declined</p>
+        <p style="color: #b91c1c; font-size: 13px; margin: 0;">
+          ${adminNote || 'Following thorough examination of the photos and order specifications, the claim could not be approved under our bespoke product policy.'}
+        </p>
+      </div>
+    `}
+
+    ${adminNote && isApproved ? `
+      <p style="color: #6b7280; font-size: 13px; font-style: italic; margin-bottom: 25px;">
+        Support note: "${adminNote}"
+      </p>
+    ` : ''}
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${BASE_URL}/profile" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 14px; display: inline-block;">View in Profile</a>
+    </div>
+  `;
+
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    replyTo: SUPPORT_INBOX,
+    to: email,
+    subject,
+    html: wrapEmail(isAr ? arContent : enContent, lang),
+  });
+};
+

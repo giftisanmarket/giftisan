@@ -225,7 +225,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
                   <tbody className="divide-y divide-primary/5">
                     {recentOrders.slice(0, 5).map((order: any) => (
                       <tr key={order.id} className="hover:bg-cream/30 transition-colors group">
-                        <td className="px-6 md:px-8 py-4 md:py-5 font-mono text-[10px] md:text-xs font-bold text-primary">{order.id.slice(0, 8)}</td>
+                        <td className="px-6 md:px-8 py-4 md:py-5 font-mono text-[10px] md:text-xs font-bold text-primary break-all">#{order.id}</td>
                         <td className="px-6 md:px-8 py-4 md:py-5 font-bold text-primary text-xs md:text-sm">{order.user?.name || order.clientEmail || (isAr ? "زائر" : "Guest")}</td>
                         <td className="px-6 md:px-8 py-4 md:py-5 font-bold text-accent text-xs md:text-sm">
                           <div className="flex flex-col">

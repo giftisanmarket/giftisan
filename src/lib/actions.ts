@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail, sendRefundRequestSubmittedEmail, sendRefundResolvedEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
@@ -1044,8 +1044,14 @@ export async function getUserOrders(userId: string) {
     const orders = await prisma.order.findMany({
       where: { userId },
       include: {
+        refundRequests: {
+          orderBy: { createdAt: "desc" }
+        },
         items: {
           include: {
+            refundRequests: {
+              orderBy: { createdAt: "desc" }
+            },
             product: {
               include: {
                 artisan: {
@@ -2471,8 +2477,14 @@ export async function getAllOrders() {
     return await prisma.order.findMany({
       include: {
         user: true,
+        refundRequests: {
+          orderBy: { createdAt: 'desc' }
+        },
         items: {
           include: {
+            refundRequests: {
+              orderBy: { createdAt: 'desc' }
+            },
             product: {
               include: {
                 artisan: true
@@ -3617,4 +3629,739 @@ export async function convertGuestToAccount({
     return { success: false, error: error?.message || "Failed to create account." };
   }
 }
+
+export async function submitRefundRequestAction({
+  orderId,
+  orderItemId,
+  reason,
+  details,
+  images,
+  preferredAction,
+  lang = 'en'
+}: {
+  orderId: string;
+  orderItemId?: string;
+  reason: 'DAMAGED_IN_TRANSIT' | 'DEFECTIVE_OR_WRONG_ITEM' | 'NOT_AS_DESCRIBED' | 'ORDER_NOT_RECEIVED' | 'OTHER';
+  details: string;
+  images: string[];
+  preferredAction: 'REFUND' | 'REPLACEMENT';
+  lang?: 'ar' | 'en';
+}) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: lang === 'ar' ? "يرجى تسجيل الدخول أولاً" : "Please sign in to submit a claim" };
+  }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    if (!order || order.userId !== session.user.id) {
+      return { error: lang === 'ar' ? "الطلب غير موجود أو غير مصرح به" : "Order not found or unauthorized" };
+    }
+
+    // Eligibility Guard: Check Order Status
+    if (order.status === "PENDING") {
+      return {
+        error: lang === 'ar'
+          ? "هذا الطلب بانتظار الدفع، يمكنك إلغاؤه مباشرة دون الحاجة لطلب استرجاع."
+          : "This order is awaiting payment. You can cancel it directly without submitting a claim."
+      };
+    }
+
+    if (order.status === "CANCELLED") {
+      return {
+        error: lang === 'ar'
+          ? "هذا الطلب ملغي بالفعل."
+          : "This order has already been cancelled."
+      };
+    }
+
+    // Check 14-day dispute window if delivered
+    if (order.status === "DELIVERED") {
+      const fourteenDaysInMs = 14 * 24 * 60 * 60 * 1000;
+      const orderAge = new Date().getTime() - new Date(order.updatedAt).getTime();
+      if (orderAge > fourteenDaysInMs) {
+        return {
+          error: lang === 'ar'
+            ? "تجاوز هذا الطلب مهلة الاسترجاع المسموحة (14 يوماً من تاريخ الاستلام)."
+            : "This order has exceeded the 14-day dispute and return window from delivery date."
+        };
+      }
+    }
+
+    // Process and upload images
+    const uploadedImages: string[] = [];
+    for (const img of images) {
+      const processed = await processImage(img);
+      if (processed) uploadedImages.push(processed);
+    }
+
+    // Check if there is an existing pending refund request for this order/orderItem
+    const existing = await prisma.refundRequest.findFirst({
+      where: {
+        orderId,
+        orderItemId: orderItemId || null,
+        status: "PENDING"
+      }
+    });
+
+    if (existing) {
+      return { error: lang === 'ar' ? "يوجد طلب قيد المراجعة بالفعل لهذا المنتج" : "A claim is already pending review for this item" };
+    }
+
+    const targetItem = orderItemId ? order.items.find(i => i.id === orderItemId) : (order.items.length === 1 ? order.items[0] : null);
+
+    const refundRequest = await prisma.refundRequest.create({
+      data: {
+        orderId,
+        orderItemId: orderItemId || null,
+        userId: session.user.id,
+        reason,
+        details,
+        images: uploadedImages,
+        preferredAction,
+        status: "PENDING",
+        refundAmount: targetItem ? targetItem.price * targetItem.quantity : order.totalAmount
+      }
+    });
+
+    // Send confirmation email
+    const email = order.user?.email || order.clientEmail;
+    if (email) {
+      const customerName = order.user?.name || "Valued Client";
+      const reasonLabels: Record<string, string> = {
+        DAMAGED_IN_TRANSIT: lang === 'ar' ? "تلف أثناء الشحن" : "Damaged in transit",
+        DEFECTIVE_OR_WRONG_ITEM: lang === 'ar' ? "منتج تالف أو خاطئ" : "Defective or wrong item",
+        NOT_AS_DESCRIBED: lang === 'ar' ? "مختلف عن الوصف" : "Not as described",
+        ORDER_NOT_RECEIVED: lang === 'ar' ? "لم يتم استلام الطلب" : "Order not received",
+        OTHER: lang === 'ar' ? "سبب آخر" : "Other"
+      };
+
+      await sendRefundRequestSubmittedEmail({
+        email,
+        customerName,
+        orderId,
+        productName: targetItem?.product?.name,
+        reason: reasonLabels[reason] || reason,
+        preferredAction,
+        ticketId: refundRequest.id,
+        lang
+      });
+    }
+
+    revalidatePath(`/${lang}/profile`);
+    revalidatePath(`/${lang}/admin`);
+    revalidatePath(`/${lang}/admin/refunds`);
+    revalidatePath(`/${lang}/admin/orders`);
+    return { success: true, refundRequest };
+  } catch (error: any) {
+    console.error("submitRefundRequest error:", error);
+    return { error: error.message || "Failed to submit refund claim" };
+  }
+}
+
+export async function getAdminRefundRequestsAction() {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const claims = await prisma.refundRequest.findMany({
+      include: {
+        user: true,
+        order: {
+          include: {
+            items: {
+              include: {
+                product: {
+                  include: {
+                    artisan: {
+                      include: {
+                        user: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderItem: {
+          include: {
+            product: {
+              include: {
+                artisan: {
+                  include: {
+                    user: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return { success: true, claims };
+  } catch (error: any) {
+    console.error("getAdminRefundRequests error:", error);
+    return { error: "Failed to fetch refund claims" };
+  }
+}
+
+export async function resolveRefundRequestAction({
+  requestId,
+  action,
+  adminNote,
+  lang = 'en'
+}: {
+  requestId: string;
+  action: 'APPROVE' | 'REJECT' | 'REPLACEMENT';
+  adminNote?: string;
+  lang?: 'ar' | 'en';
+}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const claim = await prisma.refundRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        user: true,
+        order: {
+          include: {
+            user: true,
+            items: {
+              include: {
+                product: {
+                  include: {
+                    artisan: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderItem: {
+          include: {
+            product: {
+              include: {
+                artisan: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!claim || !claim.order) {
+      return { error: "Refund claim or associated order not found" };
+    }
+
+    const statusMap = {
+      APPROVE: "APPROVED" as const,
+      REJECT: "REJECTED" as const,
+      REPLACEMENT: "REPLACEMENT_ISSUED" as const,
+    };
+
+    const newStatus = statusMap[action];
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Update the claim status & admin note
+      const updatedClaim = await tx.refundRequest.update({
+        where: { id: requestId },
+        data: {
+          status: newStatus,
+          adminNote: adminNote || null
+        }
+      });
+
+      // 2. Financial Debit & Status Synchronization on APPROVE
+      if (action === "APPROVE") {
+        if (claim.orderItemId) {
+          // A. Item-Level Refund
+          await tx.orderItem.update({
+            where: { id: claim.orderItemId },
+            data: { status: "REFUNDED" }
+          });
+
+          // Check if all items in the order are now refunded
+          const remainingUnrefunded = await tx.orderItem.count({
+            where: {
+              orderId: claim.orderId,
+              id: { not: claim.orderItemId },
+              status: { not: "REFUNDED" }
+            }
+          });
+
+          if (remainingUnrefunded === 0) {
+            await tx.order.update({
+              where: { id: claim.orderId },
+              data: { status: "REFUNDED" }
+            });
+          }
+
+          // Debit specific artisan
+          const targetItem = claim.orderItem || claim.order.items.find(i => i.id === claim.orderItemId);
+          if (targetItem?.product?.artisan) {
+            const artisan = targetItem.product.artisan;
+            const itemTotal = targetItem.price * targetItem.quantity;
+            const commission = artisan.commissionRate ?? 0.0;
+            const artisanShare = itemTotal * (1 - commission);
+
+            // Check if there are sale transactions for this order
+            const saleTxs = await tx.artisanTransaction.findMany({
+              where: {
+                orderId: claim.orderId,
+                artisanId: artisan.id,
+                type: "SALE",
+                status: { in: ["PENDING", "CLEARED"] }
+              }
+            });
+
+            const hasPendingSale = saleTxs.some(t => t.status === "PENDING");
+            const balance = await tx.artisanBalance.findUnique({
+              where: { artisanId: artisan.id }
+            });
+
+            if (balance) {
+              if (hasPendingSale) {
+                const newPending = Math.max(0, balance.pending - artisanShare);
+                await tx.artisanBalance.update({
+                  where: { artisanId: artisan.id },
+                  data: { pending: newPending }
+                });
+              } else {
+                const newWithdrawable = Math.max(0, balance.withdrawable - artisanShare);
+                await tx.artisanBalance.update({
+                  where: { artisanId: artisan.id },
+                  data: { withdrawable: newWithdrawable }
+                });
+              }
+            }
+
+            // Create REFUND_DEBIT transaction log
+            await tx.artisanTransaction.create({
+              data: {
+                artisanId: artisan.id,
+                orderId: claim.orderId,
+                amount: -artisanShare,
+                type: "REFUND_DEBIT",
+                status: "COMPLETED",
+                description: `Refund debited for dispute #${claim.id} ("${targetItem.product.name}" Qty: ${targetItem.quantity})`
+              }
+            });
+          }
+        } else {
+          // B. Full-Order Refund (all items)
+          await tx.orderItem.updateMany({
+            where: { orderId: claim.orderId },
+            data: { status: "REFUNDED" }
+          });
+
+          await tx.order.update({
+            where: { id: claim.orderId },
+            data: { status: "REFUNDED" }
+          });
+
+          // Group items by artisan to debit each artisan accurately
+          const artisanMap = new Map<string, { artisan: any; totalShare: number; productNames: string[] }>();
+
+          for (const item of claim.order.items) {
+            const artisan = item.product?.artisan;
+            if (!artisan) continue;
+
+            const itemTotal = item.price * item.quantity;
+            const commission = artisan.commissionRate ?? 0.0;
+            const artisanShare = itemTotal * (1 - commission);
+
+            const existing = artisanMap.get(artisan.id) || { artisan, totalShare: 0, productNames: [] };
+            existing.totalShare += artisanShare;
+            existing.productNames.push(item.product.name);
+            artisanMap.set(artisan.id, existing);
+          }
+
+          for (const [artisanId, data] of artisanMap.entries()) {
+            const saleTxs = await tx.artisanTransaction.findMany({
+              where: {
+                orderId: claim.orderId,
+                artisanId,
+                type: "SALE",
+                status: { in: ["PENDING", "CLEARED"] }
+              }
+            });
+
+            const hasPendingSale = saleTxs.some(t => t.status === "PENDING");
+            const balance = await tx.artisanBalance.findUnique({
+              where: { artisanId }
+            });
+
+            if (balance) {
+              if (hasPendingSale) {
+                const newPending = Math.max(0, balance.pending - data.totalShare);
+                await tx.artisanBalance.update({
+                  where: { artisanId },
+                  data: { pending: newPending }
+                });
+              } else {
+                const newWithdrawable = Math.max(0, balance.withdrawable - data.totalShare);
+                await tx.artisanBalance.update({
+                  where: { artisanId },
+                  data: { withdrawable: newWithdrawable }
+                });
+              }
+            }
+
+            await tx.artisanTransaction.create({
+              data: {
+                artisanId,
+                orderId: claim.orderId,
+                amount: -data.totalShare,
+                type: "REFUND_DEBIT",
+                status: "COMPLETED",
+                description: `Full Order Refund debited for dispute #${claim.id} (${data.productNames.join(", ")})`
+              }
+            });
+          }
+        }
+      }
+
+      return updatedClaim;
+    });
+
+    // Send resolution email to customer
+    const customerEmail = claim.user?.email || claim.order?.clientEmail;
+    const customerName = claim.user?.name || "Valued Client";
+    if (customerEmail) {
+      await sendRefundResolvedEmail({
+        email: customerEmail,
+        customerName,
+        orderId: claim.orderId,
+        status: newStatus,
+        adminNote,
+        refundAmount: claim.refundAmount || undefined,
+        lang
+      });
+    }
+
+    revalidatePath(`/${lang}/admin`);
+    revalidatePath(`/${lang}/admin/refunds`);
+    revalidatePath(`/${lang}/admin/orders`);
+    revalidatePath(`/${lang}/profile`);
+    revalidatePath(`/${lang}/studio`);
+    return { success: true, claim: result };
+  } catch (error: any) {
+    console.error("resolveRefundRequest error:", error);
+    return { error: error.message || "Failed to resolve claim" };
+  }
+}
+
+// -----------------------------------------------------------------------------
+// PLATFORM EXPENSES MANAGEMENT ACTIONS
+// -----------------------------------------------------------------------------
+
+function getExpenseDb() {
+  if ((prisma as any).platformExpense) {
+    return prisma;
+  }
+  try {
+    const { PrismaClient } = require("@prisma/client");
+    const { PrismaPg } = require("@prisma/adapter-pg");
+    const { Pool } = require("pg");
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 2
+    });
+    const adapter = new PrismaPg(pool);
+    return new PrismaClient({ adapter });
+  } catch {
+    return prisma;
+  }
+}
+
+export async function getPlatformExpensesAction({
+  category,
+  timeframe = "ALL",
+  search
+}: {
+  category?: string;
+  timeframe?: "ALL" | "THIS_MONTH" | "LAST_MONTH" | "THIS_YEAR";
+  search?: string;
+} = {}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const db = getExpenseDb();
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    const startOfThisYear = new Date(now.getFullYear(), 0, 1);
+
+    const where: any = {};
+
+    if (category && category !== "ALL") {
+      where.category = category;
+    }
+
+    if (timeframe === "THIS_MONTH") {
+      where.date = { gte: startOfThisMonth };
+    } else if (timeframe === "LAST_MONTH") {
+      where.date = { gte: startOfLastMonth, lte: endOfLastMonth };
+    } else if (timeframe === "THIS_YEAR") {
+      where.date = { gte: startOfThisYear };
+    }
+
+    if (search && search.trim()) {
+      where.OR = [
+        { title: { contains: search.trim(), mode: "insensitive" } },
+        { paidBy: { contains: search.trim(), mode: "insensitive" } },
+        { notes: { contains: search.trim(), mode: "insensitive" } },
+      ];
+    }
+
+    const expenses = await db.platformExpense.findMany({
+      where,
+      orderBy: { date: "desc" }
+    });
+
+    // Calculate aggregated financial summaries across all expenses
+    const allExpenses = await db.platformExpense.findMany({
+      select: {
+        id: true,
+        amount: true,
+        category: true,
+        date: true
+      }
+    });
+
+    let totalSpent = 0;
+    let thisMonthSpent = 0;
+    let lastMonthSpent = 0;
+    const categoryTotals: Record<string, number> = {};
+    const categoryCounts: Record<string, number> = {};
+
+    for (const exp of allExpenses) {
+      totalSpent += exp.amount;
+      const expDate = new Date(exp.date);
+
+      if (expDate >= startOfThisMonth) {
+        thisMonthSpent += exp.amount;
+      } else if (expDate >= startOfLastMonth && expDate <= endOfLastMonth) {
+        lastMonthSpent += exp.amount;
+      }
+
+      categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+      categoryCounts[exp.category] = (categoryCounts[exp.category] || 0) + 1;
+    }
+
+    return {
+      success: true,
+      expenses,
+      analytics: {
+        totalSpent,
+        thisMonthSpent,
+        lastMonthSpent,
+        totalCount: allExpenses.length,
+        categoryTotals,
+        categoryCounts
+      }
+    };
+  } catch (error: any) {
+    console.error("getPlatformExpenses error:", error);
+    return { error: "Failed to fetch platform expenses" };
+  }
+}
+
+export async function createPlatformExpenseAction({
+  title,
+  category,
+  amount,
+  currency = "EGP",
+  date,
+  paidBy,
+  paymentMethod,
+  receiptImage,
+  notes,
+  lang = "en"
+}: {
+  title: string;
+  category: "MARKETING" | "PACKAGING_SUPPLIES" | "LOGISTICS_SHIPPING" | "SOFTWARE_SERVICES" | "EQUIPMENT_TOOLS" | "OFFICE_OPERATIONS" | "SALARIES_CONTRACTORS" | "OTHER";
+  amount: number;
+  currency?: string;
+  date?: string;
+  paidBy?: string;
+  paymentMethod?: string;
+  receiptImage?: string;
+  notes?: string;
+  lang?: string;
+}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  if (!title || !title.trim()) {
+    return { error: lang === "ar" ? "يرجى كتابة اسم أو وصف المصروف" : "Expense title is required" };
+  }
+
+  if (isNaN(amount) || amount <= 0) {
+    return { error: lang === "ar" ? "يرجى إدخال مبلغ صحيح أكبر من صفر" : "Valid positive expense amount is required" };
+  }
+
+  try {
+    const db = getExpenseDb();
+    let receiptUrl: string | null = null;
+    if (receiptImage && receiptImage.startsWith("data:")) {
+      receiptUrl = await processImage(receiptImage);
+    } else if (receiptImage) {
+      receiptUrl = receiptImage;
+    }
+
+    const expense = await db.platformExpense.create({
+      data: {
+        title: title.trim(),
+        category,
+        amount: Number(amount),
+        currency,
+        date: date ? new Date(date) : new Date(),
+        paidBy: paidBy ? paidBy.trim() : null,
+        paymentMethod: paymentMethod ? paymentMethod.trim() : null,
+        receiptUrl,
+        notes: notes ? notes.trim() : null,
+        createdById: session.user.id
+      }
+    });
+
+    revalidatePath(`/${lang}/admin/expenses`);
+    revalidatePath(`/${lang}/admin`);
+    return { success: true, expense };
+  } catch (error: any) {
+    console.error("createPlatformExpense error:", error);
+    return { error: error.message || "Failed to record platform expense" };
+  }
+}
+
+export async function updatePlatformExpenseAction({
+  id,
+  title,
+  category,
+  amount,
+  currency = "EGP",
+  date,
+  paidBy,
+  paymentMethod,
+  receiptImage,
+  notes,
+  lang = "en"
+}: {
+  id: string;
+  title: string;
+  category: "MARKETING" | "PACKAGING_SUPPLIES" | "LOGISTICS_SHIPPING" | "SOFTWARE_SERVICES" | "EQUIPMENT_TOOLS" | "OFFICE_OPERATIONS" | "SALARIES_CONTRACTORS" | "OTHER";
+  amount: number;
+  currency?: string;
+  date?: string;
+  paidBy?: string;
+  paymentMethod?: string;
+  receiptImage?: string;
+  notes?: string;
+  lang?: string;
+}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  if (!id) {
+    return { error: "Expense ID is required" };
+  }
+
+  if (!title || !title.trim()) {
+    return { error: lang === "ar" ? "يرجى كتابة اسم أو وصف المصروف" : "Expense title is required" };
+  }
+
+  if (isNaN(amount) || amount <= 0) {
+    return { error: lang === "ar" ? "يرجى إدخال مبلغ صحيح أكبر من صفر" : "Valid positive expense amount is required" };
+  }
+
+  try {
+    const db = getExpenseDb();
+    let receiptUrl: string | null | undefined = undefined;
+    if (receiptImage && receiptImage.startsWith("data:")) {
+      receiptUrl = await processImage(receiptImage);
+    } else if (receiptImage !== undefined) {
+      receiptUrl = receiptImage || null;
+    }
+
+    const updated = await db.platformExpense.update({
+      where: { id },
+      data: {
+        title: title.trim(),
+        category,
+        amount: Number(amount),
+        currency,
+        date: date ? new Date(date) : undefined,
+        paidBy: paidBy ? paidBy.trim() : null,
+        paymentMethod: paymentMethod ? paymentMethod.trim() : null,
+        ...(receiptUrl !== undefined ? { receiptUrl } : {}),
+        notes: notes ? notes.trim() : null
+      }
+    });
+
+    revalidatePath(`/${lang}/admin/expenses`);
+    revalidatePath(`/${lang}/admin`);
+    return { success: true, expense: updated };
+  } catch (error: any) {
+    console.error("updatePlatformExpense error:", error);
+    return { error: error.message || "Failed to update expense" };
+  }
+}
+
+export async function deletePlatformExpenseAction(id: string, lang = "en") {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  if (!id) {
+    return { error: "Expense ID is required" };
+  }
+
+  try {
+    const db = getExpenseDb();
+    await db.platformExpense.delete({
+      where: { id }
+    });
+
+    revalidatePath(`/${lang}/admin/expenses`);
+    revalidatePath(`/${lang}/admin`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("deletePlatformExpense error:", error);
+    return { error: error.message || "Failed to delete expense" };
+  }
+}
+
+
+
 

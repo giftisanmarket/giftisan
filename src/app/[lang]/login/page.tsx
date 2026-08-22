@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   return {
     title: dict.common?.login || "Login",
-    description: "Access your artisan studio or customer profile to discover and manage handcrafted treasures.",
+    description: "Access your artisan studio or customer profile to discover and manage handcrafted products.",
     robots: {
       index: false,
       follow: false,

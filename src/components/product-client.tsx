@@ -179,7 +179,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
 
   const handleShare = async () => {
     const shareData = {
-      title: `${product.name} | Giftisan treasure`,
+      title: `${product.name} | Giftisan product`,
       text: `I found this incredible '${product.name}' by ${product.artisan.studioName || product.artisan.user.name} on Giftisan. Check it out!`,
       url: window.location.href,
     };
@@ -224,8 +224,8 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </h3>
               <p className="text-sm md:text-base text-charcoal/60 leading-relaxed font-bold">
                 {product.status === "REJECTED" 
-                  ? (lang === 'ar' ? "تم رفض هذا الكنز. يرجى مراجعة تفاصيل المنتج أو التواصل مع الإدارة." : "This treasure has been rejected. Please review the details or contact support.")
-                  : (lang === 'ar' ? "هذا الكنز قيد المراجعة حالياً ولن يظهر للجمهور حتى يتم قبوله." : "This treasure is currently under review and won't be visible to the public until approved.")
+                  ? (lang === 'ar' ? "تم رفض هذا المنتج. يرجى مراجعة تفاصيل المنتج أو التواصل مع الإدارة." : "This product has been rejected. Please review the details or contact support.")
+                  : (lang === 'ar' ? "هذا المنتج قيد المراجعة حالياً ولن يظهر للجمهور حتى يتم قبوله." : "This product is currently under review and won't be visible to the public until approved.")
                 }
               </p>
             </div>
@@ -769,7 +769,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                 <div className="prose prose-stone leading-relaxed text-charcoal/70">
                   <h3 className="text-xl font-heading font-bold text-primary mb-4">{dict.product.story_behind}</h3>
                   <p>
-                    {dict.product.handcrafted_by} {product.artisan.studioName || product.artisan.user.name} {dict.product.operating_out_of.toLowerCase()} {product.artisan.location}, {dict.product.details_text_1 || "this treasure represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience."}
+                    {dict.product.handcrafted_by} {product.artisan.studioName || product.artisan.user.name} {dict.product.operating_out_of.toLowerCase()} {product.artisan.location}, {dict.product.details_text_1 || "this product represents the pinnacle of artisanal craftsmanship. Every detail has been carefully considered to ensure a one-of-a-kind experience."}
                   </p>
                   <ul className="mt-8 space-y-4 list-disc ps-5">
                     <li>{dict.product.details_category}: {dict.common.categories_list?.[product.category.toLowerCase()] || product.category}</li>

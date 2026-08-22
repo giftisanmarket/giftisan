@@ -64,7 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.error(
         typeof window !== 'undefined' && (document.dir === 'rtl' || document.documentElement.lang === 'ar')
           ? "عذراً، هذا المنتج غير متوفر حالياً بالمخزون."
-          : "Sorry, this treasure is out of stock.",
+          : "Sorry, this product is out of stock.",
         { id: "cart-stock-limit", style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' } }
       );
       return;

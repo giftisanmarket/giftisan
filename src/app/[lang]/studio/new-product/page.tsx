@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { getDictionary } = await import("@/app/[lang]/dictionaries");
   const dict = await getDictionary(lang as any);
   return {
-    title: dict.studio?.add_treasure || "List a New Treasure",
+    title: dict.studio?.add_treasure || "List a New Product",
     description: dict.studio?.manage_inventory_desc || "Share your handcrafted masterpiece with the global Giftisan community.",
     robots: {
       index: false,

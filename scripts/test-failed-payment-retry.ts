@@ -160,7 +160,7 @@ async function main() {
           select: { stock: true, name: true }
         });
         if (!product || product.stock < item.quantity) {
-          throw new Error(`The treasure "${product?.name || 'One of your items'}" just sold out!`);
+          throw new Error(`The product "${product?.name || 'One of your items'}" just sold out!`);
         }
         await tx.product.update({
           where: { id: item.productId },

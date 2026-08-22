@@ -36,7 +36,7 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
           </h1>
           
           <p className="text-base md:text-xl text-charcoal/60 max-w-lg leading-relaxed font-medium">
-            {dict?.home?.hero_discover || "Discover a curated collection of handcrafted treasures..."}
+            {dict?.home?.hero_discover || "Discover a curated collection of handcrafted products..."}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xl">
@@ -51,7 +51,7 @@ export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: 
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={dict?.home?.hero_search_placeholder || "Search for treasures..."}
+                  placeholder={dict?.home?.hero_search_placeholder || "Search for products..."}
                   className="w-full h-14 md:h-16 ps-14 pe-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
                 />
               </div>

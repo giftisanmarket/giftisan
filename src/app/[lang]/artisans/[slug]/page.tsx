@@ -119,8 +119,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const artisan = data.artisanProfile;
 
   const description = artisan.bio || (lang === 'ar' 
-    ? `اكتشف عالم ${data.name}. استكشف كنوزاً فريدة مصنوعة بشغف.`
-    : `Discover the world of ${data.name}. Explore unique treasures made with passion.`);
+    ? `اكتشف عالم ${data.name}. استكشف منتجاتاً فريدة مصنوعة بشغف.`
+    : `Discover the world of ${data.name}. Explore unique products made with passion.`);
   const keywords = [data.name, artisan.studioName, artisan.location, lang === 'ar' ? "حرفي" : "Artisan", lang === 'ar' ? "صنع يدوي" : "Handmade", SITE_NAME].filter(Boolean) as string[];
   
   const getAbsoluteUrl = (url: string | null) => {
@@ -178,8 +178,8 @@ export default async function ArtisanPage({ params }: Props) {
   const artisan = data.artisanProfile;
 
   const description = artisan.bio || (lang === 'ar' 
-    ? `اكتشف عالم ${data.name}. استكشف كنوزاً فريدة مصنوعة بشغف.`
-    : `Discover the world of ${data.name}. Explore unique treasures made with passion.`);
+    ? `اكتشف عالم ${data.name}. استكشف منتجاتاً فريدة مصنوعة بشغف.`
+    : `Discover the world of ${data.name}. Explore unique products made with passion.`);
   
   const getAbsoluteUrl = (url: string | null) => {
     if (!url) return null;

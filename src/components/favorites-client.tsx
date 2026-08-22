@@ -24,7 +24,7 @@ export default function FavoritesClient({ dict }: { dict: any }) {
                {dict.home.favorites_title || "Your Favorites"}
             </h1>
             <p className="text-charcoal/60 text-lg leading-relaxed text-center md:text-start">
-              {dict.home.favorites_desc || "A curated collection of your favorite artisanal treasures. Save them for later or add them to your collection today."}
+              {dict.home.favorites_desc || "A curated collection of your favorite artisanal products. Save them for later or add them to your collection today."}
             </p>
           </header>
 
@@ -34,12 +34,12 @@ export default function FavoritesClient({ dict }: { dict: any }) {
                 <Heart className="w-10 h-10 text-primary/20" />
               </div>
               <h2 className="text-2xl font-heading font-bold text-primary">{dict.home.favorites_empty || "Your list is currently empty"}</h2>
-              <p className="text-charcoal/60 mt-2 mb-8">{dict.home.favorites_empty_desc || "Start exploring the collection to find treasures you love."}</p>
+              <p className="text-charcoal/60 mt-2 mb-8">{dict.home.favorites_empty_desc || "Start exploring the collection to find products you love."}</p>
               <Link 
                 href="/" 
                 className="h-14 px-10 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center w-fit mx-auto group"
               >
-                {dict.common.start_shopping || "Explore Treasures"}
+                {dict.common.start_shopping || "Explore Products"}
                 <span className="ms-2 group-hover:translate-x-1 transition-transform">→</span>
               </Link>
             </div>

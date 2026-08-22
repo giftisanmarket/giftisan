@@ -175,7 +175,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                   <BespokeImage src={review.product.images[0]} alt="" fill className="object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-[11px] text-primary/30 font-black uppercase tracking-widest mb-1 group-hover/p:text-accent transition-colors">Purchased Treasure</p>
+                  <p className="text-[10px] md:text-[11px] text-primary/30 font-black uppercase tracking-widest mb-1 group-hover/p:text-accent transition-colors">Purchased Product</p>
                   <p className="font-bold text-sm md:text-base text-primary group-hover/p:text-accent transition-colors truncate">{review.product.name}</p>
                   <p className="text-xs font-black text-accent mt-1">{dict.product.currency} {review.product.price}</p>
                 </div>

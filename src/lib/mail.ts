@@ -134,7 +134,7 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
 
   const arContent = `
     <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 26px; margin-bottom: 18px;">مرحباً بك في الدائرة، ${name}!</h1>
-    <p style="color: #4b5563; line-height: 2; font-size: 16px; margin-bottom: 25px;">نتشرف بانضمامك إلى مجتمعنا من الحرفيين ومقتني الكنوز. "جيفتيزان" هو الملاذ الذي تلتقي فيه الحرفة الأصيلة بالروح والإبداع.</p>
+    <p style="color: #4b5563; line-height: 2; font-size: 16px; margin-bottom: 25px;">نتشرف بانضمامك إلى مجتمعنا من الحرفيين ومقتني المنتجات. "جيفتيزان" هو الملاذ الذي تلتقي فيه الحرفة الأصيلة بالروح والإبداع.</p>
     <div style="text-align: center; margin: 35px 0;">
       <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">اكتشف الخزائن</a>
     </div>
@@ -143,7 +143,7 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
 
   const enContent = `
     <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 26px; margin-bottom: 18px;">Welcome to the Circle, ${name}!</h1>
-    <p style="color: #4b5563; line-height: 1.8; font-size: 16px; margin-bottom: 25px;">We're honored to have you join our community of artisans and treasure hunters. Giftisan is a sanctum where authentic craft meets soul.</p>
+    <p style="color: #4b5563; line-height: 1.8; font-size: 16px; margin-bottom: 25px;">We're honored to have you join our community of artisans and product hunters. Giftisan is a sanctum where authentic craft meets soul.</p>
     <div style="text-align: center; margin: 35px 0;">
       <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Explore the Vault</a>
     </div>
@@ -166,11 +166,11 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   }
 
   const isAr = lang === 'ar';
-  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId.slice(0, 8)})` : `New Sale Alert: A treasure has been claimed! (#${orderId.slice(0, 8)})`;
+  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId.slice(0, 8)})` : `New Sale Alert: A product has been claimed! (#${orderId.slice(0, 8)})`;
 
   const arContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 12px;">تنبيه مبيعة جديدة!</h1>
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني الكنوز بشراء قطعة من الاستوديو الخاص بك الآن.</p>
+    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني المنتجات بشراء قطعة من الاستوديو الخاص بك الآن.</p>
     
     <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">رقم الطلب</p>
@@ -189,7 +189,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
 
   const enContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 12px;">New Sale Alert!</h1>
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a treasure from your studio.</p>
+    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a product from your studio.</p>
     
     <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">Order Reference</p>
@@ -234,7 +234,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
 
   const enContent = `
     <p style="color: #4b5563; font-size: 16px; margin-bottom: 15px;">Hi ${receiverName},</p>
-    <h2 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 22px; margin-bottom: 25px; line-height: 1.5;"><strong>${senderName}</strong> has initiated a dialogue regarding a treasure.</h2>
+    <h2 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 22px; margin-bottom: 25px; line-height: 1.5;"><strong>${senderName}</strong> has initiated a dialogue regarding a product.</h2>
     <div style="text-align: center; margin: 35px 0;">
       <a href="${BASE_URL}/profile/messages" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">Join Dialogue</a>
     </div>
@@ -341,7 +341,7 @@ export const sendOrderStatusUpdateEmail = async (
 
   const subject = isAr
     ? isDelivered ? `وصلت قطعتك الفنية! شاركنا رأيك | جيفتيزان` : `تحديث لطلبك #${orderId.slice(0, 8)}: ${statusTextAr[status] || status}`
-    : isDelivered ? `Share Your Story: Your treasure has arrived! | Giftisan` : `Journey Update: Your treasure ${statusTextEn[status] || status}`;
+    : isDelivered ? `Share Your Story: Your product has arrived! | Giftisan` : `Journey Update: Your product ${statusTextEn[status] || status}`;
 
   const arContent = `
     <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px;">
@@ -378,7 +378,7 @@ export const sendOrderStatusUpdateEmail = async (
 
   const enContent = `
     <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px;">
-      ${isDelivered ? 'Your Treasure has Arrived' : 'Journey Update'}
+      ${isDelivered ? 'Your Product has Arrived' : 'Journey Update'}
     </h1>
     <p style="color: #4b5563; font-size: 16px; line-height: 1.7;">Hi ${name}, your order for <strong>${productName}</strong> ${statusTextEn[status] || 'is moving forward'}.</p>
     
@@ -505,7 +505,7 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
 
   const arContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">مبروك! تم اعتماد الاستوديو الخاص بك</h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">أهلاً يا ${name}، لقد قام فريق التقييم بمراجعة الاستوديو الخاص بك والتأكد من استيفاء كافة بياناتك ومنتجاتك. يسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان"! استوديو إبداعاتك ومنتجاتك الآن متاحة للجمهور وجاهزة لاستقبال الطلبات من مقتني الكنوز.</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">أهلاً يا ${name}، لقد قام فريق التقييم بمراجعة الاستوديو الخاص بك والتأكد من استيفاء كافة بياناتك ومنتجاتك. يسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان"! استوديو إبداعاتك ومنتجاتك الآن متاحة للجمهور وجاهزة لاستقبال الطلبات من مقتني المنتجات.</p>
     
     <div style="background-color: #f0fdf4; padding: 22px; border-radius: 18px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
       <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em;">✨ شارة الحرفي المؤسس 2026</p>
@@ -530,7 +530,7 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
 
   const enContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">Congratulations! Your Studio is Approved</h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 25px;">Hi ${name}, our curators have reviewed your studio and verified all your onboarding requirements. We're thrilled to officially welcome you to the Giftisan Guild! Your studio and handcrafted treasures are now live and visible to collectors across the marketplace.</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 25px;">Hi ${name}, our curators have reviewed your studio and verified all your onboarding requirements. We're thrilled to officially welcome you to the Giftisan Guild! Your studio and handcrafted products are now live and visible to collectors across the marketplace.</p>
     
     <div style="background-color: #f0fdf4; padding: 22px; border-radius: 18px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
       <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em;">✨ 2026 Founding Member Status</p>
@@ -669,7 +669,7 @@ export const sendProductStatusUpdateEmail = async (
   const isApproved = status === "APPROVED";
   const subject = isAr
     ? isApproved ? `مبروك! تم اعتماد منتجك "${productName}" وهو الآن متاح للجميع` : `تحديث تقييم لمنتجك "${productName}"`
-    : isApproved ? `Treasure Unveiled: ${productName} is now live! | Giftisan` : `Curator Update: Status changed for ${productName}`;
+    : isApproved ? `Product Unveiled: ${productName} is now live! | Giftisan` : `Curator Update: Status changed for ${productName}`;
 
   const arContent = `
     <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">
@@ -678,7 +678,7 @@ export const sendProductStatusUpdateEmail = async (
     <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">
       أهلاً يا ${name}، 
       ${isApproved
-        ? `خبر رائع! لقد وافق فريق التقييم على <strong>${productName}</strong>. منتجك الآن معروض في السوق ومتاح لجميع مقتني الكنوز.`
+        ? `خبر رائع! لقد وافق فريق التقييم على <strong>${productName}</strong>. منتجك الآن معروض في السوق ومتاح لجميع مقتني المنتجات.`
         : status === "REJECTED"
           ? `لقد راجع فريق التقييم <strong>${productName}</strong> وتقرر عدم عرضه في الوقت الحالي.${reason ? `<br/><br/><strong>ملاحظات المنسقين:</strong><br/>${reason}` : ' يرجى مراجعة معايير الجودة أو التواصل مع الدعم لمزيد من التفاصيل.'}`
           : `تمت إعادة <strong>${productName}</strong> إلى قائمة المراجعة. سنقوم بإخطارك فور تحديث الحالة.`
@@ -694,7 +694,7 @@ export const sendProductStatusUpdateEmail = async (
 
   const enContent = `
     <h1 class="heading" style="color: ${isApproved ? ACCENT_COLOR : PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">
-      ${isApproved ? 'Treasure Approved!' : 'Product Status Update'}
+      ${isApproved ? 'Product Approved!' : 'Product Status Update'}
     </h1>
     <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 25px;">
       Hi ${name}, 
@@ -915,7 +915,7 @@ export const sendBuyerOrderReceiptEmail = async (
 
   const enContent = `
     <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 24px; margin-bottom: 12px;">Order Confirmed!</h1>
-    <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin-bottom: 25px;">Hi ${customerName}, your order has been received and confirmed. Our artisans are now preparing your handcrafted treasures with care and mastery.</p>
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin-bottom: 25px;">Hi ${customerName}, your order has been received and confirmed. Our artisans are now preparing your handcrafted products with care and mastery.</p>
     
     <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">

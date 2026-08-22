@@ -372,7 +372,7 @@ const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, req
         {/* Preset Badge Chips */}
         {!readOnly && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Treasure"].map((badgePreset) => (
+            {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Product"].map((badgePreset) => (
               <button
                 key={badgePreset}
                 type="button"
@@ -1168,7 +1168,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
       const res = await updateProduct(product.id, form);
 
       if (res.success) {
-        toast.success(dict.edit_product.update_success || "Treasure updated successfully");
+        toast.success(dict.edit_product.update_success || "Product updated successfully");
         router.refresh();
         onClose();
       } else {
@@ -1205,7 +1205,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
             <div className="px-6 py-4 md:px-8 md:py-5 border-b border-primary/5 flex justify-between items-center bg-white shrink-0">
               <div>
                 <h2 className={cn("text-lg md:text-2xl font-heading font-bold text-primary", isRTL && "font-black")}>
-                  {dict.edit_product.edit_treasure} <span className="serif italic font-normal text-accent">{dict.edit_product.treasure_accent || "Treasure"}</span>
+                  {dict.edit_product.edit_treasure} <span className="serif italic font-normal text-accent">{dict.edit_product.treasure_accent || "Product"}</span>
                 </h2>
                 <p className="text-charcoal/40 text-[10px] md:text-xs mt-0.5">{dict.edit_product.refine_details}</p>
               </div>

@@ -69,7 +69,7 @@ export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
                     <div className="pt-8 border-t border-primary/5 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-primary/30 uppercase tracking-widest mb-1">{dict.home.found_treasures.split(' ')[2]}</span>
+                          <span className="text-[10px] font-black text-primary/30 uppercase tracking-widest mb-1">{dict.common?.treasure_plural || "Products"}</span>
                           <span className="text-sm font-bold text-primary flex items-center gap-1">
                             <ShoppingBag className="w-3 h-3 text-accent" />
                             {artisan.products.length}

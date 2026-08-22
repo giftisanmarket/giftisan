@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     twitter: {
       card: "summary_large_image",
       title: dict.seo.title,
-      description: lang === 'ar' ? "اكتشف كنوزاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted treasures from local artisans.",
+      description: lang === 'ar' ? "اكتشف منتجاتاً يدوية فريدة من الحرفيين المحليين." : "Discover unique handcrafted products from local artisans.",
       images: ["/hero.webp"],
       creator: "@giftisan_eg",
     },

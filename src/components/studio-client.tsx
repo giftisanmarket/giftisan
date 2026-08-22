@@ -190,7 +190,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
   const executeBulkDelete = async () => {
     if (!bulkProductsToDelete) return;
 
-    const loadingToast = toast.loading("Removing treasures...", {
+    const loadingToast = toast.loading("Removing products...", {
       style: { borderRadius: '20px', background: '#1a1a1a', color: '#fff' }
     });
 
@@ -202,7 +202,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
     toast.dismiss(loadingToast);
 
     if (res.success) {
-      toast.success(`${ids.length} Treasures removed`, {
+      toast.success(`${ids.length} Products removed`, {
         icon: <Trash2 className="w-5 h-5 text-red-500" />,
       });
       router.refresh();
@@ -221,7 +221,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
     toast.dismiss(loadingToast);
 
     if (res.success) {
-      toast.success(`${ids.length} Treasures updated`, {
+      toast.success(`${ids.length} Products updated`, {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
       });
       router.refresh();
@@ -323,7 +323,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
             isOpen={bulkProductsToDelete !== null}
             onClose={() => setBulkProductsToDelete(null)}
             onConfirm={executeBulkDelete}
-            title={dict.studio.remove_treasure || "Remove Treasures"}
+            title={dict.studio.remove_treasure || "Remove Products"}
             message={dict.studio.remove_desc}
             confirmText={dict.studio.delete_permanently || "Delete"}
             cancelText={dict.studio.keep_it || "Keep"}

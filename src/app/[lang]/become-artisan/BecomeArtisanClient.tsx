@@ -105,7 +105,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     },
     {
       title: dict.home.artisan_onboarding?.steps?.step_2_title || "Curate",
-      desc: dict.home.artisan_onboarding?.steps?.step_2_desc || "Upload your treasures.",
+      desc: dict.home.artisan_onboarding?.steps?.step_2_desc || "Upload your products.",
       icon: <Store className="w-5 h-5" />,
     },
     {
@@ -240,7 +240,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
             <div className="p-8 bg-primary rounded-[2rem] text-white space-y-4">
               <h4 className="font-heading font-bold text-xl">Need Help?</h4>
               <p className="text-white/60 text-sm">
-                Our curation team is here to help you set up your studio and showcase your unique treasures.
+                Our curation team is here to help you set up your studio and showcase your unique products.
               </p>
               <a href="mailto:support@giftisan.com" className="inline-flex items-center gap-2 text-accent font-bold hover:gap-3 transition-all">
                 Contact Curation <ArrowRight className="w-4 h-4" />

@@ -35,14 +35,14 @@ export function Navbar({ dict }: { dict?: any }) {
       open_studio: "Open Your Studio",
       start_shopping: "Start Shopping",
       search_placeholder: "Search for unique gifts...",
-      explore_trending: "Explore Trending Treasures",
+      explore_trending: "Explore Trending Products",
       all_categories: "Browse All Categories",
       sell: "Sell",
       pro_studio: "Pro Studio",
       sign_in: "Sign In",
       sign_out: "Sign Out",
       menu: "Menu",
-      explore: "Explore Treasures",
+      explore: "Explore Products",
       terms: "Terms of Service",
       privacy: "Privacy Policy",
       shipping: "Shipping Policy",
@@ -285,10 +285,10 @@ export function Navbar({ dict }: { dict?: any }) {
                           {searchResults.length > 0 ? (
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-5">
                               
-                              {/* Left Column: Matching Products (Treasures) */}
+                              {/* Left Column: Matching Products (Products) */}
                               <div className="lg:col-span-7 space-y-3">
                                 <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2 px-1">
-                                  {pathname.includes("/ar") ? "الكنوز المتطابقة" : "Matching Treasures"}
+                                  {pathname.includes("/ar") ? "المنتجات المتطابقة" : "Matching Products"}
                                 </p>
                                 <div className="space-y-2.5">
                                   {suggestions.products.map((p) => (

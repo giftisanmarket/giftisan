@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   return {
     title: dict.auth.forgot_password_title,
-    description: "Reset your Giftisan password to continue discovering unique handcrafted treasures.",
+    description: "Reset your Giftisan password to continue discovering unique handcrafted products.",
     robots: {
       index: false,
       follow: false,

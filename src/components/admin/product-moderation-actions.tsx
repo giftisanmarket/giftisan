@@ -141,7 +141,7 @@ export function ProductModerationActions({
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-primary/20 backdrop-blur-sm">
           <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl space-y-6">
             <h3 className="text-2xl font-heading font-bold text-primary">Provide Feedback</h3>
-            <p className="text-sm text-charcoal/60">Tell the artisan why this treasure isn't ready for the collection yet.</p>
+            <p className="text-sm text-charcoal/60">Tell the artisan why this product isn't ready for the collection yet.</p>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}

@@ -56,8 +56,8 @@ export function AdminProductsClient({ initialProducts, dict, lang }: AdminProduc
   }, [initialProducts]);
 
   const sortOptions = [
-    { key: "NEWEST", label: isAr ? "الأحدث إضافتاً" : "Newest Treasures" },
-    { key: "OLDEST", label: isAr ? "الأقدم إضافتاً" : "Oldest Treasures" },
+    { key: "NEWEST", label: isAr ? "الأحدث إضافتاً" : "Newest Products" },
+    { key: "OLDEST", label: isAr ? "الأقدم إضافتاً" : "Oldest Products" },
     { key: "PRICE_HIGH", label: isAr ? "السعر (الأعلى للأقل)" : "Price: High to Low" },
     { key: "PRICE_LOW", label: isAr ? "السعر (الأقل للأعلى)" : "Price: Low to High" },
     { key: "STOCK_LOW", label: isAr ? "المخزون (الأقل للمزيد)" : "Stock: Lowest First" },
@@ -113,7 +113,7 @@ export function AdminProductsClient({ initialProducts, dict, lang }: AdminProduc
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-primary/5 pb-8">
         <div>
           <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-2">
-            {dict.admin?.global_products_title || "Global"} <span className="serif italic text-accent font-normal">{dict.admin?.products_accent || "Treasures"}</span>
+            {dict.admin?.global_products_title || "Global"} <span className="serif italic text-accent font-normal">{dict.admin?.products_accent || "Products"}</span>
           </h1>
           <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-md">
             {dict.admin?.monitor_products_desc || "Moderate artisan products, set featured items, inspect stock levels, and enforce marketplace quality standards."}
@@ -122,7 +122,7 @@ export function AdminProductsClient({ initialProducts, dict, lang }: AdminProduc
 
         <div className="bg-white px-5 py-3 rounded-2xl border border-primary/5 shadow-sm shrink-0 w-full md:w-auto">
           <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">
-            {dict.admin?.total_treasures || (isAr ? "إجمالي الكنوز" : "Total Products")}
+            {dict.admin?.total_treasures || (isAr ? "إجمالي المنتجات" : "Total Products")}
           </p>
           <p className="text-xl md:text-2xl font-black text-primary leading-none">{stats.total}</p>
         </div>
@@ -361,7 +361,7 @@ export function AdminProductsClient({ initialProducts, dict, lang }: AdminProduc
             <thead>
               <tr className="bg-primary/5 border-b border-primary/5">
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-start">
-                  {dict.admin?.treasure || (isAr ? "المنتج والكنز" : "Treasure")}
+                  {dict.admin?.product || (isAr ? "المنتج والمنتج" : "Product")}
                 </th>
                 <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-start">
                   {dict.admin?.artisan || (isAr ? "الحرفي والاستوديو" : "Artisan")}

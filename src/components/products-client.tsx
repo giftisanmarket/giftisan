@@ -88,7 +88,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
   const categoriesList = useMemo(() => {
     const rawList = dict.common?.categories_list || {};
     return [
-      { id: "all", label: lang === "ar" ? "كل الكنوز" : "All Treasures" },
+      { id: "all", label: lang === "ar" ? "كل المنتجات" : "All Products" },
       ...dynamicCategories.map((catId) => {
         // Fallback to capitalizing the id if not found in translation file
         const label = rawList[catId] || catId.charAt(0).toUpperCase() + catId.slice(1).replace(/-/g, " ");
@@ -176,12 +176,12 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-4">
-              {dict.common?.explore || "Explore Treasures"}
+              {dict.common?.explore || "Explore Products"}
             </h1>
             <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
               {lang === "ar"
                 ? "تصفح واقتنِ تحفاً يدوية فريدة مصممة بشغف وروح من قبل أمهر المصممين والحرفيين المستقلين في مصر."
-                : "Browse and collect beautiful, high-fidelity handcrafted treasures, made with soul and historical heritage by Egypt's finest independent creators."}
+                : "Browse and collect beautiful, high-fidelity handcrafted products, made with soul and historical heritage by Egypt's finest independent creators."}
             </p>
           </motion.div>
         </div>
@@ -194,7 +194,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
       <div className="sticky top-[72px] md:top-[124px] z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-4 shadow-sm">
         <div className="container mx-auto px-4 md:px-6 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            
+
             {/* Search Input */}
             <div className="relative w-full lg:max-w-md">
               <input
@@ -281,14 +281,14 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
 
           {/* Dynamic Horizontally-Scrollable Categories Bar */}
           <div className="border-t border-primary/5 pt-3">
-            <div 
+            <div
               className="scroll-fade-mask md:mask-none"
               style={{
                 "--mask-left": showLeftScrollFade ? "transparent" : "black",
                 "--mask-right": showRightScrollFade ? "transparent" : "black",
               } as React.CSSProperties}
             >
-              <div 
+              <div
                 ref={scrollContainerRef}
                 onScroll={updateScrollFades}
                 className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5 -mx-4 px-8 md:mx-0 md:px-0"
@@ -313,13 +313,13 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
         </div>
       </div>
 
-      {/* Treasures Grid */}
+      {/* Products Grid */}
       <section className="py-12 container mx-auto px-4 md:px-6">
-        
+
         {/* Results Info */}
         <div className="mb-8 flex justify-between items-center px-1">
           <p className="text-[10px] md:text-sm font-medium text-charcoal/60 uppercase tracking-widest">
-            {lang === "ar" ? "الكنوز المتوفرة: " : "Treasures available: "}
+            {lang === "ar" ? "المنتجات المتوفرة: " : "Products available: "}
             <span className="text-primary font-bold">{filteredProducts.length}</span>
           </p>
           {(selectedCategory !== "all" || searchQuery || showVerifiedOnly) && (
@@ -339,11 +339,11 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
             </div>
             <div className="space-y-3 px-4">
               <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">
-                {lang === "ar" ? "لم نجد ما تبحث عنه..." : "No treasures match your criteria..."}
+                {lang === "ar" ? "لم نجد ما تبحث عنه..." : "No products match your criteria..."}
               </h2>
               <p className="text-charcoal/60 max-w-md mx-auto text-xs md:text-base leading-relaxed">
                 {lang === "ar"
-                  ? "جرب إزالة أو تعديل عوامل التصفية لعرض مجموعة الكنوز الكاملة المصنوعة يدوياً."
+                  ? "جرب إزالة أو تعديل عوامل التصفية لعرض مجموعة المنتجات الكاملة المصنوعة يدوياً."
                   : "Try adjusting your filters, modifying keywords, or searching for other authentic crafts."}
               </p>
               <button
@@ -375,7 +375,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                         className="object-cover group-hover:scale-110 transition-transform duration-1000"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       />
-                      
+
                       {/* Wishlist Heart Button */}
                       <button
                         onClick={(e) => {
@@ -433,7 +433,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
             {dict.home?.not_found_title || "Not what you are looking for?"}
           </h2>
           <p className="text-charcoal/60 text-base md:text-lg leading-relaxed">
-            {dict.home?.custom_commissions_desc || "Our master makers thrive on custom orders. Pitch your dream and customize a unique treasure today."}
+            {dict.home?.custom_commissions_desc || "Our master makers thrive on custom orders. Pitch your dream and customize a unique product today."}
           </p>
           <Link href="/artisans">
             <button className="h-14 md:h-16 px-8 md:px-12 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group text-sm md:text-base active:scale-95 duration-200">

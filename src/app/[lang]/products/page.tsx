@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   
   return {
-    title: `${dict.common?.explore || "Explore Handcrafted Treasures"} | Giftisan`,
-    description: dict.seo?.description || "Explore our collection of authentic handcrafted Egyptian treasures.",
+    title: `${dict.common?.explore || "Explore Handcrafted Products"} | Giftisan`,
+    description: dict.seo?.description || "Explore our collection of authentic handcrafted Egyptian products.",
     alternates: {
       canonical: `${SITE_URL}/${lang}/products`,
     },

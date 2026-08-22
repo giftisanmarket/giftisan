@@ -73,7 +73,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
         <div className="container mx-auto px-4 md:px-6 flex flex-row justify-between items-center gap-3">
           <p className="text-[9px] md:text-sm font-medium text-charcoal/60 uppercase tracking-widest">
             <span className="text-primary font-bold">{filteredProducts.length}</span>
-            <span className="ms-1 opacity-50">{dict.home.found_treasures.split(' ')[2]}</span>
+            <span className="ms-1 opacity-50">{dict.common?.treasure_plural || "Products"}</span>
           </p>
           <div className="flex items-center gap-1.5 md:gap-3">
             <button 

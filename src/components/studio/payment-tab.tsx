@@ -683,7 +683,7 @@ export function PaymentTab({
             <p>
               2. <strong>{isRTL ? "الأمان والضمان" : "Fulfillment Escrow"}:</strong> {isRTL 
                 ? "يتم تجميد الأرباح في رصيدك المعلّق لتسهيل الإلغاءات في حال تعذر شحن الطلب. بمجرد مرور 7 أيام على تسليم الطلب للعميل، ينتقل المبلغ تلقائياً لرصيدك القابل للسحب." 
-                : "The funds are held safely as Pending to accommodate cancellations or stock changes. Once 7 days pass after the customer safely receives their unique treasures, the funds clear automatically into your Withdrawable balance."}
+                : "The funds are held safely as Pending to accommodate cancellations or stock changes. Once 7 days pass after the customer safely receives their unique products, the funds clear automatically into your Withdrawable balance."}
             </p>
             <p>
               3. <strong>{isRTL ? "كيفية طلب سحب الأرباح" : "How to Request Payouts"}:</strong> {isRTL 

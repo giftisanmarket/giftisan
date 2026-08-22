@@ -910,7 +910,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
       const res = await createProduct(artisanId, form);
 
       if (res.success) {
-        toast.success(dict.new_product.success_message || "Treasure listed successfully!");
+        toast.success(dict.new_product.success_message || "Product listed successfully!");
         window.location.href = "/studio";
       } else {
         toast.error(res.error || "Failed to create product.");
@@ -1391,7 +1391,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 
                 {/* Preset Badge Chips */}
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Treasure"].map((badgePreset) => (
+                  {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Product"].map((badgePreset) => (
                     <button
                       key={badgePreset}
                       type="button"
@@ -1442,7 +1442,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
           <div className="container mx-auto max-w-4xl flex items-center justify-between gap-4">
             <div className="min-w-0 hidden sm:block">
               <p className="text-xs font-bold text-primary truncate max-w-xs">
-                {formData.name || "Untitled Treasure"}
+                {formData.name || "Untitled Product"}
               </p>
               <p className="text-[10px] font-medium text-primary/40 font-mono">
                 {formData.price ? `${formData.price} EGP` : "Set Price"} • {formData.images.filter(Boolean).length}/10 Photos

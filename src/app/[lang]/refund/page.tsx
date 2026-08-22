@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   return {
     title: dict.common?.refund || "Refund Policy",
-    description: "Information about Giftisan's fair refund and return policy for handcrafted treasures.",
+    description: "Information about Giftisan's fair refund and return policy for handcrafted products.",
   };
 }
 

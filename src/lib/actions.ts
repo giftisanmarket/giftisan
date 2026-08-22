@@ -596,7 +596,7 @@ export async function createOrder(userId: string | null, totalAmount: number, it
           });
 
           if (!product || product.stock < item.quantity) {
-            throw new Error(`The treasure "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
+            throw new Error(`The product "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
           }
         }
       }
@@ -823,7 +823,7 @@ export async function retryPaymentAction(orderId: string) {
               select: { stock: true, name: true }
             });
             if (!product || product.stock < item.quantity) {
-              throw new Error(`The treasure "${product?.name || 'One of your items'}" just sold out! Please place a new order.`);
+              throw new Error(`The product "${product?.name || 'One of your items'}" just sold out! Please place a new order.`);
             }
             await tx.product.update({
               where: { id: item.productId },
@@ -1634,7 +1634,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
     return { success: true, product };
   } catch (error: any) {
     console.error("Create product error detail:", error);
-    return { error: error.message || "Failed to list new treasure" };
+    return { error: error.message || "Failed to list new product" };
   }
 }
 
@@ -2153,7 +2153,7 @@ export async function updateProduct(productId: string, formData: FormData) {
     return { success: true, product: updated };
   } catch (error: any) {
     console.error("Update product error:", error);
-    return { error: error.message || "Failed to update treasure" };
+    return { error: error.message || "Failed to update product" };
   }
 }
 
@@ -2170,7 +2170,7 @@ export async function deleteProduct(productId: string) {
     });
 
     if (!product) {
-      return { error: "Treasure not found" };
+      return { error: "Product not found" };
     }
 
     const isAdmin = session.user.role === "ADMIN";
@@ -2179,7 +2179,7 @@ export async function deleteProduct(productId: string) {
     });
 
     if (!isAdmin && (!artisan || product.artisanId !== artisan.id)) {
-      return { error: "You are not authorized to remove this treasure" };
+      return { error: "You are not authorized to remove this product" };
     }
 
     await prisma.product.delete({
@@ -2194,7 +2194,7 @@ export async function deleteProduct(productId: string) {
     return { success: true };
   } catch (error) {
     console.error("Delete product error:", error);
-    return { error: "Failed to remove treasure" };
+    return { error: "Failed to remove product" };
   }
 }
 
@@ -2554,7 +2554,7 @@ export async function updateProductStatus(productId: string, status: "PENDING" |
     });
 
     if (!product) {
-      return { error: "Treasure not found" };
+      return { error: "Product not found" };
     }
 
     await prisma.product.update({
@@ -2583,7 +2583,7 @@ export async function updateProductStatus(productId: string, status: "PENDING" |
     return { success: true };
   } catch (error) {
     console.error("Update product status error:", error);
-    return { error: "Failed to update treasure status" };
+    return { error: "Failed to update product status" };
   }
 }
 
@@ -3074,7 +3074,7 @@ export async function bulkDeleteProducts(ids: string[]) {
       });
 
       if (productsCount !== ids.length) {
-        return { error: "You are not authorized to remove some of these treasures" };
+        return { error: "You are not authorized to remove some of these products" };
       }
     }
 
@@ -3092,7 +3092,7 @@ export async function bulkDeleteProducts(ids: string[]) {
     return { success: true };
   } catch (error) {
     console.error("Bulk delete error:", error);
-    return { error: "Failed to remove treasures" };
+    return { error: "Failed to remove products" };
   }
 }
 
@@ -3124,7 +3124,7 @@ export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" |
       });
 
       if (productsCount !== ids.length) {
-        return { error: "You are not authorized to update some of these treasures" };
+        return { error: "You are not authorized to update some of these products" };
       }
 
       // If status is REJECTED, only admins can set that
@@ -3151,7 +3151,7 @@ export async function bulkUpdateProductStatus(ids: string[], status: "PENDING" |
     return { success: true };
   } catch (error) {
     console.error("Bulk update status error:", error);
-    return { error: "Failed to update treasures status" };
+    return { error: "Failed to update products status" };
   }
 }
 

@@ -333,7 +333,7 @@ export function ContactArtisanButton({
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-[8px] font-black text-accent uppercase tracking-widest leading-none mb-1">
-                        {isRtl ? "بخصوص الكنز" : "Regarding Treasure"}
+                        {isRtl ? "بخصوص المنتج" : "Regarding Product"}
                       </p>
                       <p className="text-xs font-bold text-primary truncate uppercase">{productName}</p>
                     </div>
@@ -364,7 +364,7 @@ export function ContactArtisanButton({
                       </h4>
                       <p className="text-charcoal/40 text-xs max-w-xs mt-2 leading-relaxed">
                         {isRtl 
-                          ? "استفسر عن التخصيص، المواد المستخدمة، أو اطلب تفاصيل مخصصة لهذا الكنز." 
+                          ? "استفسر عن التخصيص، المواد المستخدمة، أو اطلب تفاصيل مخصصة لهذا المنتج." 
                           : "Inquire about bespoke sizing, specific materials, or request tailored alterations for this piece."}
                       </p>
                     </div>

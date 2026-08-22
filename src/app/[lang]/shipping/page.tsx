@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(lang as any);
   return {
     title: dict.common?.shipping || "Shipping Policy",
-    description: "Information about how Giftisan handles the delivery of your handcrafted treasures.",
+    description: "Information about how Giftisan handles the delivery of your handcrafted products.",
   };
 }
 

@@ -18,15 +18,15 @@ async function main() {
 
   // 2. Create the test product
   const testProduct = await prisma.product.upsert({
-    where: { slug: 'live-test-treasure-2026' },
+    where: { slug: 'live-test-product-2026' },
     update: {
       price: 10,
       status: 'APPROVED'
     },
     create: {
-      name: '2026 Live Test Treasure',
-      slug: 'live-test-treasure-2026',
-      description: 'A 10.00 EGP treasure created specifically for verifying the live Paymob integration for the 2026 season launch.',
+      name: '2026 Live Test Product',
+      slug: 'live-test-product-2026',
+      description: 'A 10.00 EGP product created specifically for verifying the live Paymob integration for the 2026 season launch.',
       price: 10,
       images: ['https://res.cloudinary.com/dlnnwqgob/image/upload/v1714488310/placeholder_d49hxw.jpg'],
       category: 'Art & Collectibles',

@@ -30,7 +30,7 @@ export default function NotFound() {
         </h1>
 
         <p className="text-charcoal/60 max-w-md mx-auto mb-12 text-lg leading-relaxed font-medium">
-          The treasure you're looking for seems to have vanished from the vault. It might have been claimed already, or moved to a new collection.
+          The product you're looking for seems to have vanished from the vault. It might have been claimed already, or moved to a new collection.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 items-center">
@@ -46,14 +46,14 @@ export default function NotFound() {
             className="w-full sm:w-auto px-10 h-16 bg-white text-primary border border-primary/10 font-bold rounded-2xl hover:bg-cream transition-all shadow-lg flex items-center justify-center gap-3 active:scale-95"
           >
             <Sparkles className="w-5 h-5 text-accent" />
-            Explore Treasures
+            Explore Products
           </Link>
         </div>
       </div>
 
       <footer className="py-12 border-t border-primary/5 text-center relative z-10">
         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/20">
-          Giftisan • Every Story is a Treasure
+          Giftisan • Every Story is a Product
         </p>
       </footer>
 

@@ -449,7 +449,7 @@ function MessagesContent({ initialMessages, userId, targetUser, dict }: { initia
                       <Image src={activeThread.product.images[0]} alt="" fill className="object-cover" />
                     </div>
                     <div className="max-w-[150px]">
-                      <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">{dict.home.treasure}</p>
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none mb-1">{dict.home.product}</p>
                       <p className="text-xs font-bold text-primary truncate uppercase">{activeThread.product.name}</p>
                     </div>
                   </div>

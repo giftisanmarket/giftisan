@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   return {
     title: dict.home.favorites_title || "Your Favorites",
-    description: "Your curated collection of artisanal treasures.",
+    description: "Your curated collection of artisanal products.",
     robots: {
       index: false,
       follow: false,

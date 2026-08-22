@@ -1,6 +1,6 @@
 # Giftisan
 
-> Giftisan is an online marketplace offering a curated collection of unique, handcrafted treasures from independent Egyptian artisans. The platform supports local makers by providing a space to showcase bespoke jewelry, traditional ceramics, heritage textiles, and one-of-a-kind home decor.
+> Giftisan is an online marketplace offering a curated collection of unique, handcrafted products from independent Egyptian artisans. The platform supports local makers by providing a space to showcase bespoke jewelry, traditional ceramics, heritage textiles, and one-of-a-kind home decor.
 
 ## Brand Identity & Ground Truth Facts
 - **Exclusively Egyptian Handmade**: All products featured on Giftisan are handcrafted by local, independent Egyptian artisans and small heritage workshops across Egypt (Cairo, Alexandria, Fayoum, Upper Egypt, etc.).

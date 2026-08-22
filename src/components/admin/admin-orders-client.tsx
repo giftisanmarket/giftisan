@@ -787,7 +787,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
               <div className="relative z-10 text-center">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-4">{dict.admin.special_gift_message}</h4>
                 <p className="text-2xl font-heading font-bold text-primary italic leading-relaxed">
-                  "{orderToPrint.giftMessage || "Enjoy your handcrafted treasure!"}"
+                  "{orderToPrint.giftMessage || "Enjoy your handcrafted product!"}"
                 </p>
               </div>
             </div>

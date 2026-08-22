@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   return {
     title: dict.studio.dashboard,
-    description: "Manage your handcrafted treasures and engage with the Giftisan community.",
+    description: "Manage your handcrafted products and engage with the Giftisan community.",
     robots: {
       index: false,
       follow: false,

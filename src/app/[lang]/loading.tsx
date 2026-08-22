@@ -29,7 +29,7 @@ export default function Loading() {
           <Skeleton className="aspect-square rounded-[2rem] md:rounded-[3rem] hidden lg:block" />
         </div>
 
-        {/* Featured Treasures Skeleton */}
+        {/* Featured Products Skeleton */}
         <div className="space-y-8 md:space-y-12">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div className="space-y-3 w-full sm:w-auto">

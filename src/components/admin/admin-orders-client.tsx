@@ -189,7 +189,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                     <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.customer}</th>
                     <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.items}</th>
                     <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.admin.status}</th>
-                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-right">{dict.admin.revenue}</th>
+                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-right">{dict.admin?.order_total || dict.admin?.revenue || "Order Total"}</th>
                     <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest text-center">Actions</th>
                   </tr>
                 </thead>
@@ -300,17 +300,34 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                             </span>
                           </td>
                           <td className="px-6 md:px-8 py-4 md:py-6 text-right">
-                            <p className="text-base md:text-lg font-heading font-bold text-primary">{dict.product?.currency || "EGP"} {order.totalAmount}</p>
-                            {order.discountApplied > 0 && (
-                              <p className="text-[10px] font-bold text-emerald-600 mt-0.5">
-                                -{dict.product?.currency || "EGP"} {order.discountApplied}
-                              </p>
-                            )}
-                            {order.shippingCost > 0 && (
-                              <p className="text-[10px] font-bold text-accent mt-0.5 uppercase tracking-widest">
-                                {order.shippingMethod?.name || "Shipping"}: +{dict.product?.currency || "EGP"} {order.shippingCost}
-                              </p>
-                            )}
+                            {(() => {
+                              const isVoided = order.status === "CANCELLED" || order.status === "REFUNDED";
+                              return (
+                                <>
+                                  <p className={cn(
+                                    "text-base md:text-lg font-heading font-bold",
+                                    isVoided ? "text-charcoal/40 line-through" : "text-primary"
+                                  )}>
+                                    {dict.product?.currency || "EGP"} {order.totalAmount}
+                                  </p>
+                                  {isVoided && (
+                                    <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest block mt-0.5">
+                                      {order.status === "REFUNDED" ? (isAr ? "مسترجع (0 إيراد)" : "Refunded (0 Rev)") : (isAr ? "ملغي (0 إيراد)" : "Cancelled (0 Rev)")}
+                                    </span>
+                                  )}
+                                  {!isVoided && order.discountApplied > 0 && (
+                                    <p className="text-[10px] font-bold text-emerald-600 mt-0.5">
+                                      -{dict.product?.currency || "EGP"} {order.discountApplied}
+                                    </p>
+                                  )}
+                                  {!isVoided && order.shippingCost > 0 && (
+                                    <p className="text-[10px] font-bold text-accent mt-0.5 uppercase tracking-widest">
+                                      {order.shippingMethod?.name || "Shipping"}: +{dict.product?.currency || "EGP"} {order.shippingCost}
+                                    </p>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </td>
                           <td className="px-6 md:px-8 py-4 md:py-6 text-center">
                             <div className="relative flex justify-center">

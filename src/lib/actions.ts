@@ -988,6 +988,78 @@ export async function processOrderCancellationInTx(tx: any, orderId: string) {
   }
 }
 
+export async function processOrderRefundInTx(tx: any, orderId: string) {
+  // 1. Mark all order items as REFUNDED
+  await tx.orderItem.updateMany({
+    where: { orderId },
+    data: { status: "REFUNDED" }
+  });
+
+  // 2. Fetch order items to restore stock
+  const orderItems = await tx.orderItem.findMany({
+    where: { orderId },
+    select: { variantId: true, productId: true, quantity: true }
+  });
+
+  for (const item of orderItems) {
+    if (item.variantId) {
+      await tx.productVariant.update({
+        where: { id: item.variantId },
+        data: {
+          stock: {
+            increment: item.quantity
+          }
+        }
+      });
+    } else if (item.productId) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            increment: item.quantity
+          }
+        }
+      });
+    }
+  }
+
+  // 3. Reverse financial transactions and artisan balances
+  const transactions = await tx.artisanTransaction.findMany({
+    where: {
+      orderId,
+      status: { in: ["PENDING", "CLEARED"] }
+    }
+  });
+
+  for (const t of transactions) {
+    const amountToDeduct = Math.abs(t.amount);
+    const balance = await tx.artisanBalance.findUnique({
+      where: { artisanId: t.artisanId }
+    });
+
+    if (balance) {
+      if (t.status === "PENDING") {
+        const newPending = Math.max(0, balance.pending - amountToDeduct);
+        await tx.artisanBalance.update({
+          where: { artisanId: t.artisanId },
+          data: { pending: newPending }
+        });
+      } else if (t.status === "CLEARED") {
+        const newWithdrawable = Math.max(0, balance.withdrawable - amountToDeduct);
+        await tx.artisanBalance.update({
+          where: { artisanId: t.artisanId },
+          data: { withdrawable: newWithdrawable }
+        });
+      }
+    }
+
+    await tx.artisanTransaction.update({
+      where: { id: t.id },
+      data: { status: "FAILED" }
+    });
+  }
+}
+
 export async function cancelOrder(orderId: string) {
   try {
     const session = await auth();
@@ -1665,8 +1737,11 @@ export async function getArtisanSales(artisanId: string) {
         },
         order: {
           status: {
-            notIn: ["PENDING", "CANCELLED"]
+            notIn: ["PENDING", "CANCELLED", "REFUNDED"]
           }
+        },
+        status: {
+          notIn: ["REFUNDED", "CANCELLED"]
         }
       },
       include: {
@@ -1926,7 +2001,7 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
       return { error: "Order not found" };
     }
 
-    const isUncancelling = order.status === "CANCELLED" && status !== "CANCELLED";
+    const isUnvoiding = (order.status === "CANCELLED" || order.status === "REFUNDED") && (status !== "CANCELLED" && status !== "REFUNDED");
 
     await prisma.$transaction(async (tx) => {
       await tx.order.update({
@@ -1940,8 +2015,10 @@ export async function updateOrderStatus(orderId: string, status: string, trackin
 
       if (status === "CANCELLED") {
         await processOrderCancellationInTx(tx, orderId);
+      } else if (status === "REFUNDED") {
+        await processOrderRefundInTx(tx, orderId);
       } else {
-        if (isUncancelling) {
+        if (isUnvoiding) {
           await processOrderUncancellationInTx(tx, order);
         }
         await tx.orderItem.updateMany({
@@ -2327,14 +2404,14 @@ export async function getAdminStats() {
           prisma.order.count({
             where: {
               status: {
-                notIn: ["PENDING", "CANCELLED"]
+                notIn: ["PENDING", "CANCELLED", "REFUNDED"]
               }
             }
           }),
           prisma.order.aggregate({
             where: {
               status: {
-                notIn: ["PENDING", "CANCELLED"]
+                notIn: ["PENDING", "CANCELLED", "REFUNDED"]
               }
             },
             _sum: { totalAmount: true }
@@ -2381,7 +2458,7 @@ export async function getAdminStats() {
             }
           }),
           prisma.order.aggregate({
-            where: { status: { notIn: ["PENDING", "CANCELLED"] } },
+            where: { status: { notIn: ["PENDING", "CANCELLED", "REFUNDED"] } },
             _sum: { shippingCost: true }
           }),
           prisma.order.count({
@@ -3874,6 +3951,10 @@ export async function resolveRefundRequestAction({
       return { error: "Refund claim or associated order not found" };
     }
 
+    if (claim.status !== "PENDING") {
+      return { error: "This refund claim has already been resolved and cannot be modified." };
+    }
+
     const statusMap = {
       APPROVE: "APPROVED" as const,
       REJECT: "REJECTED" as const,
@@ -3901,6 +3982,22 @@ export async function resolveRefundRequestAction({
             data: { status: "REFUNDED" }
           });
 
+          // Restore item stock
+          const targetItem = claim.orderItem || claim.order.items.find(i => i.id === claim.orderItemId);
+          if (targetItem) {
+            if (targetItem.variantId) {
+              await tx.productVariant.update({
+                where: { id: targetItem.variantId },
+                data: { stock: { increment: targetItem.quantity } }
+              });
+            } else if (targetItem.productId) {
+              await tx.product.update({
+                where: { id: targetItem.productId },
+                data: { stock: { increment: targetItem.quantity } }
+              });
+            }
+          }
+
           // Check if all items in the order are now refunded
           const remainingUnrefunded = await tx.orderItem.count({
             where: {
@@ -3915,10 +4012,19 @@ export async function resolveRefundRequestAction({
               where: { id: claim.orderId },
               data: { status: "REFUNDED" }
             });
+
+            // Mark SALE transactions as FAILED so escrow cron doesn't process them
+            await tx.artisanTransaction.updateMany({
+              where: {
+                orderId: claim.orderId,
+                type: "SALE",
+                status: "PENDING"
+              },
+              data: { status: "FAILED" }
+            });
           }
 
           // Debit specific artisan
-          const targetItem = claim.orderItem || claim.order.items.find(i => i.id === claim.orderItemId);
           if (targetItem?.product?.artisan) {
             const artisan = targetItem.product.artisan;
             const itemTotal = targetItem.price * targetItem.quantity;
@@ -3978,6 +4084,31 @@ export async function resolveRefundRequestAction({
           await tx.order.update({
             where: { id: claim.orderId },
             data: { status: "REFUNDED" }
+          });
+
+          // Restore stock for all items
+          for (const item of claim.order.items) {
+            if (item.variantId) {
+              await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: { stock: { increment: item.quantity } }
+              });
+            } else if (item.productId) {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: { stock: { increment: item.quantity } }
+              });
+            }
+          }
+
+          // Mark all SALE transactions for this order as FAILED
+          await tx.artisanTransaction.updateMany({
+            where: {
+              orderId: claim.orderId,
+              type: "SALE",
+              status: "PENDING"
+            },
+            data: { status: "FAILED" }
           });
 
           // Group items by artisan to debit each artisan accurately

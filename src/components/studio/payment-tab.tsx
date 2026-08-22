@@ -643,9 +643,20 @@ export function PaymentTab({
                       </td>
                       <td className={cn(
                         "py-5 px-2 text-sm font-bold text-end whitespace-nowrap",
-                        isPositive ? "text-green-600" : "text-charcoal"
+                        tx.status === "FAILED"
+                          ? "text-charcoal/40 line-through"
+                          : isPositive
+                            ? "text-green-600"
+                            : "text-charcoal"
                       )}>
-                        {isPositive ? "+" : ""}{tx.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}
+                        <div>
+                          <span>{isPositive ? "+" : ""}{tx.amount.toFixed(2)} {isRTL ? "ج.م" : "EGP"}</span>
+                          {tx.status === "FAILED" && (
+                            <span className="block text-[9px] font-bold text-rose-500 uppercase tracking-widest no-underline">
+                              {isRTL ? "(ملغي - 0.00 ج.م)" : "(Voided - 0.00 EGP)"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-5 px-2 text-end whitespace-nowrap">
                         <button

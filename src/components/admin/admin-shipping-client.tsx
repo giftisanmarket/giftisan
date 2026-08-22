@@ -107,10 +107,10 @@ export function AdminShippingClient({ initialMethods, dict }: AdminShippingClien
           animate={{ opacity: 1, x: 0 }}
         >
           <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-3">
-            {dict.admin.shipping_management.split(' ')[0]} <span className="serif italic text-accent font-normal">{dict.admin.shipping_management.split(' ')[1] || "Zones"}</span>
+            {dict.admin.shipping_management.split(' ')[0]} <span className="serif italic text-accent font-normal">{dict.admin.shipping_management.split(' ').slice(1).join(' ') || "Zones"}</span>
           </h1>
           <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-md">
-            Manage your delivery regions and flat-rate costs. Changes here affect checkout instantly.
+            {dict.admin.shipping_desc || "Manage your delivery regions and flat-rate costs. Changes here affect checkout instantly."}
           </p>
         </motion.div>
 
@@ -215,13 +215,13 @@ export function AdminShippingClient({ initialMethods, dict }: AdminShippingClien
             {methods.length === 0 ? (
               <div className="bg-white rounded-[2.5rem] p-16 text-center border border-dashed border-primary/10">
                 <Truck className="w-12 h-12 text-primary/10 mx-auto mb-4" />
-                <h3 className="text-xl font-heading font-bold text-primary mb-2">No zones defined yet</h3>
-                <p className="text-charcoal/40 text-sm max-w-xs mx-auto mb-8">Start by adding your first shipping region to enable checkout.</p>
+                <h3 className="text-xl font-heading font-bold text-primary mb-2">{dict.admin.no_zones_title || "No zones defined yet"}</h3>
+                <p className="text-charcoal/40 text-sm max-w-xs mx-auto mb-8">{dict.admin.no_zones_desc || "Start by adding your first shipping region to enable checkout."}</p>
                 <button
                   onClick={() => setIsAdding(true)}
                   className="px-8 h-12 bg-primary/5 hover:bg-primary text-primary hover:text-white font-bold rounded-xl transition-all"
                 >
-                  Add Your First Zone
+                  {dict.admin.add_first_zone || dict.admin.add_zone || "Add Your First Zone"}
                 </button>
               </div>
             ) : (
@@ -247,7 +247,7 @@ export function AdminShippingClient({ initialMethods, dict }: AdminShippingClien
                       <div className="flex items-center gap-3 mb-1">
                         <h3 className="text-xl font-heading font-black text-primary">{method.name}</h3>
                         {!method.isActive && (
-                          <span className="px-2 py-0.5 bg-primary/10 text-primary/40 text-[8px] font-black uppercase tracking-widest rounded-full">Inactive</span>
+                          <span className="px-2 py-0.5 bg-primary/10 text-primary/40 text-[8px] font-black uppercase tracking-widest rounded-full">{dict.admin.inactive || "Inactive"}</span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-x-6 gap-y-2">

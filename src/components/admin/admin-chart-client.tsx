@@ -38,10 +38,10 @@ export function AdminChartClient({ orders, dict, lang }: AdminChartClientProps) 
     const dates = [...Array(timeRange)].map((_, i) => subDays(new Date(), i)).reverse();
     
     return dates.map(date => {
-      // Filter orders placed on this day (exclude pending/cancelled orders for revenue accuracy)
+      // Filter orders placed on this day (exclude pending/cancelled/refunded orders for revenue accuracy)
       const dayOrders = orders.filter(order => 
         isSameDay(new Date(order.createdAt), date) && 
-        !["PENDING", "CANCELLED"].includes(order.status)
+        !["PENDING", "CANCELLED", "REFUNDED"].includes(order.status)
       );
       
       const revenue = dayOrders.reduce((acc, order) => acc + (order.totalAmount || 0), 0);

@@ -35,7 +35,7 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
             where: {
               order: {
                 status: {
-                  notIn: ["PENDING", "CANCELLED"]
+                  notIn: ["PENDING", "CANCELLED", "REFUNDED"]
                 }
               }
             }
@@ -72,7 +72,7 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
                 where: {
                   order: {
                     status: {
-                      notIn: ["PENDING", "CANCELLED"]
+                      notIn: ["PENDING", "CANCELLED", "REFUNDED"]
                     }
                   }
                 }

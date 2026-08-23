@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -11,15 +13,21 @@ import {
   ArrowUpRight, 
   Sparkles, 
   Info, 
-  Star,
-  Check,
-  CheckCircle2,
-  X,
-  EyeOff,
-  Search
+  Star, 
+  Check, 
+  CheckCircle2, 
+  X, 
+  Search,
+  AlertTriangle,
+  Package,
+  Layers,
+  RefreshCw,
+  Minus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
+import { updateProductStockAction } from "@/lib/actions";
+import { toast } from "react-hot-toast";
 
 interface InventoryTabProps {
   products: any[];
@@ -31,6 +39,7 @@ interface InventoryTabProps {
   isDeleting: string | null;
   onBulkDelete?: (ids: string[]) => void;
   onBulkStatusUpdate?: (ids: string[], status: string) => void;
+  lang?: string;
 }
 
 export function InventoryTab({
@@ -42,56 +51,91 @@ export function InventoryTab({
   setProductToDelete,
   isDeleting,
   onBulkDelete,
-  onBulkStatusUpdate
+  onBulkStatusUpdate,
+  lang = "en"
 }: InventoryTabProps) {
+  const isAr = lang === "ar";
+  const [productList, setProductList] = useState<any[]>(products);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "APPROVED" | "OUT_OF_STOCK" | "PENDING" | "REJECTED">("ALL");
+  const [updatingStockId, setUpdatingStockId] = useState<string | null>(null);
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Sync state if products prop changes
+  if (products !== productList && products.length !== productList.length) {
+    setProductList(products);
+  }
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
+  // Stock counters
+  const totalCount = productList.length;
+  const approvedCount = productList.filter(p => p.status === "APPROVED" && (p.stock || 0) > 0).length;
+  const outOfStockCount = productList.filter(p => (p.stock || 0) <= 0).length;
+  const pendingCount = productList.filter(p => p.status === "PENDING").length;
+  const needsAttentionCount = productList.filter(p => p.status === "REJECTED").length;
 
-  const toggleSelectAll = () => {
-    if (selectedIds.length === products.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(products.map(p => p.id));
-    }
-  };
+  const filteredProducts = productList.filter(p => {
+    // 1. Text Search
+    const matchesSearch = 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
 
-  const handleBulkDelete = () => {
-    if (onBulkDelete && selectedIds.length > 0) {
-      onBulkDelete(selectedIds);
-      setSelectedIds([]);
-    }
-  };
+    // 2. Status Filter
+    if (statusFilter === "APPROVED") return p.status === "APPROVED" && (p.stock || 0) > 0;
+    if (statusFilter === "OUT_OF_STOCK") return (p.stock || 0) <= 0;
+    if (statusFilter === "PENDING") return p.status === "PENDING";
+    if (statusFilter === "REJECTED") return p.status === "REJECTED";
 
-  const handleBulkStatus = (status: string) => {
-    if (onBulkStatusUpdate && selectedIds.length > 0) {
-      onBulkStatusUpdate(selectedIds, status);
-      setSelectedIds([]);
+    return true;
+  });
+
+  const handleQuickStockChange = async (productId: string, delta: number, currentStock: number) => {
+    if (isAdminPreview) return;
+    const newStock = Math.max(0, currentStock + delta);
+    if (newStock === currentStock) return;
+
+    setUpdatingStockId(productId);
+    
+    // Optimistic Update
+    setProductList(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+
+    try {
+      const res = await updateProductStockAction(productId, newStock, isAr ? "ar" : "en");
+      if (res.error) {
+        // Rollback
+        setProductList(prev => prev.map(p => p.id === productId ? { ...p, stock: currentStock } : p));
+        toast.error(res.error);
+      } else {
+        toast.success(
+          isAr 
+            ? `تم تحديث المخزون: ${newStock} قطعة`
+            : `Stock updated to ${newStock} ${newStock === 1 ? 'piece' : 'pieces'}`,
+          {
+            style: { borderRadius: "16px", background: "#1a1a1a", color: "#fff", fontSize: "13px" }
+          }
+        );
+      }
+    } catch (err: any) {
+      setProductList(prev => prev.map(p => p.id === productId ? { ...p, stock: currentStock } : p));
+      toast.error(err.message || "Failed to update stock");
+    } finally {
+      setUpdatingStockId(null);
     }
   };
 
   return (
     <div id="inventory" className="relative">
       <div className="bg-white rounded-[2rem] md:rounded-[3.5rem] p-5 md:p-8 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5 mb-32">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-6 md:gap-10">
+        
+        {/* Header Title & Actions */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-10 gap-6 md:gap-10">
           <div className="space-y-2 text-center md:text-start w-full md:w-auto">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight">
               {dict.studio.studio_inventory} <span className="serif italic font-normal text-accent">{dict.studio.studio_inventory_accent}</span>
             </h2>
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <p className="text-sm md:text-base text-charcoal/40 font-medium">{dict.studio.manage_inventory_desc}</p>
-            </div>
+            <p className="text-sm md:text-base text-charcoal/40 font-medium">{dict.studio.manage_inventory_desc}</p>
           </div>
+          
           {!isAdminPreview ? (
             <Link
               href="/studio/new-product"
@@ -106,8 +150,42 @@ export function InventoryTab({
           )}
         </div>
 
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+          {[
+            { id: "ALL", label: isAr ? "جميع القطع" : "All Pieces", count: totalCount, color: "text-primary" },
+            { id: "APPROVED", label: isAr ? "متاح بالمتجر" : "Available in Store", count: approvedCount, color: "text-green-600" },
+            { id: "OUT_OF_STOCK", label: isAr ? "نفد المخزون" : "Out of Stock", count: outOfStockCount, color: "text-red-600", alert: outOfStockCount > 0 },
+            { id: "PENDING", label: isAr ? "قيد المراجعة" : "Under Review", count: pendingCount, color: "text-sky-600" },
+            ...(needsAttentionCount > 0 ? [{ id: "REJECTED", label: isAr ? "يتطلب تعديل" : "Needs Revision", count: needsAttentionCount, color: "text-red-500", alert: true }] : [])
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id as any)}
+              className={cn(
+                "px-4 py-2.5 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 border active:scale-95 shrink-0",
+                statusFilter === tab.id
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/10"
+                  : "bg-cream/40 text-charcoal/70 border-primary/5 hover:bg-cream hover:text-primary"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn(
+                "px-2 py-0.5 rounded-full text-[10px] font-black",
+                statusFilter === tab.id
+                  ? "bg-white/20 text-white"
+                  : tab.alert
+                    ? "bg-red-50 text-red-600 font-black"
+                    : "bg-primary/5 text-primary/60"
+              )}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
         {/* Search Bar */}
-        {products.length > 0 && (
+        {productList.length > 0 && (
           <div className="mb-8 md:mb-10 relative group">
             <div className="absolute inset-y-0 start-0 ps-6 flex items-center pointer-events-none">
               <Search className="w-5 h-5 text-primary/20 group-focus-within:text-accent transition-colors" />
@@ -130,158 +208,194 @@ export function InventoryTab({
           </div>
         )}
 
+        {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
           {filteredProducts.length === 0 ? (
-            <div className="col-span-full py-20 md:py-32 text-center space-y-6 md:space-y-8 bg-cream/20 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-primary/5">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary/5">
-                <Search className="w-10 h-10 md:w-16 md:h-16 text-primary/10" />
+            <div className="col-span-full py-20 md:py-28 text-center space-y-6 bg-cream/20 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-primary/5">
+              <div className="w-20 h-20 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-xl shadow-primary/5">
+                <Package className="w-8 h-8 md:w-12 md:h-12 text-primary/20" />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl md:text-4xl font-heading font-bold text-primary">
-                  {searchQuery ? dict.studio.no_search_results : dict.studio.empty_studio_title}
+              <div className="space-y-1">
+                <h3 className="text-xl md:text-3xl font-heading font-bold text-primary">
+                  {searchQuery ? dict.studio.no_search_results : (isAr ? "لا توجد منتجات في هذا التصنيف" : "No items found in this filter")}
                 </h3>
-                <p className="text-charcoal/40 max-w-xs md:max-w-md mx-auto text-sm md:text-base">
-                  {searchQuery ? dict.studio.no_search_results_desc : dict.studio.empty_studio_desc}
+                <p className="text-charcoal/40 max-w-xs md:max-w-md mx-auto text-xs md:text-sm">
+                  {searchQuery ? dict.studio.no_search_results_desc : (isAr ? "جرّب اختيار تصنيف آخر أو إضافة قطعة جديدة." : "Try picking a different tab or adding a new handcrafted item.")}
                 </p>
               </div>
             </div>
           ) : (
-            filteredProducts.map((p: any) => (
-              <div 
-                key={p.id}
-                className={cn(
-                  "group relative bg-white rounded-[2rem] md:rounded-[2.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden",
-                  p.status === "APPROVED" ? "border-l-[3px] border-l-green-500" :
-                  p.status === "REJECTED" ? "border-l-[3px] border-l-red-400"  :
-                  p.status === "DRAFT"    ? "border-l-[3px] border-l-slate-300" :
-                                           "border-l-[3px] border-l-amber-400"
-                )}
-              >
-                <div className="relative aspect-square overflow-hidden shrink-0">
-                  <BespokeImage type="product" id={p.id} src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
+            filteredProducts.map((p: any) => {
+              const currentStock = p.stock || 0;
+              const isOutOfStock = currentStock <= 0;
+              const isUpdatingThis = updatingStockId === p.id;
 
+              return (
+                <div 
+                  key={p.id}
+                  className={cn(
+                    "group relative bg-white rounded-[2rem] md:rounded-[2.5rem] border border-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all text-charcoal flex flex-col h-full overflow-hidden",
+                    p.status === "APPROVED" ? "border-l-[4px] border-l-green-500" :
+                    p.status === "REJECTED" ? "border-l-[4px] border-l-red-400"  :
+                    p.status === "DRAFT"    ? "border-l-[4px] border-l-slate-300" :
+                                             "border-l-[4px] border-l-amber-400"
+                  )}
+                >
+                  {/* Image Cover & Status Tag */}
+                  <div className="relative aspect-square overflow-hidden shrink-0">
+                    <BespokeImage 
+                      type="product" 
+                      id={p.id} 
+                      src={p.images?.[0] || "/placeholder.jpg"} 
+                      alt={p.name} 
+                      fill 
+                      className="object-cover group-hover:scale-105 transition-transform duration-700" 
+                    />
 
-
-                  {/* Status Overlay - Premium Look */}
-                  <div className="absolute top-4 start-4 z-10 flex flex-col gap-2">
-                    <span className={cn(
-                      "px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-xl border",
-                      p.status === "APPROVED" ? "bg-green-500/90 text-white border-white/20" :
+                    {/* Status Badge */}
+                    <div className="absolute top-4 start-4 z-10 flex flex-col gap-2">
+                      <span className={cn(
+                        "px-3 py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-xl border",
+                        p.status === "APPROVED" ? "bg-green-500/90 text-white border-white/20" :
                         p.status === "REJECTED" ? "bg-red-500/90 text-white border-white/20" :
-                          "bg-amber-500/90 text-white border-white/20"
-                    )}>
-                      {p.status === "APPROVED" ? dict.admin.treasure_approved :
-                        p.status === "REJECTED" ? dict.admin.treasure_rejected :
+                                                  "bg-amber-500/90 text-white border-white/20"
+                      )}>
+                        {p.status === "APPROVED" ? dict.admin.treasure_approved :
+                          p.status === "REJECTED" ? dict.admin.treasure_rejected :
                           p.status === "DRAFT" ? dict.admin.treasure_draft :
-                            dict.admin.treasure_pending}
-                    </span>
-                  </div>
+                                                dict.admin.treasure_pending}
+                      </span>
 
-                  {/* Action Buttons: Always visible on Mobile & Tablets (including Landscape), Hover on Large Desktop */}
-                  <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20 transition-all duration-300 xl:opacity-0 xl:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedProductForEdit(p);
-                        setIsEditModalOpen(true);
-                      }}
-                      title={isAdminPreview ? "View" : "Edit"}
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
-                    >
-                      {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setProductToDelete(p.id);
-                      }}
-                      disabled={isDeleting === p.id}
-                      title="Delete"
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-red-500 flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50 border border-primary/10 cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                    <Link
-                      href={`/products/${p.slug || p.id}`}
-                      title="View Product Page"
-                      className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
-                    >
-                      <ArrowUpRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="p-5 md:p-6 lg:p-7 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-4 gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg md:text-2xl font-heading font-bold text-primary truncate leading-tight group-hover:text-accent transition-colors">{p.name}</h3>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                          (p.stock || 0) <= 0 ? "bg-red-50 text-red-500 border-red-100" :
-                            (p.stock || 0) < 5 ? "bg-orange-50 text-orange-600 border-orange-100 animate-pulse" :
-                              "bg-primary/5 text-primary/40 border-transparent"
-                        )}>
-                          {dict.studio.in_stock.replace('{count}', (p.stock || 0).toString())}
-                          {(p.stock || 0) > 0 && (p.stock || 0) < 5 && ` — ${dict.edit_product.low_stock}`}
+                      {/* Only Show Badge if strictly Out of Stock (0 pieces) */}
+                      {isOutOfStock && (
+                        <span className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-red-600/90 text-white backdrop-blur-md shadow-lg border border-white/20 flex items-center gap-1">
+                          <AlertTriangle className="w-2.5 h-2.5" />
+                          {isAr ? "نفد المخزون" : "Out of Stock"}
                         </span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end shrink-0">
-                      {p.status === "REJECTED" && !isAdminPreview && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedProductForEdit(p);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="text-[9px] font-black text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-red-100 active:scale-95"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          {dict.studio.resolve_feedback}
-                        </button>
                       )}
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20 transition-all duration-300 xl:opacity-0 xl:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProductForEdit(p);
+                          setIsEditModalOpen(true);
+                        }}
+                        title={isAdminPreview ? "View" : "Edit"}
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
+                      >
+                        {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProductToDelete(p.id);
+                        }}
+                        disabled={isDeleting === p.id}
+                        title="Delete"
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-red-500 flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50 border border-primary/10 cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <Link
+                        href={`/products/${p.slug || p.id}`}
+                        title="View Product Page"
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
 
-                  {p.status === "REJECTED" && p.rejectionReason && (
-                    <div className="mb-6">
-                      <div className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Info className="w-3.5 h-3.5 text-red-400" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-red-400">{dict.edit_product.feedback_title}</span>
-                        </div>
-                        <p className="text-[11px] md:text-xs text-red-700 italic leading-relaxed">
-                          "{p.rejectionReason}"
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-auto pt-6 border-t border-primary/5 flex items-center justify-between">
+                  {/* Card Body */}
+                  <div className="p-5 md:p-6 flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-[10px] font-black text-primary/20 uppercase tracking-[0.2em] mb-1">{dict.common.price}</p>
-                      <p className="text-xl md:text-2xl font-heading font-bold text-accent">{dict.product.currency} {p.price}</p>
+                      <div className="flex justify-between items-start mb-3 gap-2">
+                        <h3 className="text-base md:text-xl font-heading font-bold text-primary truncate leading-tight group-hover:text-accent transition-colors">
+                          {p.name}
+                        </h3>
+                      </div>
+
+                      {/* Stock Quantity Controls */}
+                      <div className="mt-3 p-3 bg-cream/40 rounded-2xl border border-primary/5 flex items-center justify-between">
+                        <div>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-primary/40">
+                            {isAr ? "المتوفر في ورشتك" : "In Stock"}
+                          </p>
+                          <p className={cn(
+                            "text-sm font-bold",
+                            isOutOfStock ? "text-red-500" : "text-primary"
+                          )}>
+                            {currentStock} {isAr ? "قطع" : (currentStock === 1 ? "unit" : "units")}
+                          </p>
+                        </div>
+
+                        {!isAdminPreview && (
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-primary/5">
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStockChange(p.id, -1, currentStock)}
+                              disabled={currentStock <= 0 || isUpdatingThis}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-primary/70 hover:bg-primary/5 hover:text-primary active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                              title={isAr ? "إنقاص 1" : "Decrease 1"}
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="w-6 text-center text-xs font-black text-primary">
+                              {isUpdatingThis ? <RefreshCw className="w-3 h-3 animate-spin mx-auto text-accent" /> : currentStock}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStockChange(p.id, 1, currentStock)}
+                              disabled={isUpdatingThis}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-primary/70 hover:bg-primary/5 hover:text-primary active:scale-90 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                              title={isAr ? "زيادة 1" : "Increase 1"}
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Rejection Note if applicable */}
+                      {p.status === "REJECTED" && p.rejectionReason && (
+                        <div className="mt-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                          <div className="flex items-center gap-1.5 mb-1 text-red-500">
+                            <Info className="w-3 h-3" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">{dict.edit_product.feedback_title}</span>
+                          </div>
+                          <p className="text-[11px] text-red-700 italic leading-relaxed">
+                            "{p.rejectionReason}"
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-col items-end">
-                      <p className="text-[10px] font-black text-primary/20 uppercase tracking-[0.2em] mb-1">{dict.studio.reviews}</p>
-                      <div className="flex items-center gap-2 text-xs md:text-sm font-bold text-primary">
-                        <Star className="w-3.5 h-3.5 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
-                        <span>{p._count?.reviews || 0}</span>
+
+                    {/* Price & Rating Footer */}
+                    <div className="mt-5 pt-4 border-t border-primary/5 flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] font-black text-primary/20 uppercase tracking-[0.2em]">{dict.common.price}</p>
+                        <p className="text-lg md:text-xl font-heading font-bold text-accent">{dict.product.currency} {p.price}</p>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <p className="text-[9px] font-black text-primary/20 uppercase tracking-[0.2em]">{dict.studio.reviews}</p>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                          <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                          <span>{p._count?.reviews || 0}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
-
-
     </div>
   );
 }

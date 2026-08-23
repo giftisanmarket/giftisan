@@ -111,52 +111,61 @@ export function SalesTab({
   const exportToCSV = () => {
     if (sales.length === 0) return;
 
-    // Define headers
+    // Best practice headers for artisan sales & workshop fulfillment
     const headers = [
-      "Order ID",
+      "Order Ref",
       "Date",
-      "Customer Name",
-      "Customer Email",
       "Product Name",
       "Variant",
       "Quantity",
-      "Price",
-      "Total",
+      "Unit Price (EGP)",
+      "Total Amount (EGP)",
       "Status",
-      "Shipping Address",
-      "City",
-      "Country"
+      "Destination City",
+      "Personalization / Custom Note",
+      "Gift Message"
     ];
 
+    const escapeCSV = (value: any) => {
+      if (value === null || value === undefined) return '""';
+      const str = String(value).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
     // Map sales to rows
-    const rows = sales.map(item => [
-      item.order.id,
-      new Date(item.order.createdAt).toLocaleDateString(),
-      "Giftisan Customer",
-      "Protected",
-      `"${item.product.name}"`,
-      item.variant?.name || "Standard",
-      item.quantity,
-      item.price,
-      item.price * item.quantity,
-      item.status,
-      "\"Fulfilled by Giftisan\"",
-      "Protected",
-      "EG"
-    ]);
+    const rows = sales.map(item => {
+      const totalAmount = (item.price || 0) * (item.quantity || 1);
+      const orderRef = `#${(item.order?.id || item.orderId || "").slice(-6).toUpperCase()}`;
+      const formattedDate = item.order?.createdAt 
+        ? new Date(item.order.createdAt).toISOString().split('T')[0]
+        : "";
 
-    // Join headers and rows
-    const csvContent = [
-      headers.join(","),
+      return [
+        escapeCSV(orderRef),
+        escapeCSV(formattedDate),
+        escapeCSV(item.product?.name || "Handcrafted Piece"),
+        escapeCSV(item.variant?.name || "Standard"),
+        escapeCSV(item.quantity || 1),
+        escapeCSV(Number(item.price || 0).toFixed(2)),
+        escapeCSV(totalAmount.toFixed(2)),
+        escapeCSV(item.status || "PENDING"),
+        escapeCSV(item.order?.shippingCity || "Cairo"),
+        escapeCSV(item.personalization || "None"),
+        escapeCSV(item.order?.giftMessage || "None")
+      ];
+    });
+
+    // UTF-8 BOM (\uFEFF) ensures Arabic and special characters render cleanly in Excel
+    const csvContent = "\uFEFF" + [
+      headers.map(h => `"${h}"`).join(","),
       ...rows.map(row => row.join(","))
-    ].join("\n");
+    ].join("\r\n");
 
-    // Create blob and download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `artisan_sales_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `giftisan_sales_report_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();

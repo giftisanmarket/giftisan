@@ -167,7 +167,7 @@ export default async function ProductPage({ params }: Props) {
       },
       variants: true
     },
-    take: 3
+    take: 6
   });
 
   // Sanitize data to prevent serialization crashes

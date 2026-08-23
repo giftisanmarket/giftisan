@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "clear-escrow": "tsx -r dotenv/config scripts/clear-escrow.ts",
     "simulate-payment": "tsx -r dotenv/config scripts/simulate-payment.ts",
-    "simulate-delivery": "tsx -r dotenv/config scripts/simulate-shipping-delivery.ts"
+    "simulate-delivery": "tsx -r dotenv/config scripts/simulate-shipping-delivery.ts",
+    "test:e2e": "tsx -r dotenv/config scripts/test-e2e-simulation.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

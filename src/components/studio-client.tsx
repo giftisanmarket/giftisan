@@ -614,6 +614,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     sales={sales}
                     topVariants={topVariants}
                     activities={activities}
+                    onNavigateToInventory={() => setActiveTab("inventory")}
                   />
                 )}
 
@@ -621,6 +622,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   <InventoryTab
                     products={products}
                     dict={dict}
+                    lang={lang}
                     isAdminPreview={isAdminPreview}
                     setSelectedProductForEdit={setSelectedProductForEdit}
                     setIsEditModalOpen={setIsEditModalOpen}

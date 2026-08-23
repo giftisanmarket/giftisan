@@ -14,7 +14,8 @@ import {
   Star, 
   Clock, 
   X,
-  ArrowUpRight
+  ArrowUpRight,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
@@ -31,6 +32,7 @@ interface OverviewTabProps {
   sales: any[];
   topVariants: any[];
   activities: any[];
+  onNavigateToInventory?: () => void;
 }
 
 export function OverviewTab({
@@ -43,8 +45,10 @@ export function OverviewTab({
   products,
   sales,
   topVariants,
-  activities
+  activities,
+  onNavigateToInventory
 }: OverviewTabProps) {
+  const isAr = lang === "ar";
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
 
   useEffect(() => {
@@ -65,6 +69,7 @@ export function OverviewTab({
 
   return (
     <div className="space-y-12">
+      {/* Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
           {
@@ -247,6 +252,7 @@ export function OverviewTab({
         </div>
       )}
 
+      {/* Sales Performance Chart */}
       <div className="bg-white rounded-[3rem] p-6 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
         <div className="flex justify-between items-center mb-10">
           <div>

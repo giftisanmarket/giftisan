@@ -4493,6 +4493,48 @@ export async function deletePlatformExpenseAction(id: string, lang = "en") {
   }
 }
 
+export async function updateProductStockAction(productId: string, newStock: number, lang = "en") {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  if (!productId || typeof newStock !== "number" || isNaN(newStock)) {
+    return { error: "Invalid product or stock value" };
+  }
+
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { artisan: true }
+    });
+
+    if (!product) {
+      return { error: "Product not found" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    const isOwner = product.artisan.userId === session.user.id;
+
+    if (!isAdmin && !isOwner) {
+      return { error: "Forbidden: You do not have permission to edit this product" };
+    }
+
+    const sanitizedStock = Math.max(0, Math.floor(newStock));
+    const updated = await prisma.product.update({
+      where: { id: productId },
+      data: { stock: sanitizedStock }
+    });
+
+    revalidatePath(`/${lang}/studio`);
+    revalidatePath(`/${lang}/products/${product.slug || product.id}`);
+    return { success: true, stock: updated.stock };
+  } catch (error: any) {
+    console.error("updateProductStockAction error:", error);
+    return { error: error.message || "Failed to update stock" };
+  }
+}
+
 
 
 

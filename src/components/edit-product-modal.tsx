@@ -60,7 +60,7 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
               type="number" 
               required
               min="0"
-              step="0.01"
+              step="1"
               value={price}
               onChange={(e) => setTextData((prev: any) => ({...prev, price: e.target.value}))}
               disabled={readOnly}
@@ -1148,15 +1148,15 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
 
     const form = new FormData();
     form.append("name", textData.name);
-    form.append("description", textData.description);
-    form.append("price", textData.price.trim());
+    form.append("description", textData.description || "");
+    form.append("price", String(textData.price).trim());
     form.append("category", textData.category);
-    form.append("canPersonalize", textData.canPersonalize.toString());
-    form.append("personalizationPrompt", textData.personalizationPrompt);
-    form.append("requiresClientImage", textData.requiresClientImage.toString());
-    form.append("clientImagePrompt", textData.clientImagePrompt);
-    form.append("badge", textData.badge);
-    form.append("stock", textData.stock.trim());
+    form.append("canPersonalize", textData.canPersonalize ? "true" : "false");
+    form.append("personalizationPrompt", textData.personalizationPrompt || "");
+    form.append("requiresClientImage", textData.requiresClientImage ? "true" : "false");
+    form.append("clientImagePrompt", textData.clientImagePrompt || "");
+    form.append("badge", textData.badge || "");
+    form.append("stock", String(textData.stock).trim());
     
     images.forEach((img, i) => {
       if (img) form.append(`image-${i}`, img);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin, RotateCcw, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { updateOrderStatus } from "@/lib/actions";
+import { updateOrderStatus, shipOrderWithBosta, getBostaAWBAction } from "@/lib/actions";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -74,6 +74,43 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
     const itemWithTracking = order.items?.find((i: any) => i.trackingNumber);
     setTrackingNumber(itemWithTracking?.trackingNumber || "");
     setCarrier(itemWithTracking?.carrier || "");
+  };
+
+  const [isBostaLoading, setIsBostaLoading] = useState(false);
+
+  const handleBostaShip = async (orderId: string) => {
+    setIsBostaLoading(true);
+    try {
+      const res = await shipOrderWithBosta(orderId);
+      if (res.success) {
+        toast.success(`Shipment created on Bosta! Tracking: ${res.trackingNumber}`, {
+          duration: 6000,
+          style: { borderRadius: '20px', background: '#1a4332', color: '#fff' }
+        });
+        setOrders(prev => prev.map(o => {
+          if (o.id === orderId) {
+            return { ...o, status: "SHIPPED", trackingNumber: res.trackingNumber, carrier: "Bosta" };
+          }
+          return o;
+        }));
+        if (editingOrder?.id === orderId) {
+          setEditingOrder(null);
+        }
+        if (selectedOrderDetails?.id === orderId) {
+          setSelectedOrderDetails((prev: any) => prev ? { ...prev, status: "SHIPPED", trackingNumber: res.trackingNumber, carrier: "Bosta" } : null);
+        }
+      } else {
+        toast.error(res.error || "Failed to create shipment on Bosta", {
+          style: { borderRadius: '20px', background: '#4a1d1d', color: '#fff' }
+        });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred while communicating with Bosta", {
+        style: { borderRadius: '20px', background: '#4a1d1d', color: '#fff' }
+      });
+    } finally {
+      setIsBostaLoading(false);
+    }
   };
 
   const handleUpdateStatus = async () => {
@@ -536,6 +573,39 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                     </div>
                   </motion.div>
                 )}
+
+                {/* 1-Click Bosta Dispatch Helper */}
+                {editingOrder.status === "PENDING" && newStatus === "PENDING" ? (
+                  <div className="pt-3 border-t border-primary/10">
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3 text-amber-800 text-xs">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <p className="leading-snug">
+                        <strong>Awaiting Payment:</strong> This order is unpaid. To dispatch with Bosta, confirm payment first by changing the status to <strong>PROCESSING</strong> or <strong>SHIPPED</strong>.
+                      </p>
+                    </div>
+                  </div>
+                ) : editingOrder.status !== "CANCELLED" && editingOrder.status !== "DELIVERED" && (
+                  <div className="pt-3 border-t border-primary/10">
+                    <button
+                      type="button"
+                      onClick={() => handleBostaShip(editingOrder.id)}
+                      disabled={isBostaLoading}
+                      className="w-full h-12 bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold rounded-2xl hover:opacity-95 transition-all shadow-md shadow-red-500/20 text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isBostaLoading ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Connecting to Bosta API...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Truck className="w-4 h-4" />
+                          <span>Dispatch with Bosta (1-Click)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-4">
@@ -721,13 +791,20 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                     </div>
                   </div>
                     
-                    {(selectedOrderDetails.status === "SHIPPED" || selectedOrderDetails.status === "DELIVERED") && (
+                    {(selectedOrderDetails.status === "SHIPPED" || selectedOrderDetails.status === "DELIVERED") ? (
                       <div className="space-y-4">
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40">Fulfillment</h3>
                         <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl space-y-3">
-                          <div className="flex items-center gap-2 text-blue-700">
-                            <Truck className="w-4 h-4" />
-                            <span className="text-xs font-black uppercase tracking-widest">{selectedOrderDetails.carrier || "Standard Carrier"}</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-blue-700">
+                              <Truck className="w-4 h-4" />
+                              <span className="text-xs font-black uppercase tracking-widest">{selectedOrderDetails.carrier || "Bosta"}</span>
+                            </div>
+                            {selectedOrderDetails.trackingNumber && (
+                              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[9px] font-black uppercase tracking-wider">
+                                {selectedOrderDetails.status}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">Tracking Number</p>
@@ -735,8 +812,53 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                               {selectedOrderDetails.trackingNumber || "N/A"}
                             </p>
                           </div>
+                          {selectedOrderDetails.trackingNumber && (
+                            <div className="pt-2 flex gap-2">
+                              <a
+                                href={`https://bosta.co/track/${selectedOrderDetails.trackingNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Live Bosta Tracking
+                              </a>
+                            </div>
+                          )}
                         </div>
                       </div>
+                    ) : selectedOrderDetails.status === "PENDING" ? (
+                      <div className="pt-2">
+                        <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3 text-amber-800 text-xs">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                          <p className="leading-snug">
+                            <strong>Awaiting Payment:</strong> The customer has not completed payment for this order yet.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      selectedOrderDetails.status !== "CANCELLED" && (
+                        <div className="space-y-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleBostaShip(selectedOrderDetails.id)}
+                            disabled={isBostaLoading}
+                            className="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold rounded-2xl hover:opacity-95 transition-all shadow-md shadow-red-500/20 text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                          >
+                            {isBostaLoading ? (
+                              <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Dispatching to Bosta...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Truck className="w-4 h-4" />
+                                <span>Dispatch with Bosta (1-Click)</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )
                     )}
                   </div>
                 </div>

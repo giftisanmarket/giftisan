@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
     contentDispositionType: 'attachment',
   },
   experimental: {
+    cpus: 4,
     serverActions: {
       bodySizeLimit: '10mb', // Images are pre-processed by Sharp before upload; 100mb was a DoS risk
     },

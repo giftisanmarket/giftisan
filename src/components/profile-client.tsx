@@ -380,7 +380,11 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                             </p>
                           </div>
                           <div className="shrink-0">
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">{dict.profile.total_paid}</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 mb-0.5 md:mb-1">
+                              {order.status === "PENDING" || order.status === "FAILED"
+                                ? (isAr ? "إجمالي المبلغ" : "Total Amount") 
+                                : dict.profile.total_paid}
+                            </p>
                             <div className="flex flex-col">
                               <p className="text-xs md:text-sm font-bold text-accent shrink-0">{dict.product?.currency || "EGP"} {order.totalAmount.toLocaleString()}</p>
                               {order.discountApplied > 0 && (

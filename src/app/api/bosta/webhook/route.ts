@@ -13,24 +13,25 @@ export async function POST(req: NextRequest) {
 
     // Bosta webhook payload usually has state name, e.g. data.state or data.status or data.event
     // Standard Bosta webhook structure: { event: "delivery.delivered", trackingNumber: "..." }
-    const trackingNumber = data.trackingNumber || data.data?.trackingNumber || data.data?.trackingId;
-    const rawStatus = data.status || data.state || data.data?.status || data.data?.state || data.event;
+    const trackingNumber = data.trackingNumber || data.data?.trackingNumber || data.data?.trackingId || data._id;
+    const businessReference = data.businessReference || data.data?.businessReference;
+    const rawStatus = data.status || data.state?.value || data.state || data.data?.status || data.data?.state?.value || data.data?.state || data.event;
 
-    if (!trackingNumber) {
-      return NextResponse.json({ error: "Missing trackingNumber in payload" }, { status: 400 });
+    if (!trackingNumber && !businessReference) {
+      return NextResponse.json({ error: "Missing trackingNumber or businessReference in payload" }, { status: 400 });
     }
 
     const isDelivered = BOSTA_DELIVERED_STATUSES.includes(rawStatus) || 
                         (typeof rawStatus === "string" && rawStatus.toLowerCase().includes("deliver"));
 
     if (isDelivered) {
-      const updated = await markItemAsDelivered(trackingNumber);
+      const updated = await markItemAsDelivered(trackingNumber, businessReference);
       if (updated) {
-        return NextResponse.json({ success: true, message: "Order item successfully updated to DELIVERED" });
+        return NextResponse.json({ success: true, message: "Order item successfully updated to DELIVERED and escrow timer initiated." });
       }
     }
 
-    return NextResponse.json({ success: true, message: "Received but status is not delivered" });
+    return NextResponse.json({ success: true, message: `Received state '${rawStatus}', no delivery update needed.` });
   } catch (error: any) {
     console.error("[Bosta Webhook Error]:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
@@ -42,53 +43,61 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const trackingId = searchParams.get("trackingId") || searchParams.get("trackingNumber");
+    const orderId = searchParams.get("orderId");
 
-    if (!trackingId) {
-      return NextResponse.json({ error: "Missing trackingId query parameter" }, { status: 400 });
+    if (!trackingId && !orderId) {
+      return NextResponse.json({ error: "Missing trackingId or orderId query parameter" }, { status: 400 });
     }
 
-    console.log(`[Bosta Sync] Fetching public tracking for ID: ${trackingId}`);
-    
-    // Call Bosta's public tracking endpoint
-    const response = await fetch(`https://api.bosta.co/shipments/track/${trackingId}`, {
-      headers: {
-        "Accept": "application/json"
+    if (trackingId) {
+      console.log(`[Bosta Sync] Fetching public tracking for ID: ${trackingId}`);
+      
+      // Call Bosta's public tracking endpoint
+      const response = await fetch(`https://api.bosta.co/shipments/track/${trackingId}`, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        console.warn(`[Bosta Sync] Public tracking API returned status ${response.status}.`);
+        return NextResponse.json({ success: false, error: "Tracking record not found on Bosta's servers" });
       }
-    });
 
-    if (!response.ok) {
-      console.warn(`[Bosta Sync] Public tracking API returned status ${response.status}.`);
-      return NextResponse.json({ success: false, error: "Tracking record not found on Bosta's servers" });
-    }
+      const data = await response.json();
+      console.log("[Bosta Sync] API Response:", JSON.stringify(data));
 
-    const data = await response.json();
-    console.log("[Bosta Sync] API Response:", JSON.stringify(data));
+      // Bosta tracking response standard status lies in data.state.value or data.state or data.status
+      const rawState = data.state?.value || data.state || data.status;
+      const isDelivered = BOSTA_DELIVERED_STATUSES.includes(rawState) || 
+                          (typeof rawState === "string" && rawState.toLowerCase().includes("deliver"));
 
-    // Bosta tracking response standard status lies in data.state.value or data.state or data.status
-    const rawState = data.state?.value || data.state || data.status;
-    const isDelivered = BOSTA_DELIVERED_STATUSES.includes(rawState) || 
-                        (typeof rawState === "string" && rawState.toLowerCase().includes("deliver"));
-
-    if (isDelivered) {
-      const updated = await markItemAsDelivered(trackingId);
-      if (updated) {
-        return NextResponse.json({ success: true, status: "DELIVERED", synced: true });
+      if (isDelivered) {
+        const updated = await markItemAsDelivered(trackingId, orderId || undefined);
+        if (updated) {
+          return NextResponse.json({ success: true, status: "DELIVERED", synced: true });
+        }
       }
+
+      return NextResponse.json({ success: true, status: rawState || "SHIPPED", synced: false });
+    } else if (orderId) {
+      // Force trigger mark delivery by orderId
+      const updated = await markItemAsDelivered("", orderId);
+      return NextResponse.json({ success: !!updated, status: updated ? "DELIVERED" : "UNCHANGED" });
     }
 
-    return NextResponse.json({ success: true, status: rawState || "SHIPPED", synced: false });
+    return NextResponse.json({ success: false, error: "Invalid request parameters" }, { status: 400 });
   } catch (error: any) {
     console.error("[Bosta GET Sync Error]:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
 
-async function markItemAsDelivered(trackingNumber: string) {
-  // Find the OrderItem associated with this tracking number
-  const orderItem = await prisma.orderItem.findFirst({
+async function markItemAsDelivered(trackingNumber?: string, businessReference?: string) {
+  // 1. Find OrderItem by trackingNumber
+  let orderItem = trackingNumber ? await prisma.orderItem.findFirst({
     where: { 
       trackingNumber: trackingNumber,
-      status: "SHIPPED" // Only update if currently shipped
     },
     include: {
       order: {
@@ -98,10 +107,36 @@ async function markItemAsDelivered(trackingNumber: string) {
       },
       product: true
     }
-  });
+  }) : null;
+
+  // 2. If not found by OrderItem trackingNumber, try finding by parent Order.trackingNumber or Order.id
+  if (!orderItem) {
+    const parentOrder = await prisma.order.findFirst({
+      where: {
+        OR: [
+          ...(trackingNumber ? [{ trackingNumber: trackingNumber }] : []),
+          ...(businessReference ? [{ id: businessReference }] : [])
+        ]
+      }
+    });
+
+    if (parentOrder) {
+      orderItem = await prisma.orderItem.findFirst({
+        where: { orderId: parentOrder.id },
+        include: {
+          order: {
+            include: {
+              user: true
+            }
+          },
+          product: true
+        }
+      });
+    }
+  }
 
   if (!orderItem) {
-    console.log(`[Bosta Automation] No matching SHIPPED OrderItem found for tracking: ${trackingNumber}`);
+    console.log(`[Bosta Automation] No matching OrderItem found for tracking: ${trackingNumber} / ref: ${businessReference}`);
     return false;
   }
 

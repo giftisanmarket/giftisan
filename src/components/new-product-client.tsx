@@ -984,7 +984,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       type="number"
                       required
                       min="0"
-                      step="0.01"
+                      step="1"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       placeholder={dict.new_product.price_placeholder}

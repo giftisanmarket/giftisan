@@ -18,7 +18,7 @@ import {
   Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
@@ -44,11 +44,37 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high" | "popular">("newest");
   
-  // Dropdown Open States
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [showPriceDropdown, setShowPriceDropdown] = useState(false);
+  // Single active dropdown controller: "sort" | "category" | "price" | "location" | null
+  const [openDropdown, setOpenDropdown] = useState<"sort" | "category" | "price" | "location" | null>(null);
+
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click or escape key
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (
+        toolbarRef.current && !toolbarRef.current.contains(target) &&
+        sortRef.current && !sortRef.current.contains(target)
+      ) {
+        setOpenDropdown(null);
+      }
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpenDropdown(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Dynamic list of unique categories from available products
   const availableCategories = useMemo(() => {
@@ -70,6 +96,12 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
     });
     return Array.from(locs);
   }, [initialProducts]);
+
+  // Helper for category label
+  const getCategoryLabel = (cat: string) => {
+    if (cat === "ALL") return isAr ? "جميع التصنيفات" : "All Categories";
+    return dict.common?.[cat.toLowerCase()] || cat;
+  };
 
   // Price Range Definitions
   const priceRanges: Array<{ id: string; label: string; min?: number; max?: number }> = [
@@ -139,6 +171,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
     setSelectedGovernorate("ALL");
     setSelectedPriceRange("ALL");
     setSortBy("newest");
+    setOpenDropdown(null);
   };
 
   const sortOptions = [
@@ -168,57 +201,61 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
         </div>
 
         {/* Sort Selector Button */}
-        <div className="relative w-full md:w-auto">
+        <div ref={sortRef} className="relative w-full md:w-auto z-40">
           <button 
-            onClick={() => setShowSortDropdown(!showSortDropdown)}
+            type="button"
+            onClick={() => setOpenDropdown(prev => prev === "sort" ? null : "sort")}
             className="w-full md:w-auto flex items-center justify-between md:justify-center gap-3 px-5 h-11 bg-white border border-primary/10 rounded-full text-xs font-bold text-primary hover:border-primary/20 transition-all active:scale-95 shadow-sm"
           >
             <div className="flex items-center gap-2">
               <ArrowUpDown className="w-3.5 h-3.5 text-accent" /> 
               <span>{sortOptions.find(o => o.value === sortBy)?.label}</span>
             </div>
-            <ChevronDown className={cn("w-3.5 h-3.5 text-primary/40 transition-transform", showSortDropdown && "rotate-180")} />
+            <ChevronDown className={cn("w-3.5 h-3.5 text-primary/40 transition-transform duration-200", openDropdown === "sort" && "rotate-180")} />
           </button>
 
           <AnimatePresence>
-            {showSortDropdown && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowSortDropdown(false)} />
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute end-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50"
-                >
-                  {sortOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSortBy(option.value as any);
-                        setShowSortDropdown(false);
-                      }}
-                      className={cn(
-                        "w-full text-start px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
-                        sortBy === option.value ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
-                      )}
-                    >
-                      <span>{option.label}</span>
-                      {sortBy === option.value && <Check className="w-3.5 h-3.5 text-white" />}
-                    </button>
-                  ))}
-                </motion.div>
-              </>
+            {openDropdown === "sort" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute end-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50"
+              >
+                {sortOptions.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSortBy(option.value as any);
+                      setOpenDropdown(null);
+                    }}
+                    className={cn(
+                      "w-full text-start px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                      sortBy === option.value ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                    )}
+                  >
+                    <span>{option.label}</span>
+                    {sortBy === option.value && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                  </button>
+                ))}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
 
       {/* Faceted Filters Toolbar */}
-      <div className="bg-white/80 backdrop-blur-md p-3 md:p-4 rounded-2xl md:rounded-3xl border border-primary/5 shadow-xl shadow-primary/5 mb-8">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar flex-nowrap md:flex-wrap">
+      <div 
+        ref={toolbarRef}
+        className="bg-white/80 backdrop-blur-md p-3 md:p-4 rounded-2xl md:rounded-3xl border border-primary/5 shadow-xl shadow-primary/5 mb-8 relative z-30 overflow-visible"
+      >
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           
           {/* 1. Verified Filter Toggle */}
           <button 
+            type="button"
             onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
             className={cn(
               "px-4 h-10 border rounded-full text-xs font-bold transition-all flex items-center gap-2 active:scale-95 shrink-0",
@@ -233,6 +270,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
 
           {/* 2. Customizable / Bespoke Toggle */}
           <button 
+            type="button"
             onClick={() => setShowCustomizableOnly(!showCustomizableOnly)}
             className={cn(
               "px-4 h-10 border rounded-full text-xs font-bold transition-all flex items-center gap-2 active:scale-95 shrink-0",
@@ -249,7 +287,8 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
           {availableCategories.length > 0 && (
             <div className="relative shrink-0">
               <button
-                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                type="button"
+                onClick={() => setOpenDropdown(prev => prev === "category" ? null : "category")}
                 className={cn(
                   "px-4 h-10 border rounded-full text-xs font-bold transition-all flex items-center gap-2 active:scale-95",
                   selectedCategory !== "ALL"
@@ -257,49 +296,58 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
                     : "bg-cream/40 border-primary/5 text-primary/70 hover:bg-cream"
                 )}
               >
-                <span>{selectedCategory === "ALL" ? (isAr ? "التصنيف" : "Category") : selectedCategory}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                <span>
+                  {selectedCategory === "ALL" 
+                    ? (isAr ? "التصنيف" : "Category") 
+                    : getCategoryLabel(selectedCategory)}
+                </span>
+                <ChevronDown className={cn("w-3.5 h-3.5 opacity-60 transition-transform duration-200", openDropdown === "category" && "rotate-180")} />
               </button>
 
               <AnimatePresence>
-                {showCategoryDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowCategoryDropdown(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute start-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50 max-h-60 overflow-y-auto"
+                {openDropdown === "category" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute start-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50 max-h-64 overflow-y-auto"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory("ALL");
+                        setOpenDropdown(null);
+                      }}
+                      className={cn(
+                        "w-full text-start px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                        selectedCategory === "ALL" ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                      )}
                     >
-                      <button
-                        onClick={() => {
-                          setSelectedCategory("ALL");
-                          setShowCategoryDropdown(false);
-                        }}
-                        className={cn(
-                          "w-full text-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                          selectedCategory === "ALL" ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
-                        )}
-                      >
-                        {isAr ? "جميع التصنيفات" : "All Categories"}
-                      </button>
-                      {availableCategories.map(cat => (
+                      <span>{isAr ? "جميع التصنيفات" : "All Categories"}</span>
+                      {selectedCategory === "ALL" && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                    </button>
+                    {availableCategories.map(cat => {
+                      const isSelected = selectedCategory === cat;
+                      return (
                         <button
                           key={cat}
+                          type="button"
                           onClick={() => {
                             setSelectedCategory(cat);
-                            setShowCategoryDropdown(false);
+                            setOpenDropdown(null);
                           }}
                           className={cn(
-                            "w-full text-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                            selectedCategory === cat ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                            "w-full text-start px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                            isSelected ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
                           )}
                         >
-                          {cat}
+                          <span className="truncate">{getCategoryLabel(cat)}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ms-2" />}
                         </button>
-                      ))}
-                    </motion.div>
-                  </>
+                      );
+                    })}
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
@@ -308,7 +356,8 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
           {/* 4. Price Range Filter Dropdown */}
           <div className="relative shrink-0">
             <button
-              onClick={() => setShowPriceDropdown(!showPriceDropdown)}
+              type="button"
+              onClick={() => setOpenDropdown(prev => prev === "price" ? null : "price")}
               className={cn(
                 "px-4 h-10 border rounded-full text-xs font-bold transition-all flex items-center gap-2 active:scale-95",
                 selectedPriceRange !== "ALL"
@@ -317,36 +366,39 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
               )}
             >
               <span>{priceRanges.find(r => r.id === selectedPriceRange)?.label || (isAr ? "السعر" : "Price")}</span>
-              <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+              <ChevronDown className={cn("w-3.5 h-3.5 opacity-60 transition-transform duration-200", openDropdown === "price" && "rotate-180")} />
             </button>
 
             <AnimatePresence>
-              {showPriceDropdown && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowPriceDropdown(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute start-0 top-full mt-2 w-52 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50"
-                  >
-                    {priceRanges.map(range => (
+              {openDropdown === "price" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute start-0 top-full mt-2 w-52 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50"
+                >
+                  {priceRanges.map(range => {
+                    const isSelected = selectedPriceRange === range.id;
+                    return (
                       <button
                         key={range.id}
+                        type="button"
                         onClick={() => {
                           setSelectedPriceRange(range.id);
-                          setShowPriceDropdown(false);
+                          setOpenDropdown(null);
                         }}
                         className={cn(
-                          "w-full text-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                          selectedPriceRange === range.id ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                          "w-full text-start px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                          isSelected ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
                         )}
                       >
-                        {range.label}
+                        <span>{range.label}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ms-2" />}
                       </button>
-                    ))}
-                  </motion.div>
-                </>
+                    );
+                  })}
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
@@ -355,7 +407,8 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
           {availableLocations.length > 0 && (
             <div className="relative shrink-0">
               <button
-                onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                type="button"
+                onClick={() => setOpenDropdown(prev => prev === "location" ? null : "location")}
                 className={cn(
                   "px-4 h-10 border rounded-full text-xs font-bold transition-all flex items-center gap-2 active:scale-95",
                   selectedGovernorate !== "ALL"
@@ -365,48 +418,53 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
               >
                 <MapPin className="w-3.5 h-3.5 opacity-70" />
                 <span>{selectedGovernorate === "ALL" ? (isAr ? "المحافظة / الورشة" : "Location") : selectedGovernorate}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                <ChevronDown className={cn("w-3.5 h-3.5 opacity-60 transition-transform duration-200", openDropdown === "location" && "rotate-180")} />
               </button>
 
               <AnimatePresence>
-                {showLocationDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowLocationDropdown(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute start-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50 max-h-60 overflow-y-auto"
+                {openDropdown === "location" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute start-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-2xl rounded-2xl p-2 z-50 max-h-64 overflow-y-auto"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedGovernorate("ALL");
+                        setOpenDropdown(null);
+                      }}
+                      className={cn(
+                        "w-full text-start px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                        selectedGovernorate === "ALL" ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                      )}
                     >
-                      <button
-                        onClick={() => {
-                          setSelectedGovernorate("ALL");
-                          setShowLocationDropdown(false);
-                        }}
-                        className={cn(
-                          "w-full text-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                          selectedGovernorate === "ALL" ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
-                        )}
-                      >
-                        {isAr ? "جميع المحافظات" : "All Locations"}
-                      </button>
-                      {availableLocations.map(loc => (
+                      <span>{isAr ? "جميع المحافظات" : "All Locations"}</span>
+                      {selectedGovernorate === "ALL" && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                    </button>
+                    {availableLocations.map(loc => {
+                      const isSelected = selectedGovernorate === loc;
+                      return (
                         <button
                           key={loc}
+                          type="button"
                           onClick={() => {
                             setSelectedGovernorate(loc);
-                            setShowLocationDropdown(false);
+                            setOpenDropdown(null);
                           }}
                           className={cn(
-                            "w-full text-start px-3.5 py-2 rounded-xl text-xs font-bold transition-all",
-                            selectedGovernorate === loc ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                            "w-full text-start px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between",
+                            isSelected ? "bg-primary text-white" : "text-charcoal/70 hover:bg-cream hover:text-primary"
                           )}
                         >
-                          {loc}
+                          <span className="truncate">{loc}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ms-2" />}
                         </button>
-                      ))}
-                    </motion.div>
-                  </>
+                      );
+                    })}
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
@@ -415,6 +473,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
           {/* Reset Filters Shortcut */}
           {activeFiltersCount > 0 && (
             <button
+              type="button"
               onClick={resetAllFilters}
               className="px-4 h-10 rounded-full text-xs font-bold text-red-500 hover:bg-red-50 transition-all flex items-center gap-1.5 ms-auto shrink-0"
             >

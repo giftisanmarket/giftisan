@@ -31,18 +31,12 @@ interface PaymentTabProps {
   artisan: any;
   lang: string;
   dict: any;
-  handleJoinWaitlist: () => void;
-  isJoiningWaitlist: boolean;
-  hasJoinedWaitlist: boolean;
 }
 
 export function PaymentTab({
   artisan,
   lang,
   dict,
-  handleJoinWaitlist,
-  isJoiningWaitlist,
-  hasJoinedWaitlist
 }: PaymentTabProps) {
   const router = useRouter();
   

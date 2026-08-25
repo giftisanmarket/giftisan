@@ -95,13 +95,10 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
   const [shippingItem, setShippingItem] = useState<any | null>(null);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState("");
-  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
-  const [hasJoinedWaitlist, setHasJoinedWaitlist] = useState(false);
-
 
   // Variant Analytics
   const topVariants = useMemo(() => {
-    return sales.reduce((acc: any[], sale: any) => {
+    return (sales || []).reduce((acc: any[], sale: any) => {
       if (!sale.variantId) return acc;
       const existing = acc.find((v: any) => v.id === sale.variantId);
       if (existing) {
@@ -110,16 +107,16 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
       } else {
         acc.push({
           id: sale.variantId,
-          name: sale.variant?.name || dict.edit_product.standard_variant,
-          productName: sale.product.name,
+          name: sale.variant?.name || dict?.edit_product?.standard_variant || "Standard Variant",
+          productName: sale.product?.name || "Product",
           quantity: sale.quantity,
           revenue: sale.quantity * sale.price,
-          image: sale.variant?.image || sale.product.images[0]
+          image: sale.variant?.image || sale.product?.images?.[0]
         });
       }
       return acc;
     }, []).sort((a: any, b: any) => b.quantity - a.quantity).slice(0, 5);
-  }, [sales, dict.edit_product]);
+  }, [sales, dict?.edit_product]);
 
   const handleDelete = async () => {
     if (!productToDelete) return;
@@ -128,45 +125,18 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
     const res = await deleteProduct(productToDelete);
 
     if (res.success) {
-      toast.success(dict.studio.treasure_removed, {
+      toast.success(dict.studio.treasure_removed || "Product removed", {
         icon: <Trash2 className="w-5 h-5 text-red-500" />,
       });
       setProductToDelete(null);
       setIsDeleting(null);
       router.refresh();
     } else {
-      toast.error(res.error || dict.studio.delete_failed, {
+      toast.error(res.error || dict.studio.delete_failed || "Failed to delete item", {
         icon: <X className="w-5 h-5 text-red-500" />,
       });
       setIsDeleting(null);
       setProductToDelete(null);
-    }
-  };
-
-  const handleJoinWaitlist = async () => {
-    if (isAdminPreview || !artisan?.user?.email) return;
-    setIsJoiningWaitlist(true);
-
-    try {
-      const res = await subscribeToNewsletter(artisan.user.email);
-      if (res.success || res.error?.includes("already")) {
-        setHasJoinedWaitlist(true);
-        toast.success("You're on the list! We'll notify you when Phase 2 starts.", {
-          icon: <Sparkles className="w-5 h-5 text-accent" />,
-          style: {
-            borderRadius: '20px',
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.1)'
-          }
-        });
-      } else {
-        toast.error(res.error || "Failed to join waitlist");
-      }
-    } catch (err) {
-      toast.error("Something went wrong joining waitlist");
-    } finally {
-      setIsJoiningWaitlist(false);
     }
   };
 
@@ -448,50 +418,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
               </motion.div>
             )}
 
-            {/* Pro Studio Roadmap & Status */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-5 md:p-8 bg-primary text-white rounded-[2rem] md:rounded-[2.5rem] flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-2xl shadow-primary/20 relative overflow-hidden group"
-            >
-              <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/30 transition-all duration-1000" />
 
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 border border-white/20 shadow-xl">
-                <ShieldCheck className="w-7 h-7 md:w-8 md:h-8 text-accent-light" />
-              </div>
-
-              <div className="flex-1 text-center md:text-start relative z-10 space-y-3">
-                <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-                  <h3 className="text-xl md:text-2xl font-heading font-black tracking-tight">{dict.studio.founding_member}</h3>
-                  <span className="px-3 py-1 bg-accent rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-accent/20 border border-white/10">
-                    {dict.studio.exclusive_launch_group}
-                  </span>
-                </div>
-                <p className="text-xs md:text-sm text-white/60 leading-relaxed max-w-2xl font-medium">
-                  {dict.studio.founding_desc}
-                </p>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-accent-light hover:text-white transition-colors group/link bg-white/5 md:bg-transparent px-4 py-2 md:p-0 rounded-full md:rounded-none border border-white/10 md:border-none"
-                >
-                  {dict.common.support}
-                  <ArrowUpRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-                </Link>
-              </div>
-
-              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-white/10">
-                <div className="text-center md:text-end hidden sm:block">
-                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">{dict.studio.marketing_status}</p>
-                  <p className="text-xs font-bold text-accent-light flex items-center gap-2 justify-center md:justify-end">
-                    <Megaphone className="w-3 h-3" /> {dict.studio.spotlight_ready}
-                  </p>
-                </div>
-                <div className="h-10 w-[1px] bg-white/10 hidden lg:block" />
-                <div className="w-full md:w-auto px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white text-center shadow-lg">
-                  {dict.studio.phase_1_active}
-                </div>
-              </div>
-            </motion.div>
 
             <div className="relative bg-primary text-white rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-12 lg:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/20 opacity-40" />
@@ -656,9 +583,6 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     artisan={artisan}
                     lang={lang}
                     dict={dict}
-                    handleJoinWaitlist={handleJoinWaitlist}
-                    isJoiningWaitlist={isJoiningWaitlist}
-                    hasJoinedWaitlist={hasJoinedWaitlist}
                   />
                 )}
 

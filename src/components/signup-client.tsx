@@ -36,8 +36,7 @@ export function SignupClient({ dict }: { dict: any }) {
       setError(res.error);
     } else {
       if (res.autoLogin) {
-        router.push(`/${lang}`);
-        router.refresh();
+        window.location.href = `/${lang}`;
       } else {
         router.push(`/${lang}/login?signup=success`);
       }

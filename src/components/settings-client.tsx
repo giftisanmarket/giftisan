@@ -216,11 +216,6 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
              <h3 className="font-heading font-bold text-primary truncate w-full text-base md:text-xl">{name || dict.profile.your_name}</h3>
              <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">{dict.profile.profile_preview}</p>
           </div>
-          
-          <div className="p-5 md:p-8 bg-primary rounded-[1.5rem] md:rounded-[2.5rem] text-white space-y-3 md:space-y-4 shadow-xl shadow-primary/10">
-             <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/40">{dict.profile.privacy_note_title}</p>
-             <p className="text-xs md:text-sm leading-relaxed text-white/80 italic">"{dict.profile.privacy_note_desc}"</p>
-          </div>
         </div>
 
         <div className="md:col-span-8">

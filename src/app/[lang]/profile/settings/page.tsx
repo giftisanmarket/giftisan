@@ -13,10 +13,17 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
   const dict = await getDictionary(lang as any);
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id }
+    where: { id: session.user.id },
+    include: {
+      accounts: {
+        select: { provider: true }
+      }
+    }
   });
 
   if (!user) redirect(`/${lang}`);
+
+  const isOAuth = user.accounts.some(a => a.provider === "google") || !user.password;
 
   // Sanitize user object to prevent large image serialization issues
   const sanitizedUser = {
@@ -24,13 +31,14 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
     name: user.name,
     email: user.email,
     image: (user.image?.length || 0) > 300000 ? null : user.image, // Cap at ~300KB to prevent RSC crashes
+    isOAuth,
   };
 
   return (
     <main className="min-h-screen bg-cream font-sans">
       <Navbar dict={dict} />
       <div className="container mx-auto px-4 py-24 md:py-32">
-        <SettingsClient user={sanitizedUser} dict={dict} />
+        <SettingsClient user={sanitizedUser} dict={dict} lang={lang} />
       </div>
     </main>
   );

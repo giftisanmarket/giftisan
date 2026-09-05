@@ -3157,6 +3157,95 @@ export async function updateUser(userId: string, formData: FormData) {
   }
 }
 
+export async function changeEmailAction({
+  newEmail,
+  currentPassword,
+  lang = "en"
+}: {
+  newEmail: string;
+  currentPassword: string;
+  lang?: "en" | "ar";
+}) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
+    }
+
+    const trimmedEmail = newEmail?.trim().toLowerCase();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      return { error: "Please provide a valid email address." };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        accounts: {
+          select: { provider: true }
+        }
+      }
+    });
+
+    if (!user) {
+      return { error: "User not found." };
+    }
+
+    const isOAuth = user.accounts.some((a) => a.provider === "google") || !user.password;
+    if (isOAuth) {
+      return { error: "Accounts registered via Google cannot change their email address here." };
+    }
+
+    if (!user.password) {
+      return { error: "This account does not have a password set." };
+    }
+
+    if (!currentPassword) {
+      return { error: "Current password is required." };
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return { error: "Current password is incorrect." };
+    }
+
+    if (user.email?.toLowerCase() === trimmedEmail) {
+      return { error: "The new email address is the same as your current email address." };
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: trimmedEmail }
+    });
+
+    if (existingUser) {
+      return { error: "This email address is already in use by another account." };
+    }
+
+    // Update user's email and reset verification status
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        email: trimmedEmail,
+        emailVerified: null,
+      }
+    });
+
+    // Generate token and send verification email to new address
+    const verificationToken = await generateVerificationToken(trimmedEmail);
+    await sendVerificationEmail(verificationToken.identifier, verificationToken.token, lang);
+
+    revalidatePath("/profile/settings");
+    revalidatePath("/profile");
+
+    return {
+      success: true,
+      email: updatedUser.email
+    };
+  } catch (error) {
+    console.error("Change email error:", error);
+    return { error: "Failed to change email. Please try again." };
+  }
+}
+
 export async function toggleFollowAction(artisanId: string, userId: string) {
   try {
     const user = await prisma.user.findUnique({

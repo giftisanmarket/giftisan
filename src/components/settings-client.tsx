@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, Camera, Save, ArrowLeft, Check, X, AlertTriangle, Trash2 } from "lucide-react";
-import { updateUser, deleteAccountAction } from "@/lib/actions";
+import { User, Camera, Save, ArrowLeft, Check, X, AlertTriangle, Trash2, Mail, Edit3, Eye, EyeOff } from "lucide-react";
+import { updateUser, deleteAccountAction, changeEmailAction } from "@/lib/actions";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function SettingsClient({ user, dict }: { user: any; dict: any }) {
+export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: any; lang?: string }) {
   const router = useRouter();
   const { update } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,6 +24,14 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+
+  // Email change modal states
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [emailChangeError, setEmailChangeError] = useState("");
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -120,6 +128,37 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
     } else {
       setDeleteError(res.error || dict.common?.something_went_wrong || "Something went wrong.");
       setIsDeleting(false);
+    }
+  };
+
+  const handleConfirmEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsChangingEmail(true);
+    setEmailChangeError("");
+
+    try {
+      const res = await changeEmailAction({
+        newEmail,
+        currentPassword,
+        lang: (lang === "ar" ? "ar" : "en")
+      });
+
+      if (res.success && res.email) {
+        setEmail(res.email);
+        await update({ email: res.email });
+        setShowEmailModal(false);
+        setNewEmail("");
+        setCurrentPassword("");
+        toast.success(dict.profile?.email_changed_success || "Email updated! Please check your new inbox to verify.");
+        router.refresh();
+      } else {
+        setEmailChangeError(res.error || dict.common?.something_went_wrong || "Failed to update email.");
+      }
+    } catch (err: any) {
+      console.error("Change email error:", err);
+      setEmailChangeError(dict.common?.unexpected_error || "An unexpected error occurred. Please try again.");
+    } finally {
+      setIsChangingEmail(false);
     }
   };
 
@@ -232,10 +271,37 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
               </div>
 
               <div className="grid gap-1.5 md:gap-2">
-                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.auth.login_email_label}</label>
-                 <div className="w-full h-14 md:h-16 px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/40 cursor-not-allowed text-xs md:text-base overflow-hidden">
-                  <span className="truncate flex-1">{user.email}</span>
-                  <span className="ms-2 text-[7px] md:text-[8px] px-2 py-0.5 md:py-1 bg-white/50 rounded-md uppercase tracking-widest whitespace-nowrap">{dict.profile.read_only}</span>
+                 <div className="flex items-center justify-between ms-4">
+                   <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.auth.login_email_label}</label>
+                   {user.isOAuth && (
+                     <span className="text-[8px] md:text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                       {dict.profile?.managed_by_google || "Managed by Google"}
+                     </span>
+                   )}
+                 </div>
+
+                 <div className="flex flex-col sm:flex-row gap-3">
+                   <div className="flex-1 h-14 md:h-16 px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/70 text-xs md:text-base overflow-hidden">
+                     <Mail className="w-4 h-4 text-primary/40 me-3 shrink-0" />
+                     <span className="truncate flex-1">{email || user.email}</span>
+                   </div>
+
+                   {!user.isOAuth && (
+                     <button
+                       type="button"
+                       onClick={() => {
+                         setNewEmail("");
+                         setCurrentPassword("");
+                         setEmailChangeError("");
+                         setShowEmailModal(true);
+                       }}
+                       className="h-14 md:h-16 px-6 md:px-8 bg-cream hover:bg-cream/70 text-primary border border-primary/10 font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 transition-all text-xs md:text-sm active:scale-95 shadow-sm shrink-0"
+                     >
+                       <Edit3 className="w-4 h-4 text-accent" />
+                       <span>{dict.profile?.change_email_btn || "Change"}</span>
+                     </button>
+                   )}
                  </div>
               </div>
             </div>
@@ -331,6 +397,127 @@ export function SettingsClient({ user, dict }: { user: any; dict: any }) {
                   )}
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Secure Email Change Modal */}
+      <AnimatePresence>
+        {showEmailModal && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isChangingEmail && setShowEmailModal(false)}
+              className="absolute inset-0 bg-primary/40 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 start-0 w-full h-2 bg-accent" />
+              
+              <div className="flex justify-between items-start mb-6 md:mb-8">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+                  <Mail className="w-7 h-7 md:w-8 md:h-8" />
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => !isChangingEmail && setShowEmailModal(false)}
+                  className="w-10 h-10 rounded-full border border-primary/5 flex items-center justify-center hover:bg-primary/5 transition-colors"
+                >
+                  <X className="w-5 h-5 text-primary/40" />
+                </button>
+              </div>
+
+              <div className="space-y-3 mb-6 md:mb-8">
+                <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
+                  {dict.profile?.change_email_title_base || "Change"} <span className="not-italic">{dict.profile?.change_email_title_accent || "Email Address"}</span>
+                </h2>
+                <p className="text-xs md:text-sm text-charcoal/60 leading-relaxed font-medium">
+                  {dict.profile?.change_email_desc || "For security, enter your new email address and current password. A verification link will be sent to your new inbox."}
+                </p>
+              </div>
+
+              {emailChangeError && (
+                <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold text-center border border-red-100 flex items-center justify-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{emailChangeError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleConfirmEmailChange} className="space-y-4 md:space-y-5">
+                <div className="grid gap-1.5">
+                  <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/50 ms-2">
+                    {dict.profile?.new_email_label || "New Email Address"}
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="email"
+                      required
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder={dict.profile?.new_email_placeholder || "you@example.com"}
+                      className="w-full h-12 md:h-14 px-5 bg-cream/30 border border-primary/10 rounded-xl md:rounded-2xl font-bold text-primary placeholder:text-primary/30 text-xs md:text-sm focus:outline-none focus:border-accent transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-1.5">
+                  <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/50 ms-2">
+                    {dict.profile?.current_password_label || "Current Password"}
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder={dict.profile?.current_password_placeholder || "••••••••"}
+                      className="w-full h-12 md:h-14 px-5 pe-12 bg-cream/30 border border-primary/10 rounded-xl md:rounded-2xl font-bold text-primary placeholder:text-primary/30 text-xs md:text-sm focus:outline-none focus:border-accent transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute end-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => !isChangingEmail && setShowEmailModal(false)}
+                    disabled={isChangingEmail}
+                    className="h-12 md:h-14 bg-cream text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all text-xs md:text-sm uppercase tracking-widest disabled:opacity-50"
+                  >
+                    {dict.profile?.cancel_action || "Cancel"}
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={isChangingEmail || !newEmail || !currentPassword}
+                    className="h-12 md:h-14 bg-accent text-white font-bold rounded-xl md:rounded-2xl hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest disabled:opacity-50 active:scale-95"
+                  >
+                    {isChangingEmail ? (
+                      <>
+                        <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        <span>{dict.profile?.updating_email_action || "Updating..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>{dict.profile?.update_email_action || "Update Email"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

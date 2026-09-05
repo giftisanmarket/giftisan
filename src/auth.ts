@@ -83,7 +83,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.role && session.user) {
         session.user.role = token.role as any;
       }
-      if (token.emailVerified && session.user) {
+      if (token.email && session.user) {
+        session.user.email = token.email as string;
+      }
+      if (token.emailVerified !== undefined && session.user) {
         (session.user as any).emailVerified = token.emailVerified;
       }
       if (token.isOAuth !== undefined && session.user) {
@@ -102,6 +105,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role;
         token.name = user.name;
+        token.email = user.email;
         // If they use Google/OAuth/OIDC, they are verified by default
         token.emailVerified = (account && account.provider !== "credentials") ? new Date() : user.emailVerified;
         token.isOAuth = (account && account.provider !== "credentials") ? true : false;
@@ -110,8 +114,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Handle session updates (e.g. from update() on the client)
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name;
+        if (session.email) token.email = session.email;
         if (session.role) token.role = session.role;
         if (session.user?.name) token.name = session.user.name;
+        if (session.user?.email) token.email = session.user.email;
         if (session.user?.role) token.role = session.user.role;
         token.lastChecked = 0;
       }
@@ -134,6 +140,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             select: { 
               role: true, 
               name: true, 
+              email: true,
               emailVerified: true,
               accounts: {
                 select: { provider: true }
@@ -144,6 +151,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser) {
             token.role = dbUser.role;
             token.name = dbUser.name;
+            if (dbUser.email) token.email = dbUser.email;
             token.emailVerified = dbUser.emailVerified;
             token.isOAuth = dbUser.accounts.length > 0;
             token.lastChecked = now;

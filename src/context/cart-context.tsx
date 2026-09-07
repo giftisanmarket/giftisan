@@ -27,19 +27,60 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const normalizeString = (val?: string | null) => {
+  if (!val) return null;
+  const trimmed = String(val).trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const isSameCartItem = (
+  item: any,
+  productId: string,
+  personalization?: string | null,
+  variantId?: string | null,
+  customImage?: string | null
+) => {
+  return (
+    item.id === productId &&
+    normalizeString(item.personalization) === normalizeString(personalization) &&
+    normalizeString(item.variantId) === normalizeString(variantId) &&
+    normalizeString(item.customImage) === normalizeString(customImage)
+  );
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount and deduplicate legacy duplicates
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem('giftisan-cart');
       if (savedCart) {
         const parsed = JSON.parse(savedCart);
         if (Array.isArray(parsed)) {
-          setCart(parsed);
+          const deduplicated: CartItem[] = [];
+          for (const item of parsed) {
+            const existingIndex = deduplicated.findIndex((d) =>
+              isSameCartItem(d, item.id, item.personalization, item.variantId, item.customImage)
+            );
+            if (existingIndex > -1) {
+              const maxStock = typeof deduplicated[existingIndex].stock === 'number' ? deduplicated[existingIndex].stock : 999;
+              deduplicated[existingIndex].quantity = Math.min(
+                maxStock,
+                (deduplicated[existingIndex].quantity || 1) + (item.quantity || 1)
+              );
+            } else {
+              deduplicated.push({
+                ...item,
+                personalization: normalizeString(item.personalization) || undefined,
+                variantId: normalizeString(item.variantId) || undefined,
+                customImage: normalizeString(item.customImage) || undefined,
+              });
+            }
+          }
+          setCart(deduplicated);
         }
       }
     } catch (e) {
@@ -57,7 +98,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cart, isInitialized]);
 
   const addToCart = (product: any, personalization?: string, skipOpen = false, customImage?: string) => {
-    const itemCustomImage = customImage || product.customImage;
+    const itemCustomImage = normalizeString(customImage || product.customImage);
+    const itemPersonalization = normalizeString(personalization || product.personalization);
+    const itemVariantId = normalizeString(product.variantId);
     const maxStock = typeof product.stock === 'number' ? product.stock : 999;
 
     if (maxStock <= 0) {
@@ -70,12 +113,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const existingItem = cart.find(
-      (item) => 
-        item.id === product.id && 
-        item.personalization === personalization && 
-        item.variantId === product.variantId &&
-        item.customImage === itemCustomImage
+    const existingItem = cart.find((item) =>
+      isSameCartItem(item, product.id, itemPersonalization, itemVariantId, itemCustomImage)
     );
 
     if (existingItem && existingItem.quantity >= maxStock) {
@@ -90,46 +129,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     setCart((prevCart) => {
-      const itemInPrev = prevCart.find(
-        (item) => 
-          item.id === product.id && 
-          item.personalization === personalization && 
-          item.variantId === product.variantId &&
-          item.customImage === itemCustomImage
+      const itemInPrev = prevCart.find((item) =>
+        isSameCartItem(item, product.id, itemPersonalization, itemVariantId, itemCustomImage)
       );
       if (itemInPrev) {
         return prevCart.map((item) =>
-          item.id === product.id && 
-          item.personalization === personalization && 
-          item.variantId === product.variantId &&
-          item.customImage === itemCustomImage
+          isSameCartItem(item, product.id, itemPersonalization, itemVariantId, itemCustomImage)
             ? { ...item, quantity: Math.min(maxStock, item.quantity + 1) }
             : item
         );
       }
-      return [...prevCart, { ...product, quantity: Math.min(1, maxStock), personalization, customImage: itemCustomImage }];
+      return [
+        ...prevCart,
+        {
+          ...product,
+          quantity: Math.min(1, maxStock),
+          personalization: itemPersonalization || undefined,
+          variantId: itemVariantId || undefined,
+          customImage: itemCustomImage || undefined,
+        },
+      ];
     });
     if (!skipOpen) setIsCartOpen(true);
   };
 
   const removeFromCart = (productId: string, personalization?: string, variantId?: string | null, customImage?: string) => {
-    setCart((prevCart) => prevCart.filter((item) => !(
-      item.id === productId && 
-      item.personalization === personalization && 
-      item.variantId === variantId &&
-      item.customImage === customImage
-    )));
+    setCart((prevCart) =>
+      prevCart.filter((item) => !isSameCartItem(item, productId, personalization, variantId, customImage))
+    );
   };
 
   const updateQuantity = (productId: string, quantity: number, personalization?: string, variantId?: string | null, customImage?: string) => {
     if (quantity < 1) return;
 
-    const targetItem = cart.find(
-      (item) =>
-        item.id === productId && 
-        item.personalization === personalization && 
-        item.variantId === variantId &&
-        item.customImage === customImage
+    const targetItem = cart.find((item) =>
+      isSameCartItem(item, productId, personalization, variantId, customImage)
     );
 
     if (targetItem) {
@@ -146,12 +180,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setCart((prevCart) =>
       prevCart.map((item) => {
-        if (
-          item.id === productId && 
-          item.personalization === personalization && 
-          item.variantId === variantId &&
-          item.customImage === customImage
-        ) {
+        if (isSameCartItem(item, productId, personalization, variantId, customImage)) {
           const maxStock = typeof item.stock === 'number' ? item.stock : 999;
           return { ...item, quantity: Math.min(quantity, maxStock) };
         }

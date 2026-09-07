@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/lib/data";
 import { useSession } from "next-auth/react";
-import { toggleFavoriteAction, getUserFavorites } from "@/lib/actions";
+import { toggleFavoriteAction, getUserFavorites, getProductsByIds } from "@/lib/actions";
 
 interface FavoritesContextType {
   favorites: Product[];
@@ -19,14 +19,16 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load from localStorage on mount, then sync with DB if logged in
+  // Load from localStorage on mount, then sync with DB if logged in or refresh stale guest items
   useEffect(() => {
     const loadFavorites = async () => {
       try {
         const savedFavorites = localStorage.getItem("giftisan-favorites");
+        let localList: any[] = [];
         if (savedFavorites) {
           const parsed = JSON.parse(savedFavorites);
           if (Array.isArray(parsed)) {
+            localList = parsed;
             setFavorites(parsed);
           }
         }
@@ -36,6 +38,20 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
           const mappedDbFavorites = dbFavorites as any;
           setFavorites(mappedDbFavorites);
           localStorage.setItem("giftisan-favorites", JSON.stringify(mappedDbFavorites));
+        } else if (localList.length > 0) {
+          const ids = localList.map((p: any) => p?.id).filter(Boolean);
+          if (ids.length > 0) {
+            const freshProducts = await getProductsByIds(ids);
+            if (freshProducts && freshProducts.length > 0) {
+              const freshMap = new Map(freshProducts.map((p: any) => [p.id, p]));
+              const updatedList = localList.map((p: any) => {
+                const fresh = freshMap.get(p.id);
+                return fresh ? { ...p, ...fresh } : p;
+              });
+              setFavorites(updatedList as any);
+              localStorage.setItem("giftisan-favorites", JSON.stringify(updatedList));
+            }
+          }
         }
       } catch (e) {
         console.error("Failed to load favorites", e);
@@ -55,6 +71,8 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   }, [favorites, isInitialized]);
 
   const toggleFavorite = async (product: any) => {
+    const isAdding = !favorites.some((p) => p.id === product.id);
+
     // Optimistic update
     setFavorites((prev) => {
       const exists = prev.find((p) => p.id === product.id);
@@ -63,6 +81,19 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, product];
     });
+
+    // If adding a product that might lack full details (e.g. stock or variants), enrich it in the background
+    if (isAdding && (product.stock === undefined || !product.variants)) {
+      getProductsByIds([product.id])
+        .then((fresh) => {
+          if (fresh && fresh[0]) {
+            setFavorites((prev) =>
+              prev.map((p) => (p.id === product.id ? { ...p, ...fresh[0] } : p)) as any
+            );
+          }
+        })
+        .catch(console.error);
+    }
 
     // DB sync if logged in
     if (session?.user?.id) {

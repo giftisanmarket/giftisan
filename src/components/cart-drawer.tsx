@@ -65,10 +65,10 @@ export function CartDrawer({ dict, lang }: { dict: any; lang?: string }) {
                   </div>
                 </div>
               ) : (
-                cart.map((item) => {
+                cart.map((item, idx) => {
                   const artisanName = item.artisan ? (item.artisan.studioName || item.artisan.name || item.artisan.user?.name) : null;
                   return (
-                    <div key={item.id + (item.personalization || "") + (item.variantId || "") + (item.customImage || "")} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
+                    <div key={`${item.id}-${item.variantId || 'novar'}-${item.personalization || 'nopers'}-${idx}`} className="flex gap-4 group items-start animate-in slide-in-from-end-4 duration-300">
                       <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-primary/5 shrink-0 shadow-lg shadow-primary/5">
                         <BespokeImage src={item.image || item.images?.[0] || ""} alt={item.name} fill className="object-cover" />
                       </div>

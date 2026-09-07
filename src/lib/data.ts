@@ -1,30 +1,30 @@
 export interface Product {
   id: string;
   name: string;
+  slug?: string | null;
   price: number;
-  description: string;
+  description?: string;
   artisan?: {
     name?: string;
-    studioName?: string;
-    location?: string;
-    avatar?: string;
-    bio?: string;
+    studioName?: string | null;
+    location?: string | null;
+    avatar?: string | null;
+    bio?: string | null;
     user?: {
-      name?: string;
+      name?: string | null;
     };
+    [key: string]: any;
   };
   images: string[];
   category: string;
-  tags: string[];
+  tags?: string[];
   canPersonalize?: boolean;
+  requiresClientImage?: boolean;
   stock?: number;
-  reviews: {
-    user: string;
-    rating: number;
-    comment: string;
-    date: string;
-  }[];
-  badge?: "New Arrival" | "Limited Edition" | "Bestseller";
+  variants?: any[];
+  reviews?: any[];
+  badge?: string | null;
+  [key: string]: any;
 }
 
 export const MOCK_PRODUCTS: Product[] = [

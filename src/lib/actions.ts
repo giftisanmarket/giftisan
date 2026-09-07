@@ -553,22 +553,60 @@ export async function getUserFavorites(userId: string) {
               include: {
                 user: true
               }
-            }
+            },
+            variants: true
           }
         }
       }
     });
-    return favorites.map(f => ({
-      ...f.product,
-      images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+    return favorites
+      .filter(f => f.product && f.product.status === "APPROVED")
+      .map(f => ({
+        ...f.product,
+        images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+        artisan: {
+          ...f.product.artisan,
+          avatar: (f.product.artisan.avatar?.length || 0) > 300000 ? "" : f.product.artisan.avatar,
+          user: { name: f.product.artisan.user?.name }
+        }
+      }));
+  } catch (error) {
+    console.error("Get favorites error:", error);
+    return [];
+  }
+}
+
+export async function getProductsByIds(ids: string[]) {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: ids },
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
+      },
+      include: {
+        artisan: {
+          include: {
+            user: true
+          }
+        },
+        variants: true
+      }
+    });
+    return products.map(p => ({
+      ...p,
+      images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
       artisan: {
-        ...f.product.artisan,
-        avatar: (f.product.artisan.avatar?.length || 0) > 300000 ? "" : f.product.artisan.avatar,
-        user: { name: f.product.artisan.user?.name }
+        ...p.artisan,
+        avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar,
+        user: { name: p.artisan.user?.name }
       }
     }));
   } catch (error) {
-    console.error("Get favorites error:", error);
+    console.error("Get products by IDs error:", error);
     return [];
   }
 }

@@ -47,11 +47,16 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         id: true,
         name: true,
         slug: true,
+        description: true,
         price: true,
+        stock: true,
         badge: true,
         images: true,
         isFeatured: true,
         category: true,
+        canPersonalize: true,
+        requiresClientImage: true,
+        variants: true,
         artisan: {
           select: {
             id: true,

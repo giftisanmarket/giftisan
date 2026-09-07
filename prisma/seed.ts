@@ -51,7 +51,7 @@ async function main() {
       create: {
         id: product.id,
         name: product.name,
-        description: product.description,
+        description: product.description || "",
         price: product.price,
         images: product.images,
         category: product.category,

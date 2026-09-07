@@ -198,6 +198,37 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
     }
   };
 
+  const executeAddToCart = (skipOpen = false) => {
+    if (product.canPersonalize && !personalization.trim()) {
+      setPersonalizationError(true);
+      personalizationRef.current?.focus();
+      toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
+      return false;
+    }
+    if (product.requiresClientImage && !customImage) {
+      setCustomImageError(true);
+      customImageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast.error(dict.product.image_upload_required_err || (lang === 'ar' ? "يرجى رفع الصورة المطلوبة قبل الشراء" : "Please upload the required photo before purchasing"));
+      return false;
+    }
+    if (options.length > 0 && !selectedVariant) {
+       toast.error("Please select a variation first");
+       return false;
+    }
+    
+    const productToCart = {
+      ...product,
+      price: displayPrice,
+      image: selectedVariant?.image || product.images[0],
+      stock: displayStock,
+      variantId: selectedVariant?.id || null,
+      variantName: selectedVariant?.name || null,
+      customImage: customImage || undefined
+    };
+    addToCart(productToCart, personalization.trim(), skipOpen, customImage || undefined);
+    return true;
+  };
+
   return (
     <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
       <Navbar dict={dict} />
@@ -599,35 +630,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
             <div className="space-y-4 mb-8">
               <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    if (product.canPersonalize && !personalization.trim()) {
-                      setPersonalizationError(true);
-                      personalizationRef.current?.focus();
-                      toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
-                      return;
-                    }
-                    if (product.requiresClientImage && !customImage) {
-                      setCustomImageError(true);
-                      customImageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      toast.error(dict.product.image_upload_required_err || (lang === 'ar' ? "يرجى رفع الصورة المطلوبة قبل الشراء" : "Please upload the required photo before purchasing"));
-                      return;
-                    }
-                    if (options.length > 0 && !selectedVariant) {
-                       toast.error("Please select a variation first");
-                       return;
-                    }
-                    
-                    const productToCart = {
-                      ...product,
-                      price: displayPrice,
-                      image: selectedVariant?.image || product.images[0],
-                      stock: displayStock,
-                      variantId: selectedVariant?.id || null,
-                      variantName: selectedVariant?.name || null,
-                      customImage: customImage || undefined
-                    };
-                    addToCart(productToCart, personalization.trim(), false, customImage || undefined);
-                  }}
+                  onClick={() => executeAddToCart(false)}
                   disabled={(displayStock || 0) <= 0}
                   className={cn(
                     "flex-1 py-5 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95",
@@ -652,34 +655,10 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </div>
               <button 
                 onClick={() => {
-                  if (product.canPersonalize && !personalization.trim()) {
-                    setPersonalizationError(true);
-                    personalizationRef.current?.focus();
-                    toast.error(lang === 'ar' ? "يرجى إدخال تفاصيل التخصيص أولاً" : "Please provide personalization details first");
-                    return;
+                  const ok = executeAddToCart(true);
+                  if (ok) {
+                    window.location.href = "/checkout";
                   }
-                  if (product.requiresClientImage && !customImage) {
-                    setCustomImageError(true);
-                    customImageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    toast.error(dict.product.image_upload_required_err || (lang === 'ar' ? "يرجى رفع الصورة المطلوبة قبل الشراء" : "Please upload the required photo before purchasing"));
-                    return;
-                  }
-                  if (options.length > 0 && !selectedVariant) {
-                    toast.error("Please select a variation first");
-                    return;
-                  }
-
-                  const productToCart = {
-                    ...product,
-                    price: displayPrice,
-                    image: selectedVariant?.image || product.images[0],
-                    stock: displayStock,
-                    variantId: selectedVariant?.id || null,
-                    variantName: selectedVariant?.name || null,
-                    customImage: customImage || undefined
-                  };
-                  addToCart(productToCart, personalization.trim(), true, customImage || undefined);
-                  window.location.href = "/checkout";
                 }}
                 disabled={(displayStock || 0) <= 0}
                 className={cn(
@@ -1114,7 +1093,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
             <p className="text-base sm:text-lg font-heading font-bold text-primary leading-tight">{dict.product.currency} {displayPrice}</p>
           </div>
           <button
-            onClick={() => addToCart(product, personalization, false, customImage || undefined)}
+            onClick={() => executeAddToCart(false)}
             disabled={(displayStock || 0) <= 0}
             className={cn(
               "flex-1 h-12 bg-primary text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-xs flex items-center justify-center gap-2",

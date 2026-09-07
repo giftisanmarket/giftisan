@@ -46,76 +46,119 @@ export default function FavoritesClient({ dict }: { dict: any }) {
           ) : (
             <div className="space-y-6">
               <AnimatePresence>
-                {favorites.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="group bg-white rounded-[2.5rem] p-6 flex flex-col md:flex-row items-center gap-8 border border-primary/5 shadow-xl shadow-primary/5 hover:border-accent/30 transition-all"
-                  >
-                    {/* Image */}
-                    <div className="relative w-full md:w-48 aspect-square rounded-[2rem] overflow-hidden shrink-0 shadow-lg">
-                      {product.images?.[0] && (
-                        <Image 
-                          src={product.images[0]} 
-                          alt={product.name} 
-                          fill 
-                          className={cn(
-                            "object-cover group-hover:scale-105 transition-transform duration-700",
-                            (product.stock || 0) <= 0 && "grayscale"
-                          )} 
-                        />
-                      )}
-                      {(product.stock || 0) <= 0 && (
-                        <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-[2px] flex items-center justify-center">
-                          <span className="px-3.5 py-1.5 bg-red-600 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-white/20">
-                            {dict.product.sold_out || "Sold Out"}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                {favorites.map((product: any) => {
+                  const isOutOfStock = (() => {
+                    if (Array.isArray(product.variants) && product.variants.length > 0) {
+                      const totalVariantStock = product.variants.reduce(
+                        (sum: number, v: any) => sum + (Number(v.stock) || 0),
+                        0
+                      );
+                      if (totalVariantStock <= 0 && (Number(product.stock) || 0) <= 0) {
+                        return true;
+                      }
+                      return false;
+                    }
+                    if (product.stock !== undefined && product.stock !== null) {
+                      return Number(product.stock) <= 0;
+                    }
+                    return false;
+                  })();
 
-                    {/* Details */}
-                    <div className="flex-1 text-center md:text-start space-y-2">
-                      <p className="text-[10px] font-black text-accent uppercase tracking-widest">{(product.artisan as any)?.studioName || product.artisan?.name}</p>
-                      <h3 className="text-2xl font-heading font-bold text-primary">{product.name}</h3>
-                      <p className="text-sm text-charcoal/60 line-clamp-2">{product.description}</p>
-                      <p className="text-2xl font-heading font-bold text-primary pt-2">{dict.product.currency || "EGP"} {product.price}.00</p>
-                    </div>
+                  const hasOptions = Boolean(
+                    (product.variants && product.variants.length > 0) ||
+                    product.canPersonalize ||
+                    product.requiresClientImage
+                  );
 
-                    {/* Actions */}
-                    <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
-                      <button 
-                        onClick={() => addToCart(product)}
-                        disabled={(product.stock || 0) <= 0}
-                        className={cn(
-                          "flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 group",
-                          (product.stock || 0) > 0 
-                            ? "hover:bg-primary-light shadow-primary/20" 
-                            : "opacity-40 grayscale !cursor-not-allowed pointer-events-auto"
-                        )}
+                  return (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="group bg-white rounded-[2.5rem] p-6 flex flex-col md:flex-row items-center gap-8 border border-primary/5 shadow-xl shadow-primary/5 hover:border-accent/30 transition-all"
+                    >
+                      {/* Image */}
+                      <Link
+                        href={`/products/${product.slug || product.id}`}
+                        className="relative w-full md:w-48 aspect-square rounded-[2rem] overflow-hidden shrink-0 shadow-lg block group"
                       >
-                        {(product.stock || 0) > 0 ? (
-                          <>
+                        {product.images?.[0] && (
+                          <Image 
+                            src={product.images[0]} 
+                            alt={product.name} 
+                            fill 
+                            className={cn(
+                              "object-cover group-hover:scale-105 transition-transform duration-700",
+                              isOutOfStock && "grayscale"
+                            )} 
+                          />
+                        )}
+                        {isOutOfStock && (
+                          <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-[2px] flex items-center justify-center">
+                            <span className="px-3.5 py-1.5 bg-red-600 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-white/20">
+                              {dict.product?.sold_out || "Sold Out"}
+                            </span>
+                          </div>
+                        )}
+                      </Link>
+
+                      {/* Details */}
+                      <div className="flex-1 text-center md:text-start space-y-2">
+                        <p className="text-[10px] font-black text-accent uppercase tracking-widest">
+                          {(product.artisan as any)?.studioName || product.artisan?.name}
+                        </p>
+                        <h3 className="text-2xl font-heading font-bold text-primary">
+                          <Link href={`/products/${product.slug || product.id}`} className="hover:text-accent transition-colors">
+                            {product.name}
+                          </Link>
+                        </h3>
+                        {product.description && (
+                          <p className="text-sm text-charcoal/60 line-clamp-2">{product.description}</p>
+                        )}
+                        <p className="text-2xl font-heading font-bold text-primary pt-2">
+                          {dict.product?.currency || "EGP"} {product.price}.00
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
+                        {isOutOfStock ? (
+                          <button 
+                            disabled
+                            className="flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 opacity-40 grayscale !cursor-not-allowed pointer-events-auto"
+                          >
+                            {dict.product?.sold_out || "Sold Out"}
+                          </button>
+                        ) : hasOptions ? (
+                          <Link 
+                            href={`/products/${product.slug || product.id}`}
+                            className="flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 group hover:bg-primary-light shadow-primary/20"
+                          >
                             <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            {dict.product.add_to_cart || "Move to Cart"}
-                          </>
+                            {dict.product?.add_to_cart || "Move to Cart"}
+                          </Link>
                         ) : (
-                          dict.product.sold_out || "Sold Out"
+                          <button 
+                            onClick={() => addToCart(product)}
+                            className="flex-1 md:w-48 h-14 bg-primary text-white font-bold rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 group hover:bg-primary-light shadow-primary/20"
+                          >
+                            <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            {dict.product?.add_to_cart || "Move to Cart"}
+                          </button>
                         )}
-                      </button>
-                      <button 
-                        onClick={() => toggleFavorite(product)}
-                        title="Remove from favorites"
-                        className="w-14 h-14 shrink-0 border border-primary/10 rounded-2xl text-primary/40 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all flex items-center justify-center"
-                      >
-                        <Trash2 className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
+                        <button 
+                          onClick={() => toggleFavorite(product)}
+                          title="Remove from favorites"
+                          className="w-14 h-14 shrink-0 border border-primary/10 rounded-2xl text-primary/40 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all flex items-center justify-center"
+                        >
+                          <Trash2 className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           )}

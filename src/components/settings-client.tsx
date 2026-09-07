@@ -193,8 +193,8 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
         )}
       </AnimatePresence>
 
-      <div className="grid md:grid-cols-12 gap-6 md:gap-12">
-        <div className="md:col-span-4 space-y-6 md:space-y-8">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="lg:col-span-4 space-y-6 md:space-y-8">
           <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-primary/5 border border-primary/5 flex flex-col items-center text-center">
              <div 
                className="relative w-28 h-28 md:w-40 md:h-40 mb-4 md:mb-6 group cursor-pointer"
@@ -218,8 +218,8 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
           </div>
         </div>
 
-        <div className="md:col-span-8">
-          <form onSubmit={handleSave} className="bg-white rounded-[2rem] md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-10">
+        <div className="lg:col-span-8">
+          <form onSubmit={handleSave} className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 sm:p-8 lg:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-10">
             <div className="space-y-5 md:space-y-6">
               <div className="grid gap-1.5 md:gap-2">
                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.auth.signup_full_name}</label>
@@ -235,7 +235,7 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
               <div className="grid gap-1.5 md:gap-2">
                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">{dict.profile.profile_photo_label || "Profile Photo"}</label>
                 <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                  <div className="flex-1 relative">
+                  <div className="flex-1 relative min-w-0">
                     <input 
                       type="text" 
                       value={image.startsWith('data:') ? (dict.profile.custom_photo || 'Custom Photo') : image}
@@ -244,7 +244,7 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                       placeholder={dict.profile.no_photo || "No photo"}
                     />
                   </div>
-                  <label className="cursor-pointer group relative">
+                  <label className="cursor-pointer group relative shrink-0">
                     <input 
                       type="file" 
                       ref={fileInputRef}
@@ -252,13 +252,13 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                       className="hidden"
                       onChange={handleFileChange}
                     />
-                    <div className="h-14 md:h-16 px-6 md:px-8 bg-accent text-white font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20 text-xs md:text-base active:scale-95 disabled:opacity-50">
+                    <div className="w-full sm:w-auto h-14 md:h-16 px-6 md:px-8 bg-accent text-white font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 hover:bg-accent-light transition-all shadow-lg shadow-accent/20 text-xs md:text-base active:scale-95 disabled:opacity-50 whitespace-nowrap">
                       {isCompressing ? (
-                        <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin shrink-0" />
                       ) : (
-                        <Camera className="w-5 h-5" />
+                        <Camera className="w-5 h-5 shrink-0" />
                       )}
-                      {isCompressing ? "Processing..." : dict.profile.upload_action}
+                      <span>{isCompressing ? "Processing..." : dict.profile.upload_action}</span>
                     </div>
                   </label>
                 </div>
@@ -270,16 +270,16 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.auth.login_email_label}</label>
                    {user.isOAuth && (
                      <span className="text-[8px] md:text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1.5">
-                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                       {dict.profile?.managed_by_google || "Managed by Google"}
+                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                       <span className="truncate">{dict.profile?.managed_by_google || "Managed by Google"}</span>
                      </span>
                    )}
                  </div>
 
                  <div className="flex flex-col sm:flex-row gap-3">
-                   <div className="flex-1 h-14 md:h-16 px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/70 text-xs md:text-base overflow-hidden">
+                   <div className="w-full sm:flex-1 min-w-0 h-14 md:h-16 min-h-[3.5rem] md:min-h-[4rem] px-5 sm:px-6 md:px-8 bg-primary/5 border border-primary/5 rounded-xl md:rounded-2xl flex items-center font-bold text-primary/70 text-xs md:text-base overflow-hidden">
                      <Mail className="w-4 h-4 text-primary/40 me-3 shrink-0" />
-                     <span className="truncate flex-1">{email || user.email}</span>
+                     <span className="truncate flex-1 min-w-0">{email || user.email}</span>
                    </div>
 
                    {!user.isOAuth && (
@@ -291,9 +291,9 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                          setEmailChangeError("");
                          setShowEmailModal(true);
                        }}
-                       className="h-14 md:h-16 px-6 md:px-8 bg-cream hover:bg-cream/70 text-primary border border-primary/10 font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 transition-all text-xs md:text-sm active:scale-95 shadow-sm shrink-0"
+                       className="w-full sm:w-auto h-14 md:h-16 px-6 md:px-8 bg-cream hover:bg-cream/70 text-primary border border-primary/10 font-bold rounded-xl md:rounded-2xl flex items-center justify-center gap-2 transition-all text-xs md:text-sm active:scale-95 shadow-sm shrink-0 whitespace-nowrap"
                      >
-                       <Edit3 className="w-4 h-4 text-accent" />
+                       <Edit3 className="w-4 h-4 text-accent shrink-0" />
                        <span>{dict.profile?.change_email_btn || "Change"}</span>
                      </button>
                    )}
@@ -343,13 +343,13 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-2xl"
             >
               <div className="absolute top-0 start-0 w-full h-2 bg-red-500" />
               
-              <div className="flex justify-between items-start mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
-                  <AlertTriangle className="w-8 h-8" />
+              <div className="flex justify-between items-start mb-6 sm:mb-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
+                  <AlertTriangle className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <button 
                   onClick={() => setShowDeleteModal(false)}
@@ -359,9 +359,9 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                 </button>
               </div>
 
-              <div className="space-y-4 mb-10">
-                <h2 className="text-3xl font-heading font-bold text-primary italic serif">{dict.profile.final_goodbye_base} <span className="not-italic">{dict.profile.final_goodbye_accent}</span></h2>
-                <p className="text-charcoal/60 leading-relaxed font-medium">
+              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-heading font-bold text-primary italic serif">{dict.profile.final_goodbye_base} <span className="not-italic">{dict.profile.final_goodbye_accent}</span></h2>
+                <p className="text-xs sm:text-sm text-charcoal/60 leading-relaxed font-medium">
                   {dict.profile.delete_confirm_desc}
                 </p>
               </div>
@@ -372,23 +372,23 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-3 sm:gap-4">
                 <button 
                   onClick={() => setShowDeleteModal(false)}
-                  className="h-14 bg-cream text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all text-sm uppercase tracking-widest"
+                  className="w-full h-12 sm:h-14 px-4 bg-cream text-primary font-bold rounded-xl sm:rounded-2xl hover:bg-primary/5 transition-all text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest flex items-center justify-center active:scale-95"
                 >
                   {dict.profile.keep_account_action}
                 </button>
                 <button 
                   onClick={handleConfirmDelete}
                   disabled={isDeleting}
-                  className="h-14 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 group text-sm uppercase tracking-widest"
+                  className="w-full h-12 sm:h-14 px-4 bg-red-600 text-white font-bold rounded-xl sm:rounded-2xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 group text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest disabled:opacity-50 active:scale-95"
                 >
                   {isDeleting ? (dict.profile.erasing_data_action || "Erasing Data...") : (dict.profile.erase_data_action || "Erase Everything")}
                   {isDeleting ? (
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin shrink-0" />
                   ) : (
-                    <Trash2 className="w-4 h-4 group-hover:shake" />
+                    <Trash2 className="w-4 h-4 group-hover:shake shrink-0" />
                   )}
                 </button>
               </div>
@@ -412,7 +412,7 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-2xl"
             >
               <div className="absolute top-0 start-0 w-full h-2 bg-accent" />
               
@@ -485,28 +485,28 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4">
+                <div className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-3 md:gap-4 pt-4">
                   <button 
                     type="button"
                     onClick={() => !isChangingEmail && setShowEmailModal(false)}
                     disabled={isChangingEmail}
-                    className="h-12 md:h-14 bg-cream text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all text-xs md:text-sm uppercase tracking-widest disabled:opacity-50"
+                    className="w-full h-12 md:h-14 px-4 bg-cream text-primary font-bold rounded-xl md:rounded-2xl hover:bg-primary/5 transition-all text-xs md:text-sm uppercase tracking-wider sm:tracking-widest disabled:opacity-50 flex items-center justify-center active:scale-95"
                   >
                     {dict.profile?.cancel_action || "Cancel"}
                   </button>
                   <button 
                     type="submit"
                     disabled={isChangingEmail || !newEmail || !currentPassword}
-                    className="h-12 md:h-14 bg-accent text-white font-bold rounded-xl md:rounded-2xl hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest disabled:opacity-50 active:scale-95"
+                    className="w-full h-12 md:h-14 px-4 bg-accent text-white font-bold rounded-xl md:rounded-2xl hover:bg-accent-light transition-all shadow-xl shadow-accent/20 flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-wider sm:tracking-widest disabled:opacity-50 active:scale-95"
                   >
                     {isChangingEmail ? (
                       <>
-                        <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin shrink-0" />
                         <span>{dict.profile?.updating_email_action || "Updating..."}</span>
                       </>
                     ) : (
                       <>
-                        <Check className="w-4 h-4" />
+                        <Check className="w-4 h-4 shrink-0" />
                         <span>{dict.profile?.update_email_action || "Update Email"}</span>
                       </>
                     )}

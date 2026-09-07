@@ -30,9 +30,9 @@ export default function SettingsLoading() {
           </div>
 
           {/* Settings Main Content Grid */}
-          <div className="grid md:grid-cols-12 gap-6 md:gap-12">
+          <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Left Column (Avatar & Info Cards) */}
-            <div className="md:col-span-4 space-y-6 md:space-y-8">
+            <div className="lg:col-span-4 space-y-6 md:space-y-8">
               {/* Avatar Preview Card */}
               <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-primary/5 border border-primary/5 flex flex-col items-center text-center">
                 <div className="relative w-28 h-28 md:w-40 md:h-40 mb-4 md:mb-6">
@@ -41,18 +41,12 @@ export default function SettingsLoading() {
                 <Skeleton className="w-32 h-6 rounded-md mb-2" />
                 <Skeleton className="w-24 h-4 rounded-md" />
               </div>
-
-              {/* Privacy Notice Card */}
-              <div className="p-5 md:p-8 bg-primary rounded-[1.5rem] md:rounded-[2.5rem] space-y-3 md:space-y-4 shadow-xl">
-                <Skeleton className="w-24 h-4 bg-white/20 rounded-md" />
-                <Skeleton className="w-full h-12 bg-white/10 rounded-md" />
-              </div>
             </div>
 
             {/* Right Column (Form Details & Danger Zone) */}
-            <div className="md:col-span-8 space-y-8 md:space-y-12">
+            <div className="lg:col-span-8 space-y-8 md:space-y-12">
               {/* Settings Form Mockup */}
-              <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-10">
+              <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 sm:p-8 lg:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-10">
                 <div className="space-y-5 md:space-y-6">
                   {/* Full Name input mockup */}
                   <div className="grid gap-1.5 md:gap-2">
@@ -72,7 +66,10 @@ export default function SettingsLoading() {
                   {/* Email Address readonly mockup */}
                   <div className="grid gap-1.5 md:gap-2">
                     <Skeleton className="w-24 h-4 rounded-md ms-4" />
-                    <Skeleton className="w-full h-14 md:h-16 rounded-xl md:rounded-2xl" />
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Skeleton className="w-full sm:flex-1 h-14 md:h-16 rounded-xl md:rounded-2xl" />
+                      <Skeleton className="w-full sm:w-28 h-14 md:h-16 rounded-xl md:rounded-2xl" />
+                    </div>
                   </div>
                 </div>
 

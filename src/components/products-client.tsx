@@ -393,12 +393,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                         <Heart className={cn("w-4 h-4 md:w-5 md:h-5", isFavorite(product.id) && "fill-current")} />
                       </button>
 
-                      {/* Eco-label Badge */}
-                      {product.badge && (
-                        <div className="absolute bottom-3 start-3 md:bottom-5 md:start-5 px-3 py-1 bg-white/95 backdrop-blur text-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-md">
-                          {product.badge}
-                        </div>
-                      )}
+
                     </div>
 
                     <div className="space-y-1 px-1">

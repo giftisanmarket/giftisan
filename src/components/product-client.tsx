@@ -391,21 +391,6 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </div>
             </div>
 
-            {/* Variant Badge Display */}
-            <AnimatePresence mode="wait">
-              {selectedVariant?.badge && (
-                <motion.div
-                  key={selectedVariant.badge}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] font-black uppercase tracking-widest mb-4 w-fit"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  {selectedVariant.badge}
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-6 md:mb-8">
               <p className="text-2xl sm:text-3xl font-heading font-bold text-primary">
@@ -1010,11 +995,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                       className="object-contain group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
-                    {p.badge && (
-                      <div className="absolute top-4 start-4 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
-                        {p.badge}
-                      </div>
-                    )}
+
                     <div className="absolute top-4 end-4 p-3 rounded-full bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white transition-all scale-90 lg:group-hover:scale-100">
                       <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
                     </div>

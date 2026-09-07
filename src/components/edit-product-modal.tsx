@@ -282,7 +282,7 @@ const MediaSlot = memo(({ idx, img, resolution, isCompressing, onImageChange, re
 
 MediaSlot.displayName = "MediaSlot";
 
-const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, requiresClientImage, clientImagePrompt, badge, setTextData, readOnly, dict }: any) => (
+const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, requiresClientImage, clientImagePrompt, setTextData, readOnly, dict }: any) => (
   <section className="space-y-8 pb-10">
     <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
       <CheckCircle2 className="w-5 h-5 text-accent" />
@@ -334,7 +334,9 @@ const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, req
             />
           </div>
         )}
+      </div>
 
+      <div className="space-y-4">
         <div className="flex items-center gap-3 p-4 bg-cream/10 rounded-xl border border-primary/5">
           <input 
             type="checkbox" 
@@ -364,43 +366,6 @@ const DetailsSection = memo(({ stock, canPersonalize, personalizationPrompt, req
             />
           </div>
         )}
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[10px] font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
-        
-        {/* Preset Badge Chips */}
-        {!readOnly && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Product"].map((badgePreset) => (
-              <button
-                key={badgePreset}
-                type="button"
-                onClick={() => setTextData((prev: any) => ({ ...prev, badge: badgePreset }))}
-                className={cn(
-                  "px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border",
-                  badge === badgePreset
-                    ? "bg-accent text-white border-accent shadow-sm"
-                    : "bg-cream/40 text-primary/70 border-primary/10 hover:border-accent/40"
-                )}
-              >
-                {badgePreset}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <input 
-          type="text" 
-          value={badge}
-          onChange={(e) => setTextData((prev: any) => ({...prev, badge: e.target.value}))}
-          placeholder="e.g. Best Seller"
-          disabled={readOnly}
-          className={cn(
-            "w-full py-3 px-8 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary",
-            readOnly && "cursor-default"
-          )}
-        />
       </div>
     </div>
   </section>
@@ -467,6 +432,7 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
       <div className="space-y-1">
         <input 
           type="number" 
+          min="1"
           value={v.stock}
           onChange={(e) => {
             const newVariants = [...variants];
@@ -475,40 +441,16 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
           }}
           className={cn(
             "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
-            parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
+            parseInt(v.stock) <= 0 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
           )}
         />
-        {parseInt(v.stock) < 5 && (
+        {parseInt(v.stock) <= 0 && (
           <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
         )}
       </div>
     </td>
-    <td className="px-4 py-3">
-      <input 
-        type="text" 
-        value={v.badge || ""}
-        onChange={(e) => {
-          const newVariants = [...variants];
-          newVariants[i] = { ...newVariants[i], badge: e.target.value };
-          setVariants(newVariants);
-        }}
-        placeholder="e.g. Rare"
-        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-      />
-    </td>
-    <td className="px-4 py-3">
-      <input 
-        type="text" 
-        value={v.sku || ""}
-        onChange={(e) => {
-          const newVariants = [...variants];
-          newVariants[i] = { ...newVariants[i], sku: e.target.value };
-          setVariants(newVariants);
-        }}
-        placeholder={dict.checkout.optional}
-        className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-      />
-    </td>
+
+
     <td className="px-4 py-3 text-end">
       <button 
         type="button"
@@ -595,6 +537,7 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
         <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
         <input 
           type="number" 
+          min="1"
           value={v.stock}
           onChange={(e) => {
             const newVariants = [...variants];
@@ -603,38 +546,12 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
           }}
           className={cn(
             "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
-            parseInt(v.stock) < 5 ? "border-orange-300" : "border-primary/5"
+            parseInt(v.stock) <= 0 ? "border-orange-300" : "border-primary/5"
           )}
         />
       </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.variant_badge}</label>
-        <input 
-          type="text" 
-          value={v.badge || ""}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], badge: e.target.value };
-            setVariants(newVariants);
-          }}
-          placeholder="e.g. Rare"
-          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.sku_label}</label>
-        <input 
-          type="text" 
-          value={v.sku || ""}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], sku: e.target.value };
-            setVariants(newVariants);
-          }}
-          placeholder={dict.checkout.optional}
-          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-        />
-      </div>
+
+
     </div>
   </div>
 ));
@@ -751,7 +668,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
       return {
         name,
         price: basePrice,
-        stock: "0",
+        stock: "1",
         sku: "",
         options: combo,
       };
@@ -802,7 +719,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                   onClick={() => setOptions(options.filter((_: any, i: number) => i !== optIdx))}
                   className="text-[10px] font-bold text-red-500 uppercase hover:text-red-600"
                 >
-                  {dict.common.remove}
+                  {dict.edit_product?.delete_option || dict.common?.remove || "Delete"}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -870,8 +787,8 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                     <th className="px-4 py-3 text-start">{dict.edit_product.variant_name}</th>
                     <th className="px-4 py-3 text-start">{dict.new_product.price_label}</th>
                     <th className="px-4 py-3 text-start">{dict.new_product.initial_stock_label}</th>
-                    <th className="px-4 py-3 text-start">{dict.edit_product.variant_badge}</th>
-                    <th className="px-4 py-3 text-start">{dict.edit_product.sku_label}</th>
+
+
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -950,7 +867,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                           }
                         }
                       }}
-                      placeholder="e.g. 5"
+                      placeholder={dict.edit_product?.bulk_stock_placeholder || "e.g. 5"}
                       className="w-full h-12 px-4 bg-cream/30 border border-primary/10 rounded-2xl font-bold text-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
                     />
                   </div>
@@ -979,7 +896,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                       }}
                       className="flex-1 py-3.5 px-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl transition-all shadow-md shadow-accent/20 active:scale-95 text-sm"
                     >
-                      {dict.common?.apply || "Apply Stock"}
+                      {dict.edit_product?.apply_stock || dict.common?.apply || "Apply Stock"}
                     </button>
                   </div>
                 </div>
@@ -1008,7 +925,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
     personalizationPrompt: product.personalizationPrompt || "",
     requiresClientImage: product.requiresClientImage || false,
     clientImagePrompt: product.clientImagePrompt || "",
-    badge: product.badge || "",
+    badge: "",
     stock: (product.stock || 0).toString()
   });
 
@@ -1155,7 +1072,7 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
     form.append("personalizationPrompt", textData.personalizationPrompt || "");
     form.append("requiresClientImage", textData.requiresClientImage ? "true" : "false");
     form.append("clientImagePrompt", textData.clientImagePrompt || "");
-    form.append("badge", textData.badge || "");
+    form.append("badge", "");
     form.append("stock", String(textData.stock).trim());
     
     images.forEach((img, i) => {
@@ -1270,7 +1187,6 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
                   personalizationPrompt={textData.personalizationPrompt}
                   requiresClientImage={textData.requiresClientImage}
                   clientImagePrompt={textData.clientImagePrompt}
-                  badge={textData.badge}
                   setTextData={setTextData} 
                   readOnly={readOnly} 
                   dict={dict} 

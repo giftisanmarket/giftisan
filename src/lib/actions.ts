@@ -1689,7 +1689,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
         personalizationPrompt: data.personalizationPrompt || null,
         requiresClientImage: data.requiresClientImage,
         clientImagePrompt: data.clientImagePrompt || null,
-        badge: data.badge,
+        badge: null,
         stock: parseInt(data.stock) || 0,
         status: "PENDING",
         variants: {
@@ -1700,7 +1700,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
             sku: v.sku || null,
             options: v.options || null,
             image: v.image ? await processImage(v.image) : null,
-            badge: v.badge || null
+            badge: null
           })))
         }
       }
@@ -2376,7 +2376,7 @@ export async function updateProduct(productId: string, formData: FormData) {
         personalizationPrompt: data.personalizationPrompt || null,
         requiresClientImage: data.requiresClientImage,
         clientImagePrompt: data.clientImagePrompt || null,
-        badge: data.badge || null,
+        badge: null,
         stock: parseInt(data.stock) || 0,
         status: "PENDING", // Reset to pending on update for re-approval
         rejectionReason: null // Clear feedback once resubmitted
@@ -2406,7 +2406,7 @@ export async function updateProduct(productId: string, formData: FormData) {
             sku: v.sku ? `${v.sku}-${Date.now()}` : null, // Avoid unique constraint conflict on recreate
             options: v.options || null,
             image: v.image ? await processImage(v.image) : null,
-            badge: v.badge || null,
+            badge: null,
           }))
         ),
         skipDuplicates: true,

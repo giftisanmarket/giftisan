@@ -250,11 +250,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
               <Link href={`/products/${product.slug || product.id}`} className="group block">
                 <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden mb-4 md:mb-8 shadow-2xl shadow-primary/5 border border-primary/5">
                   <BespokeImage src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" sizes="(max-width: 768px) 50vw, 33vw" />
-                  {product.badge && (
-                    <div className="absolute top-3 start-3 md:top-8 md:start-8 z-10 px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
-                      {product.badge}
-                    </div>
-                  )}
+
                 </div>
                 <h3 className="text-sm md:text-2xl font-heading font-bold text-primary group-hover:text-brand transition-colors line-clamp-1 leading-tight">{product.name}</h3>
                 <p className="text-xs md:text-xl font-bold text-brand mt-1 md:mt-2">{dict.product.currency} {product.price}</p>

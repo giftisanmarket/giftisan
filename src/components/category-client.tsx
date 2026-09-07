@@ -182,11 +182,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
                     >
                       <Heart className={cn("w-4 h-4 md:w-6 md:h-6", isFavorite(product.id) && "fill-current")} />
                     </button>
-                    {product.badge && (
-                      <div className="absolute bottom-2 start-2 md:bottom-6 md:start-6 px-2 md:px-4 py-0.5 md:py-1.5 bg-white/90 backdrop-blur text-primary text-[7px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl">
-                        {product.badge}
-                      </div>
-                    )}
+
                   </div>
                   <div className="space-y-1.5 md:space-y-2 px-1">
                     <p className="text-[7px] md:text-[10px] font-black text-accent uppercase tracking-[0.3em] leading-none mb-1">

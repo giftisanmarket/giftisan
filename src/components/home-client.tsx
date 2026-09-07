@@ -158,11 +158,7 @@ export default function HomeClient({ products, artisans, categoryCounts, artisan
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
-                  {product.badge && (
-                    <div className="absolute top-2 start-2 md:top-4 md:start-4 z-10 px-2 py-0.5 md:px-3 md:py-1 bg-white/90 backdrop-blur-md text-primary text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-xl border border-primary/5">
-                      {product.badge}
-                    </div>
-                  )}
+
 
                   {/* Actions Layer */}
                   <div className="absolute top-2 end-2 md:top-4 md:end-4 z-10 flex flex-col gap-2">

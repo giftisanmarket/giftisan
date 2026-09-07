@@ -96,6 +96,7 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
       <div className="space-y-1">
         <input 
           type="number" 
+          min="1"
           value={v.stock}
           onChange={(e) => {
             const newVariants = [...variants];
@@ -104,40 +105,16 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
           }}
           className={cn(
             "w-20 h-10 bg-white border rounded-xl px-3 focus:outline-none font-bold",
-            parseInt(v.stock) < 5 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
+            parseInt(v.stock) <= 0 ? "border-orange-300 focus:border-orange-500" : "border-primary/20 focus:border-accent"
           )}
         />
-        {parseInt(v.stock) < 5 && (
+        {parseInt(v.stock) <= 0 && (
           <p className="text-[8px] font-black uppercase text-orange-500 tracking-tighter">{dict.edit_product.low_stock}!</p>
         )}
       </div>
     </td>
-    <td className="px-6 py-4">
-      <input 
-        type="text" 
-        value={v.badge || ""}
-        onChange={(e) => {
-          const newVariants = [...variants];
-          newVariants[i] = { ...newVariants[i], badge: e.target.value };
-          setVariants(newVariants);
-        }}
-        placeholder="e.g. Rare"
-        className="w-24 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-      />
-    </td>
-    <td className="px-6 py-4">
-      <input 
-        type="text" 
-        value={v.sku}
-        onChange={(e) => {
-          const newVariants = [...variants];
-          newVariants[i] = { ...newVariants[i], sku: e.target.value };
-          setVariants(newVariants);
-        }}
-        placeholder={dict.checkout.optional}
-        className="w-28 h-10 bg-white border border-primary/20 rounded-xl px-3 focus:outline-none focus:border-accent font-bold"
-      />
-    </td>
+
+
     <td className="px-6 py-4 text-end">
       <button 
         type="button"
@@ -227,6 +204,7 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
         <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
         <input 
           type="number" 
+          min="1"
           value={v.stock}
           onChange={(e) => {
             const newVariants = [...variants];
@@ -235,38 +213,12 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
           }}
           className={cn(
             "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
-            parseInt(v.stock) < 5 ? "border-orange-300" : "border-primary/5"
+            parseInt(v.stock) <= 0 ? "border-orange-300" : "border-primary/5"
           )}
         />
       </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.variant_badge}</label>
-        <input 
-          type="text" 
-          value={v.badge || ""}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], badge: e.target.value };
-            setVariants(newVariants);
-          }}
-          placeholder="e.g. Rare"
-          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.edit_product.sku_label}</label>
-        <input 
-          type="text" 
-          value={v.sku}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], sku: e.target.value };
-            setVariants(newVariants);
-          }}
-          placeholder={dict.checkout.optional}
-          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-        />
-      </div>
+
+
     </div>
   </div>
 ));
@@ -385,7 +337,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
       return {
         name,
         price: basePrice,
-        stock: "0",
+        stock: "1",
         sku: "",
         options: combo
       };
@@ -403,21 +355,29 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
       <div className="space-y-6">
         {/* Quick Option Preset Chips */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-primary/40 me-1">Quick Presets:</span>
-          {["Color", "Size", "Material", "Finish", "Style"].map((preset) => (
+          <span className="text-[10px] font-black uppercase tracking-widest text-primary/40 me-1">
+            {dict.edit_product?.quick_presets || "Quick Presets:"}
+          </span>
+          {[
+            { id: "color", label: dict.edit_product?.preset_color || "Color" },
+            { id: "size", label: dict.edit_product?.preset_size || "Size" },
+            { id: "material", label: dict.edit_product?.preset_material || "Material" },
+            { id: "finish", label: dict.edit_product?.preset_finish || "Finish" },
+            { id: "style", label: dict.edit_product?.preset_style || "Style" },
+          ].map((preset) => (
             <button
-              key={preset}
+              key={preset.id}
               type="button"
               onClick={() => {
-                if (!options.some((o: any) => o.name.toLowerCase() === preset.toLowerCase())) {
-                  setOptions([...options, { name: preset, values: [] }]);
-                  toast.success(`Added option: ${preset}`);
+                if (!options.some((o: any) => o.name.toLowerCase() === preset.label.toLowerCase())) {
+                  setOptions([...options, { name: preset.label, values: [] }]);
+                  toast.success(`${dict.edit_product?.added_option || "Added option"}: ${preset.label}`);
                 }
               }}
               className="px-3 py-1 bg-primary/5 hover:bg-accent/10 hover:text-accent border border-primary/10 rounded-full text-xs font-bold text-primary transition-all active:scale-95 flex items-center gap-1"
             >
               <Plus className="w-3 h-3 text-accent" />
-              <span>{preset}</span>
+              <span>{preset.label}</span>
             </button>
           ))}
         </div>
@@ -460,12 +420,12 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                   type="button" 
                   onClick={() => {
                     setOptions(options.filter((_: any, i: number) => i !== optIdx));
-                    toast.success(`Removed option: ${opt.name}`);
+                    toast.success(`${dict.edit_product?.removed_option || "Removed option"}: ${opt.name}`);
                   }}
                   className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>{dict.common?.remove || "Delete Option"}</span>
+                  <span>{dict.edit_product?.delete_option || dict.common?.remove || "Delete Option"}</span>
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -534,8 +494,8 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                     <th className="px-6 py-4 text-start">{dict.edit_product.variant_name}</th>
                     <th className="px-6 py-4 text-start">{dict.new_product.price_label}</th>
                     <th className="px-6 py-4 text-start">{dict.new_product.initial_stock_label}</th>
-                    <th className="px-6 py-4 text-start">{dict.edit_product.variant_badge}</th>
-                    <th className="px-6 py-4 text-start">{dict.edit_product.sku_label}</th>
+
+
                     <th className="px-4 py-4 text-end"></th>
                   </tr>
                 </thead>
@@ -614,7 +574,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                           }
                         }
                       }}
-                      placeholder="e.g. 5"
+                      placeholder={dict.edit_product?.bulk_stock_placeholder || "e.g. 5"}
                       className="w-full h-12 px-4 bg-cream/30 border border-primary/10 rounded-2xl font-bold text-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
                     />
                   </div>
@@ -643,7 +603,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                       }}
                       className="flex-1 py-3.5 px-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl transition-all shadow-md shadow-accent/20 active:scale-95 text-sm"
                     >
-                      {dict.common?.apply || "Apply Stock"}
+                      {dict.edit_product?.apply_stock || dict.common?.apply || "Apply Stock"}
                     </button>
                   </div>
                 </div>
@@ -897,7 +857,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     form.append("personalizationPrompt", formData.personalizationPrompt);
     form.append("requiresClientImage", formData.requiresClientImage.toString());
     form.append("clientImagePrompt", formData.clientImagePrompt);
-    form.append("badge", formData.badge);
+    form.append("badge", "");
     form.append("stock", formData.stock.trim());
 
     formData.images.forEach((img, i) => {
@@ -1135,8 +1095,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
             {isDraggingOver && (
               <div className="absolute inset-0 z-50 bg-accent/10 backdrop-blur-md border-2 border-dashed border-accent rounded-[2rem] flex flex-col items-center justify-center text-accent animate-in fade-in zoom-in-95">
                 <Upload className="w-12 h-12 animate-bounce mb-3" />
-                <p className="text-base font-black uppercase tracking-widest">Drop your files here to upload</p>
-                <p className="text-xs font-bold text-accent/70 mt-1">Supports JPG, PNG, WEBP, MP4 (Max 10)</p>
+                <p className="text-base font-black uppercase tracking-widest">{dict.new_product?.drop_files_here || "Drop your files here to upload"}</p>
+                <p className="text-xs font-bold text-accent/70 mt-1">{dict.new_product?.supports_formats || "Supports JPG, PNG, WEBP, MP4 (Max 10)"}</p>
               </div>
             )}
 
@@ -1336,12 +1296,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                     <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
                     <textarea value={formData.personalizationPrompt} onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })} placeholder={dict.new_product.personalization_prompt_placeholder} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
                     
-                    {/* Live Buyer Preview Pill */}
-                    <div className="p-3 bg-cream/40 border border-primary/10 rounded-xl text-xs flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-accent shrink-0" />
-                      <span className="font-bold text-primary/60">Live Buyer Preview:</span>
-                      <span className="text-primary font-medium italic">"{formData.personalizationPrompt || "Enter custom name or message..."}"</span>
-                    </div>
+
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1385,31 +1340,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 )}
               </AnimatePresence>
 
-              {/* Promo Badge Input with Presets */}
-              <div className="space-y-3 col-span-full md:col-span-1">
-                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.promo_badge_label}</label>
-                
-                {/* Preset Badge Chips */}
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {["One of a Kind", "Handmade", "Gift Ready", "Made to Order", "Rare Product"].map((badgePreset) => (
-                    <button
-                      key={badgePreset}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, badge: badgePreset })}
-                      className={cn(
-                        "px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border",
-                        formData.badge === badgePreset
-                          ? "bg-accent text-white border-accent shadow-sm"
-                          : "bg-cream/40 text-primary/70 border-primary/10 hover:border-accent/40"
-                      )}
-                    >
-                      {badgePreset}
-                    </button>
-                  ))}
-                </div>
 
-                <input type="text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder={dict.new_product.promo_badge_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm" />
-              </div>
 
               {/* Initial Stock Input (for non-variant products) */}
               <div className="space-y-3 col-span-full md:col-span-1">

@@ -126,9 +126,9 @@ export function RichTextEditor({
   const currentFontSize = editor.getAttributes("textStyle").fontSize || "16px";
 
   return (
-    <div className="border border-primary/5 rounded-[2rem] overflow-hidden bg-white focus-within:border-accent transition-all shadow-sm">
+    <div className="border border-primary/5 rounded-2xl sm:rounded-[2rem] overflow-hidden bg-white focus-within:border-accent transition-all shadow-sm">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-4 py-3 border-b border-primary/5 bg-cream/40">
+      <div className="flex flex-wrap items-center gap-1 px-2.5 sm:px-4 py-2 sm:py-3 border-b border-primary/5 bg-cream/40">
 
         {/* Undo / Redo */}
         <ToolbarButton
@@ -267,12 +267,12 @@ export function RichTextEditor({
 
       {/* Editor area */}
       <div
-        className="relative px-6 py-5 cursor-text"
+        className="relative px-4 sm:px-6 py-4 sm:py-5 cursor-text"
         dir={dir}
         onClick={() => editor.commands.focus()}
       >
         {editor.isEmpty && placeholder && (
-          <p className="absolute top-5 text-primary/25 font-medium text-base pointer-events-none whitespace-pre-line select-none">
+          <p className="absolute top-4 sm:top-5 left-4 right-4 sm:left-6 sm:right-6 text-primary/25 font-medium text-sm sm:text-base pointer-events-none whitespace-pre-line select-none">
             {placeholder}
           </p>
         )}

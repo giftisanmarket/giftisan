@@ -24,15 +24,15 @@ export default async function AdminOutreachPage({ params }: { params: Promise<{ 
   if (user?.role !== "ADMIN") redirect(`/${lang}`);
 
   return (
-    <div className="space-y-8">
-      <div className="border-b border-primary/5 pb-8">
-        <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-2">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="border-b border-primary/5 pb-4 sm:pb-8">
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-1.5 sm:mb-2">
           {(dict.admin.outreach_title || "Artisan Outreach").split(' ')[0]}{" "}
           <span className="serif italic text-accent font-normal">
             {(dict.admin.outreach_title || "Artisan Outreach").split(' ').slice(1).join(' ')}
           </span>
         </h1>
-        <p className="text-charcoal/40 font-medium text-sm md:text-base">
+        <p className="text-charcoal/40 font-medium text-xs sm:text-sm md:text-base">
           {dict.admin.outreach_desc || "Send personalized, beautifully formatted Arabic invitations directly to artisans."}
         </p>
       </div>

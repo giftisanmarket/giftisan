@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles, Laptop, Smartphone } from "lucide-react";
 import { sendCustomEmailAction } from "@/lib/actions";
 import { toast } from "react-hot-toast";
@@ -54,6 +55,11 @@ type TemplateStyle = 'corporate' | 'minimal' | 'artisan';
 
 export function OutreachClient({ dict }: { dict: any }) {
   const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sender state
   const [selectedPreset, setSelectedPreset] = useState<string>("management");
@@ -483,35 +489,35 @@ export function OutreachClient({ dict }: { dict: any }) {
   return (
     <>
       <div className="max-w-4xl mx-auto" dir={isAr ? "rtl" : "ltr"}>
-        <div className="bg-white rounded-[2.5rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
+        <div className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
 
           {/* Header */}
-          <div className="bg-primary/95 text-white px-6 py-4 flex items-center gap-3 border-b border-white/10">
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+          <div className="bg-primary/95 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center gap-3 border-b border-white/10">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
               <Send className="w-4 h-4 text-accent" />
             </div>
-            <div>
-              <h3 className="font-heading font-black text-sm tracking-tight">
+            <div className="min-w-0">
+              <h3 className="font-heading font-black text-xs sm:text-sm tracking-tight truncate">
                 {isAr ? "إنشاء رسالة جديدة" : "New Message"}
               </h3>
-              <p className="text-[10px] text-white/50 font-bold tracking-wider uppercase">
+              <p className="text-[9px] sm:text-[10px] text-white/50 font-bold tracking-wider uppercase truncate">
                 {isAr ? "عبر خدمة البريد — يدعم قوالب إدارية واجتماعات واختيار المرسل" : "Giftisan Mailer — Executive, Meeting & Hiring communication"}
               </p>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
 
             {/* Sender Identity Section */}
-            <div className="space-y-3 p-5 rounded-2xl bg-cream/30 border border-primary/5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="space-y-3 p-3.5 sm:p-5 rounded-2xl bg-cream/30 border border-primary/5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-primary/70 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-accent" />
                   {isAr ? "هوية المرسل (From)" : "Sender Identity (From)"}
                 </label>
                 {effectiveSenderEmail && (
-                  <span className="text-[11px] font-mono font-bold text-accent px-2.5 py-0.5 rounded-full bg-accent/10">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-accent px-2.5 py-0.5 rounded-full bg-accent/10 truncate max-w-full">
                     {effectiveSenderName} &lt;{effectiveSenderEmail}&gt;
                   </span>
                 )}
@@ -531,7 +537,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                           setTemplateStyle("corporate");
                         }
                       }}
-                      className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer ${
+                      className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer min-w-0 ${
                         isAr ? "text-right" : "text-left"
                       } ${
                         isSelected
@@ -539,9 +545,9 @@ export function OutreachClient({ dict }: { dict: any }) {
                           : "bg-white/80 hover:bg-white border-primary/5 hover:border-primary/15 text-primary"
                       }`}
                     >
-                      <div>
+                      <div className="min-w-0 w-full">
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className={`text-xs font-bold leading-tight ${isSelected ? "text-white" : "text-primary"}`}>
+                          <span className={`text-[11px] sm:text-xs font-bold leading-tight truncate ${isSelected ? "text-white" : "text-primary"}`}>
                             {isAr ? preset.nameAr : preset.nameEn}
                           </span>
                           <span
@@ -550,12 +556,12 @@ export function OutreachClient({ dict }: { dict: any }) {
                             }`}
                           />
                         </div>
-                        <p className={`text-[10px] font-mono truncate ${isSelected ? "text-white/70" : "text-primary/50"}`}>
+                        <p className={`text-[9px] sm:text-[10px] font-mono truncate ${isSelected ? "text-white/70" : "text-primary/50"}`}>
                           {preset.email || (isAr ? "إدخال يدوي" : "Manual entry")}
                         </p>
                       </div>
                       <span
-                        className={`inline-block mt-2 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
+                        className={`inline-block mt-2 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider truncate max-w-full ${
                           isSelected
                             ? "bg-white/15 text-white/90"
                             : "bg-primary/5 text-primary/60"
@@ -635,8 +641,8 @@ export function OutreachClient({ dict }: { dict: any }) {
             </div>
 
             {/* Quick Draft Templates Bar */}
-            <div className="space-y-2 p-4 rounded-2xl bg-cream/20 border border-primary/5">
-              <div className="flex items-center justify-between">
+            <div className="space-y-2 p-3.5 sm:p-4 rounded-2xl bg-cream/20 border border-primary/5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-accent" />
                   {isAr ? "قوالب سريعة بنقرة واحدة" : "1-Click Quick Draft Templates"}
@@ -645,48 +651,48 @@ export function OutreachClient({ dict }: { dict: any }) {
                   {isAr ? "انقر لتعبئة نموذج فوري" : "Click to auto-populate draft"}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => applyQuickTemplate('meeting')}
-                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                  className="px-2.5 sm:px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-[11px] sm:text-xs font-bold text-primary flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-xs active:scale-95 text-center sm:text-left rtl:sm:text-right"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-accent" />
-                  <span>{isAr ? "دعوة لاجتماع عمل" : "Meeting Invitation"}</span>
+                  <Calendar className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <span className="truncate">{isAr ? "دعوة اجتماع" : "Meeting Invite"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => applyQuickTemplate('interview')}
-                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                  className="px-2.5 sm:px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-[11px] sm:text-xs font-bold text-primary flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-xs active:scale-95 text-center sm:text-left rtl:sm:text-right"
                 >
-                  <Briefcase className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{isAr ? "مقابلة وتوظيف" : "Hiring & Interview"}</span>
+                  <Briefcase className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <span className="truncate">{isAr ? "مقابلة وتوظيف" : "Hiring & Interview"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => applyQuickTemplate('memo')}
-                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                  className="px-2.5 sm:px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-[11px] sm:text-xs font-bold text-primary flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-xs active:scale-95 text-center sm:text-left rtl:sm:text-right"
                 >
-                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{isAr ? "تعميم إداري للموظفين" : "Internal Memo"}</span>
+                  <FileText className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span className="truncate">{isAr ? "تعميم إداري" : "Internal Memo"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => applyQuickTemplate('artisan')}
-                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                  className="px-2.5 sm:px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-[11px] sm:text-xs font-bold text-primary flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-xs active:scale-95 text-center sm:text-left rtl:sm:text-right"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>{isAr ? "دعوة انضمام حرفي" : "Artisan Outreach"}</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span className="truncate">{isAr ? "دعوة حرفي" : "Artisan Outreach"}</span>
                 </button>
               </div>
             </div>
 
             {/* To */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
                   {isAr ? "إلى" : "To"}
@@ -700,7 +706,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                 rows={2}
                 value={gmailTo}
                 onChange={(e) => setGmailTo(e.target.value)}
-                className="w-full px-6 py-4 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-sm resize-none"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-xs sm:text-sm resize-none"
                 placeholder="sales-manager@giftisan.com, employee@example.com"
                 dir="ltr"
               />
@@ -717,7 +723,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                 required
                 value={gmailSubject}
                 onChange={(e) => setGmailSubject(e.target.value)}
-                className="w-full h-14 px-6 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-sm"
+                className="w-full h-12 sm:h-14 px-4 sm:px-6 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-xs sm:text-sm"
                 placeholder={isAr ? "عنوان الرسالة..." : "Email subject..."}
                 dir={gmailDir}
               />
@@ -725,7 +731,7 @@ export function OutreachClient({ dict }: { dict: any }) {
 
             {/* Template Style Selector */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-primary/40">
                   {isAr ? "طابع وتصميم القالب" : "Email Template Style"}
                 </label>
@@ -736,50 +742,59 @@ export function OutreachClient({ dict }: { dict: any }) {
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
                 <button
                   type="button"
                   onClick={() => setTemplateStyle('corporate')}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left rtl:text-right sm:text-center transition-all cursor-pointer flex flex-row sm:flex-col items-center sm:items-center justify-between sm:justify-center gap-2 ${
                     templateStyle === 'corporate'
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
                   }`}
                 >
-                  <div className="text-xs font-black">{isAr ? "رسمي وإداري" : "Corporate / Executive"}</div>
-                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'corporate' ? 'text-white/70' : 'text-primary/50'}`}>
-                    {isAr ? "الموصى به للاجتماعات والتوظيف" : "Recommended for meetings & hiring"}
+                  <div>
+                    <div className="text-xs font-black">{isAr ? "رسمي وإداري" : "Corporate / Executive"}</div>
+                    <div className={`text-[10px] mt-0.5 ${templateStyle === 'corporate' ? 'text-white/70' : 'text-primary/50'}`}>
+                      {isAr ? "الموصى به للاجتماعات والتوظيف" : "Recommended for meetings & hiring"}
+                    </div>
                   </div>
+                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 sm:hidden ${templateStyle === 'corporate' ? 'bg-accent' : 'bg-primary/20'}`} />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setTemplateStyle('minimal')}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left rtl:text-right sm:text-center transition-all cursor-pointer flex flex-row sm:flex-col items-center sm:items-center justify-between sm:justify-center gap-2 ${
                     templateStyle === 'minimal'
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
                   }`}
                 >
-                  <div className="text-xs font-black">{isAr ? "خطاب مباشر" : "Minimal Letter"}</div>
-                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'minimal' ? 'text-white/70' : 'text-primary/50'}`}>
-                    {isAr ? "خطاب تنفيذي أبيض ناصع" : "Clean white letterhead"}
+                  <div>
+                    <div className="text-xs font-black">{isAr ? "خطاب مباشر" : "Minimal Letter"}</div>
+                    <div className={`text-[10px] mt-0.5 ${templateStyle === 'minimal' ? 'text-white/70' : 'text-primary/50'}`}>
+                      {isAr ? "خطاب تنفيذي أبيض ناصع" : "Clean white letterhead"}
+                    </div>
                   </div>
+                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 sm:hidden ${templateStyle === 'minimal' ? 'bg-accent' : 'bg-primary/20'}`} />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setTemplateStyle('artisan')}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left rtl:text-right sm:text-center transition-all cursor-pointer flex flex-row sm:flex-col items-center sm:items-center justify-between sm:justify-center gap-2 ${
                     templateStyle === 'artisan'
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
                   }`}
                 >
-                  <div className="text-xs font-black">{isAr ? "تسويقي وحرفي" : "Artisan / Marketing"}</div>
-                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'artisan' ? 'text-white/70' : 'text-primary/50'}`}>
-                    {isAr ? "لدعوة الحرفيين للمنصة" : "Marketplace & Craft branding"}
+                  <div>
+                    <div className="text-xs font-black">{isAr ? "تسويقي وحرفي" : "Artisan / Marketing"}</div>
+                    <div className={`text-[10px] mt-0.5 ${templateStyle === 'artisan' ? 'text-white/70' : 'text-primary/50'}`}>
+                      {isAr ? "لدعوة الحرفيين للمنصة" : "Marketplace & Craft branding"}
+                    </div>
                   </div>
+                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 sm:hidden ${templateStyle === 'artisan' ? 'bg-accent' : 'bg-primary/20'}`} />
                 </button>
               </div>
             </div>
@@ -805,31 +820,31 @@ export function OutreachClient({ dict }: { dict: any }) {
 
             {/* Batch Send Logs */}
             {sendLogs.length > 0 && (
-              <div className="p-5 bg-cream/50 rounded-2xl border border-primary/5 space-y-3">
+              <div className="p-3.5 sm:p-5 bg-cream/50 rounded-2xl border border-primary/5 space-y-3">
                 <h4 className="text-xs font-black text-primary/50 uppercase tracking-wider">
                   {isAr ? "حالة الإرسال" : "Send Status"}
                 </h4>
                 <div className="grid gap-2 max-h-[160px] overflow-y-auto">
                   {sendLogs.map((log, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-primary/5 last:border-0 gap-4">
-                      <span className="font-mono text-primary/70 truncate">{log.email}</span>
+                    <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-primary/5 last:border-0 gap-3">
+                      <span className="font-mono text-primary/70 truncate text-[11px] sm:text-xs">{log.email}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {log.status === "pending" && (
                           <>
                             <span className="w-3 h-3 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-                            <span className="text-accent font-bold">{isAr ? "جاري..." : "Sending..."}</span>
+                            <span className="text-accent font-bold text-[11px] sm:text-xs">{isAr ? "جاري..." : "Sending..."}</span>
                           </>
                         )}
                         {log.status === "success" && (
                           <>
                             <Check className="w-3.5 h-3.5 text-green-600" />
-                            <span className="text-green-600 font-bold">{isAr ? "تم" : "Sent"}</span>
+                            <span className="text-green-600 font-bold text-[11px] sm:text-xs">{isAr ? "تم" : "Sent"}</span>
                           </>
                         )}
                         {log.status === "error" && (
                           <>
                             <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                            <span className="text-red-500 font-bold">{log.error || (isAr ? "فشل" : "Failed")}</span>
+                            <span className="text-red-500 font-bold text-[11px] sm:text-xs">{log.error || (isAr ? "فشل" : "Failed")}</span>
                           </>
                         )}
                       </div>
@@ -840,191 +855,196 @@ export function OutreachClient({ dict }: { dict: any }) {
             )}
 
             {/* Actions */}
-            <div className="pt-4 border-t border-primary/5 flex items-center gap-3">
+            <div className="pt-4 border-t border-primary/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
               <button
                 type="submit"
                 disabled={gmailStatus === "sending"}
-                className="px-8 h-14 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-primary/10 active:scale-[0.98] disabled:opacity-50 cursor-pointer transition-all"
+                className="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-xl sm:rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-primary/10 active:scale-[0.98] disabled:opacity-50 cursor-pointer transition-all shrink-0"
               >
                 {gmailStatus === "sending" ? (
                   <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 ) : (
                   <Mail className="w-4 h-4" />
                 )}
-                <span>{gmailStatus === "sending" ? (isAr ? "جاري الإرسال..." : "Sending...") : (isAr ? "إرسال" : "Send Message")}</span>
+                <span>{gmailStatus === "sending" ? (isAr ? "جاري الإرسال..." : "Sending...") : (isAr ? "إرسال الرسالة" : "Send Message")}</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setIsPreviewOpen(true)}
-                disabled={gmailStatus === "sending" || isEmpty(gmailBody)}
-                className="px-6 h-14 border border-primary/10 hover:border-primary/20 hover:bg-primary/5 text-primary/70 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all disabled:opacity-40 active:scale-[0.98] cursor-pointer"
-                title={isAr ? "معاينة الرسالة المنسقة" : "Preview formatted email"}
-              >
-                <Eye className="w-4 h-4 text-accent" />
-                <span>{isAr ? "معاينة" : "Preview"}</span>
-              </button>
+              <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto sm:ml-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewOpen(true)}
+                  disabled={gmailStatus === "sending" || isEmpty(gmailBody)}
+                  className="flex-1 sm:flex-initial px-4 sm:px-6 h-11 sm:h-14 border border-primary/10 hover:border-primary/20 hover:bg-primary/5 text-primary/70 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 transition-all disabled:opacity-40 active:scale-[0.98] cursor-pointer"
+                  title={isAr ? "معاينة الرسالة المنسقة" : "Preview formatted email"}
+                >
+                  <Eye className="w-4 h-4 text-accent" />
+                  <span>{isAr ? "معاينة" : "Preview"}</span>
+                </button>
 
-              <button
-                type="button"
-                disabled={gmailStatus === "sending"}
-                onClick={() => {
-                  setGmailTo("");
-                  setGmailSubject("");
-                  setGmailBody("<p></p>");
-                  setCustomSenderName("");
-                  setCustomSenderEmail("");
-                  setCustomReplyTo("");
-                  setSendLogs([]);
-                }}
-                className="px-6 h-14 border border-primary/10 hover:border-primary/20 text-primary/50 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center transition-all disabled:opacity-40 ml-auto cursor-pointer"
-              >
-                {isAr ? "مسح" : "Clear"}
-              </button>
+                <button
+                  type="button"
+                  disabled={gmailStatus === "sending"}
+                  onClick={() => {
+                    setGmailTo("");
+                    setGmailSubject("");
+                    setGmailBody("<p></p>");
+                    setCustomSenderName("");
+                    setCustomSenderEmail("");
+                    setCustomReplyTo("");
+                    setSendLogs([]);
+                  }}
+                  className="px-4 sm:px-6 h-11 sm:h-14 border border-primary/10 hover:border-primary/20 text-primary/50 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-xl sm:rounded-2xl flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer"
+                >
+                  {isAr ? "مسح" : "Clear"}
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </div>
 
       {/* Modern Glassmorphic Preview Modal */}
-      <AnimatePresence>
-        {isPreviewOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" dir={isAr ? "rtl" : "ltr"}>
-            {/* Backdrop Blur */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsPreviewOpen(false)}
-              className="absolute inset-0 bg-primary/40 backdrop-blur-md"
-            />
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isPreviewOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6" dir={isAr ? "rtl" : "ltr"}>
+              {/* Backdrop Blur */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsPreviewOpen(false)}
+                className="absolute inset-0 bg-primary/70 backdrop-blur-md"
+              />
 
-            {/* Modal Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="relative bg-white rounded-[2.5rem] w-full max-w-4xl h-[94vh] max-h-[880px] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
-            >
-              {/* Header */}
-              <div className="px-6 py-3 border-b border-primary/5 bg-cream/40 flex items-center justify-between shrink-0">
-                <div>
-                  <h3 className="font-heading font-black text-primary text-base flex items-center gap-2">
-                    {isAr ? "معاينة البريد الإلكتروني" : "Email Sandbox Preview"}
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase font-bold">
-                      {templateStyle}
-                    </span>
-                  </h3>
-                  <p className="text-[10px] text-primary/50 font-bold uppercase tracking-wider mt-0.5">
-                    {isAr ? "شكل الرسالة النهائي كما سيصل في صندوق الوارد" : "Real-time client view of the formatted email template"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {/* Device Toggle */}
-                  <div className="flex items-center p-1 bg-white border border-primary/10 rounded-xl shadow-xs">
+              {/* Modal Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: "spring", duration: 0.5 }}
+                className="relative bg-white rounded-2xl sm:rounded-[2.5rem] w-full max-w-4xl h-[94vh] max-h-[880px] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
+              >
+                {/* Header */}
+                <div className="px-3.5 sm:px-6 py-2.5 sm:py-3 border-b border-primary/5 bg-cream/40 flex items-center justify-between shrink-0">
+                  <div className="min-w-0">
+                    <h3 className="font-heading font-black text-primary text-xs sm:text-base flex items-center gap-1.5 sm:gap-2 truncate">
+                      <span>{isAr ? "معاينة البريد" : "Email Preview"}</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase font-bold shrink-0">
+                        {templateStyle}
+                      </span>
+                    </h3>
+                    <p className="text-[9px] sm:text-[10px] text-primary/50 font-bold uppercase tracking-wider mt-0.5 truncate hidden sm:block">
+                      {isAr ? "شكل الرسالة النهائي كما سيصل في صندوق الوارد" : "Real-time client view of the formatted email template"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    {/* Device Toggle */}
+                    <div className="flex items-center p-0.5 sm:p-1 bg-white border border-primary/10 rounded-xl shadow-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice('desktop')}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
+                          previewDevice === 'desktop'
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-primary/60 hover:text-primary'
+                        }`}
+                      >
+                        <Laptop className="w-3.5 h-3.5" />
+                        <span className="hidden xs:inline">{isAr ? "كمبيوتر" : "Desktop"}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice('mobile')}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
+                          previewDevice === 'mobile'
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-primary/60 hover:text-primary'
+                        }`}
+                      >
+                        <Smartphone className="w-3.5 h-3.5" />
+                        <span className="hidden xs:inline">{isAr ? "موبايل" : "Phone"}</span>
+                      </button>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => setPreviewDevice('desktop')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        previewDevice === 'desktop'
-                          ? 'bg-primary text-white shadow-xs'
-                          : 'text-primary/60 hover:text-primary'
-                      }`}
+                      onClick={() => setIsPreviewOpen(false)}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer shrink-0"
                     >
-                      <Laptop className="w-3.5 h-3.5" />
-                      <span>{isAr ? "كمبيوتر" : "Desktop"}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewDevice('mobile')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        previewDevice === 'mobile'
-                          ? 'bg-primary text-white shadow-xs'
-                          : 'text-primary/60 hover:text-primary'
-                      }`}
-                    >
-                      <Smartphone className="w-3.5 h-3.5" />
-                      <span>{isAr ? "موبايل" : "Phone"}</span>
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
+                </div>
 
+                {/* Subject & Sender Info bar */}
+                <div className="px-3.5 sm:px-6 py-2 bg-cream/10 border-b border-primary/5 flex flex-wrap items-center gap-y-1.5 gap-x-4 text-[11px] sm:text-xs text-primary/60 font-bold shrink-0">
+                  <div className="truncate max-w-full">
+                    <span className="text-primary/40 mr-1.5">{isAr ? "من:" : "From:"}</span>
+                    <span className="text-primary font-mono">{effectiveSenderName} &lt;{effectiveSenderEmail}&gt;</span>
+                  </div>
+                  {effectiveReplyTo && effectiveReplyTo !== effectiveSenderEmail && (
+                    <div className="truncate max-w-full">
+                      <span className="text-primary/40 mr-1.5">{isAr ? "الرد إلى:" : "Reply-To:"}</span>
+                      <span className="text-primary font-mono">{effectiveReplyTo}</span>
+                    </div>
+                  )}
+                  <div className="truncate max-w-full">
+                    <span className="text-primary/40 mr-1.5">{isAr ? "الموضوع:" : "Subject:"}</span>
+                    <span className="text-primary">{gmailSubject || (isAr ? "(بدون عنوان)" : "(No Subject)")}</span>
+                  </div>
+                  <div className="ltr:ml-auto rtl:mr-auto font-mono text-[9px] sm:text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full shrink-0">
+                    {gmailDir === "rtl" ? "RTL (Arabic)" : "LTR (English)"}
+                  </div>
+                </div>
+
+                {/* Sandbox Render Area */}
+                <div className="flex-1 p-2 sm:p-3 md:p-5 bg-cream/20 overflow-hidden flex items-center justify-center min-h-0">
+                  <div
+                    className={`transition-all duration-300 ${
+                      previewDevice === 'mobile'
+                        ? 'w-[290px] xs:w-[330px] sm:w-[360px] max-w-full h-full max-h-[580px] rounded-[2rem] sm:rounded-[2.5rem] border-[6px] sm:border-[8px] border-slate-900 shadow-2xl overflow-hidden bg-white flex flex-col'
+                        : 'w-full max-w-2xl h-full rounded-2xl border border-primary/10 bg-white shadow-sm overflow-hidden flex flex-col'
+                    }`}
+                  >
+                    {previewDevice === 'mobile' && (
+                      <div className="w-full bg-slate-900 py-1.5 flex items-center justify-center shrink-0">
+                        {/* Speaker / Dynamic Island notch */}
+                        <div className="w-20 h-3 bg-slate-950 rounded-full flex items-center justify-end px-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+                        </div>
+                      </div>
+                    )}
+                    <iframe
+                      srcDoc={getBrandedHtml(gmailBody, gmailDir, templateStyle)}
+                      className="w-full flex-1 border-0"
+                      title="Branded Email Preview"
+                    />
+                    {previewDevice === 'mobile' && (
+                      <div className="w-full bg-white py-1 flex items-center justify-center shrink-0 border-t border-slate-100">
+                        {/* Home indicator bar */}
+                        <div className="w-24 h-1 bg-slate-300 rounded-full" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="px-6 py-2.5 border-t border-primary/5 bg-cream/20 flex items-center justify-end shrink-0">
                   <button
                     type="button"
                     onClick={() => setIsPreviewOpen(false)}
-                    className="w-9 h-9 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer"
+                    className="px-5 h-10 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center transition-all cursor-pointer"
                   >
-                    <X className="w-4 h-4" />
+                    {isAr ? "رائع، إغلاق" : "Looks Good!"}
                   </button>
                 </div>
-              </div>
-
-              {/* Subject & Sender Info bar */}
-              <div className="px-6 py-2 bg-cream/10 border-b border-primary/5 flex flex-wrap items-center gap-y-1.5 gap-x-5 text-xs text-primary/60 font-bold shrink-0">
-                <div>
-                  <span className="text-primary/40 mr-1.5">{isAr ? "من:" : "From:"}</span>
-                  <span className="text-primary font-mono">{effectiveSenderName} &lt;{effectiveSenderEmail}&gt;</span>
-                </div>
-                {effectiveReplyTo && effectiveReplyTo !== effectiveSenderEmail && (
-                  <div>
-                    <span className="text-primary/40 mr-1.5">{isAr ? "الرد إلى:" : "Reply-To:"}</span>
-                    <span className="text-primary font-mono">{effectiveReplyTo}</span>
-                  </div>
-                )}
-                <div>
-                  <span className="text-primary/40 mr-1.5">{isAr ? "الموضوع:" : "Subject:"}</span>
-                  <span className="text-primary">{gmailSubject || (isAr ? "(بدون عنوان)" : "(No Subject)")}</span>
-                </div>
-                <div className="md:ml-auto font-mono text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full">
-                  {gmailDir === "rtl" ? "RTL (Arabic)" : "LTR (English)"}
-                </div>
-              </div>
-
-              {/* Sandbox Render Area */}
-              <div className="flex-1 p-3 md:p-5 bg-cream/20 overflow-hidden flex items-center justify-center min-h-0">
-                <div
-                  className={`transition-all duration-300 ${
-                    previewDevice === 'mobile'
-                      ? 'w-[340px] sm:w-[360px] max-w-full h-full max-h-[580px] rounded-[2.5rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden bg-white flex flex-col'
-                      : 'w-full max-w-2xl h-full rounded-2xl border border-primary/10 bg-white shadow-sm overflow-hidden flex flex-col'
-                  }`}
-                >
-                  {previewDevice === 'mobile' && (
-                    <div className="w-full bg-slate-900 py-1.5 flex items-center justify-center shrink-0">
-                      {/* Speaker / Dynamic Island notch */}
-                      <div className="w-20 h-3 bg-slate-950 rounded-full flex items-center justify-end px-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
-                      </div>
-                    </div>
-                  )}
-                  <iframe
-                    srcDoc={getBrandedHtml(gmailBody, gmailDir, templateStyle)}
-                    className="w-full flex-1 border-0"
-                    title="Branded Email Preview"
-                  />
-                  {previewDevice === 'mobile' && (
-                    <div className="w-full bg-white py-1 flex items-center justify-center shrink-0 border-t border-slate-100">
-                      {/* Home indicator bar */}
-                      <div className="w-24 h-1 bg-slate-300 rounded-full" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="px-6 py-2.5 border-t border-primary/5 bg-cream/20 flex items-center justify-end shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsPreviewOpen(false)}
-                  className="px-5 h-10 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center transition-all cursor-pointer"
-                >
-                  {isAr ? "رائع، إغلاق" : "Looks Good!"}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

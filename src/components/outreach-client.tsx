@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles } from "lucide-react";
+import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles, Laptop, Smartphone } from "lucide-react";
 import { sendCustomEmailAction } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
@@ -72,6 +72,7 @@ export function OutreachClient({ dict }: { dict: any }) {
   const [gmailStatus, setGmailStatus] = useState<"idle" | "sending">("idle");
   const [sendLogs, setSendLogs] = useState<{ email: string; status: "pending" | "success" | "error"; error?: string }[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
   const isCustom = selectedPreset === "custom";
   const activePreset = SENDER_PRESETS.find(p => p.id === selectedPreset);
@@ -240,45 +241,48 @@ export function OutreachClient({ dict }: { dict: any }) {
         <html dir="${dir}">
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #f1f5f9; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #f1f5f9; -webkit-text-size-adjust: 100%; }
               .heading { font-weight: 800; }
               .email-wrapper { width: 100%; background-color: #f1f5f9; padding: 32px 16px; box-sizing: border-box; }
               .email-card { max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; }
+              .email-header { padding: 24px 30px; }
               .email-body { padding: 38px 32px; text-align: ${isRtl ? 'right' : 'left'}; color: #334155; font-size: 15px; line-height: 1.8; }
+              .email-footer { padding: 26px 32px; }
               .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
               .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
               .email-body li { margin: 0.35em 0; }
               .email-body strong { font-weight: 700; color: #0f172a; }
               .email-body p { margin: 0 0 0.85em 0; }
+
+              @media only screen and (max-width: 600px) {
+                .email-wrapper { padding: 8px 4px !important; }
+                .email-card { border-radius: 14px !important; max-width: 100% !important; }
+                .email-header { padding: 18px 16px !important; }
+                .email-body { padding: 24px 18px !important; font-size: 15px !important; line-height: 1.75 !important; }
+                .email-footer { padding: 20px 18px !important; }
+                .header-title { font-size: 17px !important; }
+                .header-sub { font-size: 9px !important; }
+                .header-badge { font-size: 8px !important; padding: 4px 8px !important; }
+              }
             </style>
           </head>
           <body>
             <div class="email-wrapper">
               <div class="email-card">
                 <!-- Corporate Header -->
-                <div style="padding: 24px 30px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <div class="email-header" style="padding: 22px 28px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
+                  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
                     <tr>
-                      <td align="${isRtl ? 'right' : 'left'}" valign="middle">
-                        <table cellpadding="0" cellspacing="0" border="0">
-                          <tr>
-                            <td valign="middle" style="padding-${isRtl ? 'left' : 'right'}: 14px;">
-                              <img src="/icon.png" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0;">
-                            </td>
-                            <td valign="middle">
-                              <div class="heading" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
-                              <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;">
-                                ${isRtl ? 'الإدارة والعمليات' : 'Management & Operations'}
-                              </div>
-                            </td>
-                          </tr>
-                        </table>
+                      <td valign="middle" style="width: 44px; padding-${isRtl ? 'left' : 'right'}: 14px;">
+                        <img src="/icon.png" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0;">
                       </td>
-                      <td align="${isRtl ? 'left' : 'right'}" valign="middle">
-                        <span style="display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #da7b5a; background-color: rgba(218, 123, 90, 0.15); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(218, 123, 90, 0.3);">
-                          ${isRtl ? 'اتصال رسمي' : 'Official Notice'}
-                        </span>
+                      <td valign="middle" align="${isRtl ? 'right' : 'left'}">
+                        <div class="heading header-title" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
+                        <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 3px;">
+                          ${isRtl ? 'الإدارة والعمليات • إشعار رسمي' : 'Management & Operations • Official Notice'}
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -290,7 +294,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                 </div>
 
                 <!-- Corporate Signature & Footer -->
-                <div style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isRtl ? 'right' : 'left'};">
+                <div class="email-footer" style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isRtl ? 'right' : 'left'};">
                   <div style="margin-bottom: 16px;">
                     <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${effectiveSenderName}</div>
                     <div style="font-size: 12px; color: #64748b; font-family: monospace; margin-top: 2px;">${effectiveSenderEmail}</div>
@@ -318,20 +322,26 @@ export function OutreachClient({ dict }: { dict: any }) {
         <html dir="${dir}">
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #ffffff; }
-              .email-wrapper { max-width: 580px; width: 100%; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; text-align: ${isRtl ? 'right' : 'left'}; color: #1f2937; }
-              .email-body { font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 35px; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #ffffff; -webkit-text-size-adjust: 100%; }
+              .email-wrapper { max-width: 580px; width: 100%; margin: 0 auto; padding: 36px 22px; box-sizing: border-box; text-align: ${isRtl ? 'right' : 'left'}; color: #1f2937; }
+              .email-body { font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 32px; }
               .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
               .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
               .email-body li { margin: 0.35em 0; }
               .email-body strong { font-weight: 700; color: #111827; }
               .email-body p { margin: 0 0 0.85em 0; }
+
+              @media only screen and (max-width: 600px) {
+                .email-wrapper { padding: 18px 14px !important; }
+                .email-body { font-size: 15px !important; line-height: 1.75 !important; margin-bottom: 24px !important; }
+              }
             </style>
           </head>
           <body>
             <div class="email-wrapper">
-              <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 30px;">
+              <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 28px;">
                 <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: #0f172a;">Giftisan</span>
                 <span style="font-size: 11px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-${isRtl ? 'right' : 'left'}: 12px;">
                   ${isRtl ? 'المكتب التنفيذي' : 'Executive Office'}
@@ -356,32 +366,46 @@ export function OutreachClient({ dict }: { dict: any }) {
       <html dir="${dir}">
         <head>
           <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #fcf9f1; }
+            body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #fcf9f1; -webkit-text-size-adjust: 100%; }
             .heading { font-weight: bold; }
-            .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 30px; box-sizing: border-box; }
-            .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
-            .email-body { padding: 40px; text-align: ${isRtl ? 'right' : 'left'}; color: #4b5563; font-size: 16px; line-height: 1.8; }
-            .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.5em 0; }
-            .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.5em 0; }
-            .email-body li { margin: 0.25em 0; }
-            .email-body strong { font-weight: 700; }
-            .email-body p { margin: 0 0 0.75em 0; }
+            .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 32px 16px; box-sizing: border-box; }
+            .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 14px 36px rgba(0,0,0,0.05); overflow: hidden; }
+            .email-header { text-align: center; padding: 36px 24px 28px 24px; background-color: #064e3b; }
+            .email-body { padding: 38px 32px; text-align: ${isRtl ? 'right' : 'left'}; color: #4b5563; font-size: 15px; line-height: 1.8; }
+            .email-footer { text-align: center; padding: 32px 24px; border-top: 1px solid rgba(0,0,0,0.05); background-color: #ffffff; }
+            .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+            .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+            .email-body li { margin: 0.35em 0; }
+            .email-body strong { font-weight: 700; color: #111827; }
+            .email-body p { margin: 0 0 0.85em 0; }
+
+            @media only screen and (max-width: 600px) {
+              .email-wrapper { padding: 8px 4px !important; }
+              .email-card { border-radius: 14px !important; max-width: 100% !important; }
+              .email-header { padding: 24px 16px 20px 16px !important; }
+              .email-body { padding: 24px 18px !important; font-size: 15px !important; line-height: 1.75 !important; }
+              .email-footer { padding: 22px 16px !important; }
+              .header-logo { width: 44px !important; height: 44px !important; margin-bottom: 8px !important; }
+              .header-title { font-size: 22px !important; }
+              .header-sub { font-size: 9px !important; }
+            }
           </style>
         </head>
         <body>
           <div class="email-wrapper">
             <div class="email-card">
-              <div style="text-align: center; padding: 40px 20px 30px 20px; background-color: #064e3b; border-radius: 24px 24px 0 0;">
-                <img src="/icon.png" alt="Giftisan" width="56" height="56" align="center" style="display: block; margin: 0 auto 14px auto; border-radius: 12px; border: 0; outline: none;">
-                <div class="heading" style="font-size: 26px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
-                <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 5px; text-align: center;">Handcrafted Mastery</div>
+              <div class="email-header">
+                <img src="/icon.png" alt="Giftisan" width="54" height="54" class="header-logo" align="center" style="display: block; margin: 0 auto 12px auto; border-radius: 12px; border: 0; outline: none;">
+                <div class="heading header-title" style="font-size: 26px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
+                <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 4px; text-align: center;">Handcrafted Mastery</div>
               </div>
               <div class="email-body">
                 ${bodyHtml}
               </div>
-              <div style="text-align: center; padding: 40px 20px; border-top: 1px solid rgba(0,0,0,0.05); background-color: #ffffff; border-radius: 0 0 24px 24px;">
-                <p style="color: #9ca3af; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; margin-top: 0;">Proudly Based in Egypt • Supporting Local Artisans</p>
+              <div class="email-footer">
+                <p style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; margin-top: 0;">Proudly Based in Egypt • Supporting Local Artisans</p>
                 <p style="color: #064e3b; font-weight: bold; font-size: 14px; margin: 0;">${effectiveSenderName}</p>
                 ${effectiveSenderEmail ? `<p style="color: #9ca3af; font-size: 11px; margin: 4px 0 0 0; font-family: monospace;">${effectiveSenderEmail}</p>` : ""}
               </div>
@@ -881,10 +905,10 @@ export function OutreachClient({ dict }: { dict: any }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="relative bg-white rounded-[2.5rem] w-full max-w-4xl h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
+              className="relative bg-white rounded-[2.5rem] w-full max-w-4xl h-[94vh] max-h-[880px] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
             >
               {/* Header */}
-              <div className="px-6 py-4 border-b border-primary/5 bg-cream/40 flex items-center justify-between">
+              <div className="px-6 py-3 border-b border-primary/5 bg-cream/40 flex items-center justify-between shrink-0">
                 <div>
                   <h3 className="font-heading font-black text-primary text-base flex items-center gap-2">
                     {isAr ? "معاينة البريد الإلكتروني" : "Email Sandbox Preview"}
@@ -896,17 +920,47 @@ export function OutreachClient({ dict }: { dict: any }) {
                     {isAr ? "شكل الرسالة النهائي كما سيصل في صندوق الوارد" : "Real-time client view of the formatted email template"}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsPreviewOpen(false)}
-                  className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-3">
+                  {/* Device Toggle */}
+                  <div className="flex items-center p-1 bg-white border border-primary/10 rounded-xl shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('desktop')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        previewDevice === 'desktop'
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-primary/60 hover:text-primary'
+                      }`}
+                    >
+                      <Laptop className="w-3.5 h-3.5" />
+                      <span>{isAr ? "كمبيوتر" : "Desktop"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('mobile')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        previewDevice === 'mobile'
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-primary/60 hover:text-primary'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span>{isAr ? "موبايل" : "Phone"}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPreviewOpen(false)}
+                    className="w-9 h-9 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Subject & Sender Info bar */}
-              <div className="px-8 py-3 bg-cream/10 border-b border-primary/5 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-primary/60 font-bold">
+              <div className="px-6 py-2 bg-cream/10 border-b border-primary/5 flex flex-wrap items-center gap-y-1.5 gap-x-5 text-xs text-primary/60 font-bold shrink-0">
                 <div>
                   <span className="text-primary/40 mr-1.5">{isAr ? "من:" : "From:"}</span>
                   <span className="text-primary font-mono">{effectiveSenderName} &lt;{effectiveSenderEmail}&gt;</span>
@@ -927,20 +981,42 @@ export function OutreachClient({ dict }: { dict: any }) {
               </div>
 
               {/* Sandbox Render Area */}
-              <div className="flex-1 p-6 md:p-8 bg-cream/20 overflow-hidden">
-                <iframe
-                  srcDoc={getBrandedHtml(gmailBody, gmailDir, templateStyle)}
-                  className="w-full h-full border border-primary/5 rounded-3xl bg-white shadow-inner"
-                  title="Branded Email Preview"
-                />
+              <div className="flex-1 p-3 md:p-5 bg-cream/20 overflow-hidden flex items-center justify-center min-h-0">
+                <div
+                  className={`transition-all duration-300 ${
+                    previewDevice === 'mobile'
+                      ? 'w-[340px] sm:w-[360px] max-w-full h-full max-h-[580px] rounded-[2.5rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden bg-white flex flex-col'
+                      : 'w-full max-w-2xl h-full rounded-2xl border border-primary/10 bg-white shadow-sm overflow-hidden flex flex-col'
+                  }`}
+                >
+                  {previewDevice === 'mobile' && (
+                    <div className="w-full bg-slate-900 py-1.5 flex items-center justify-center shrink-0">
+                      {/* Speaker / Dynamic Island notch */}
+                      <div className="w-20 h-3 bg-slate-950 rounded-full flex items-center justify-end px-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+                      </div>
+                    </div>
+                  )}
+                  <iframe
+                    srcDoc={getBrandedHtml(gmailBody, gmailDir, templateStyle)}
+                    className="w-full flex-1 border-0"
+                    title="Branded Email Preview"
+                  />
+                  {previewDevice === 'mobile' && (
+                    <div className="w-full bg-white py-1 flex items-center justify-center shrink-0 border-t border-slate-100">
+                      {/* Home indicator bar */}
+                      <div className="w-24 h-1 bg-slate-300 rounded-full" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="px-6 py-4 border-t border-primary/5 bg-cream/20 flex items-center justify-end">
+              <div className="px-6 py-2.5 border-t border-primary/5 bg-cream/20 flex items-center justify-end shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsPreviewOpen(false)}
-                  className="px-6 h-12 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+                  className="px-5 h-10 bg-primary hover:bg-primary-light text-white font-heading font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center transition-all cursor-pointer"
                 >
                   {isAr ? "رائع، إغلاق" : "Looks Good!"}
                 </button>

@@ -77,32 +77,40 @@ const CREAM_BG = "#fcf9f1";
 const isDevOnly = () => process.env.NODE_ENV === "development" && process.env.FORCE_SEND_EMAIL !== "true";
 
 const emailStyles = `
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; }
+    body { font-family: Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; }
     .heading { font-family: Helvetica, Arial, sans-serif; font-weight: bold; }
-    .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 30px; box-sizing: border-box; }
-    .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
-    .email-body { padding: 40px; }
+    .email-wrapper { width: 100%; background-color: #f1f5f9; padding: 32px 16px; box-sizing: border-box; }
+    .email-card { max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; }
+    .email-header { padding: 24px 30px; }
+    .email-body { padding: 38px 32px; font-size: 15px; line-height: 1.8; }
+    .email-footer { padding: 26px 32px; }
+    
     @media only screen and (max-width: 600px) {
-      .email-wrapper { padding: 12px !important; }
-      .email-card { border-radius: 16px !important; }
-      .email-body { padding: 24px 20px !important; }
+      .email-wrapper { padding: 8px 4px !important; }
+      .email-card { border-radius: 14px !important; max-width: 100% !important; }
+      .email-header { padding: 20px 16px !important; }
+      .email-body { padding: 24px 18px !important; font-size: 15px !important; line-height: 1.75 !important; }
+      .email-footer { padding: 20px 18px !important; }
+      .header-title { font-size: 18px !important; }
+      .header-sub { font-size: 9px !important; }
+      .header-badge { font-size: 8px !important; padding: 4px 8px !important; }
     }
   </style>
 `;
 
 const getEmailHeader = () => `
-  ${emailStyles}
-  <div style="text-align: center; padding: 35px 20px 25px 20px; background-color: ${PRIMARY_COLOR}; border-radius: 24px 24px 0 0;">
+  <div class="email-header" style="text-align: center; padding: 35px 20px 25px 20px; background-color: ${PRIMARY_COLOR};">
     <img src="${LOGO_URL}" alt="Giftisan" width="52" height="52" align="center" style="display: block; margin: 0 auto 12px auto; border: 0; outline: none; border-radius: 6px;">
-    <div class="heading" style="font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
-    <div style="font-size: 10px; color: rgba(255,255,255,0.45); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 4px; text-align: center;">Handcrafted Mastery</div>
+    <div class="heading header-title" style="font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
+    <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.45); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 4px; text-align: center;">Handcrafted Mastery</div>
   </div>
 `;
 
 const getEmailFooter = (lang: 'ar' | 'en' = 'en') => `
-  <div style="text-align: center; padding: 35px 20px; border-top: 1px solid rgba(0,0,0,0.05);" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
-    <p style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">
+  <div class="email-footer" style="text-align: center; padding: 30px 20px; border-top: 1px solid rgba(0,0,0,0.05);" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
+    <p style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; margin-top: 0;">
       ${lang === 'ar' ? 'فريق جيفتيزان • ننطلق من مصر لدعم الحرفيين المحليين' : 'Proudly Based in Egypt • Supporting Local Artisans'}
     </p>
     <p style="color: #1a2c2c; font-weight: bold; font-size: 13px; margin: 0 0 15px 0;">
@@ -128,28 +136,17 @@ const wrapCorporateEmail = (content: string, lang: 'ar' | 'en' = 'en', senderNam
       <div class="email-card" style="max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};">
         
         <!-- Corporate Header -->
-        <div style="padding: 24px 30px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <div class="email-header" style="padding: 22px 28px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
+          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
             <tr>
-              <td align="${isAr ? 'right' : 'left'}" valign="middle">
-                <table cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td valign="middle" style="padding-${isAr ? 'left' : 'right'}: 14px;">
-                      <img src="${LOGO_URL}" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none;">
-                    </td>
-                    <td valign="middle">
-                      <div class="heading" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
-                      <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;">
-                        ${isAr ? 'الإدارة والعمليات' : 'Management & Operations'}
-                      </div>
-                    </td>
-                  </tr>
-                </table>
+              <td valign="middle" style="width: 44px; padding-${isAr ? 'left' : 'right'}: 14px;">
+                <img src="${LOGO_URL}" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none;">
               </td>
-              <td align="${isAr ? 'left' : 'right'}" valign="middle">
-                <span style="display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #da7b5a; background-color: rgba(218, 123, 90, 0.15); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(218, 123, 90, 0.3);">
-                  ${isAr ? 'اتصال رسمي' : 'Official Notice'}
-                </span>
+              <td valign="middle" align="${isAr ? 'right' : 'left'}">
+                <div class="heading header-title" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
+                <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 3px;">
+                  ${isAr ? 'الإدارة والعمليات • إشعار رسمي' : 'Management & Operations • Official Notice'}
+                </div>
               </td>
             </tr>
           </table>
@@ -161,7 +158,7 @@ const wrapCorporateEmail = (content: string, lang: 'ar' | 'en' = 'en', senderNam
         </div>
 
         <!-- Corporate Signature & Footer -->
-        <div style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isAr ? 'right' : 'left'};">
+        <div class="email-footer" style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isAr ? 'right' : 'left'};">
           <div style="margin-bottom: 16px;">
             <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${senderName}</div>
             <div style="font-size: 12px; color: #64748b; font-family: monospace; margin-top: 2px;">${senderEmail}</div>
@@ -186,7 +183,7 @@ const wrapMinimalEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName:
   const isAr = lang === 'ar';
   return `
     ${emailStyles}
-    <div style="background-color: #ffffff; padding: 40px 20px; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};" dir="${isAr ? 'rtl' : 'ltr'}">
+    <div class="email-wrapper" style="background-color: #ffffff; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};" dir="${isAr ? 'rtl' : 'ltr'}">
       <div style="max-width: 580px; width: 100%; margin: 0 auto; text-align: ${isAr ? 'right' : 'left'}; color: #1f2937;">
         
         <!-- Minimal Letter Header -->
@@ -204,7 +201,7 @@ const wrapMinimalEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName:
         </div>
 
         <!-- Body -->
-        <div style="font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 35px;">
+        <div class="email-body" style="color: #374151; margin-bottom: 35px; padding: 0;">
           ${content}
         </div>
 
@@ -237,10 +234,11 @@ const wrapEmail = (
   }
 
   return `
-    <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="${isAr ? 'rtl' : 'ltr'}">
-      <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
+    ${emailStyles}
+    <div class="email-wrapper" style="background-color: ${CREAM_BG};" dir="${isAr ? 'rtl' : 'ltr'}">
+      <div class="email-card" style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
         ${getEmailHeader()}
-        <div class="email-body" style="padding: 35px 30px; text-align: ${isAr ? 'right' : 'left'};">
+        <div class="email-body" style="text-align: ${isAr ? 'right' : 'left'};">
           ${content}
         </div>
         ${getEmailFooter(lang)}

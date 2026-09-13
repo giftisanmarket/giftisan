@@ -3430,16 +3430,42 @@ export async function sendOutreachAction(data: { name: string; email: string; pr
   }
 }
 
-export async function sendCustomEmailAction(data: { to: string; subject: string; body: string; dir: 'ltr' | 'rtl' }) {
+export async function sendCustomEmailAction(data: {
+  to: string;
+  subject: string;
+  body: string;
+  dir: 'ltr' | 'rtl';
+  fromName?: string;
+  fromEmail?: string;
+  replyTo?: string;
+  templateStyle?: 'corporate' | 'artisan' | 'minimal';
+}) {
   try {
     const session = await auth();
     if (session?.user?.role !== "ADMIN") {
       return { success: false, error: "Unauthorized" };
     }
 
-    const result = await sendCustomEmail(data.to, data.subject, data.body, data.dir);
+    let from: string | undefined;
+    const email = data.fromEmail?.trim();
+    let name = data.fromName?.trim() || "Giftisan";
+    name = name.replace(/<[^>]*>/g, "").trim() || "Giftisan";
+
+    if (email) {
+      from = `${name} <${email}>`;
+    }
+
+    const replyTo = data.replyTo?.trim() || email || undefined;
+
+    const result = await sendCustomEmail(data.to, data.subject, data.body, data.dir, {
+      from,
+      replyTo,
+      templateStyle: data.templateStyle || 'corporate',
+      senderName: name,
+      senderEmail: email,
+    });
     if (!result.success) {
-      return { success: false, error: "Failed to send email via Resend" };
+      return { success: false, error: "Failed to send email via SMTP" };
     }
     return { success: true };
   } catch (error) {

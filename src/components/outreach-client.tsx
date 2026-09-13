@@ -1,15 +1,70 @@
 "use client";
 
 import { useState } from "react";
-import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X } from "lucide-react";
+import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles } from "lucide-react";
 import { sendCustomEmailAction } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { motion, AnimatePresence } from "framer-motion";
 
+const SENDER_PRESETS = [
+  {
+    id: "management",
+    nameEn: "Giftisan Management",
+    nameAr: "إدارة جيفتيزان",
+    email: "management@giftisan.com",
+    badgeEn: "Executive & Meetings",
+    badgeAr: "الإدارة والاجتماعات",
+  },
+  {
+    id: "admin",
+    nameEn: "Giftisan Admin",
+    nameAr: "مسؤول جيفتيزان",
+    email: "admin@giftisan.com",
+    badgeEn: "Platform & Ops",
+    badgeAr: "إدارة النظام والعمليات",
+  },
+  {
+    id: "team",
+    nameEn: "Giftisan Team",
+    nameAr: "فريق جيفتيزان",
+    email: "team@giftisan.com",
+    badgeEn: "Internal & Staff",
+    badgeAr: "فريق العمل والتواصل",
+  },
+  {
+    id: "support",
+    nameEn: "Giftisan Support",
+    nameAr: "دعم جيفتيزان",
+    email: "support@giftisan.com",
+    badgeEn: "Customer Care",
+    badgeAr: "خدمة العملاء",
+  },
+  {
+    id: "custom",
+    nameEn: "Custom Sender",
+    nameAr: "مرسل مخصص",
+    email: "",
+    badgeEn: "Custom Email",
+    badgeAr: "اسم وبريد مخصص",
+  },
+];
+
+type TemplateStyle = 'corporate' | 'minimal' | 'artisan';
+
 export function OutreachClient({ dict }: { dict: any }) {
   const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
 
+  // Sender state
+  const [selectedPreset, setSelectedPreset] = useState<string>("management");
+  const [customSenderName, setCustomSenderName] = useState("");
+  const [customSenderEmail, setCustomSenderEmail] = useState("");
+  const [customReplyTo, setCustomReplyTo] = useState("");
+
+  // Template style state (Default to corporate for official/meeting/hiring communications)
+  const [templateStyle, setTemplateStyle] = useState<TemplateStyle>("corporate");
+
+  // Email form state
   const [gmailTo, setGmailTo] = useState("");
   const [gmailSubject, setGmailSubject] = useState("");
   const [gmailBody, setGmailBody] = useState("");
@@ -18,66 +73,317 @@ export function OutreachClient({ dict }: { dict: any }) {
   const [sendLogs, setSendLogs] = useState<{ email: string; status: "pending" | "success" | "error"; error?: string }[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+  const isCustom = selectedPreset === "custom";
+  const activePreset = SENDER_PRESETS.find(p => p.id === selectedPreset);
+
+  const rawCustomName = customSenderName.replace(/<[^>]*>/g, "").trim();
+  const effectiveSenderName = isCustom
+    ? (rawCustomName || (isAr ? "إدارة جيفتيزان" : "Giftisan Management"))
+    : ((isAr ? activePreset?.nameAr : activePreset?.nameEn) || "Giftisan Management");
+
+  const effectiveSenderEmail = isCustom
+    ? customSenderEmail.trim()
+    : (activePreset?.email || "management@giftisan.com");
+
+  const effectiveReplyTo = isCustom && customReplyTo.trim()
+    ? customReplyTo.trim()
+    : effectiveSenderEmail;
+
   const isEmpty = (html: string) => {
     const stripped = html.replace(/<[^>]*>/g, "").trim();
     return stripped.length === 0;
   };
 
-  const getBrandedHtml = (bodyHtml: string, dir: 'ltr' | 'rtl') => {
-    const primaryColor = "#064e3b";
-    const accentColor = "#da7b5a";
-    const creamBg = "#fcf9f1";
-    
-    const emailStyles = `
-      <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: ${creamBg}; }
-        .heading { font-family: system-ui, sans-serif; font-weight: bold; }
-        .email-wrapper { width: 100%; background-color: ${creamBg}; padding: 30px; box-sizing: border-box; }
-        .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
-        .email-body { padding: 40px; text-align: ${dir === 'rtl' ? 'right' : 'left'}; color: #4b5563; font-size: 16px; line-height: 1.8; }
-        
-        /* TipTap rich text styles mapping */
-        .email-body ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
-        .email-body ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
-        .email-body li { margin: 0.25em 0; }
-        .email-body strong { font-weight: 700; }
-        .email-body em { font-style: italic; }
-        .email-body u { text-decoration: underline; }
-        .email-body s { text-decoration: line-through; }
-        .email-body p { margin: 0 0 0.75em 0; }
-        
-        @media only screen and (max-width: 600px) {
-          .email-wrapper { padding: 12px !important; }
-          .email-card { border-radius: 16px !important; }
-          .email-body { padding: 24px 20px !important; }
-        }
-      </style>
-    `;
+  // Quick 1-Click Starter Drafts
+  const applyQuickTemplate = (type: 'meeting' | 'interview' | 'memo' | 'artisan') => {
+    if (type === 'meeting') {
+      setTemplateStyle('corporate');
+      if (isAr) {
+        setGmailDir('rtl');
+        setGmailSubject('دعوة لاجتماع عمل: المتابعة والتنسيق الاستراتيجي | إدارة جيفتيزان');
+        setGmailBody(`
+          <p>أهلاً بك،</p>
+          <p>يسرنا دعوتك لحضور اجتماع عمل لمناقشة خطط العمل الحالية، مراجعة الأهداف التشغيلية، ومواءمة الأولويات للفترة القادمة.</p>
+          <p><strong>تفاصيل الاجتماع:</strong></p>
+          <ul>
+            <li><strong>التاريخ والوقت:</strong> [مثال: الخميس القادم الساعة 11:00 صباحاً]</li>
+            <li><strong>المكان / الرابط:</strong> [رابط Google Meet / Zoom أو قاعة الاجتماعات]</li>
+            <li><strong>المدة المتوقعة:</strong> 45 دقيقة</li>
+            <li><strong>جدول الأعمال:</strong> مراجعة خطة المبيعات والخطوات التنفيذية القادمة</li>
+          </ul>
+          <p>يرجى تأكيد إمكانية حضورك عبر الرد على هذه الرسالة.</p>
+          <p>مع خالص التحيات والتقدير،</p>
+        `);
+      } else {
+        setGmailDir('ltr');
+        setGmailSubject('Meeting Invitation: Strategic Alignment & Review | Giftisan Management');
+        setGmailBody(`
+          <p>Dear Colleague,</p>
+          <p>You are cordially invited to an executive alignment meeting to review ongoing objectives, strategic milestones, and operational priorities.</p>
+          <p><strong>Meeting Details:</strong></p>
+          <ul>
+            <li><strong>Date & Time:</strong> [e.g., Thursday, Oct 15 at 11:00 AM]</li>
+            <li><strong>Location / Link:</strong> [Google Meet / Zoom Link or Conference Room]</li>
+            <li><strong>Duration:</strong> 45 minutes</li>
+            <li><strong>Agenda:</strong> Sales performance review and operational action items</li>
+          </ul>
+          <p>Please confirm your attendance by replying to this email.</p>
+          <p>Best regards,</p>
+        `);
+      }
+      toast.success(isAr ? 'تم تطبيق قالب دعوة الاجتماع' : 'Meeting invite template applied');
+    } else if (type === 'interview') {
+      setTemplateStyle('corporate');
+      if (isAr) {
+        setGmailDir('rtl');
+        setGmailSubject('دعوة لمقابلة عمل: وظيفة [اسم الوظيفة] في جيفتيزان');
+        setGmailBody(`
+          <p>عزيزي / عزيزتي [اسم المرشح]،</p>
+          <p>نشكرك على اهتمامك بالانضمام إلى فريق عمل <strong>جيفتيزان</strong>. لقد اطلعنا باهتمام على سيرتك الذاتية وخبراتك، ويسعدنا دعوتك لإجراء مقابلة عمل بخصوص وظيفة <strong>[اسم الوظيفة]</strong>.</p>
+          <p><strong>تفاصيل المقابلة:</strong></p>
+          <ul>
+            <li><strong>المسمى الوظيفي:</strong> [اسم الوظيفة]</li>
+            <li><strong>طريقة المقابلة:</strong> مكالمة فيديو عبر Google Meet / بمقر الشركة</li>
+            <li><strong>المواعيد المقترحة:</strong> [مثال: غداً الساعة 2:00 ظهراً أو 4:00 عصراً]</li>
+            <li><strong>المدة المتوقعة:</strong> حوالي 30 إلى 45 دقيقة</li>
+          </ul>
+          <p>يرجى تأكيد الموعد الأنسب لك من بين الخيارات المقترحة عبر الرد على هذه الرسالة، أو اقتراح موعد بديل إذا لزم الأمر.</p>
+          <p>نتطلع للتحدث معك قريباً.</p>
+          <p>مع أطيب التحيات،</p>
+        `);
+      } else {
+        setGmailDir('ltr');
+        setGmailSubject('Interview Invitation: [Position Name] Role at Giftisan');
+        setGmailBody(`
+          <p>Dear [Candidate Name],</p>
+          <p>Thank you for your interest in joining <strong>Giftisan</strong>. We were very impressed by your qualifications and background, and we would like to invite you for an interview regarding the <strong>[Position Name]</strong> position.</p>
+          <p><strong>Interview Details:</strong></p>
+          <ul>
+            <li><strong>Position:</strong> [Position Name]</li>
+            <li><strong>Format:</strong> Video Call (Google Meet) / On-site</li>
+            <li><strong>Proposed Slots:</strong> [e.g., Tomorrow at 2:00 PM or 4:00 PM]</li>
+            <li><strong>Duration:</strong> Approximately 30-45 minutes</li>
+          </ul>
+          <p>Please let us know which time slot works best for you by replying to this email, or suggest an alternative if needed.</p>
+          <p>We look forward to speaking with you.</p>
+          <p>Warm regards,</p>
+        `);
+      }
+      toast.success(isAr ? 'تم تطبيق قالب مقابلة العمل' : 'Hiring/Interview template applied');
+    } else if (type === 'memo') {
+      setTemplateStyle('corporate');
+      if (isAr) {
+        setGmailDir('rtl');
+        setGmailSubject('تعميم إداري: [موضوع التعميم] | إدارة جيفتيزان');
+        setGmailBody(`
+          <p>فريق العمل الأعزاء،</p>
+          <p>نود إحاطتكم علماً بهذا التحديث الإداري والتشغيلي بخصوص <strong>[موضوع التعميم]</strong>.</p>
+          <p><strong>أهم النقاط والتوجيهات:</strong></p>
+          <ul>
+            <li><strong>تاريخ السريان:</strong> [التاريخ]</li>
+            <li><strong>الإجراء المطلوب:</strong> [توضيح الإجراء المطلوب أو الإحاطة]</li>
+            <li><strong>التفاصيل:</strong> [اكتب التفاصيل هنا]</li>
+          </ul>
+          <p>في حال وجود أي استفسارات أو ملاحظات، يرجى التواصل معنا مباشرة.</p>
+          <p>شاكرين لكم حسن تعاونكم وتفانيكم المستمر،</p>
+        `);
+      } else {
+        setGmailDir('ltr');
+        setGmailSubject('Internal Announcement: [Topic / Update] | Giftisan Operations');
+        setGmailBody(`
+          <p>Dear Team,</p>
+          <p>Please find below an important operational update regarding <strong>[Topic / Subject]</strong>.</p>
+          <p><strong>Key Highlights:</strong></p>
+          <ul>
+            <li><strong>Effective Date:</strong> [Date]</li>
+            <li><strong>Action Required:</strong> [Brief note or "For your information"]</li>
+            <li><strong>Details:</strong> [Add specific details here]</li>
+          </ul>
+          <p>If you have questions or require any clarification, please do not hesitate to reach out.</p>
+          <p>Thank you for your ongoing dedication and efforts,</p>
+        `);
+      }
+      toast.success(isAr ? 'تم تطبيق قالب التعميم الإداري' : 'Team memo template applied');
+    } else if (type === 'artisan') {
+      setTemplateStyle('artisan');
+      if (isAr) {
+        setGmailDir('rtl');
+        setGmailSubject('دعوة للانضمام إلى نخبة حرفيي جيفتيزان');
+        setGmailBody(`
+          <p>أهلاً بك،</p>
+          <p>لقد لفتت إبداعاتكم ومنتجاتكم اليدوية الراقية انتباه فريق التقييم لدينا في <strong>جيفتيزان</strong>.</p>
+          <p>نحن منصة متخصصة تسعى لتمكين الحرفيين المحليين وإيصال إبداعاتهم إلى جمهور يقدر الفن والأصالة. يسرنا دعوتكم لافتتاح استوديو خاص بكم وعرض منتجاتكم على المنصة.</p>
+          <p>يسعدنا ترتيب جلسة تعريفية سريعة للإجابة عن أي استفسار.</p>
+          <p>دمتم مبدعين،</p>
+        `);
+      } else {
+        setGmailDir('ltr');
+        setGmailSubject('Exclusive Invitation to Showcase on Giftisan');
+        setGmailBody(`
+          <p>Hello,</p>
+          <p>Our curation team at <strong>Giftisan</strong> was truly captivated by your exceptional craftsmanship and artistic creations.</p>
+          <p>We are a dedicated marketplace celebrating authentic craftsmanship and connecting passionate artisans with collectors who appreciate quality. We would be thrilled to invite you to establish your own studio on our platform.</p>
+          <p>Let us know if you would like a brief walkthrough to answer any questions.</p>
+          <p>Warmest regards,</p>
+        `);
+      }
+      toast.success(isAr ? 'تم تطبيق قالب دعوة الحرفيين' : 'Artisan outreach template applied');
+    }
+  };
 
+  const getBrandedHtml = (bodyHtml: string, dir: 'ltr' | 'rtl', style: TemplateStyle) => {
+    const isRtl = dir === 'rtl';
+
+    if (style === 'corporate') {
+      return `
+        <!DOCTYPE html>
+        <html dir="${dir}">
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #f1f5f9; }
+              .heading { font-weight: 800; }
+              .email-wrapper { width: 100%; background-color: #f1f5f9; padding: 32px 16px; box-sizing: border-box; }
+              .email-card { max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; }
+              .email-body { padding: 38px 32px; text-align: ${isRtl ? 'right' : 'left'}; color: #334155; font-size: 15px; line-height: 1.8; }
+              .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+              .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+              .email-body li { margin: 0.35em 0; }
+              .email-body strong { font-weight: 700; color: #0f172a; }
+              .email-body p { margin: 0 0 0.85em 0; }
+            </style>
+          </head>
+          <body>
+            <div class="email-wrapper">
+              <div class="email-card">
+                <!-- Corporate Header -->
+                <div style="padding: 24px 30px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td align="${isRtl ? 'right' : 'left'}" valign="middle">
+                        <table cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td valign="middle" style="padding-${isRtl ? 'left' : 'right'}: 14px;">
+                              <img src="/icon.png" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0;">
+                            </td>
+                            <td valign="middle">
+                              <div class="heading" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
+                              <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;">
+                                ${isRtl ? 'الإدارة والعمليات' : 'Management & Operations'}
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td align="${isRtl ? 'left' : 'right'}" valign="middle">
+                        <span style="display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #da7b5a; background-color: rgba(218, 123, 90, 0.15); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(218, 123, 90, 0.3);">
+                          ${isRtl ? 'اتصال رسمي' : 'Official Notice'}
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Corporate Body -->
+                <div class="email-body">
+                  ${bodyHtml}
+                </div>
+
+                <!-- Corporate Signature & Footer -->
+                <div style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isRtl ? 'right' : 'left'};">
+                  <div style="margin-bottom: 16px;">
+                    <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${effectiveSenderName}</div>
+                    <div style="font-size: 12px; color: #64748b; font-family: monospace; margin-top: 2px;">${effectiveSenderEmail}</div>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 3px; font-weight: 600;">
+                      ${isRtl ? 'المكتب الإداري • القاهرة، مصر' : 'Giftisan Corporate Office • Cairo, Egypt'}
+                    </div>
+                  </div>
+                  
+                  <div style="padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; line-height: 1.5;">
+                    ${isRtl 
+                      ? 'تنبيه: هذه الرسالة اتصال إداري رسمي وسري مخصص فقط للمرسل إليه. إذا وصلتك بالخطأ، يرجى إبلاغ المرسل وحذفها.'
+                      : 'CONFIDENTIALITY NOTICE: This message is an official corporate communication intended exclusively for the designated recipient. If received in error, please notify the sender and delete immediately.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+    }
+
+    if (style === 'minimal') {
+      return `
+        <!DOCTYPE html>
+        <html dir="${dir}">
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #ffffff; }
+              .email-wrapper { max-width: 580px; width: 100%; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; text-align: ${isRtl ? 'right' : 'left'}; color: #1f2937; }
+              .email-body { font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 35px; }
+              .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+              .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.6em 0; }
+              .email-body li { margin: 0.35em 0; }
+              .email-body strong { font-weight: 700; color: #111827; }
+              .email-body p { margin: 0 0 0.85em 0; }
+            </style>
+          </head>
+          <body>
+            <div class="email-wrapper">
+              <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 30px;">
+                <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: #0f172a;">Giftisan</span>
+                <span style="font-size: 11px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-${isRtl ? 'right' : 'left'}: 12px;">
+                  ${isRtl ? 'المكتب التنفيذي' : 'Executive Office'}
+                </span>
+              </div>
+              <div class="email-body">
+                ${bodyHtml}
+              </div>
+              <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                <div style="font-size: 13px; font-weight: 800; color: #111827;">${effectiveSenderName}</div>
+                <div style="font-size: 12px; color: #6b7280; font-family: monospace; margin-top: 2px;">${effectiveSenderEmail}</div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+    }
+
+    // Default Artisan / Marketplace template
     return `
       <!DOCTYPE html>
       <html dir="${dir}">
         <head>
           <meta charset="utf-8">
-          ${emailStyles}
+          <style>
+            body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #fcf9f1; }
+            .heading { font-weight: bold; }
+            .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 30px; box-sizing: border-box; }
+            .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
+            .email-body { padding: 40px; text-align: ${isRtl ? 'right' : 'left'}; color: #4b5563; font-size: 16px; line-height: 1.8; }
+            .email-body ul { list-style-type: disc; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.5em 0; }
+            .email-body ol { list-style-type: decimal; padding-${isRtl ? 'right' : 'left'}: 1.5em; margin: 0.5em 0; }
+            .email-body li { margin: 0.25em 0; }
+            .email-body strong { font-weight: 700; }
+            .email-body p { margin: 0 0 0.75em 0; }
+          </style>
         </head>
         <body>
           <div class="email-wrapper">
             <div class="email-card">
-              <!-- Header -->
-              <div style="text-align: center; padding: 40px 20px 30px 20px; background-color: ${primaryColor}; border-radius: 24px 24px 0 0;">
+              <div style="text-align: center; padding: 40px 20px 30px 20px; background-color: #064e3b; border-radius: 24px 24px 0 0;">
                 <img src="/icon.png" alt="Giftisan" width="56" height="56" align="center" style="display: block; margin: 0 auto 14px auto; border-radius: 12px; border: 0; outline: none;">
                 <div class="heading" style="font-size: 26px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
                 <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 5px; text-align: center;">Handcrafted Mastery</div>
               </div>
-              <!-- Body -->
               <div class="email-body">
                 ${bodyHtml}
               </div>
-              <!-- Footer -->
               <div style="text-align: center; padding: 40px 20px; border-top: 1px solid rgba(0,0,0,0.05); background-color: #ffffff; border-radius: 0 0 24px 24px;">
-                <p style="color: #9ca3af; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; margin-top: 0;">Proudly Based in Egypt • Supporting Local Artisans</p>
-                <p style="color: ${primaryColor}; font-weight: bold; font-size: 14px; margin: 0;">The Giftisan Team</p>
+                <p style="color: #9ca3af; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; margin-top: 0;">Proudly Based in Egypt • Supporting Local Artisans</p>
+                <p style="color: #064e3b; font-weight: bold; font-size: 14px; margin: 0;">${effectiveSenderName}</p>
+                ${effectiveSenderEmail ? `<p style="color: #9ca3af; font-size: 11px; margin: 4px 0 0 0; font-family: monospace;">${effectiveSenderEmail}</p>` : ""}
               </div>
             </div>
           </div>
@@ -88,6 +394,13 @@ export function OutreachClient({ dict }: { dict: any }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isCustom) {
+      if (!customSenderEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customSenderEmail.trim())) {
+        toast.error(isAr ? "برجاء إدخال بريد إلكتروني صالح للمرسل" : "Please enter a valid sender email address");
+        return;
+      }
+    }
 
     if (!gmailTo.trim() || !gmailSubject.trim() || isEmpty(gmailBody)) {
       toast.error(isAr ? "برجاء ملء جميع الحقول المطلوبة" : "Please fill in all required fields");
@@ -116,6 +429,10 @@ export function OutreachClient({ dict }: { dict: any }) {
           subject: gmailSubject,
           body: gmailBody,
           dir: gmailDir,
+          fromName: effectiveSenderName,
+          fromEmail: effectiveSenderEmail,
+          replyTo: effectiveReplyTo,
+          templateStyle,
         });
 
         if (res.success) {
@@ -133,8 +450,6 @@ export function OutreachClient({ dict }: { dict: any }) {
 
     if (successCount === emailsList.length) {
       toast.success(isAr ? `تم إرسال جميع الرسائل (${successCount}) بنجاح!` : `All ${successCount} emails sent successfully!`);
-      
-      // Auto open preview modal on successful test send
       setIsPreviewOpen(true);
     } else {
       toast.error(isAr ? `تم إرسال ${successCount} من أصل ${emailsList.length} رسائل` : `Sent ${successCount} of ${emailsList.length} emails`);
@@ -156,14 +471,194 @@ export function OutreachClient({ dict }: { dict: any }) {
                 {isAr ? "إنشاء رسالة جديدة" : "New Message"}
               </h3>
               <p className="text-[10px] text-white/50 font-bold tracking-wider uppercase">
-                {isAr ? "عبر خدمة Resend — يمكنك إرسال لأكثر من عنوان" : "Powered by Resend — supports multiple recipients"}
+                {isAr ? "عبر خدمة البريد — يدعم قوالب إدارية واجتماعات واختيار المرسل" : "Giftisan Mailer — Executive, Meeting & Hiring communication"}
               </p>
             </div>
           </div>
 
           {/* Form */}
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
 
-          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5">
+            {/* Sender Identity Section */}
+            <div className="space-y-3 p-5 rounded-2xl bg-cream/30 border border-primary/5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-primary/70 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-accent" />
+                  {isAr ? "هوية المرسل (From)" : "Sender Identity (From)"}
+                </label>
+                {effectiveSenderEmail && (
+                  <span className="text-[11px] font-mono font-bold text-accent px-2.5 py-0.5 rounded-full bg-accent/10">
+                    {effectiveSenderName} &lt;{effectiveSenderEmail}&gt;
+                  </span>
+                )}
+              </div>
+
+              {/* Presets Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                {SENDER_PRESETS.map((preset) => {
+                  const isSelected = selectedPreset === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedPreset(preset.id);
+                        if (preset.id === "management" || preset.id === "admin" || preset.id === "team") {
+                          setTemplateStyle("corporate");
+                        }
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer ${
+                        isAr ? "text-right" : "text-left"
+                      } ${
+                        isSelected
+                          ? "bg-primary text-white border-primary shadow-md shadow-primary/10 scale-[1.01]"
+                          : "bg-white/80 hover:bg-white border-primary/5 hover:border-primary/15 text-primary"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className={`text-xs font-bold leading-tight ${isSelected ? "text-white" : "text-primary"}`}>
+                            {isAr ? preset.nameAr : preset.nameEn}
+                          </span>
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              isSelected ? "bg-accent" : "bg-primary/20"
+                            }`}
+                          />
+                        </div>
+                        <p className={`text-[10px] font-mono truncate ${isSelected ? "text-white/70" : "text-primary/50"}`}>
+                          {preset.email || (isAr ? "إدخال يدوي" : "Manual entry")}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-block mt-2 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
+                          isSelected
+                            ? "bg-white/15 text-white/90"
+                            : "bg-primary/5 text-primary/60"
+                        }`}
+                      >
+                        {isAr ? preset.badgeAr : preset.badgeEn}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Sender Fields */}
+              <AnimatePresence>
+                {isCustom && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden pt-3 border-t border-primary/10 space-y-3"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-primary/50 mb-1 block">
+                          {isAr ? "اسم المرسل المعروض (الاسم فقط)" : "Sender Display Name (Name only)"}
+                        </label>
+                        <input
+                          type="text"
+                          required={isCustom}
+                          value={customSenderName}
+                          onChange={(e) => setCustomSenderName(e.target.value)}
+                          placeholder={isAr ? "مثال: حازم | مدير المبيعات" : "e.g., Hazem | Sales Manager"}
+                          className="w-full h-11 px-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-medium text-primary text-xs"
+                          dir={isAr ? "rtl" : "ltr"}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-primary/50 mb-1 block">
+                          {isAr ? "عنوان بريد المرسل" : "Sender Email Address"}
+                        </label>
+                        <input
+                          type="email"
+                          required={isCustom}
+                          value={customSenderEmail}
+                          onChange={(e) => setCustomSenderEmail(e.target.value)}
+                          placeholder="management@giftisan.com"
+                          className="w-full h-11 px-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-mono text-primary text-xs"
+                          dir="ltr"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-primary/50 mb-1 block">
+                          {isAr ? "عنوان الرد (اختياري)" : "Reply-To Email (Optional)"}
+                        </label>
+                        <input
+                          type="email"
+                          value={customReplyTo}
+                          onChange={(e) => setCustomReplyTo(e.target.value)}
+                          placeholder={customSenderEmail || "support@giftisan.com"}
+                          className="w-full h-11 px-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-mono text-primary text-xs"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-accent font-medium flex items-center gap-1.5">
+                      {isAr
+                        ? "ملاحظة: تأكد من أن النطاق (@giftisan.com) معتمد في Brevo SMTP لضمان وصول الرسالة وتفادي صندوق البريد المزعج."
+                        : "Note: For maximum deliverability via Brevo SMTP, use an address on your verified domain (@giftisan.com)."}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Quick Draft Templates Bar */}
+            <div className="space-y-2 p-4 rounded-2xl bg-cream/20 border border-primary/5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-accent" />
+                  {isAr ? "قوالب سريعة بنقرة واحدة" : "1-Click Quick Draft Templates"}
+                </span>
+                <span className="text-[10px] text-primary/40 font-medium">
+                  {isAr ? "انقر لتعبئة نموذج فوري" : "Click to auto-populate draft"}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => applyQuickTemplate('meeting')}
+                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-accent" />
+                  <span>{isAr ? "دعوة لاجتماع عمل" : "Meeting Invitation"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => applyQuickTemplate('interview')}
+                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                >
+                  <Briefcase className="w-3.5 h-3.5 text-blue-600" />
+                  <span>{isAr ? "مقابلة وتوظيف" : "Hiring & Interview"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => applyQuickTemplate('memo')}
+                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                >
+                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isAr ? "تعميم إداري للموظفين" : "Internal Memo"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => applyQuickTemplate('artisan')}
+                  className="px-3.5 py-2 bg-white hover:bg-cream border border-primary/10 rounded-xl text-xs font-bold text-primary flex items-center gap-2 transition-all hover:border-accent/40 cursor-pointer shadow-sm active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{isAr ? "دعوة انضمام حرفي" : "Artisan Outreach"}</span>
+                </button>
+              </div>
+            </div>
 
             {/* To */}
             <div className="space-y-2">
@@ -182,7 +677,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                 value={gmailTo}
                 onChange={(e) => setGmailTo(e.target.value)}
                 className="w-full px-6 py-4 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-sm resize-none"
-                placeholder="artisan1@gmail.com, artisan2@gmail.com"
+                placeholder="sales-manager@giftisan.com, employee@example.com"
                 dir="ltr"
               />
             </div>
@@ -204,6 +699,67 @@ export function OutreachClient({ dict }: { dict: any }) {
               />
             </div>
 
+            {/* Template Style Selector */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-black uppercase tracking-widest text-primary/40">
+                  {isAr ? "طابع وتصميم القالب" : "Email Template Style"}
+                </label>
+                <span className="text-[10px] text-accent font-bold">
+                  {templateStyle === 'corporate' && (isAr ? "رسمي وإداري للموظفين والاجتماعات" : "Official for Staff, Hiring & Meetings")}
+                  {templateStyle === 'minimal' && (isAr ? "خطاب ورقي تنفيذي مباشر" : "Clean executive memo")}
+                  {templateStyle === 'artisan' && (isAr ? "تسويقي لدعوة الحرفيين والعملاء" : "Artisan & Marketplace marketing")}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTemplateStyle('corporate')}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    templateStyle === 'corporate'
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
+                  }`}
+                >
+                  <div className="text-xs font-black">{isAr ? "رسمي وإداري" : "Corporate / Executive"}</div>
+                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'corporate' ? 'text-white/70' : 'text-primary/50'}`}>
+                    {isAr ? "الموصى به للاجتماعات والتوظيف" : "Recommended for meetings & hiring"}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTemplateStyle('minimal')}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    templateStyle === 'minimal'
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
+                  }`}
+                >
+                  <div className="text-xs font-black">{isAr ? "خطاب مباشر" : "Minimal Letter"}</div>
+                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'minimal' ? 'text-white/70' : 'text-primary/50'}`}>
+                    {isAr ? "خطاب تنفيذي أبيض ناصع" : "Clean white letterhead"}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTemplateStyle('artisan')}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    templateStyle === 'artisan'
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-cream/20 hover:bg-white border-primary/10 text-primary'
+                  }`}
+                >
+                  <div className="text-xs font-black">{isAr ? "تسويقي وحرفي" : "Artisan / Marketing"}</div>
+                  <div className={`text-[10px] mt-0.5 ${templateStyle === 'artisan' ? 'text-white/70' : 'text-primary/50'}`}>
+                    {isAr ? "لدعوة الحرفيين للمنصة" : "Marketplace & Craft branding"}
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Rich Text Body */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-primary/40">
@@ -217,8 +773,8 @@ export function OutreachClient({ dict }: { dict: any }) {
                 isAr={isAr}
                 placeholder={
                   isAr
-                    ? "اكتب رسالتك هنا...\nسيتم إرسالها مغلفة في قالب جيفتيزان الفاخر."
-                    : "Write your message here...\nIt will be delivered wrapped in the premium Giftisan email template."
+                    ? "اكتب رسالتك هنا أو استخدم أحد القوالب السريعة بالأعلى..."
+                    : "Write your message here or choose a 1-click quick template above..."
                 }
               />
             </div>
@@ -292,9 +848,12 @@ export function OutreachClient({ dict }: { dict: any }) {
                   setGmailTo("");
                   setGmailSubject("");
                   setGmailBody("<p></p>");
+                  setCustomSenderName("");
+                  setCustomSenderEmail("");
+                  setCustomReplyTo("");
                   setSendLogs([]);
                 }}
-                className="px-6 h-14 border border-primary/10 hover:border-primary/20 text-primary/50 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center transition-all disabled:opacity-40 ml-auto"
+                className="px-6 h-14 border border-primary/10 hover:border-primary/20 text-primary/50 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center transition-all disabled:opacity-40 ml-auto cursor-pointer"
               >
                 {isAr ? "مسح" : "Clear"}
               </button>
@@ -322,29 +881,42 @@ export function OutreachClient({ dict }: { dict: any }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="relative bg-white rounded-[2.5rem] w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
+              className="relative bg-white rounded-[2.5rem] w-full max-w-4xl h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-primary/5 z-10"
             >
               {/* Header */}
-              <div className="px-6 py-5 border-b border-primary/5 bg-cream/40 flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-primary/5 bg-cream/40 flex items-center justify-between">
                 <div>
-                  <h3 className="font-heading font-black text-primary text-base">
+                  <h3 className="font-heading font-black text-primary text-base flex items-center gap-2">
                     {isAr ? "معاينة البريد الإلكتروني" : "Email Sandbox Preview"}
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase font-bold">
+                      {templateStyle}
+                    </span>
                   </h3>
                   <p className="text-[10px] text-primary/50 font-bold uppercase tracking-wider mt-0.5">
-                    {isAr ? "شكل الرسالة النهائي كما سيصل في صندوق الوارد" : "Real-time client view of the branded newsletter template"}
+                    {isAr ? "شكل الرسالة النهائي كما سيصل في صندوق الوارد" : "Real-time client view of the formatted email template"}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsPreviewOpen(false)}
-                  className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all"
+                  className="w-10 h-10 rounded-full border border-primary/10 flex items-center justify-center text-primary/45 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Subject Info bar */}
+              {/* Subject & Sender Info bar */}
               <div className="px-8 py-3 bg-cream/10 border-b border-primary/5 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-primary/60 font-bold">
+                <div>
+                  <span className="text-primary/40 mr-1.5">{isAr ? "من:" : "From:"}</span>
+                  <span className="text-primary font-mono">{effectiveSenderName} &lt;{effectiveSenderEmail}&gt;</span>
+                </div>
+                {effectiveReplyTo && effectiveReplyTo !== effectiveSenderEmail && (
+                  <div>
+                    <span className="text-primary/40 mr-1.5">{isAr ? "الرد إلى:" : "Reply-To:"}</span>
+                    <span className="text-primary font-mono">{effectiveReplyTo}</span>
+                  </div>
+                )}
                 <div>
                   <span className="text-primary/40 mr-1.5">{isAr ? "الموضوع:" : "Subject:"}</span>
                   <span className="text-primary">{gmailSubject || (isAr ? "(بدون عنوان)" : "(No Subject)")}</span>
@@ -357,8 +929,8 @@ export function OutreachClient({ dict }: { dict: any }) {
               {/* Sandbox Render Area */}
               <div className="flex-1 p-6 md:p-8 bg-cream/20 overflow-hidden">
                 <iframe
-                  srcDoc={getBrandedHtml(gmailBody, gmailDir)}
-                  className="w-full h-full border border-primary/5 rounded-3xl bg-cream/40 shadow-inner"
+                  srcDoc={getBrandedHtml(gmailBody, gmailDir, templateStyle)}
+                  className="w-full h-full border border-primary/5 rounded-3xl bg-white shadow-inner"
                   title="Branded Email Preview"
                 />
               </div>

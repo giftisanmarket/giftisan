@@ -49,6 +49,9 @@ export const SUPPORT_INBOX = "support@giftisan.com";
 
 // Sender addresses (Categorized for clean branding & deliverability)
 export const SENDER_SUPPORT = "Giftisan Support <support@giftisan.com>";
+export const SENDER_MANAGEMENT = "Giftisan Management <management@giftisan.com>";
+export const SENDER_ADMIN = "Giftisan Admin <admin@giftisan.com>";
+export const SENDER_TEAM = "Giftisan Team <team@giftisan.com>";
 export const SENDER_AUTH = "Giftisan Security <auth@giftisan.com>";
 export const SENDER_ORDERS = "Giftisan Orders <orders@giftisan.com>";
 export const SENDER_FINANCE = "Giftisan Finance <payouts@giftisan.com>";
@@ -111,17 +114,140 @@ const getEmailFooter = (lang: 'ar' | 'en' = 'en') => `
   </div>
 `;
 
-const wrapEmail = (content: string, lang: 'ar' | 'en' = 'en') => `
-  <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
-    <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: ${lang === 'ar' ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
-      ${getEmailHeader()}
-      <div class="email-body" style="padding: 35px 30px; text-align: ${lang === 'ar' ? 'right' : 'left'};">
-        ${content}
+interface WrapEmailOptions {
+  style?: 'corporate' | 'artisan' | 'minimal';
+  senderName?: string;
+  senderEmail?: string;
+}
+
+const wrapCorporateEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName: string, senderEmail: string) => {
+  const isAr = lang === 'ar';
+  return `
+    ${emailStyles}
+    <div class="email-wrapper" style="background-color: #f1f5f9; padding: 32px 16px;" dir="${isAr ? 'rtl' : 'ltr'}">
+      <div class="email-card" style="max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};">
+        
+        <!-- Corporate Header -->
+        <div style="padding: 24px 30px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td align="${isAr ? 'right' : 'left'}" valign="middle">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td valign="middle" style="padding-${isAr ? 'left' : 'right'}: 14px;">
+                      <img src="${LOGO_URL}" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none;">
+                    </td>
+                    <td valign="middle">
+                      <div class="heading" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
+                      <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;">
+                        ${isAr ? 'الإدارة والعمليات' : 'Management & Operations'}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td align="${isAr ? 'left' : 'right'}" valign="middle">
+                <span style="display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #da7b5a; background-color: rgba(218, 123, 90, 0.15); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(218, 123, 90, 0.3);">
+                  ${isAr ? 'اتصال رسمي' : 'Official Notice'}
+                </span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Corporate Body -->
+        <div class="email-body" style="padding: 38px 32px; color: #334155; font-size: 15px; line-height: 1.8; text-align: ${isAr ? 'right' : 'left'};">
+          ${content}
+        </div>
+
+        <!-- Corporate Signature & Footer -->
+        <div style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isAr ? 'right' : 'left'};">
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${senderName}</div>
+            <div style="font-size: 12px; color: #64748b; font-family: monospace; margin-top: 2px;">${senderEmail}</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px; font-weight: 600;">
+              ${isAr ? 'المكتب الإداري • القاهرة، مصر' : 'Giftisan Corporate Office • Cairo, Egypt'}
+            </div>
+          </div>
+          
+          <div style="padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; line-height: 1.5;">
+            ${isAr 
+              ? 'تنبيه: هذه الرسالة اتصال إداري رسمي وسري مخصص فقط للمرسل إليه. إذا وصلتك بالخطأ، يرجى إبلاغ المرسل وحذفها.'
+              : 'CONFIDENTIALITY NOTICE: This message is an official corporate communication intended exclusively for the designated recipient. If received in error, please notify the sender and delete immediately.'}
+          </div>
+        </div>
+
       </div>
-      ${getEmailFooter(lang)}
     </div>
-  </div>
-`;
+  `;
+};
+
+const wrapMinimalEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName: string, senderEmail: string) => {
+  const isAr = lang === 'ar';
+  return `
+    ${emailStyles}
+    <div style="background-color: #ffffff; padding: 40px 20px; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};" dir="${isAr ? 'rtl' : 'ltr'}">
+      <div style="max-width: 580px; width: 100%; margin: 0 auto; text-align: ${isAr ? 'right' : 'left'}; color: #1f2937;">
+        
+        <!-- Minimal Letter Header -->
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 30px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td align="${isAr ? 'right' : 'left'}" valign="middle">
+                <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: #0f172a;">Giftisan</span>
+                <span style="font-size: 11px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-${isAr ? 'right' : 'left'}: 12px;">
+                  ${isAr ? 'المكتب التنفيذي' : 'Executive Office'}
+                </span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Body -->
+        <div style="font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 35px;">
+          ${content}
+        </div>
+
+        <!-- Sign-off -->
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+          <div style="font-size: 13px; font-weight: 800; color: #111827;">${senderName}</div>
+          <div style="font-size: 12px; color: #6b7280; font-family: monospace; margin-top: 2px;">${senderEmail}</div>
+        </div>
+
+      </div>
+    </div>
+  `;
+};
+
+const wrapEmail = (
+  content: string,
+  lang: 'ar' | 'en' = 'en',
+  options?: WrapEmailOptions
+) => {
+  const style = options?.style || 'artisan';
+  const isAr = lang === 'ar';
+  const senderName = options?.senderName || (isAr ? 'إدارة جيفتيزان' : 'Giftisan Management');
+  const senderEmail = options?.senderEmail || 'management@giftisan.com';
+
+  if (style === 'corporate') {
+    return wrapCorporateEmail(content, lang, senderName, senderEmail);
+  }
+  if (style === 'minimal') {
+    return wrapMinimalEmail(content, lang, senderName, senderEmail);
+  }
+
+  return `
+    <div class="email-wrapper" style="background-color: ${CREAM_BG}; padding: 30px;" dir="${isAr ? 'rtl' : 'ltr'}">
+      <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
+        ${getEmailHeader()}
+        <div class="email-body" style="padding: 35px 30px; text-align: ${isAr ? 'right' : 'left'};">
+          ${content}
+        </div>
+        ${getEmailFooter(lang)}
+      </div>
+    </div>
+  `;
+};
 
 export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
   if (isDevOnly()) {
@@ -631,24 +757,44 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
   });
 };
 
-export const sendCustomEmail = async (to: string, subject: string, body: string, dir: 'ltr' | 'rtl' = 'ltr') => {
+export const sendCustomEmail = async (
+  to: string,
+  subject: string,
+  body: string,
+  dir: 'ltr' | 'rtl' = 'ltr',
+  options?: {
+    from?: string;
+    replyTo?: string;
+    templateStyle?: 'corporate' | 'artisan' | 'minimal';
+    senderName?: string;
+    senderEmail?: string;
+  }
+) => {
+  const from = options?.from || SENDER_SUPPORT;
+  const replyTo = options?.replyTo || SUPPORT_INBOX;
+  const style = options?.templateStyle || 'corporate';
+
   if (isDevOnly()) {
-    console.log(`\n--- 📧 DEV: CUSTOM EMAIL (${dir.toUpperCase()}) ---\nTarget: ${to}\nSubject: ${subject}\n------------------------------\n`);
+    console.log(`\n--- 📧 DEV: CUSTOM EMAIL [${style.toUpperCase()}] (${dir.toUpperCase()}) ---\nFrom: ${from}\nReply-To: ${replyTo}\nTarget: ${to}\nSubject: ${subject}\n------------------------------\n`);
     return { success: true };
   }
 
   const content = `
-    <div style="color: #4b5563; font-size: 15px; line-height: 1.8;">
+    <div style="font-size: 15px; line-height: 1.8;">
       ${body}
     </div>
   `;
 
   return sendOperationalEmail({
-    from: SENDER_SUPPORT,
-    replyTo: SUPPORT_INBOX,
+    from,
+    replyTo,
     to,
     subject,
-    html: wrapEmail(content, dir === 'rtl' ? 'ar' : 'en'),
+    html: wrapEmail(content, dir === 'rtl' ? 'ar' : 'en', {
+      style,
+      senderName: options?.senderName,
+      senderEmail: options?.senderEmail,
+    }),
   });
 };
 

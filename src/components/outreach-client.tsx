@@ -278,13 +278,13 @@ export function OutreachClient({ dict }: { dict: any }) {
             <div class="email-wrapper">
               <div class="email-card">
                 <!-- Corporate Header -->
-                <div class="email-header" style="padding: 22px 28px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
+                <div class="email-header" style="padding: 22px 28px; background-color: #064E3B;">
                   <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
                     <tr>
-                      <td valign="middle" style="width: 44px; padding-${isRtl ? 'left' : 'right'}: 14px;">
-                        <img src="/icon.png" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0;">
+                      <td valign="middle" width="52" style="width: 52px; padding: 0; padding-${isRtl ? 'left' : 'right'}: 14px; vertical-align: middle;">
+                        <img src="/icon.png" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none; width: 38px; height: 38px;">
                       </td>
-                      <td valign="middle" align="${isRtl ? 'right' : 'left'}">
+                      <td valign="middle" align="${isRtl ? 'right' : 'left'}" style="padding: 0; vertical-align: middle;">
                         <div class="heading header-title" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
                         <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 3px;">
                           ${isRtl ? 'الإدارة والعمليات • إشعار رسمي' : 'Management & Operations • Official Notice'}
@@ -374,9 +374,9 @@ export function OutreachClient({ dict }: { dict: any }) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #fcf9f1; -webkit-text-size-adjust: 100%; }
+            body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; background-color: #FDFCF0; -webkit-text-size-adjust: 100%; }
             .heading { font-weight: bold; }
-            .email-wrapper { width: 100%; background-color: #fcf9f1; padding: 32px 16px; box-sizing: border-box; }
+            .email-wrapper { width: 100%; background-color: #FDFCF0; padding: 32px 16px; box-sizing: border-box; }
             .email-card { max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 24px; box-shadow: 0 14px 36px rgba(0,0,0,0.05); overflow: hidden; }
             .email-header { text-align: center; padding: 36px 24px 28px 24px; background-color: #064e3b; }
             .email-body { padding: 38px 32px; text-align: ${isRtl ? 'right' : 'left'}; color: #4b5563; font-size: 15px; line-height: 1.8; }

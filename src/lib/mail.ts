@@ -70,150 +70,300 @@ const getBaseUrl = () => {
 
 const BASE_URL = getBaseUrl();
 
-const PRIMARY_COLOR = "#1a2c2c";
-const ACCENT_COLOR = "#da7b5a";
-const CREAM_BG = "#fcf9f1";
+const PRIMARY_COLOR = "#064E3B";
+const ACCENT_COLOR = "#D97706";
+const CANVAS_BG = "#FDFCF0";
 
 const isDevOnly = () => process.env.NODE_ENV === "development" && process.env.FORCE_SEND_EMAIL !== "true";
 
-const emailStyles = `
+// ─── Bulletproof Email Shell ────────────────────────────────────────────────
+// Uses nested HTML tables (role=presentation) with 100% inlined styles.
+// MSO/Outlook conditional comments enforce max-width on Outlook desktop.
+// All layout is table-based so Gmail, Outlook, Yahoo, Apple Mail all
+// render consistently regardless of <style> block stripping.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const emailMeta = `
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; }
-    .heading { font-family: Helvetica, Arial, sans-serif; font-weight: bold; }
-    .email-wrapper { width: 100%; background-color: #f1f5f9; padding: 32px 16px; box-sizing: border-box; }
-    .email-card { max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; }
-    .email-header { padding: 24px 30px; }
-    .email-body { padding: 38px 32px; font-size: 15px; line-height: 1.8; }
-    .email-footer { padding: 26px 32px; }
-    
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
     @media only screen and (max-width: 600px) {
-      .email-wrapper { padding: 8px 4px !important; }
-      .email-card { border-radius: 14px !important; max-width: 100% !important; }
-      .email-header { padding: 20px 16px !important; }
-      .email-body { padding: 24px 18px !important; font-size: 15px !important; line-height: 1.75 !important; }
-      .email-footer { padding: 20px 18px !important; }
-      .header-title { font-size: 18px !important; }
-      .header-sub { font-size: 9px !important; }
-      .header-badge { font-size: 8px !important; padding: 4px 8px !important; }
+      .mobile-full { width: 100% !important; max-width: 100% !important; }
+      .mobile-pad { padding: 28px 20px !important; }
+      .mobile-body-pad { padding: 24px 20px !important; }
+      .mobile-footer-pad { padding: 24px 20px !important; }
+      .mobile-h1 { font-size: 22px !important; }
     }
   </style>
 `;
 
-const getEmailHeader = () => `
-  <div class="email-header" style="text-align: center; padding: 35px 20px 25px 20px; background-color: ${PRIMARY_COLOR};">
-    <img src="${LOGO_URL}" alt="Giftisan" width="52" height="52" align="center" style="display: block; margin: 0 auto 12px auto; border: 0; outline: none; border-radius: 6px;">
-    <div class="heading header-title" style="font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: -0.02em; text-align: center;">Giftisan</div>
-    <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.45); font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 4px; text-align: center;">Handcrafted Mastery</div>
-  </div>
-`;
+/** Generate a hidden inbox preview snippet with zero-width spacers to prevent body content from bleeding into the preview. */
+const getPreheader = (text: string) =>
+  `<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;font-size:1px;color:#f5f3ee;line-height:1px;">${text}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>`;
 
-const getEmailFooter = (lang: 'ar' | 'en' = 'en') => `
-  <div class="email-footer" style="text-align: center; padding: 30px 20px; border-top: 1px solid rgba(0,0,0,0.05);" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
-    <p style="color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; margin-top: 0;">
-      ${lang === 'ar' ? 'فريق جيفتيزان • ننطلق من مصر لدعم الحرفيين المحليين' : 'Proudly Based in Egypt • Supporting Local Artisans'}
-    </p>
-    <p style="color: #1a2c2c; font-weight: bold; font-size: 13px; margin: 0 0 15px 0;">
-      ${lang === 'ar' ? 'فريق عمل جيفتيزان' : 'The Giftisan Team'}
-    </p>
-    <div style="font-size: 11px; color: #d1d5db;">
-      &copy; 2026 Giftisan. All rights reserved.
-    </div>
-  </div>
-`;
+/** Bulletproof artisan card email header — table-based, 100% inlined */
+const getEmailHeader = (lang: 'ar' | 'en' = 'en') => {
+  const isAr = lang === 'ar';
+  return `
+    <!-- Header -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td style="background-color: ${PRIMARY_COLOR}; border-radius: 14px 14px 0 0; padding: 0;">
+          <!-- Logo & Brand -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td align="center" style="padding: 28px 32px 22px 32px;">
+                <img src="${LOGO_URL}" alt="Giftisan" width="44" height="44" style="display: block; margin: 0 auto 12px auto; border: 0; outline: none; border-radius: 8px;">
+                <div style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1;">Giftisan</div>
+                <div style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; font-size: 9px; color: rgba(255,255,255,0.38); font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; margin-top: 5px;">${isAr ? 'إتقان يُصنع بالأيدي' : 'Handcrafted Mastery'}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+/** Bulletproof artisan card email footer — table-based, 100% inlined */
+const getEmailFooter = (lang: 'ar' | 'en' = 'en') => {
+  const isAr = lang === 'ar';
+  return `
+    <!-- Footer -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td style="background-color: #faf9f6; border-top: 1px solid #ece9e2; border-radius: 0 0 14px 14px; padding: 24px 32px;" align="center" dir="${isAr ? 'rtl' : 'ltr'}">
+          <p style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; margin: 0 0 6px 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #b8b0a0;">
+            ${isAr ? 'فريق جيفتيزان • بنبني من مصر لدعم الحرفيين المحليين' : 'Proudly Based in Egypt • Supporting Local Artisans'}
+          </p>
+          <p style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; margin: 0 0 10px 0; font-size: 12px; font-weight: 700; color: ${PRIMARY_COLOR};">
+            ${isAr ? 'فريق عمل جيفتيزان' : 'The Giftisan Team'}
+          </p>
+          <p style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; margin: 0; font-size: 10px; color: #c8c2b8;">
+            &copy; 2026 Giftisan. All rights reserved.
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+/** Bulletproof CTA button using table-cell (renders in all clients including Outlook) */
+const getCtaButton = (href: string, label: string, bgColor = ACCENT_COLOR, lang: 'ar' | 'en' = 'en') => {
+  const isAr = lang === 'ar';
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+      <tr>
+        <td align="center" bgcolor="${bgColor}" style="border-radius: 10px; background-color: ${bgColor};">
+          <a href="${href}" target="_blank" style="display: inline-block; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; font-size: 14px; font-weight: 800; color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 10px; background-color: ${bgColor}; letter-spacing: 0.01em; mso-padding-alt: 14px 36px;">${label}</a>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+/** Raw-link fallback box for verification/reset emails — renders if button is blocked */
+const getLinkFallback = (href: string, lang: 'ar' | 'en' = 'en') => {
+  const isAr = lang === 'ar';
+  const label = isAr ? 'أو انسخ هذا الرابط مباشرة في متصفحك:' : 'Or copy and paste this link into your browser:';
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 20px;">
+      <tr>
+        <td style="background-color: #f5f3ee; border-radius: 8px; border: 1px solid #e7e3da; padding: 12px 16px;" dir="${isAr ? 'rtl' : 'ltr'}">
+          <p style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"}; margin: 0 0 6px 0; font-size: 11px; color: #9c9488; font-weight: 600;">${label}</p>
+          <p style="font-family: monospace; margin: 0; font-size: 11px; color: #5c5a56; word-break: break-all; line-height: 1.6;">${href}</p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
 
 interface WrapEmailOptions {
   style?: 'corporate' | 'artisan' | 'minimal';
   senderName?: string;
   senderEmail?: string;
+  preheader?: string;
 }
 
-const wrapCorporateEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName: string, senderEmail: string) => {
+/**
+ * Artisan card style — bulletproof table layout.
+ * The outer wrapper is a full-width bgcolor table.
+ * The inner "card" is a max-580px centered table with MSO conditionals
+ * so Outlook desktop correctly constrains the width.
+ */
+const wrapArtisanEmail = (content: string, lang: 'ar' | 'en', preheader: string) => {
   const isAr = lang === 'ar';
-  return `
-    ${emailStyles}
-    <div class="email-wrapper" style="background-color: #f1f5f9; padding: 32px 16px;" dir="${isAr ? 'rtl' : 'ltr'}">
-      <div class="email-card" style="max-width: 620px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};">
-        
-        <!-- Corporate Header -->
-        <div class="email-header" style="padding: 22px 28px; background-color: #0d2828; border-bottom: 3px solid #da7b5a;">
-          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-            <tr>
-              <td valign="middle" style="width: 44px; padding-${isAr ? 'left' : 'right'}: 14px;">
-                <img src="${LOGO_URL}" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none;">
-              </td>
-              <td valign="middle" align="${isAr ? 'right' : 'left'}">
-                <div class="heading header-title" style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
-                <div class="header-sub" style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 3px;">
-                  ${isAr ? 'الإدارة والعمليات • إشعار رسمي' : 'Management & Operations • Official Notice'}
-                </div>
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Corporate Body -->
-        <div class="email-body" style="padding: 38px 32px; color: #334155; font-size: 15px; line-height: 1.8; text-align: ${isAr ? 'right' : 'left'};">
-          ${content}
-        </div>
-
-        <!-- Corporate Signature & Footer -->
-        <div class="email-footer" style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: ${isAr ? 'right' : 'left'};">
-          <div style="margin-bottom: 16px;">
-            <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${senderName}</div>
-            <div style="font-size: 12px; color: #64748b; font-family: monospace; margin-top: 2px;">${senderEmail}</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px; font-weight: 600;">
-              ${isAr ? 'المكتب الإداري • القاهرة، مصر' : 'Giftisan Corporate Office • Cairo, Egypt'}
-            </div>
-          </div>
-          
-          <div style="padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; line-height: 1.5;">
-            ${isAr 
-              ? 'تنبيه: هذه الرسالة اتصال إداري رسمي وسري مخصص فقط للمرسل إليه. إذا وصلتك بالخطأ، يرجى إبلاغ المرسل وحذفها.'
-              : 'CONFIDENTIALITY NOTICE: This message is an official corporate communication intended exclusively for the designated recipient. If received in error, please notify the sender and delete immediately.'}
-          </div>
-        </div>
-
-      </div>
-    </div>
-  `;
+  const fontStack = isAr
+    ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif"
+    : "Helvetica, Arial, sans-serif";
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${isAr ? 'rtl' : 'ltr'}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title>Giftisan</title>
+  ${emailMeta}
+</head>
+<body style="margin: 0; padding: 0; background-color: ${CANVAS_BG}; word-spacing: normal;">
+  ${preheader ? getPreheader(preheader) : ''}
+  <!-- Outer Wrapper Table -->
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${CANVAS_BG};">
+    <tr>
+      <td align="center" style="padding: 32px 12px;">
+        <!--[if (gte mso 9)|(IE)]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="580">
+          <tr><td align="center" valign="top" width="580">
+        <![endif]-->
+        <!-- Email Card -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="mobile-full" style="max-width: 580px; background-color: #ffffff; border-radius: 14px; border: 1px solid #e7e3da; font-family: ${fontStack};">
+          <!-- HEADER -->
+          <tr><td style="padding: 0; border-radius: 14px 14px 0 0;">${getEmailHeader(lang)}</td></tr>
+          <!-- BODY -->
+          <tr>
+            <td class="mobile-body-pad" style="padding: 36px 40px; color: #374151; font-size: 15px; line-height: 1.75; font-family: ${fontStack};" dir="${isAr ? 'rtl' : 'ltr'}" align="${isAr ? 'right' : 'left'}">
+              ${content}
+            </td>
+          </tr>
+          <!-- FOOTER -->
+          <tr><td style="padding: 0; border-radius: 0 0 14px 14px;">${getEmailFooter(lang)}</td></tr>
+        </table>
+        <!--[if (gte mso 9)|(IE)]>
+          </td></tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 };
 
-const wrapMinimalEmail = (content: string, lang: 'ar' | 'en' = 'en', senderName: string, senderEmail: string) => {
+/** Corporate style — left-aligned letterhead with sender signature */
+const wrapCorporateEmail = (content: string, lang: 'ar' | 'en', senderName: string, senderEmail: string) => {
   const isAr = lang === 'ar';
-  return `
-    ${emailStyles}
-    <div class="email-wrapper" style="background-color: #ffffff; font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"};" dir="${isAr ? 'rtl' : 'ltr'}">
-      <div style="max-width: 580px; width: 100%; margin: 0 auto; text-align: ${isAr ? 'right' : 'left'}; color: #1f2937;">
-        
-        <!-- Minimal Letter Header -->
-        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 30px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td align="${isAr ? 'right' : 'left'}" valign="middle">
-                <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: #0f172a;">Giftisan</span>
-                <span style="font-size: 11px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-${isAr ? 'right' : 'left'}: 12px;">
-                  ${isAr ? 'المكتب التنفيذي' : 'Executive Office'}
-                </span>
-              </td>
-            </tr>
-          </table>
-        </div>
+  const fontStack = isAr
+    ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif"
+    : "Helvetica, Arial, sans-serif";
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${isAr ? 'rtl' : 'ltr'}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title>Giftisan</title>
+  ${emailMeta}
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; word-spacing: normal;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f1f5f9;">
+    <tr>
+      <td align="center" style="padding: 32px 12px;">
+        <!--[if (gte mso 9)|(IE)]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="580">
+          <tr><td align="center" valign="top" width="580">
+        <![endif]-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="mobile-full" style="max-width: 580px; background-color: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; font-family: ${fontStack};">
+          <!-- Corporate Header -->
+          <tr>
+            <td style="background-color: #064E3B; border-radius: 14px 14px 0 0; padding: 22px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td valign="middle" width="52" style="width: 52px; padding: 0; padding-${isAr ? 'left' : 'right'}: 14px; vertical-align: middle;">
+                    <img src="${LOGO_URL}" alt="Giftisan" width="38" height="38" style="display: block; border-radius: 8px; border: 0; outline: none; width: 38px; height: 38px;">
+                  </td>
+                  <td valign="middle" align="${isAr ? 'right' : 'left'}" style="padding: 0; vertical-align: middle;">
+                    <div style="font-family: ${fontStack}; font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Giftisan</div>
+                    <div style="font-family: ${fontStack}; font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-top: 3px;">${isAr ? 'الإدارة والعمليات • إشعار رسمي' : 'Management & Operations • Official Notice'}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td class="mobile-body-pad" style="padding: 38px 32px; color: #334155; font-size: 15px; line-height: 1.8; font-family: ${fontStack};" dir="${isAr ? 'rtl' : 'ltr'}" align="${isAr ? 'right' : 'left'}">
+              ${content}
+            </td>
+          </tr>
+          <!-- Corporate Signature -->
+          <tr>
+            <td class="mobile-footer-pad" style="padding: 26px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 14px 14px;" align="${isAr ? 'right' : 'left'}" dir="${isAr ? 'rtl' : 'ltr'}">
+              <p style="font-family: ${fontStack}; margin: 0 0 2px 0; font-size: 14px; font-weight: 800; color: #0f172a;">${senderName}</p>
+              <p style="font-family: monospace; margin: 0 0 2px 0; font-size: 12px; color: #64748b;">${senderEmail}</p>
+              <p style="font-family: ${fontStack}; margin: 0 0 14px 0; font-size: 11px; color: #94a3b8; font-weight: 600;">${isAr ? 'المكتب الإداري • القاهرة، مصر' : 'Giftisan Corporate Office • Cairo, Egypt'}</p>
+              <p style="font-family: ${fontStack}; margin: 0; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; line-height: 1.5;">${isAr ? 'تنبيه: هذه الرسالة اتصال إداري رسمي وسري مخصص فقط للمرسل إليه. إذا وصلتك بالخطأ، يرجى إبلاغ المرسل وحذفها.' : 'CONFIDENTIALITY NOTICE: This message is an official corporate communication intended exclusively for the designated recipient. If received in error, please notify the sender and delete immediately.'}</p>
+            </td>
+          </tr>
+        </table>
+        <!--[if (gte mso 9)|(IE)]>
+          </td></tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+};
 
-        <!-- Body -->
-        <div class="email-body" style="color: #374151; margin-bottom: 35px; padding: 0;">
-          ${content}
-        </div>
-
-        <!-- Sign-off -->
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
-          <div style="font-size: 13px; font-weight: 800; color: #111827;">${senderName}</div>
-          <div style="font-size: 12px; color: #6b7280; font-family: monospace; margin-top: 2px;">${senderEmail}</div>
-        </div>
-
-      </div>
-    </div>
-  `;
+/** Minimal letter style — plain white, typographic letterhead */
+const wrapMinimalEmail = (content: string, lang: 'ar' | 'en', senderName: string, senderEmail: string) => {
+  const isAr = lang === 'ar';
+  const fontStack = isAr
+    ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif"
+    : "Helvetica, Arial, sans-serif";
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${isAr ? 'rtl' : 'ltr'}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title>Giftisan</title>
+  ${emailMeta}
+</head>
+<body style="margin: 0; padding: 0; background-color: #ffffff; word-spacing: normal;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <!--[if (gte mso 9)|(IE)]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="560">
+          <tr><td align="left" valign="top" width="560">
+        <![endif]-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="mobile-full" style="max-width: 560px; font-family: ${fontStack};">
+          <!-- Letterhead -->
+          <tr>
+            <td style="padding-bottom: 18px; border-bottom: 2px solid #0f172a;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="${isAr ? 'right' : 'left'}">
+                    <span style="font-family: ${fontStack}; font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: #0f172a;">Giftisan</span>
+                    <span style="font-family: ${fontStack}; font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-${isAr ? 'right' : 'left'}: 10px;">${isAr ? 'المكتب التنفيذي' : 'Executive Office'}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 30px 0; color: #374151; font-size: 15px; line-height: 1.8; font-family: ${fontStack};" dir="${isAr ? 'rtl' : 'ltr'}" align="${isAr ? 'right' : 'left'}">
+              ${content}
+            </td>
+          </tr>
+          <!-- Sign-off -->
+          <tr>
+            <td style="padding-top: 20px; border-top: 1px solid #e5e7eb;" align="${isAr ? 'right' : 'left'}">
+              <p style="font-family: ${fontStack}; margin: 0 0 2px 0; font-size: 13px; font-weight: 800; color: #111827;">${senderName}</p>
+              <p style="font-family: monospace; margin: 0; font-size: 11px; color: #6b7280;">${senderEmail}</p>
+            </td>
+          </tr>
+        </table>
+        <!--[if (gte mso 9)|(IE)]>
+          </td></tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 };
 
 const wrapEmail = (
@@ -225,6 +375,7 @@ const wrapEmail = (
   const isAr = lang === 'ar';
   const senderName = options?.senderName || (isAr ? 'إدارة جيفتيزان' : 'Giftisan Management');
   const senderEmail = options?.senderEmail || 'management@giftisan.com';
+  const preheader = options?.preheader || '';
 
   if (style === 'corporate') {
     return wrapCorporateEmail(content, lang, senderName, senderEmail);
@@ -233,18 +384,7 @@ const wrapEmail = (
     return wrapMinimalEmail(content, lang, senderName, senderEmail);
   }
 
-  return `
-    ${emailStyles}
-    <div class="email-wrapper" style="background-color: ${CREAM_BG};" dir="${isAr ? 'rtl' : 'ltr'}">
-      <div class="email-card" style="font-family: ${isAr ? "'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif" : "Helvetica, Arial, sans-serif"};">
-        ${getEmailHeader()}
-        <div class="email-body" style="text-align: ${isAr ? 'right' : 'left'};">
-          ${content}
-        </div>
-        ${getEmailFooter(lang)}
-      </div>
-    </div>
-  `;
+  return wrapArtisanEmail(content, lang, preheader);
 };
 
 export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' | 'en' = 'en') => {
@@ -257,21 +397,21 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
   const subject = isAr ? 'مرحباً بك في دائرة جيفتيزان' : 'Welcome to the Circle | Giftisan';
 
   const arContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 26px; margin-bottom: 18px;">مرحباً بك في الدائرة، ${name}!</h1>
-    <p style="color: #4b5563; line-height: 2; font-size: 16px; margin-bottom: 25px;">نتشرف بانضمامك إلى مجتمعنا من الحرفيين ومقتني المنتجات. "جيفتيزان" هو الملاذ الذي تلتقي فيه الحرفة الأصيلة بالروح والإبداع.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">اكتشف الخزائن</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center;">نتمنى لك تجربة ممتعة بصحبة إبداعاتنا!</p>
+    <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">مرحباً بك في الدائرة، ${name}!</h1>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; line-height: 1.9; font-size: 15px; margin: 0 0 28px 0;">نتشرف بانضمامك إلى مجتمعنا من الحرفيين ومقتني المنتجات. &laquo;جيفتيزان&raquo; هو الملاذ الذي تلتقي فيه الحرفة الأصيلة بالروح والإبداع.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 28px 0;">
+      <tr><td align="center">${getCtaButton(BASE_URL, 'اكتشف الخزائن', ACCENT_COLOR, 'ar')}</td></tr>
+    </table>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #9ca3af; font-size: 12px; font-style: italic; text-align: center; margin: 0;">نتمنى لك تجربة ممتعة بصحبة إبداعاتنا!</p>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 26px; margin-bottom: 18px;">Welcome to the Circle, ${name}!</h1>
-    <p style="color: #4b5563; line-height: 1.8; font-size: 16px; margin-bottom: 25px;">We're honored to have you join our community of artisans and product hunters. Giftisan is a sanctum where authentic craft meets soul.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${BASE_URL}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Explore the Vault</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center;">Happy discovery!</p>
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">Welcome to the Circle, ${name}!</h1>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; line-height: 1.8; font-size: 15px; margin: 0 0 28px 0;">We&rsquo;re honored to have you join our community of artisans and product hunters. Giftisan is a sanctum where authentic craft meets soul.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 28px 0;">
+      <tr><td align="center">${getCtaButton(BASE_URL, 'Explore the Vault', ACCENT_COLOR, 'en')}</td></tr>
+    </table>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #9ca3af; font-size: 12px; font-style: italic; text-align: center; margin: 0;">Happy discovery!</p>
   `;
 
   return sendOperationalEmail({
@@ -279,7 +419,7 @@ export const sendWelcomeEmail = async (email: string, name: string, lang: 'ar' |
     replyTo: SUPPORT_INBOX,
     to: email,
     subject,
-    html: wrapEmail(isAr ? arContent : enContent, lang),
+    html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? `مرحباً بك في مجتمع جيفتيزان يا ${name}!` : `Welcome to Giftisan, ${name}! Explore the vault of handcrafted masterpieces.` }),
   });
 };
 
@@ -293,41 +433,41 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId})` : `New Sale Alert: A product has been claimed! (#${orderId})`;
 
   const arContent = `
-    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 12px;">تنبيه مبيعة جديدة!</h1>
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني المنتجات بشراء قطعة من الاستوديو الخاص بك الآن.</p>
-    
-    <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
-      <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">رقم الطلب</p>
-      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</p>
-      
-      <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">أرباحك المحققة (0% عمولة للمنصة)</p>
-      <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 28px; font-weight: bold;">${totalAmount.toLocaleString()} ج.م</p>
-    </div>
-
-    <p style="color: #4b5563; font-size: 15px; margin-bottom: 30px; line-height: 1.9;">يرجى تسجيل الدخول إلى **لوحة تحكم الاستوديو** لمعاينة بيانات الشحن والبدء في تجهيز الطلب.</p>
-    
-    <div style="text-align: center;">
-      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">دخول الاستوديو</a>
-    </div>
+    <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${ACCENT_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 12px 0;">تنبيه مبيعة جديدة!</h1>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني المنتجات بشراء قطعة من الاستوديو الخاص بك الآن.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8;">
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 4px 0; color: #9ca3af; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">رقم الطلب</p>
+          <p style="font-family: monospace; margin: 0 0 18px 0; color: ${PRIMARY_COLOR}; font-size: 17px; font-weight: 700; word-break: break-all;">#${orderId}</p>
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 4px 0; color: #9ca3af; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">أرباحك المحققة (0% عمولة للمنصة)</p>
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0; color: ${ACCENT_COLOR}; font-size: 26px; font-weight: 800;">${totalAmount.toLocaleString()} ج.م</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.8;">يرجى تسجيل الدخول إلى لوحة تحكم الاستوديو لمعاينة بيانات الشحن والبدء في تجهيز الطلب.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'دخول الاستوديو', PRIMARY_COLOR, 'ar')}</td></tr>
+    </table>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 12px;">New Sale Alert!</h1>
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 25px; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a product from your studio.</p>
-    
-    <div style="background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
-      <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">Order Reference</p>
-      <p style="margin: 0 0 20px 0; color: ${PRIMARY_COLOR}; font-size: 18px; font-weight: bold; font-family: monospace; word-break: break-all;">#${orderId}</p>
-      
-      <p style="margin: 0 0 6px 0; color: #9ca3af; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em;">Your Earnings (0% Platform Fee)</p>
-      <p style="margin: 0; color: ${ACCENT_COLOR}; font-size: 28px; font-weight: bold;">EGP ${totalAmount.toLocaleString()}</p>
-    </div>
-
-    <p style="color: #4b5563; font-size: 15px; margin-bottom: 30px; line-height: 1.7;">Please log in to your **Studio Dashboard** to view shipment details and begin fulfillment.</p>
-    
-    <div style="text-align: center;">
-      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">Enter Studio</a>
-    </div>
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${ACCENT_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 12px 0;">New Sale Alert!</h1>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a product from your studio.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8;">
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 4px 0; color: #9ca3af; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">Order Reference</p>
+          <p style="font-family: monospace; margin: 0 0 18px 0; color: ${PRIMARY_COLOR}; font-size: 17px; font-weight: 700; word-break: break-all;">#${orderId}</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 4px 0; color: #9ca3af; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">Your Earnings (0% Platform Fee)</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0; color: ${ACCENT_COLOR}; font-size: 26px; font-weight: 800;">EGP ${totalAmount.toLocaleString()}</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.7;">Please log in to your Studio Dashboard to view shipment details and begin fulfillment.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'Enter Studio', PRIMARY_COLOR, 'en')}</td></tr>
+    </table>
   `;
 
   return sendOperationalEmail({
@@ -335,7 +475,7 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
     replyTo: SUPPORT_INBOX,
     to: artisanEmail,
     subject,
-    html: wrapEmail(isAr ? arContent : enContent, lang),
+    html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? `مبيعة جديدة! #${orderId} — ${totalAmount.toLocaleString()} ج.م أرباحك.` : `New sale! Order #${orderId} — EGP ${totalAmount.toLocaleString()} earned.` }),
   });
 };
 
@@ -349,19 +489,19 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
   const subject = isAr ? `رسالة جديدة من ${senderName} | جيفتيزان` : `New Dialogue from ${senderName} | Giftisan`;
 
   const arContent = `
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 15px;">أهلاً ${receiverName}،</p>
-    <h2 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 22px; margin-bottom: 25px; line-height: 1.6;">لديك رسالة تواصل جديدة من <strong>${senderName}</strong> بخصوص أحد المعروضات.</h2>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${BASE_URL}/profile/messages" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">الرد على الرسالة</a>
-    </div>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 12px 0;">أهلاً ${receiverName}،</p>
+    <h2 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: 800; margin: 0 0 28px 0; line-height: 1.5;">لديك رسالة تواصل جديدة من <strong>${senderName}</strong> بخصوص أحد المعروضات.</h2>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 28px 0;">
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/profile/messages`, 'الرد على الرسالة', PRIMARY_COLOR, 'ar')}</td></tr>
+    </table>
   `;
 
   const enContent = `
-    <p style="color: #4b5563; font-size: 16px; margin-bottom: 15px;">Hi ${receiverName},</p>
-    <h2 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 22px; margin-bottom: 25px; line-height: 1.5;"><strong>${senderName}</strong> has initiated a dialogue regarding a product.</h2>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${BASE_URL}/profile/messages" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">Join Dialogue</a>
-    </div>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 12px 0;">Hi ${receiverName},</p>
+    <h2 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: 800; margin: 0 0 28px 0; line-height: 1.5;"><strong>${senderName}</strong> has initiated a dialogue regarding a product.</h2>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 28px 0;">
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/profile/messages`, 'Join Dialogue', PRIMARY_COLOR, 'en')}</td></tr>
+    </table>
   `;
 
   return sendOperationalEmail({
@@ -369,7 +509,7 @@ export const sendMessageNotification = async (receiverEmail: string, receiverNam
     replyTo: SUPPORT_INBOX,
     to: receiverEmail,
     subject,
-    html: wrapEmail(isAr ? arContent : enContent, lang),
+    html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? `رسالة جديدة من ${senderName} بخصوص أحد منتجاتك.` : `${senderName} sent you a message about a product on Giftisan.` }),
   });
 };
 
@@ -388,21 +528,39 @@ export const sendVerificationEmail = async (email: string, token: string, lang: 
   const subject = isAr ? 'توثيق الحساب | جيفتيزان' : 'Verify your identity | Giftisan';
 
   const arContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">توثيق عنوان البريد الإلكتروني</h1>
-    <p style="color: #4b5563; font-size: 15px; line-height: 1.9; margin-bottom: 25px;">قبل البدء في استكشاف الخزائن أو فتح الاستوديو الخاص بك، يرجى تأكيد بريدك الإلكتروني لضمان أمان حسابك وفتح كافة المميزات.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${confirmLink}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">تأكيد البريد الإلكتروني</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 12px; font-style: italic; text-align: center;">صلاحية هذا الرابط تنتهي خلال 24 ساعة.</p>
+    <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">توثيق عنوان البريد الإلكتروني</h1>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.9; margin: 0 0 28px 0;">قبل البدء في استكشاف الخزائن أو فتح الاستوديو الخاص بك، يرجى تأكيد بريدك الإلكتروني لضمان أمان حسابك وفتح كافة المميزات.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+      <tr><td align="center">${getCtaButton(confirmLink, 'تأكيد البريد الإلكتروني', ACCENT_COLOR, 'ar')}</td></tr>
+    </table>
+    ${getLinkFallback(confirmLink, 'ar')}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #f0ede8; padding: 14px 18px;" align="center">
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: #b8b0a0; text-transform: uppercase; letter-spacing: 0.08em;">صلاحية الرابط</p>
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0; font-size: 13px; font-weight: 700; color: ${PRIMARY_COLOR};">تنتهي خلال 24 ساعة</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #c0bdb8; font-size: 11px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">إذا لم تقم بإنشاء حساب في جيفتيزان، يمكنك تجاهل هذه الرسالة بأمان تام.</p>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">Verify your identity</h1>
-    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 25px;">Before you explore the vault or open your studio, please confirm your email address to secure your account and unlock all platform features.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${confirmLink}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(218, 123, 90, 0.2);">Confirm Connection</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 12px; font-style: italic; text-align: center;">This link will expire in 24 hours.</p>
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">Verify your email address</h1>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 28px 0;">Before you explore the vault or open your studio, please confirm your email address to secure your account and unlock all platform features.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+      <tr><td align="center">${getCtaButton(confirmLink, 'Confirm Email Address', ACCENT_COLOR, 'en')}</td></tr>
+    </table>
+    ${getLinkFallback(confirmLink, 'en')}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #f0ede8; padding: 14px 18px;" align="center">
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: #b8b0a0; text-transform: uppercase; letter-spacing: 0.08em;">Link Validity</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0; font-size: 13px; font-weight: 700; color: ${PRIMARY_COLOR};">Expires in 24 hours</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #c0bdb8; font-size: 11px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">If you did not create a Giftisan account, you can safely ignore this email.</p>
   `;
 
   try {
@@ -411,7 +569,7 @@ export const sendVerificationEmail = async (email: string, token: string, lang: 
       replyTo: SUPPORT_INBOX,
       to: email,
       subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
+      html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? 'أكد بريدك الإلكتروني لتفعيل حسابك في جيفتيزان.' : 'Confirm your email address to activate your Giftisan account.' }),
     });
     return { success: true };
   } catch (error) {
@@ -468,67 +626,61 @@ export const sendOrderStatusUpdateEmail = async (
     : isDelivered ? `Share Your Story: Your product has arrived! | Giftisan` : `Journey Update: Your product ${statusTextEn[status] || status}`;
 
   const arContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px;">
-      ${isDelivered ? 'وصلت قطعتك الفنية!' : 'تحديث مسار الطلب'}
-    </h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 1.8;">أهلاً ${name}، نود إعلامك بأن طلبك لـ <strong>${productName}</strong> ${statusTextAr[status] || 'يتحرك في مساره'}.</p>
-    
-    <div style="margin: 30px 0; background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; text-align: center;">
-      <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em; color: #9ca3af;">الحالة الحالية</p>
-      <p style="margin: 0; font-size: 26px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">
-        ${status === 'PROCESSING' ? 'قيد التجهيز' : status === 'SHIPPED' ? 'تم الشحن' : status === 'DELIVERED' ? 'تم التوصيل' : 'ملغي'}
-      </p>
-      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace; word-break: break-all;">رقم الطلب: #${orderId}</p>
-    </div>
-
+    <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 14px 0;">${isDelivered ? 'وصلت قطعتك الفنية!' : 'تحديث مسار الطلب'}</h1>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 15px; line-height: 1.8; margin: 0 0 22px 0;">أهلاً ${name}، نود إعلامك بأن طلبك لـ <strong>${productName}</strong> ${statusTextAr[status] || 'يتحرك في مساره'}.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 22px;">
+      <tr>
+        <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8; text-align: center;">
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 6px 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #9ca3af;">الحالة الحالية</p>
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 10px 0; font-size: 24px; font-weight: 800; color: ${statusColors[status] || PRIMARY_COLOR};">${status === 'PROCESSING' ? 'قيد التجهيز' : status === 'SHIPPED' ? 'تم الشحن' : status === 'DELIVERED' ? 'تم التوصيل' : 'ملغي'}</p>
+          <p style="font-family: monospace; margin: 0; font-size: 11px; font-weight: 700; color: #9ca3af; word-break: break-all;">رقم الطلب: #${orderId}</p>
+        </td>
+      </tr>
+    </table>
     ${status === 'SHIPPED' && trackingNumber ? `
-      <div style="margin: 20px 0; padding: 20px; border-radius: 16px; background-color: #f0fdf4; border: 1px solid #bbf7d0; text-align: right;">
-        <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px; font-weight: bold;">بيانات الشحنة والتتبع</h4>
-        <p style="margin: 0 0 4px 0; color: #14532d; font-size: 13px;"><strong>شركة الشحن:</strong> ${carrier || 'الشحن المحلي السريع'}</p>
-        <p style="margin: 0; color: #14532d; font-size: 13px; font-family: monospace;"><strong>رقم التتبع:</strong> ${trackingNumber}</p>
-      </div>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 18px;">
+        <tr>
+          <td style="background-color: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0; padding: 16px 20px;" dir="rtl">
+            <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 6px 0; color: #166534; font-size: 13px; font-weight: 800;">بيانات الشحنة والتتبع</p>
+            <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 3px 0; color: #14532d; font-size: 12px;"><strong>شركة الشحن:</strong> ${carrier || 'الشحن المحلي السريع'}</p>
+            <p style="font-family: monospace; margin: 0; color: #14532d; font-size: 12px;"><strong>رقم التتبع:</strong> ${trackingNumber}</p>
+          </td>
+        </tr>
+      </table>
     ` : ''}
-
-    ${isDelivered ? `
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 25px;">نتمنى أن تضفي هذه القطعة لمسة دافئة وجمالاً فريداً على مساحتك. تقييمك ودعمك للحرفي يعني الكثير — هل تود مشاركة رأيك في جودة الصنعة؟</p>
-    ` : ''}
-    
-    <div style="margin-top: 35px; text-align: center;">
-      <a href="${ctaLink}" style="background-color: ${isDelivered ? ACCENT_COLOR : PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">
-        ${isDelivered ? 'شارك تقييمك' : 'متابعة الطلب'}
-      </a>
-    </div>
+    ${isDelivered ? `<p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 24px 0;">نتمنى أن تضفي هذه القطعة لمسة دافئة وجمالاً فريداً على مساحتك. تقييمك ودعمك للحرفي يعني الكثير — هل تود مشاركة رأيك؟</p>` : ''}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr><td align="center">${getCtaButton(ctaLink, isDelivered ? 'شارك تقييمك' : 'متابعة الطلب', isDelivered ? ACCENT_COLOR : PRIMARY_COLOR, 'ar')}</td></tr>
+    </table>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 20px;">
-      ${isDelivered ? 'Your Product has Arrived' : 'Journey Update'}
-    </h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 1.7;">Hi ${name}, your order for <strong>${productName}</strong> ${statusTextEn[status] || 'is moving forward'}.</p>
-    
-    <div style="margin: 30px 0; background-color: #f9fafb; padding: 25px; border-radius: 18px; border: 1px solid #f3f4f6; text-align: center;">
-      <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em; color: #9ca3af;">Current Milestone</p>
-      <p style="margin: 0; font-size: 26px; font-weight: bold; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
-      <p style="margin: 15px 0 0 0; font-size: 12px; font-weight: bold; color: #6b7280; font-family: monospace; word-break: break-all;">Ref: #${orderId}</p>
-    </div>
-
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 14px 0;">${isDelivered ? 'Your Product has Arrived' : 'Journey Update'}</h1>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 15px; line-height: 1.7; margin: 0 0 22px 0;">Hi ${name}, your order for <strong>${productName}</strong> ${statusTextEn[status] || 'is moving forward'}.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 22px;">
+      <tr>
+        <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8; text-align: center;">
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 6px 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #9ca3af;">Current Milestone</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 10px 0; font-size: 24px; font-weight: 800; color: ${statusColors[status] || PRIMARY_COLOR};">${status}</p>
+          <p style="font-family: monospace; margin: 0; font-size: 11px; font-weight: 700; color: #9ca3af; word-break: break-all;">Ref: #${orderId}</p>
+        </td>
+      </tr>
+    </table>
     ${status === 'SHIPPED' && trackingNumber ? `
-      <div style="margin: 20px 0; padding: 20px; border-radius: 16px; background-color: #f0fdf4; border: 1px solid #bbf7d0; text-align: left;">
-        <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px; font-weight: bold;">Shipment Information</h4>
-        <p style="margin: 0 0 4px 0; color: #14532d; font-size: 13px;"><strong>Carrier:</strong> ${carrier || 'Local Shipping Partner'}</p>
-        <p style="margin: 0; color: #14532d; font-size: 13px; font-family: monospace;"><strong>Tracking ID:</strong> ${trackingNumber}</p>
-      </div>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 18px;">
+        <tr>
+          <td style="background-color: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0; padding: 16px 20px;">
+            <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 6px 0; color: #166534; font-size: 13px; font-weight: 800;">Shipment Information</p>
+            <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 3px 0; color: #14532d; font-size: 12px;"><strong>Carrier:</strong> ${carrier || 'Local Shipping Partner'}</p>
+            <p style="font-family: monospace; margin: 0; color: #14532d; font-size: 12px;"><strong>Tracking ID:</strong> ${trackingNumber}</p>
+          </td>
+        </tr>
+      </table>
     ` : ''}
-
-    ${isDelivered ? `
-      <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 25px;">We hope this piece brings soul and beauty to your space. Artisans thrive on your feedback — would you take a moment to share your review?</p>
-    ` : ''}
-    
-    <div style="margin-top: 35px; text-align: center;">
-      <a href="${ctaLink}" style="background-color: ${isDelivered ? ACCENT_COLOR : PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">
-        ${isDelivered ? 'Share Your Review' : 'Track Order'}
-      </a>
-    </div>
+    ${isDelivered ? `<p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 24px 0;">We hope this piece brings soul and beauty to your space. Artisans thrive on your feedback &mdash; would you take a moment to share your review?</p>` : ''}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr><td align="center">${getCtaButton(ctaLink, isDelivered ? 'Share Your Review' : 'Track Order', isDelivered ? ACCENT_COLOR : PRIMARY_COLOR, 'en')}</td></tr>
+    </table>
   `;
 
   return sendOperationalEmail({
@@ -536,7 +688,7 @@ export const sendOrderStatusUpdateEmail = async (
     replyTo: SUPPORT_INBOX,
     to: email,
     subject,
-    html: wrapEmail(isAr ? arContent : enContent, lang),
+    html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? `تحديث طلبك #${orderId}: ${statusTextAr[status] || status}` : `Order #${orderId} update: ${productName} ${statusTextEn[status] || status}` }),
   });
 };
 
@@ -555,21 +707,39 @@ export const sendPasswordResetEmail = async (email: string, token: string, lang:
   const subject = isAr ? 'استعادة الوصول إلى الحساب | جيفتيزان' : 'Security: Access Recovery | Giftisan';
 
   const arContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">استعادة كلمة المرور</h1>
-    <p style="color: #4b5563; font-size: 15px; line-height: 1.9; margin-bottom: 25px;">تلقينا طلباً لإعادة تعيين كلمة المرور لحسابك في جيفتيزان. اضغط على الزر أدناه لاختيار كلمة مرور جديدة وتأمين حسابك.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${resetLink}" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">تعيين كلمة مرور جديدة</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 12px; font-style: italic; text-align: center;">صلاحية هذا الرابط تنتهي خلال 60 دقيقة.</p>
+    <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">استعادة كلمة المرور</h1>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.9; margin: 0 0 28px 0;">تلقينا طلباً لإعادة تعيين كلمة المرور لحسابك في جيفتيزان. اضغط على الزر أدناه لاختيار كلمة مرور جديدة وتأمين حسابك.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+      <tr><td align="center">${getCtaButton(resetLink, 'تعيين كلمة مرور جديدة', PRIMARY_COLOR, 'ar')}</td></tr>
+    </table>
+    ${getLinkFallback(resetLink, 'ar')}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #f0ede8; padding: 14px 18px;" align="center">
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: #b8b0a0; text-transform: uppercase; letter-spacing: 0.08em;">صلاحية الرابط</p>
+          <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; margin: 0; font-size: 13px; font-weight: 700; color: ${PRIMARY_COLOR};">تنتهي خلال 60 دقيقة</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #c0bdb8; font-size: 11px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذه الرسالة. حسابك بأمان تام.</p>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 24px; margin-bottom: 18px;">Access Recovery</h1>
-    <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 25px;">We received a request to reclaim access to your Giftisan account. Click below to choose a new password and secure your enclave.</p>
-    <div style="text-align: center; margin: 35px 0;">
-      <a href="${resetLink}" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">Secure My Account</a>
-    </div>
-    <p style="color: #9ca3af; font-size: 12px; font-style: italic; text-align: center;">This recovery link will expire in 60 minutes.</p>
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">Password Reset Request</h1>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 28px 0;">We received a request to reset the password for your Giftisan account. Click the button below to choose a new password and secure your account.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+      <tr><td align="center">${getCtaButton(resetLink, 'Reset My Password', PRIMARY_COLOR, 'en')}</td></tr>
+    </table>
+    ${getLinkFallback(resetLink, 'en')}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #f0ede8; padding: 14px 18px;" align="center">
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: #b8b0a0; text-transform: uppercase; letter-spacing: 0.08em;">Link Validity</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0; font-size: 13px; font-weight: 700; color: ${PRIMARY_COLOR};">Expires in 60 minutes</p>
+        </td>
+      </tr>
+    </table>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #c0bdb8; font-size: 11px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">If you didn&rsquo;t request a password reset, you can safely ignore this email. Your account remains secure.</p>
   `;
 
   try {
@@ -578,7 +748,7 @@ export const sendPasswordResetEmail = async (email: string, token: string, lang:
       replyTo: SUPPORT_INBOX,
       to: email,
       subject,
-      html: wrapEmail(isAr ? arContent : enContent, lang),
+      html: wrapEmail(isAr ? arContent : enContent, lang, { preheader: isAr ? 'طلب إعادة تعيين كلمة مرور حسابك في جيفتيزان.' : 'Reset your Giftisan account password. This link expires in 60 minutes.' }),
     });
     return { success: true };
   } catch (error) {
@@ -594,17 +764,19 @@ export const sendInquiryNotification = async (name: string, email: string, messa
   }
 
   const content = `
-    <h1 class="heading" style="color: ${PRIMARY_COLOR}; font-size: 22px; margin-bottom: 20px; text-align: center;">New Customer Inquiry</h1>
-    
-    <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; margin-bottom: 25px; border: 1px solid #f3f4f6;">
-      <p style="margin: 0 0 10px 0; color: #4b5563; font-size: 14px;"><strong>Name:</strong> ${name}</p>
-      <p style="margin: 0 0 10px 0; color: #4b5563; font-size: 14px;"><strong>Email:</strong> ${email}</p>
-      <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.7;"><strong>Message:</strong><br />${message}</p>
-    </div>
-
-    <div style="text-align: center;">
-      <a href="mailto:${email}" style="background-color: ${ACCENT_COLOR}; color: white; padding: 16px 36px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">Reply to Customer</a>
-    </div>
+    <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 20px; font-weight: 800; margin: 0 0 20px 0; text-align: center;">New Customer Inquiry</h1>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+      <tr>
+        <td style="background-color: #f9fafb; padding: 20px 22px; border-radius: 10px; border: 1px solid #f0ede8;">
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 8px 0; color: #4b5563; font-size: 13px;"><strong>Name:</strong> ${name}</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0 0 8px 0; color: #4b5563; font-size: 13px;"><strong>Email:</strong> ${email}</p>
+          <p style="font-family: Helvetica, Arial, sans-serif; margin: 0; color: #4b5563; font-size: 13px; line-height: 1.7;"><strong>Message:</strong><br />${message}</p>
+        </td>
+      </tr>
+    </table>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr><td align="center">${getCtaButton(`mailto:${email}`, 'Reply to Customer', ACCENT_COLOR, 'en')}</td></tr>
+    </table>
   `;
 
   return sendOperationalEmail({

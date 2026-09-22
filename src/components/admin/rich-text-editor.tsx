@@ -121,6 +121,17 @@ export function RichTextEditor({
     editor.chain().setTextAlign(dir === "rtl" ? "right" : "left").run();
   }, [dir, editor]);
 
+  // Sync external value changes (e.g., selecting quick draft templates or clearing form)
+  useEffect(() => {
+    if (!editor) return;
+    const currentHtml = editor.getHTML();
+    const normVal = (value || "").replace(/\s+/g, " ").trim();
+    const normCur = currentHtml.replace(/\s+/g, " ").trim();
+    if (normVal !== normCur) {
+      editor.commands.setContent(value || "", { emitUpdate: false });
+    }
+  }, [value, editor]);
+
   if (!editor) return null;
 
   const currentFontSize = editor.getAttributes("textStyle").fontSize || "16px";

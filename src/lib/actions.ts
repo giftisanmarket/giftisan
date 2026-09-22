@@ -3474,6 +3474,242 @@ export async function sendCustomEmailAction(data: {
   }
 }
 
+export type AudienceGroup = 'artisans' | 'customers' | 'all' | 'subscribers';
+
+export interface AudienceMember {
+  email: string;
+  name?: string | null;
+  role?: string;
+  detail?: string;
+}
+
+export async function getAudienceCountsAction(): Promise<{
+  artisans: number;
+  customers: number;
+  allUsers: number;
+  subscribers: number;
+}> {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { artisans: 0, customers: 0, allUsers: 0, subscribers: 0 };
+    }
+
+    const [artisansCount, clientUsers, distinctOrderEmails, allUsersCount, subscribersCount] = await Promise.all([
+      prisma.user.count({
+        where: {
+          email: { not: null },
+          OR: [
+            { role: "ARTISAN" },
+            { artisanProfile: { isNot: null } }
+          ]
+        }
+      }),
+      prisma.user.findMany({
+        where: {
+          email: { not: null },
+          OR: [
+            { role: "CLIENT" },
+            { orders: { some: {} } }
+          ]
+        },
+        select: { email: true }
+      }),
+      prisma.order.findMany({
+        where: { clientEmail: { not: null } },
+        select: { clientEmail: true },
+        distinct: ['clientEmail']
+      }),
+      prisma.user.count({
+        where: { email: { not: null } }
+      }),
+      prisma.newsletterSubscriber.count()
+    ]);
+
+    const customerEmailSet = new Set<string>();
+    for (const u of clientUsers) {
+      if (u.email) customerEmailSet.add(u.email.trim().toLowerCase());
+    }
+    for (const o of distinctOrderEmails) {
+      if (o.clientEmail) customerEmailSet.add(o.clientEmail.trim().toLowerCase());
+    }
+
+    return {
+      artisans: artisansCount,
+      customers: customerEmailSet.size,
+      allUsers: allUsersCount,
+      subscribers: subscribersCount,
+    };
+  } catch (error) {
+    console.error("getAudienceCountsAction error:", error);
+    return { artisans: 0, customers: 0, allUsers: 0, subscribers: 0 };
+  }
+}
+
+export async function getAudienceRecipientsAction(
+  target: AudienceGroup
+): Promise<{ success: boolean; data?: AudienceMember[]; error?: string }> {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const emailMap = new Map<string, AudienceMember>();
+
+    if (target === 'artisans') {
+      const artisans = await prisma.user.findMany({
+        where: {
+          email: { not: null },
+          OR: [
+            { role: "ARTISAN" },
+            { artisanProfile: { isNot: null } }
+          ]
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          artisanProfile: {
+            select: {
+              studioName: true,
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      for (const a of artisans) {
+        if (!a.email) continue;
+        const normalized = a.email.trim().toLowerCase();
+        if (!emailMap.has(normalized)) {
+          emailMap.set(normalized, {
+            email: a.email.trim(),
+            name: a.name || a.artisanProfile?.studioName || null,
+            role: "ARTISAN",
+            detail: a.artisanProfile?.studioName ? `Studio: ${a.artisanProfile.studioName}` : "Artisan"
+          });
+        }
+      }
+    } else if (target === 'customers') {
+      const clientUsers = await prisma.user.findMany({
+        where: {
+          email: { not: null },
+          OR: [
+            { role: "CLIENT" },
+            { orders: { some: {} } }
+          ]
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          _count: {
+            select: { orders: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      for (const c of clientUsers) {
+        if (!c.email) continue;
+        const normalized = c.email.trim().toLowerCase();
+        if (!emailMap.has(normalized)) {
+          const orderCount = c._count?.orders || 0;
+          emailMap.set(normalized, {
+            email: c.email.trim(),
+            name: c.name || null,
+            role: "CLIENT",
+            detail: orderCount > 0 ? `${orderCount} order${orderCount > 1 ? 's' : ''}` : "Registered Client"
+          });
+        }
+      }
+
+      const orders = await prisma.order.findMany({
+        where: { clientEmail: { not: null } },
+        select: {
+          clientEmail: true,
+        },
+        distinct: ['clientEmail']
+      });
+
+      for (const o of orders) {
+        if (!o.clientEmail) continue;
+        const normalized = o.clientEmail.trim().toLowerCase();
+        if (!emailMap.has(normalized)) {
+          emailMap.set(normalized, {
+            email: o.clientEmail.trim(),
+            name: null,
+            role: "CUSTOMER",
+            detail: "Order Customer"
+          });
+        }
+      }
+    } else if (target === 'all') {
+      const allUsers = await prisma.user.findMany({
+        where: { email: { not: null } },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          artisanProfile: {
+            select: {
+              studioName: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      for (const u of allUsers) {
+        if (!u.email) continue;
+        const normalized = u.email.trim().toLowerCase();
+        if (!emailMap.has(normalized)) {
+          emailMap.set(normalized, {
+            email: u.email.trim(),
+            name: u.name || u.artisanProfile?.studioName || null,
+            role: u.role,
+            detail: u.artisanProfile?.studioName ? `Studio: ${u.artisanProfile.studioName}` : u.role
+          });
+        }
+      }
+    } else if (target === 'subscribers') {
+      const subscribers = await prisma.newsletterSubscriber.findMany({
+        select: {
+          id: true,
+          email: true,
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      for (const s of subscribers) {
+        if (!s.email) continue;
+        const normalized = s.email.trim().toLowerCase();
+        if (!emailMap.has(normalized)) {
+          emailMap.set(normalized, {
+            email: s.email.trim(),
+            name: null,
+            role: "SUBSCRIBER",
+            detail: "Newsletter Subscriber"
+          });
+        }
+      }
+    }
+
+    return {
+      success: true,
+      data: Array.from(emailMap.values())
+    };
+  } catch (error) {
+    console.error("getAudienceRecipientsAction error:", error);
+    return { success: false, error: "Failed to fetch audience recipients" };
+  }
+}
+
+
 
 export async function bulkDeleteProducts(ids: string[]) {
   try {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles, Laptop, Smartphone } from "lucide-react";
-import { sendCustomEmailAction } from "@/lib/actions";
+import { Send, User, MessageSquare, Mail, Check, AlertCircle, Eye, X, ShieldCheck, Calendar, Briefcase, FileText, Sparkles, Laptop, Smartphone, Plus } from "lucide-react";
+import { sendCustomEmailAction, getAudienceRecipientsAction, type AudienceGroup } from "@/lib/actions";
 import { toast } from "react-hot-toast";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,13 +53,35 @@ const SENDER_PRESETS = [
 
 type TemplateStyle = 'corporate' | 'minimal' | 'artisan';
 
-export function OutreachClient({ dict }: { dict: any }) {
+type TargetAudience = 'custom' | 'artisans' | 'customers' | 'all' | 'subscribers';
+
+interface OutreachClientProps {
+  dict: any;
+  initialRecipients?: string;
+  initialAudienceCounts?: {
+    artisans: number;
+    customers: number;
+    allUsers: number;
+    subscribers: number;
+  };
+}
+
+export function OutreachClient({ 
+  dict, 
+  initialRecipients = "", 
+  initialAudienceCounts 
+}: OutreachClientProps) {
   const isAr = dict.profile?.delivered === "تم التوصيل" || dict.profile?.delivered === "تم الاستلام";
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Audience counts for quick add buttons
+  const [audienceCounts] = useState(
+    initialAudienceCounts || { artisans: 0, customers: 0, allUsers: 0, subscribers: 0 }
+  );
 
   // Sender state
   const [selectedPreset, setSelectedPreset] = useState<string>("management");
@@ -71,14 +93,62 @@ export function OutreachClient({ dict }: { dict: any }) {
   const [templateStyle, setTemplateStyle] = useState<TemplateStyle>("corporate");
 
   // Email form state
-  const [gmailTo, setGmailTo] = useState("");
+  const [gmailTo, setGmailTo] = useState(initialRecipients);
   const [gmailSubject, setGmailSubject] = useState("");
   const [gmailBody, setGmailBody] = useState("");
   const [gmailDir, setGmailDir] = useState<'rtl' | 'ltr'>(isAr ? 'rtl' : 'ltr');
   const [gmailStatus, setGmailStatus] = useState<"idle" | "sending">("idle");
+  const [sendProgress, setSendProgress] = useState<{ current: number; total: number } | null>(null);
+  const isAbortedRef = useRef(false);
   const [sendLogs, setSendLogs] = useState<{ email: string; status: "pending" | "success" | "error"; error?: string }[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+
+  const appendAudienceToCustom = async (audience: AudienceGroup) => {
+    try {
+      toast.loading(isAr ? "جاري جلب العناوين..." : "Fetching emails...", { id: "loading-recipients" });
+      const res = await getAudienceRecipientsAction(audience);
+      toast.dismiss("loading-recipients");
+      if (res.success && res.data) {
+        const currentList = gmailTo
+          .split(/[,;\n]/)
+          .map(e => e.trim())
+          .filter(e => e.length > 0);
+        const existingSet = new Set(currentList.map(e => e.toLowerCase()));
+        const newEmails = res.data
+          .map(m => m.email.trim())
+          .filter(e => !existingSet.has(e.toLowerCase()));
+
+        if (newEmails.length === 0) {
+          toast(isAr ? "تمت إضافة جميع هذه العناوين مسبقاً" : "All of these emails are already in the list", { icon: "ℹ️" });
+          return;
+        }
+
+        const combined = currentList.length > 0
+          ? `${currentList.join(", ")}, ${newEmails.join(", ")}`
+          : newEmails.join(", ");
+
+        setGmailTo(combined);
+        toast.success(isAr ? `تمت إضافة ${newEmails.length} عنوان جديد` : `Added ${newEmails.length} new addresses`);
+      } else {
+        toast.error(res.error || (isAr ? "فشل إضافة العناوين" : "Failed to fetch addresses"));
+      }
+    } catch {
+      toast.dismiss("loading-recipients");
+      toast.error(isAr ? "حدث خطأ" : "Error fetching addresses");
+    }
+  };
+
+  const parsedCustomCount = useMemo(() => {
+    return Array.from(
+      new Set(
+        gmailTo
+          .split(/[,;\n]/)
+          .map(e => e.trim().toLowerCase())
+          .filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+      )
+    ).length;
+  }, [gmailTo]);
 
   const isCustom = selectedPreset === "custom";
   const activePreset = SENDER_PRESETS.find(p => p.id === selectedPreset);
@@ -437,10 +507,14 @@ export function OutreachClient({ dict }: { dict: any }) {
       return;
     }
 
-    const emailsList = gmailTo
-      .split(/[,;]/)
-      .map(e => e.trim())
-      .filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+    const emailsList = Array.from(
+      new Set(
+        gmailTo
+          .split(/[,;\n]/)
+          .map(e => e.trim().toLowerCase())
+          .filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+      )
+    );
 
     if (emailsList.length === 0) {
       toast.error(isAr ? "برجاء إدخال عناوين بريد إلكتروني صالحة" : "Please enter valid email addresses");
@@ -448,11 +522,18 @@ export function OutreachClient({ dict }: { dict: any }) {
     }
 
     setGmailStatus("sending");
+    isAbortedRef.current = false;
+    setSendProgress({ current: 0, total: emailsList.length });
     setSendLogs(emailsList.map(email => ({ email, status: "pending" as const })));
 
     let successCount = 0;
 
     for (let i = 0; i < emailsList.length; i++) {
+      if (isAbortedRef.current) {
+        toast.error(isAr ? `تم إيقاف الإرسال. تم إرسال ${successCount} رسالة بنجاح.` : `Sending stopped. Successfully sent ${successCount} emails.`);
+        break;
+      }
+
       try {
         const res = await sendCustomEmailAction({
           to: emailsList[i],
@@ -474,15 +555,19 @@ export function OutreachClient({ dict }: { dict: any }) {
       } catch {
         setSendLogs(prev => prev.map((log, idx) => idx === i ? { ...log, status: "error" as const, error: "Network Error" } : log));
       }
+
+      setSendProgress({ current: i + 1, total: emailsList.length });
     }
 
     setGmailStatus("idle");
 
-    if (successCount === emailsList.length) {
-      toast.success(isAr ? `تم إرسال جميع الرسائل (${successCount}) بنجاح!` : `All ${successCount} emails sent successfully!`);
-      setIsPreviewOpen(true);
-    } else {
-      toast.error(isAr ? `تم إرسال ${successCount} من أصل ${emailsList.length} رسائل` : `Sent ${successCount} of ${emailsList.length} emails`);
+    if (!isAbortedRef.current) {
+      if (successCount === emailsList.length) {
+        toast.success(isAr ? `تم إرسال جميع الرسائل (${successCount}) بنجاح!` : `All ${successCount} emails sent successfully!`);
+        setIsPreviewOpen(true);
+      } else {
+        toast.error(isAr ? `تم إرسال ${successCount} من أصل ${emailsList.length} رسائل` : `Sent ${successCount} of ${emailsList.length} emails`);
+      }
     }
   };
 
@@ -689,21 +774,86 @@ export function OutreachClient({ dict }: { dict: any }) {
                 </button>
               </div>
             </div>
-
-            {/* To */}
+            {/* Recipients (To) */}
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 flex items-center gap-2">
-                  <User className="w-3.5 h-3.5" />
-                  {isAr ? "إلى" : "To"}
-                </label>
+                <div className="flex items-center gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/70 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-accent" />
+                    <span>{isAr ? "المستلمون (إلى)" : "Recipients (To)"}</span>
+                  </label>
+                  {parsedCustomCount > 0 && (
+                    <span className="text-[10px] font-mono font-bold text-accent px-2 py-0.5 rounded-full bg-accent/10">
+                      {isAr ? `${parsedCustomCount} بريد صالح` : `${parsedCustomCount} valid email(s)`}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-bold text-accent/60">
-                  {isAr ? "افصل بين الإيميلات بفاصلة (,)" : "Separate multiple addresses with , or ;"}
+                  {isAr ? "افصل بين الإيميلات بفاصلة (,) أو سطر جديد" : "Separate multiple addresses with , or new line"}
                 </span>
               </div>
+
+              {/* Quick Append Audience Buttons */}
+              <div className="flex flex-wrap items-center gap-1.5 pb-1">
+                <span className="text-[9px] font-black uppercase tracking-wider text-primary/40 flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-accent" />
+                  <span>{isAr ? "إضافة سريعة للجمهور:" : "Quick Add Audience:"}</span>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => appendAudienceToCustom('artisans')}
+                  className="px-2.5 py-1 rounded-lg bg-cream/70 hover:bg-cream border border-primary/10 text-[10px] font-bold text-primary flex items-center gap-1 cursor-pointer transition-all hover:border-accent/40 active:scale-95 shadow-2xs"
+                  title={isAr ? "إضافة جميع الحرفيين المسجلين" : "Add all registered artisans"}
+                >
+                  <Plus className="w-2.5 h-2.5 text-accent" />
+                  <span>{isAr ? `الحرفيين (${audienceCounts.artisans})` : `Artisans (${audienceCounts.artisans})`}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => appendAudienceToCustom('customers')}
+                  className="px-2.5 py-1 rounded-lg bg-cream/70 hover:bg-cream border border-primary/10 text-[10px] font-bold text-primary flex items-center gap-1 cursor-pointer transition-all hover:border-accent/40 active:scale-95 shadow-2xs"
+                  title={isAr ? "إضافة عملاء المتجر وأصحاب الطلبات" : "Add store customers"}
+                >
+                  <Plus className="w-2.5 h-2.5 text-accent" />
+                  <span>{isAr ? `العملاء (${audienceCounts.customers})` : `Customers (${audienceCounts.customers})`}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => appendAudienceToCustom('all')}
+                  className="px-2.5 py-1 rounded-lg bg-cream/70 hover:bg-cream border border-primary/10 text-[10px] font-bold text-primary flex items-center gap-1 cursor-pointer transition-all hover:border-accent/40 active:scale-95 shadow-2xs"
+                  title={isAr ? "إضافة كافة الحسابات المسجلة" : "Add every registered user"}
+                >
+                  <Plus className="w-2.5 h-2.5 text-accent" />
+                  <span>{isAr ? `كافة المستخدمين (${audienceCounts.allUsers})` : `All Users (${audienceCounts.allUsers})`}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => appendAudienceToCustom('subscribers')}
+                  className="px-2.5 py-1 rounded-lg bg-cream/70 hover:bg-cream border border-primary/10 text-[10px] font-bold text-primary flex items-center gap-1 cursor-pointer transition-all hover:border-accent/40 active:scale-95 shadow-2xs"
+                  title={isAr ? "إضافة مشتركي النشرة البريدية" : "Add newsletter subscribers"}
+                >
+                  <Plus className="w-2.5 h-2.5 text-accent" />
+                  <span>{isAr ? `المشتركين (${audienceCounts.subscribers})` : `Subscribers (${audienceCounts.subscribers})`}</span>
+                </button>
+
+                {gmailTo.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setGmailTo("")}
+                    className="ltr:ml-auto rtl:mr-auto text-[10px] font-bold text-primary/40 hover:text-red-500 transition-colors cursor-pointer px-1.5 py-0.5"
+                  >
+                    {isAr ? "تفريغ الحقل" : "Clear field"}
+                  </button>
+                )}
+              </div>
+
               <textarea
                 required
-                rows={2}
+                rows={3}
                 value={gmailTo}
                 onChange={(e) => setGmailTo(e.target.value)}
                 className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-cream/30 border border-primary/5 rounded-2xl focus:outline-none focus:border-accent focus:bg-white transition-all font-bold text-primary text-xs sm:text-sm resize-none"
@@ -818,13 +968,34 @@ export function OutreachClient({ dict }: { dict: any }) {
               />
             </div>
 
-            {/* Batch Send Logs */}
+            {/* Batch Send Logs & Progress */}
             {sendLogs.length > 0 && (
               <div className="p-3.5 sm:p-5 bg-cream/50 rounded-2xl border border-primary/5 space-y-3">
-                <h4 className="text-xs font-black text-primary/50 uppercase tracking-wider">
-                  {isAr ? "حالة الإرسال" : "Send Status"}
-                </h4>
-                <div className="grid gap-2 max-h-[160px] overflow-y-auto">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-primary/50 uppercase tracking-wider">
+                    {isAr ? "حالة الإرسال" : "Send Status"}
+                  </h4>
+                  {sendProgress && (
+                    <span className="text-xs font-bold text-accent font-mono">
+                      {sendProgress.current} / {sendProgress.total} (
+                      {Math.round((sendProgress.current / sendProgress.total) * 100)}%)
+                    </span>
+                  )}
+                </div>
+
+                {/* Progress bar if sending */}
+                {sendProgress && gmailStatus === "sending" && (
+                  <div className="space-y-1">
+                    <div className="w-full bg-primary/10 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className="bg-accent h-full transition-all duration-300 rounded-full"
+                        style={{ width: `${Math.round((sendProgress.current / sendProgress.total) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid gap-2 max-h-[180px] overflow-y-auto">
                   {sendLogs.map((log, i) => (
                     <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-primary/5 last:border-0 gap-3">
                       <span className="font-mono text-primary/70 truncate text-[11px] sm:text-xs">{log.email}</span>
@@ -869,6 +1040,20 @@ export function OutreachClient({ dict }: { dict: any }) {
                 <span>{gmailStatus === "sending" ? (isAr ? "جاري الإرسال..." : "Sending...") : (isAr ? "إرسال الرسالة" : "Send Message")}</span>
               </button>
 
+              {gmailStatus === "sending" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    isAbortedRef.current = true;
+                    toast(isAr ? "جاري إيقاف الإرسال..." : "Stopping send...", { icon: "🛑" });
+                  }}
+                  className="px-5 h-12 sm:h-14 bg-red-600 hover:bg-red-700 text-white font-heading font-black text-xs uppercase tracking-widest rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                  <span>{isAr ? "إيقاف الإرسال" : "Stop"}</span>
+                </button>
+              )}
+
               <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto sm:ml-auto">
                 <button
                   type="button"
@@ -892,6 +1077,7 @@ export function OutreachClient({ dict }: { dict: any }) {
                     setCustomSenderEmail("");
                     setCustomReplyTo("");
                     setSendLogs([]);
+                    setSendProgress(null);
                   }}
                   className="px-4 sm:px-6 h-11 sm:h-14 border border-primary/10 hover:border-primary/20 text-primary/50 hover:text-primary font-heading font-black text-xs uppercase tracking-wider rounded-xl sm:rounded-2xl flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer"
                 >

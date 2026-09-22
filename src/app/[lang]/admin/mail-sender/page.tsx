@@ -4,6 +4,7 @@ import { OutreachClient } from "@/components/outreach-client";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getAudienceCountsAction } from "@/lib/actions";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -13,8 +14,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
-export default async function AdminOutreachPage({ params }: { params: Promise<{ lang: string }> }) {
+export default async function AdminOutreachPage({ 
+  params,
+  searchParams,
+}: { 
+  params: Promise<{ lang: string }>;
+  searchParams?: Promise<{ recipients?: string }>;
+}) {
   const { lang } = await params;
+  const sParams = await searchParams;
   const dict = await getDictionary(lang as any);
   
   const session = await auth();
@@ -22,6 +30,8 @@ export default async function AdminOutreachPage({ params }: { params: Promise<{ 
   
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (user?.role !== "ADMIN") redirect(`/${lang}`);
+
+  const audienceCounts = await getAudienceCountsAction();
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -37,7 +47,12 @@ export default async function AdminOutreachPage({ params }: { params: Promise<{ 
         </p>
       </div>
 
-      <OutreachClient dict={dict} />
+      <OutreachClient 
+        dict={dict} 
+        initialRecipients={sParams?.recipients || ""}
+        initialAudienceCounts={audienceCounts}
+      />
     </div>
   );
 }
+

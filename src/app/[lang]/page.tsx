@@ -21,185 +21,133 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
+const productSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  price: true,
+  stock: true,
+  badge: true,
+  images: true,
+  isFeatured: true,
+  category: true,
+  canPersonalize: true,
+  requiresClientImage: true,
+  variants: true,
+  artisan: {
+    select: {
+      id: true,
+      studioName: true,
+      slug: true,
+      avatar: true,
+      user: {
+        select: {
+          name: true
+        }
+      }
+    }
+  }
+};
+
+function sanitizeProducts(productsList: any[]) {
+  return productsList.map(p => ({
+    ...p,
+    images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
+    artisan: {
+      ...p.artisan,
+      avatar: (p.artisan?.avatar?.length || 0) > 300000 ? "" : p.artisan?.avatar
+    }
+  }));
+}
+
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   
   const dict = await getDictionary(lang as any);
 
-  const categoryNames = [
-    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles", 
-    "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
-    "Glasswork", "Basketry", "Fashion",
-    "Wedding", "Personalized", "Art & Collectibles"
-  ];
-
-  // Run all database queries concurrently in parallel with Promise.all
-  const [products, artisans, artisanCount, categoryCountsRaw] = await Promise.all([
+  // Fetch categorized product rows concurrently in parallel
+  const [
+    featuredProducts,
+    personalizedProducts,
+    textileFashionProducts,
+    homeDecorProducts,
+    artisanCount
+  ] = await Promise.all([
+    // 1. Top Featured & Best Finds (10 items = 2 complete 5-card rows)
     prisma.product.findMany({
       where: {
-        status: "APPROVED",
-        artisan: {
-          status: "APPROVED"
-        }
+        status: "APPROVED"
       },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        price: true,
-        stock: true,
-        badge: true,
-        images: true,
-        isFeatured: true,
-        category: true,
-        canPersonalize: true,
-        requiresClientImage: true,
-        variants: true,
-        artisan: {
-          select: {
-            id: true,
-            studioName: true,
-            slug: true,
-            avatar: true,
-            user: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      },
-      take: 12,
+      select: productSelect,
+      take: 10,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
       ]
     }),
-    prisma.artisanProfile.findMany({
+
+    // 2. Personalized & Bespoke Gifts (5 items = 1 full row)
+    prisma.product.findMany({
       where: {
         status: "APPROVED",
-        NOT: [
-          { studioName: { contains: "khashab", mode: "insensitive" } },
-          { studioName: { contains: "تمارا", mode: "insensitive" } },
-          { studioName: { contains: "giftisan", mode: "insensitive" } },
-          { user: { email: { contains: "giftisan", mode: "insensitive" } } }
+        OR: [
+          { canPersonalize: true },
+          { requiresClientImage: true },
+          { category: { contains: "personalized", mode: "insensitive" } }
         ]
       },
-      select: {
-        id: true,
-        studioName: true,
-        slug: true,
-        avatar: true,
-        isVerified: true,
-        location: true,
-        bio: true,
-        _count: {
-          select: {
-            products: {
-              where: {
-                status: "APPROVED"
-              }
-            }
-          }
-        },
-        user: {
-          select: {
-            name: true
-          }
-        }
-      },
+      select: productSelect,
+      take: 5,
       orderBy: [
-        { isVerified: 'desc' },
-        { products: { _count: 'desc' } },
-        { updatedAt: 'desc' }
-      ],
-      take: 8
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
     }),
-    prisma.artisanProfile.count({
-      where: { status: "APPROVED" }
-    }),
-    prisma.product.groupBy({
-      by: ['category'],
+
+    // 3. Handcrafted Textiles & Wearables (5 items = 1 full row)
+    prisma.product.findMany({
       where: {
         status: "APPROVED",
-        artisan: {
-          status: "APPROVED"
-        }
+        category: { in: ["fashion", "textiles", "apparel", "wearables"], mode: "insensitive" }
       },
-      _count: {
-        _all: true
-      }
+      select: productSelect,
+      take: 5,
+      orderBy: [
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    }),
+
+    // 4. Authentic Handcrafted Woodwork (5 items = 1 full row)
+    prisma.product.findMany({
+      where: {
+        status: "APPROVED",
+        category: { equals: "woodwork", mode: "insensitive" }
+      },
+      select: productSelect,
+      take: 5,
+      orderBy: [
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    }),
+
+    // Artisan Count
+    prisma.artisanProfile.count({
+      where: { status: "APPROVED" }
     })
   ]);
 
-  // Initialize a map with 0 counts for all official category names (case-insensitive keys)
-  const categoryCountsMap = new Map<string, number>();
-  categoryNames.forEach(name => {
-    categoryCountsMap.set(name.toLowerCase(), 0);
-  });
-
-  // Category aliases for custom DB values
-  const categoryAliasMap: Record<string, string> = {
-    "home decor": "Woodwork",
-    "home-decor": "Woodwork",
-    "accessories": "Fashion",
-    "leatherwork": "Fashion",
-    "culinary": "Culinary Arts",
-    "beauty": "Beauty & Apothecary"
-  };
-
-  // Accumulate counts from the database grouping, translating various database formats back to official names
-  categoryCountsRaw.forEach(item => {
-    const rawCategory = item.category;
-    if (!rawCategory) return;
-    
-    const normalizedRaw = rawCategory.toLowerCase().trim();
-    const aliasedName = categoryAliasMap[normalizedRaw];
-
-    const officialName = aliasedName || categoryNames.find(name => {
-      const slug1 = name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-      const slug2 = name.toLowerCase().replace(/\s+/g, "-");
-      const slug3 = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-      return slug1 === normalizedRaw || 
-             slug2 === normalizedRaw || 
-             slug3 === normalizedRaw || 
-             name.toLowerCase() === normalizedRaw;
-    }) || rawCategory;
-
-    const currentCount = categoryCountsMap.get(officialName.toLowerCase()) || 0;
-    categoryCountsMap.set(officialName.toLowerCase(), currentCount + item._count._all);
-  });
-
-  const categoryCounts = categoryNames
-    .map(name => ({
-      name,
-      count: categoryCountsMap.get(name.toLowerCase()) || 0
-    }))
-    .sort((a, b) => {
-      // 1. Categories with available items come before 0-item categories
-      if (a.count > 0 && b.count === 0) return -1;
-      if (a.count === 0 && b.count > 0) return 1;
-
-      // 2. Sort by item count descending
-      return b.count - a.count;
-    });
-
-  // Sanitize data to prevent serialization crashes from oversized images in the DB
-  const sanitizedProducts = products.map(p => ({
-    ...p,
-    images: Array.isArray(p.images) ? p.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
-    artisan: {
-      ...p.artisan,
-      avatar: (p.artisan.avatar?.length || 0) > 300000 ? "" : p.artisan.avatar
-    }
-  }));
-
-  const sanitizedArtisans = artisans.map(a => ({
-    ...a,
-    avatar: (a.avatar?.length || 0) > 300000 ? "" : a.avatar
-  }));
-
-  return <HomeClient products={sanitizedProducts} artisans={sanitizedArtisans} categoryCounts={categoryCounts} artisanCount={artisanCount} dict={dict} />;
+  return (
+    <HomeClient
+      featuredProducts={sanitizeProducts(featuredProducts)}
+      personalizedProducts={sanitizeProducts(personalizedProducts)}
+      textileFashionProducts={sanitizeProducts(textileFashionProducts)}
+      homeDecorProducts={sanitizeProducts(homeDecorProducts)}
+      artisanCount={artisanCount}
+      dict={dict}
+    />
+  );
 }

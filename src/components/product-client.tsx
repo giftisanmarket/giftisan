@@ -485,23 +485,14 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               {product.description}
             </p>
 
-            {/* Artisan Quick Bio */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-8">
+            {/* Brand Link */}
+            <div className="mb-6">
               <Link
-                href={`/artisans/${product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/ /g, "-")}`}
-                className="flex items-center gap-4 p-5 md:p-6 bg-white rounded-3xl border border-primary/5 hover:border-accent/40 shadow-sm hover:shadow-xl transition-all flex-1 active:scale-[0.98]"
+                href={`/artisans/${encodeURI(product.artisan.slug || product.artisan.user.name.toLowerCase().replace(/\s+/g, "-"))}`}
+                className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline underline-offset-4 decoration-primary/30 hover:text-accent hover:decoration-accent transition-colors"
               >
-                <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-cream shrink-0">
-                  <BespokeImage type="artisan" id={product.artisan.id} src={product.artisan.avatar} alt={product.artisan.user.name} fill className="object-cover" sizes="64px" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1">
-                    <p className="text-[8px] md:text-xs font-bold text-accent uppercase tracking-tighter">{dict.product.handcrafted_by}</p>
-                    {product.artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent" />}
-                  </div>
-                  <h3 className="text-lg md:text-xl font-heading font-bold text-primary truncate">{product.artisan.studioName || product.artisan.user.name}</h3>
-                  <p className="text-xs text-charcoal/60 truncate">{dict.product.operating_out_of} {product.artisan.location}</p>
-                </div>
+                <span>{product.artisan.studioName || product.artisan.user.name}</span>
+                {product.artisan.isVerified && <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />}
               </Link>
             </div>
 
@@ -959,31 +950,30 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
               {relatedProducts.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/products/${p.slug || p.id}`}
+                  href={`/products/${encodeURI(p.slug || p.id)}`}
                   className="group cursor-pointer block"
                 >
-                  <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-6 shadow-xl shadow-primary/5 border border-primary/5 bg-transparent">
+                  <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2.5 bg-cream/40 border border-primary/5 group-hover:shadow-md transition-all">
                     <BespokeImage
                       src={p.images[0]}
                       alt={p.name}
                       fill
-                      className="object-contain group-hover:scale-105 transition-transform duration-700"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                     />
 
-                    <div className="absolute top-4 end-4 p-3 rounded-full bg-white/90 backdrop-blur text-primary lg:opacity-0 lg:group-hover:opacity-100 opacity-100 hover:bg-white transition-all scale-90 lg:group-hover:scale-100">
-                      <Heart className={cn("w-5 h-5", isFavorite(p.id) && "fill-current text-red-500")} />
+                    <div className="absolute top-2.5 end-2.5 p-2 rounded-full bg-white/90 backdrop-blur text-primary shadow-sm hover:scale-110 transition-all">
+                      <Heart className={cn("w-4 h-4", isFavorite(p.id) && "fill-current text-red-500")} />
                     </div>
                   </div>
-                  <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{p.artisan.studioName || p.artisan.user.name}</p>
-                  <h3 className="text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors">
+                  <h3 className="text-sm font-semibold text-primary truncate group-hover:text-accent transition-colors">
                     {p.name}
                   </h3>
-                  <p className="font-heading font-bold text-primary mt-2">{dict.product.currency} {p.price}.00</p>
+                  <p className="text-sm font-bold text-primary mt-1">{dict.product.currency} {p.price}.00</p>
                 </Link>
               ))}
             </div>

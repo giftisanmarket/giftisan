@@ -10,6 +10,12 @@ interface FavoritesContextType {
   toggleFavorite: (product: any) => Promise<void>;
   isFavorite: (productId: string) => boolean;
   totalFavorites: number;
+
+  // Artisan / Studio favorites
+  favoriteArtisans: any[];
+  toggleFavoriteArtisan: (artisan: any) => void;
+  isFavoriteArtisan: (artisanId: string) => boolean;
+  totalFavoriteArtisans: number;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -17,6 +23,7 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState<Product[]>([]);
+  const [favoriteArtisans, setFavoriteArtisans] = useState<any[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from localStorage on mount, then sync with DB if logged in or refresh stale guest items
@@ -30,6 +37,21 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(parsed)) {
             localList = parsed;
             setFavorites(parsed);
+          }
+        }
+
+        // Load favorite artisans
+        const savedArtisans =
+          localStorage.getItem("giftisan-favorite-artisans") ||
+          localStorage.getItem("giftisan-followed-artisans");
+        if (savedArtisans) {
+          try {
+            const parsedArtisans = JSON.parse(savedArtisans);
+            if (Array.isArray(parsedArtisans)) {
+              setFavoriteArtisans(parsedArtisans);
+            }
+          } catch (e) {
+            console.error("Failed to parse favorite artisans", e);
           }
         }
 
@@ -69,6 +91,17 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("giftisan-favorites", JSON.stringify(favorites));
     }
   }, [favorites, isInitialized]);
+
+  // Save favorite artisans to localStorage
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem("giftisan-favorite-artisans", JSON.stringify(favoriteArtisans));
+      const ids = favoriteArtisans
+        .map((a) => (typeof a === "string" ? a : a?.id))
+        .filter(Boolean);
+      localStorage.setItem("giftisan-followed-artisans", JSON.stringify(ids));
+    }
+  }, [favoriteArtisans, isInitialized]);
 
   const toggleFavorite = async (product: any) => {
     const isAdding = !favorites.some((p) => p.id === product.id);
@@ -113,6 +146,27 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     return favorites.some((p) => p.id === productId);
   };
 
+  const toggleFavoriteArtisan = (artisan: any) => {
+    const artisanId = typeof artisan === "string" ? artisan : artisan.id;
+    setFavoriteArtisans((prev) => {
+      const exists = prev.some((a) =>
+        typeof a === "string" ? a === artisanId : a?.id === artisanId
+      );
+      if (exists) {
+        return prev.filter((a) =>
+          typeof a === "string" ? a !== artisanId : a?.id !== artisanId
+        );
+      }
+      return [...prev, artisan];
+    });
+  };
+
+  const isFavoriteArtisan = (artisanId: string) => {
+    return favoriteArtisans.some((a) =>
+      typeof a === "string" ? a === artisanId : a?.id === artisanId
+    );
+  };
+
   return (
     <FavoritesContext.Provider
       value={{
@@ -120,6 +174,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         toggleFavorite,
         isFavorite,
         totalFavorites: favorites.length,
+        favoriteArtisans,
+        toggleFavoriteArtisan,
+        isFavoriteArtisan,
+        totalFavoriteArtisans: favoriteArtisans.length,
       }}
     >
       {children}
@@ -134,3 +192,4 @@ export function useFavorites() {
   }
   return context;
 }
+

@@ -367,7 +367,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                   transition={{ duration: 0.35, delay: Math.min(idx * 0.03, 0.3) }}
                 >
                   <Link href={`/products/${product.slug || product.id}`} className="group block">
-                    <div className="relative aspect-[3/4] md:aspect-[4/5] rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden mb-4 shadow-xl border border-primary/5 bg-white">
+                    <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow border border-primary/5 bg-white">
                       <BespokeImage
                         src={product.images[0]}
                         alt={product.name}
@@ -397,9 +397,6 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                     </div>
 
                     <div className="space-y-1 px-1">
-                      <p className="text-[8px] md:text-[10px] font-black text-accent uppercase tracking-[0.2em] leading-none mb-1 truncate">
-                        {product.artisan?.studioName || "Artisan Made"}
-                      </p>
                       <h3 className="text-xs md:text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight line-clamp-1">
                         {product.name}
                       </h3>

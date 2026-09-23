@@ -1,122 +1,92 @@
 "use client";
 
-import { BespokeImage } from "./bespoke-image";
-import { motion } from "framer-motion";
-import { Search, Sparkles, Store } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { ArrowRight, Sparkles } from "lucide-react";
 
-export function Hero({ artisanCount = 0, dict }: { artisanCount?: number; dict: any }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
+interface HeroProps {
+  artisanCount?: number;
+  dict?: any;
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+export function Hero({ dict }: HeroProps) {
+  const card1Title = dict?.home?.hero_card1_title || "Elevate Every Gift-Giving Moment";
+  const card1Button = dict?.home?.hero_card1_button || "Shop Gifts";
+  const card2Title = dict?.home?.hero_card2_title || "Discover the artisans we have our eye on";
+  const card2Button = dict?.home?.hero_card2_button || "Meet the Makers";
 
   return (
-    <section className="relative w-full overflow-hidden bg-cream pt-12 md:pt-20 pb-16 md:pb-24 lg:pb-32">
-      <div className="max-w-[1600px] mx-auto px-4 md:px-8 grid lg:grid-cols-2 items-center gap-8 lg:gap-10 xl:gap-16 2xl:gap-20">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 space-y-6 md:space-y-10 flex flex-col items-center lg:items-start text-center lg:text-start"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/5 border border-accent/20 text-accent font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] w-fit">
-            <Sparkles className="w-3 h-3" /> {dict?.common?.explore || "Explore"}
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-heading font-bold text-primary leading-[1.1] tracking-tight">
-            {dict?.home?.hero_elevate || "Elevate Every Gift-Giving Moment"}
-          </h1>
-          
-          <p className="text-base md:text-xl text-charcoal/60 max-w-lg leading-relaxed font-medium">
-            {dict?.home?.hero_discover || "Discover a curated collection of handcrafted products..."}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xl">
-            <form 
-              onSubmit={handleSearch}
-              className="flex-1 flex flex-col sm:flex-row gap-3"
-            >
-              <div className="relative flex-1 group">
-                <Search className="absolute start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/30 group-focus-within:text-accent transition-colors" />
-                <input 
-                  name="q"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={dict?.home?.hero_search_placeholder || "Search for products..."}
-                  className="w-full h-14 md:h-16 ps-14 pe-6 bg-white border border-primary/10 rounded-xl md:rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-xl shadow-primary/5 font-medium text-primary placeholder:text-primary/30 text-sm md:text-base"
-                />
-              </div>
-              <button 
-                type="submit"
-                className="h-14 md:h-16 px-8 bg-primary text-white font-bold rounded-xl md:rounded-full hover:bg-primary-light transition-all shadow-xl shadow-primary/20 shrink-0 text-sm md:text-base active:scale-95 duration-200"
-              >
-                {dict?.home?.hero_search_button || "Search"}
-              </button>
-            </form>
-            
-            <div className="relative">
-              <Link
-                href="/become-artisan"
-                className="h-14 md:h-16 px-8 bg-white text-primary border border-primary/10 font-bold rounded-xl md:rounded-full hover:bg-cream transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 text-sm md:text-base shrink-0"
-              >
-                {dict?.common?.open_studio || "Open Your Studio"} <Store className="w-4 h-4" />
-              </Link>
-              <div className="absolute -top-3 -end-3 md:-top-4 md:-end-4 px-3 py-1 bg-accent text-white text-[8px] md:text-[9px] font-black rounded-full shadow-lg rotate-12 rtl:-rotate-12 animate-pulse border-2 border-white uppercase tracking-widest z-10">
-                {dict?.common?.founding_banner?.title?.split(' ')[0] || "2026"} {dict?.common?.zero_fee_badge || "0% Fee"}
-              </div>
+    <section className="w-full max-w-[1520px] mx-auto px-4 md:px-8 py-3 md:py-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch"
+      >
+        {/* Left Card: Featured Handcrafted Gift Banner */}
+        <div className="lg:col-span-7 xl:col-span-8 group relative rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-br from-[#064E3B] to-[#043327] grid grid-cols-1 sm:grid-cols-2 min-h-[380px] lg:min-h-[430px] shadow-sm border border-primary/10">
+          {/* Content Half */}
+          <div className="flex flex-col justify-center items-center text-center p-8 sm:p-10 md:p-12 lg:p-10 xl:p-14 z-10 space-y-6 md:space-y-8">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-accent-light text-[10px] md:text-xs font-bold uppercase tracking-widest">
+              <Sparkles className="w-3 h-3 text-accent-light" />
+              <span>{dict?.common?.explore || "Curated Gifts"}</span>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-6 pt-2">
-            <Link href="/artisans" className="text-[10px] md:text-xs font-bold text-charcoal/40 hover:text-accent transition-all flex items-center gap-2 group active:scale-95">
-              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              {(dict?.home?.hero_join_artisans || "Join {count} Master Artisans").replace('{count}', artisanCount > 0 ? `${artisanCount}+` : "")}
+
+            <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-medium text-cream leading-[1.18] tracking-tight">
+              {card1Title}
+            </h1>
+            
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center px-7 py-3 rounded-full bg-cream text-primary font-bold text-sm sm:text-base hover:bg-white hover:text-accent transition-all duration-200 shadow-md active:scale-95 hover:shadow-lg shrink-0"
+            >
+              {card1Button}
             </Link>
           </div>
-        </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="relative mt-8 lg:mt-0"
-        >
-          <div className="relative aspect-square md:aspect-[4/5] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-2xl border-4 border-white">
-            <BespokeImage
+          {/* Image Half */}
+          <div className="relative w-full h-[280px] sm:h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[430px] overflow-hidden">
+            <Image
               src="/hero.webp"
-              alt={dict?.seo?.title || "Giftisan Marketplace"}
+              alt="Giftisan Handcrafted Collection"
               fill
-              className="object-cover"
               priority
-              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 45vw"
             />
           </div>
-          
-          {/* Decorative Elements */}
-          <div className="absolute -bottom-10 -start-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl -z-10" />
-          <div className="absolute -top-10 -end-10 w-60 h-60 bg-primary/10 rounded-full blur-3xl -z-10" />
-          
-          <div className="absolute bottom-4 end-4 md:bottom-6 md:end-6 lg:bottom-4 lg:end-4 xl:-bottom-10 xl:-end-10 glass p-5 md:p-6 lg:p-6 xl:p-8 rounded-3xl shadow-2xl max-w-[180px] md:max-w-[240px] border border-white/50 backdrop-blur-xl animate-in slide-in-from-bottom-4 duration-1000 delay-500">
-            <p className="text-xs md:text-base font-medium text-charcoal/80 leading-relaxed italic">
-              "{dict?.home?.testimonial_quote || "The quality of the handcrafted item is incredible."}"
-            </p>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="w-8 h-px bg-accent/30" />
-              <p className="text-[10px] md:text-xs font-black text-accent uppercase tracking-widest">{dict?.home?.testimonial_author || "Verified Buyer"}</p>
-            </div>
+        </div>
+
+        {/* Right Card: Artisan Spotlight (Desktop only, hidden on small screens) */}
+        <Link
+          href="/artisans"
+          className="hidden lg:block lg:col-span-5 xl:col-span-4 group relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[320px] sm:min-h-[380px] lg:min-h-[430px] shadow-sm border border-primary/10"
+        >
+          <Image
+            src="/marketing/artisan-working.webp"
+            alt="Artisan Craftsmanship"
+            fill
+            priority
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            sizes="(max-width: 1024px) 100vw, 35vw"
+          />
+
+          {/* Bottom Gradient Overlay styled with deep brand tone */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#04281E]/95 via-[#04281E]/40 to-transparent pointer-events-none" />
+
+          {/* Bottom Content */}
+          <div className="absolute bottom-6 start-6 end-6 md:bottom-8 md:start-8 md:end-8 text-white space-y-2.5 z-10">
+            <h2 className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold text-white leading-tight drop-shadow-sm">
+              {card2Title}
+            </h2>
+            <span className="inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-accent-light group-hover:text-white underline underline-offset-4 decoration-accent-light/70 group-hover:decoration-white transition-all">
+              {card2Button}
+              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+            </span>
           </div>
-        </motion.div>
-      </div>
+        </Link>
+      </motion.div>
     </section>
   );
 }
-

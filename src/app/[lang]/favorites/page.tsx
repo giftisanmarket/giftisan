@@ -2,6 +2,7 @@ import { getDictionary, hasLocale } from "../dictionaries";
 import { notFound } from "next/navigation";
 import FavoritesClient from "@/components/favorites-client";
 import { Metadata } from "next";
+import { getAllArtisans } from "@/lib/actions";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -23,6 +24,7 @@ export default async function FavoritesPage({ params }: { params: Promise<{ lang
   if (!hasLocale(lang)) notFound();
   
   const dict = await getDictionary(lang as any);
+  const artisans = await getAllArtisans();
 
-  return <FavoritesClient dict={dict} />;
+  return <FavoritesClient dict={dict} allArtisans={artisans} />;
 }

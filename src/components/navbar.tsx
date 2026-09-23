@@ -51,7 +51,8 @@ export function Navbar({ dict }: { dict?: any }) {
   };
   const { data: session, update } = useSession();
   const { setIsCartOpen, totalItems } = useCart();
-  const { totalFavorites } = useFavorites();
+  const { totalFavorites, totalFavoriteArtisans } = useFavorites();
+  const allFavoritesCount = totalFavorites + (totalFavoriteArtisans || 0);
   const { unreadCount } = useNotifications();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -441,9 +442,9 @@ export function Navbar({ dict }: { dict?: any }) {
           <div className="flex items-center gap-1 md:gap-2 xl:gap-4">
             <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative active:scale-90">
               <Heart className="w-6 h-6" />
-              {totalFavorites > 0 && (
+              {allFavoritesCount > 0 && (
                 <span className="absolute -top-1 -end-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                  {totalFavorites}
+                  {allFavoritesCount}
                 </span>
               )}
             </Link>

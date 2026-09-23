@@ -159,7 +159,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
                     href={`/products/${product.slug || product.id}`}
                     className="group block"
                   >
-                  <div className="relative aspect-[3/4] md:aspect-[4/5] rounded-[1.5rem] md:rounded-[3rem] overflow-hidden mb-3 md:mb-6 shadow-2xl shadow-primary/5 border border-primary/5">
+                  <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-3 md:mb-5 shadow-sm hover:shadow-md transition-shadow border border-primary/5 bg-white">
                     <BespokeImage
                       src={product.images[0]}
                       alt={product.name}
@@ -185,9 +185,6 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
 
                   </div>
                   <div className="space-y-1.5 md:space-y-2 px-1">
-                    <p className="text-[7px] md:text-[10px] font-black text-accent uppercase tracking-[0.3em] leading-none mb-1">
-                      {product.artisan.studioName || "Artisan Made"}
-                    </p>
                     <h3 className="text-sm md:text-2xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight line-clamp-1">
                       {product.name}
                     </h3>

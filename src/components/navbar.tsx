@@ -212,20 +212,8 @@ export function Navbar({ dict }: { dict?: any }) {
           : "left-0 right-0 rounded-3xl border-primary/5 max-w-[calc(100vw-32px)] md:max-w-none"
       )}>
         {!searchQuery ? (
-          /* Empty Search State - Trending discovered */
+          /* Empty Search State - Popular collections & categories */
           <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-            <div className="flex justify-between items-center bg-accent/5 p-3 md:p-4 rounded-2xl border border-accent/10">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-accent flex items-center justify-center">
-                  <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-[9px] md:text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
-                  <p className="text-xs md:text-sm font-bold text-primary">{d.common.explore_trending}</p>
-                </div>
-              </div>
-            </div>
-
             <div className="space-y-3">
               <p className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
               <div className="flex flex-wrap gap-1.5 md:gap-2">

@@ -25,13 +25,9 @@ export function Hero({ dict }: HeroProps) {
         className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch"
       >
         {/* Left Card: Featured Handcrafted Gift Banner */}
-        <div className="lg:col-span-7 xl:col-span-8 group relative rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-br from-[#064E3B] to-[#043327] grid grid-cols-1 sm:grid-cols-2 min-h-[380px] lg:min-h-[430px] shadow-sm border border-primary/10">
+        <div className="lg:col-span-7 xl:col-span-8 group relative rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-br from-[#064E3B] to-[#043327] grid grid-cols-1 sm:grid-cols-2 min-h-[240px] sm:min-h-[380px] lg:min-h-[430px] shadow-sm border border-primary/10">
           {/* Content Half */}
-          <div className="flex flex-col justify-center items-center text-center p-8 sm:p-10 md:p-12 lg:p-10 xl:p-14 z-10 space-y-6 md:space-y-8">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-accent-light text-[10px] md:text-xs font-bold uppercase tracking-widest">
-              <Sparkles className="w-3 h-3 text-accent-light" />
-              <span>{dict?.common?.explore || "Curated Gifts"}</span>
-            </div>
+          <div className="flex flex-col justify-center items-center text-center p-6 sm:p-10 md:p-12 lg:p-10 xl:p-14 z-10 space-y-5 md:space-y-8">
 
             <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-medium text-cream leading-[1.18] tracking-tight">
               {card1Title}
@@ -45,8 +41,8 @@ export function Hero({ dict }: HeroProps) {
             </Link>
           </div>
 
-          {/* Image Half */}
-          <div className="relative w-full h-[280px] sm:h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[430px] overflow-hidden">
+          {/* Image Half — hidden on mobile to save vertical space */}
+          <div className="hidden sm:block relative w-full h-[280px] sm:h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[430px] overflow-hidden">
             <Image
               src="/hero.webp"
               alt="Giftisan Handcrafted Collection"

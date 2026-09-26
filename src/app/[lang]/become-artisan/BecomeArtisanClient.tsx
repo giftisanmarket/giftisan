@@ -134,7 +134,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
   }
 
   return (
-    <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
+    <main className="min-h-screen bg-cream pb-10 md:pb-20 overflow-x-hidden">
       <AnimatePresence mode="wait">
         {(isLoading || session?.user?.role === "ARTISAN") && (
           <motion.div
@@ -175,54 +175,86 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
       <Navbar dict={dict} />
 
-      <div className="container mx-auto px-4 pt-24 md:pt-32 max-w-6xl">
-        <div className="text-center mb-10 md:mb-16">
+      <div className="container mx-auto px-4 pt-16 md:pt-32 max-w-6xl">
+
+        {/* Hero Header */}
+        <div className="text-center mb-6 md:mb-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-[10px] font-black uppercase tracking-widest mb-3 md:mb-6"
           >
             <BadgeCheck className="w-3 h-3" />
             {dict.home.artisan_onboarding?.founding_member_badge || "Founding Member Program"}
           </motion.div>
-          <h1 className="text-4xl md:text-6xl font-heading font-bold text-primary mb-4 md:mb-6 leading-[1.1]">
+          <h1 className="text-3xl md:text-6xl font-heading font-bold text-primary mb-2 md:mb-6 leading-[1.1]">
             {(dict.home.become_artisan_title_base || dict.home.become_artisan_title?.split(' ')[0])}{" "}
             <span className="serif italic font-normal text-accent">
               {(dict.home.become_artisan_title_accent || dict.home.become_artisan_title?.split(' ').slice(1).join(' '))}
             </span>
           </h1>
-          <p className="text-charcoal/40 max-w-xl mx-auto text-base md:text-lg leading-relaxed">
+          <p className="text-charcoal/40 max-w-xl mx-auto text-sm md:text-lg leading-relaxed">
             {dict.home.become_artisan_desc}
           </p>
         </div>
 
-        {/* Benefits Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 max-w-5xl mx-auto">
-          {benefits.map((benefit, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 group hover:border-accent/30 transition-all"
-            >
-              <div className="w-14 h-14 bg-accent/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                {benefit.icon}
+        {/* Benefits — compact horizontal rows on mobile, cards on desktop */}
+        <div className="mb-6 md:mb-20 max-w-5xl mx-auto">
+          {/* Mobile: compact list */}
+          <div className="flex flex-col gap-2 md:hidden">
+            {benefits.map((benefit, i) => (
+              <div key={i} className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-primary/5 shadow-sm">
+                <div className="w-9 h-9 bg-accent/5 rounded-xl flex items-center justify-center shrink-0">
+                  {benefit.icon}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-primary leading-none mb-0.5">{benefit.title}</p>
+                  <p className="text-xs text-charcoal/40 leading-snug">{benefit.desc}</p>
+                </div>
               </div>
-              <h3 className="text-xl font-heading font-bold text-primary mb-3">{benefit.title}</h3>
-              <p className="text-charcoal/40 text-sm leading-relaxed">{benefit.desc}</p>
-            </motion.div>
-          ))}
+            ))}
+          </div>
+          {/* Desktop: cards grid */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {benefits.map((benefit, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 group hover:border-accent/30 transition-all"
+              >
+                <div className="w-14 h-14 bg-accent/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  {benefit.icon}
+                </div>
+                <h3 className="text-xl font-heading font-bold text-primary mb-3">{benefit.title}</h3>
+                <p className="text-charcoal/40 text-sm leading-relaxed">{benefit.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-16 items-start">
-          {/* How it Works */}
-          <div className="lg:col-span-5 space-y-12">
+        <div className="grid lg:grid-cols-12 gap-8 md:gap-16 items-start">
+          {/* How it Works — horizontal pill strip on mobile, vertical on desktop */}
+          <div className="lg:col-span-5 space-y-6 md:space-y-12">
             <div>
-              <h2 className="text-3xl font-heading font-bold text-primary mb-8">
+              <h2 className="text-lg md:text-3xl font-heading font-bold text-primary mb-4 md:mb-8">
                 {dict.home.artisan_onboarding?.how_it_works_title || "How it Works"}
               </h2>
-              <div className="space-y-8">
+              {/* Mobile: horizontal step strip */}
+              <div className="flex gap-2 md:hidden">
+                {steps.map((step, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl p-3 border border-primary/5 text-center">
+                    <div className="w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0">
+                      {i + 1}
+                    </div>
+                    <p className="text-xs font-bold text-primary leading-tight">{step.title}</p>
+                    <p className="text-[10px] text-charcoal/40 leading-tight">{step.desc}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: vertical list */}
+              <div className="hidden md:block space-y-8">
                 {steps.map((step, i) => (
                   <div key={i} className="flex gap-6">
                     <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -237,7 +269,8 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
               </div>
             </div>
 
-            <div className="p-8 bg-primary rounded-[2rem] text-white space-y-4">
+            {/* Need Help — hidden on mobile to save space */}
+            <div className="hidden md:block p-8 bg-primary rounded-[2rem] text-white space-y-4">
               <h4 className="font-heading font-bold text-xl">Need Help?</h4>
               <p className="text-white/60 text-sm">
                 Our curation team is here to help you set up your studio and showcase your unique products.
@@ -254,10 +287,10 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               onSubmit={handleSubmit}
-              className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 md:space-y-8"
+              className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-4 md:space-y-8"
             >
-              <div className="space-y-5 md:space-y-6">
-                <div className="space-y-2">
+              <div className="space-y-4 md:space-y-6">
+                <div className="space-y-1.5 md:space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <Store className="w-3 h-3" /> {dict.home.studio_name_label} *
                   </label>
@@ -267,41 +300,43 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
                     value={formData.studioName}
                     onChange={(e) => setFormData({ ...formData, studioName: e.target.value })}
                     placeholder={dict.home.studio_name_placeholder}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
+                    className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    <MapPin className="w-3 h-3" /> {dict.home.location_label} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder={dict.home.location_placeholder}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
-                  />
+                <div className="grid grid-cols-2 gap-3 md:block md:space-y-6">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
+                      <MapPin className="w-3 h-3" /> {dict.home.location_label} *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      placeholder={dict.home.location_placeholder}
+                      className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 md:space-y-2">
+                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
+                      <Phone className="w-3 h-3" /> {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف' : 'Phone')} *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      name="phone"
+                      autoComplete="tel"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                      placeholder="+20 100 000 0000"
+                      className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    <Phone className="w-3 h-3" /> {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف / واتساب' : 'Phone Number / WhatsApp')} *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    name="phone"
-                    autoComplete="tel"
-                    value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    placeholder="+20 100 000 0000"
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
-                  />
-                </div>
-
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                   <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
                     <AlignLeft className="w-3 h-3" /> {dict.home.bio_label} *
                   </label>
@@ -310,16 +345,16 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     placeholder={dict.home.bio_placeholder}
-                    className="w-full h-32 md:h-40 p-5 md:p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none shadow-sm text-sm"
+                    className="w-full h-24 md:h-40 p-4 md:p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none shadow-sm text-sm"
                   />
                 </div>
               </div>
 
-              <div className="pt-6 md:pt-8 flex flex-col items-center gap-6">
+              <div className="pt-2 md:pt-8 flex flex-col items-center gap-3 md:gap-6">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-14 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-base md:text-lg active:scale-95 group"
+                  className="w-full h-13 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-lg active:scale-95 group"
                 >
                   {isLoading ? dict.home.launch_loading : (dict.home.launch_button || "Open Your Studio")}
                   <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
@@ -336,3 +371,4 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
     </main>
   );
 }
+

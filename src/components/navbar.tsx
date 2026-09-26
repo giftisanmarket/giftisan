@@ -757,34 +757,6 @@ export function Navbar({ dict }: { dict?: any }) {
           </form>
         </div>
 
-        {/* Tier 3: Mobile Category Pills Scroll (Etsy Style) */}
-        <div className="block md:hidden border-t border-primary/5 px-3 py-2 bg-cream/15 overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="flex items-center gap-1.5 whitespace-nowrap min-w-max">
-            {navCategories.map((cat) => {
-              const isActive = pathname.includes(`/category/${cat.id}`);
-              return (
-                <Link
-                  key={cat.id}
-                  href={`/category/${cat.id}`}
-                  className={cn(
-                    "px-3 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap active:scale-95",
-                    isActive
-                      ? "bg-primary text-white shadow-xs"
-                      : "bg-white text-charcoal/70 border border-primary/10 hover:text-primary hover:border-accent"
-                  )}
-                >
-                  {cat.label}
-                </Link>
-              );
-            })}
-            <Link
-              href="/categories"
-              className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all whitespace-nowrap shrink-0 active:scale-95"
-            >
-              {d.common.all_categories || "All"} →
-            </Link>
-          </div>
-        </div>
 
         {/* Tier 4: Desktop Categories Bar */}
         <div className="hidden md:block border-t border-primary/5 py-3">

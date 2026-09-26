@@ -15,7 +15,7 @@ export function FoundingBanner({ dict }: { dict: any }) {
   const lang = params?.lang as string || "en";
 
   useEffect(() => {
-    const isDismissed = sessionStorage.getItem("giftisan-founding-banner-dismissed");
+    const isDismissed = localStorage.getItem("giftisan-founding-banner-dismissed");
     if (isDismissed) setIsVisible(false);
   }, []);
 
@@ -27,7 +27,7 @@ export function FoundingBanner({ dict }: { dict: any }) {
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsVisible(false);
-    sessionStorage.setItem("giftisan-founding-banner-dismissed", "true");
+    localStorage.setItem("giftisan-founding-banner-dismissed", "true");
   };
 
   const bannerData = dict?.common?.founding_banner || {

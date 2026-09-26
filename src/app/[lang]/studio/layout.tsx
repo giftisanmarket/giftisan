@@ -53,7 +53,7 @@ export default async function StudioLayout({
   const dict = await getDictionary(lang as any);
 
   return (
-    <div className="min-h-screen bg-cream/30 text-charcoal font-heading selection:bg-accent/20 pb-20 md:pb-0">
+    <div className="min-h-screen bg-cream/30 text-charcoal font-heading selection:bg-accent/20">
       <StudioHeader
         lang={lang}
         dict={dict}

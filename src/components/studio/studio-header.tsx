@@ -143,8 +143,7 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
   const publicShopUrl = artisan?.slug ? `/${lang}/artisans/${artisan.slug}` : null;
 
   return (
-    <>
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-xl border-b border-primary/10 shadow-xs">
+    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-xl border-b border-primary/10 shadow-xs">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-16 md:h-20 flex items-center justify-between gap-3 md:gap-6">
         
         {/* Brand Logo + Studio Indicator (Home Page Logo + Studio Label, linking to /studio) */}
@@ -176,14 +175,14 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
           
-          {/* Primary CTA: Add Product (Desktop & Tablet; on mobile it lives in the bottom navigation bar) */}
+          {/* Primary CTA: Add Product (Compact circular on mobile, full pill on desktop) */}
           <Link
             href={`/${lang}/studio/new-product`}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold text-white bg-accent hover:bg-accent-light transition-all shadow-sm shadow-accent/20 active:scale-95 shrink-0 group"
+            className="w-8 h-8 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full text-xs font-bold text-white bg-accent hover:bg-accent-light transition-all shadow-sm shadow-accent/20 active:scale-95 flex items-center justify-center gap-1.5 shrink-0 group"
             title={dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}
           >
-            <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90 duration-300" />
-            <span>{dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}</span>
+            <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5 transition-transform group-hover:rotate-90 duration-300" />
+            <span className="hidden sm:inline">{dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}</span>
           </Link>
 
           {/* View Live Shop (Artisan Storefront Preview - Desktop / Tablet) */}
@@ -501,64 +500,5 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
         )}
       </AnimatePresence>
     </header>
-
-    {/* Mobile Bottom Navigation Bar (Shopify / Etsy Seller App Pattern - Hidden on full-screen form pages) */}
-    {!pathname.includes("/studio/new-product") && (
-      <nav className="md:hidden fixed bottom-0 start-0 end-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-primary/10 px-2 py-1.5 flex items-center justify-around shadow-2xl">
-        {/* Dashboard */}
-        <Link
-          href={`/${lang}/studio`}
-          className={cn(
-            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
-            pathname === `/${lang}/studio` && !isMobileMenuOpen ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
-          )}
-        >
-          <LayoutDashboard className="w-5 h-5" />
-          <span className="text-[10px] font-bold">{isAr ? "الرئيسية" : "Dashboard"}</span>
-        </Link>
-
-        {/* Quick Add Product */}
-        <Link
-          href={`/${lang}/studio/new-product`}
-          className={cn(
-            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
-            pathname === `/${lang}/studio/new-product` ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
-          )}
-        >
-          <div className="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center shadow-md shadow-accent/20">
-            <Plus className="w-4 h-4" />
-          </div>
-          <span className="text-[10px] font-bold">{isAr ? "إضافة" : "Add"}</span>
-        </Link>
-
-
-        {/* Live Shop Preview */}
-        {publicShopUrl && (
-          <Link
-            href={publicShopUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-charcoal/60 hover:text-primary transition-all active:scale-95"
-          >
-            <Store className="w-5 h-5" />
-            <span className="text-[10px] font-bold">{isAr ? "متجري" : "My Shop"}</span>
-          </Link>
-        )}
-
-        {/* More / Menu Drawer Toggle */}
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={cn(
-            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
-            isMobileMenuOpen ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
-          )}
-        >
-          <Menu className="w-5 h-5" />
-          <span className="text-[10px] font-bold">{isAr ? "المزيد" : "More"}</span>
-        </button>
-      </nav>
-    )}
-    </>
   );
 }

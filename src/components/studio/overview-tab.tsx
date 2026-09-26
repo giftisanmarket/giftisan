@@ -253,14 +253,14 @@ export function OverviewTab({
       )}
 
       {/* Sales Performance Chart */}
-      <div className="bg-white rounded-[3rem] p-6 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
-        <div className="flex justify-between items-center mb-10">
+      <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+        <div className="flex flex-wrap justify-between items-start gap-3 mb-6 md:mb-10">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
-            <p className="text-charcoal/40 mt-1">{dict.studio.daily_revenue_desc}</p>
+            <h2 className="text-xl md:text-3xl font-heading font-bold text-primary">{dict.studio.sales_performance} <span className="serif italic font-normal text-accent">{dict.studio.sales_performance_accent}</span></h2>
+            <p className="text-charcoal/40 text-xs md:text-sm mt-1">{dict.studio.daily_revenue_desc}</p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-accent px-4 py-2 bg-accent/10 rounded-full">
-            <ArrowUpRight className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-3 py-1.5 bg-accent/10 rounded-full shrink-0">
+            <ArrowUpRight className="w-3.5 h-3.5" />
             {dict.studio.live_data}
           </div>
         </div>
@@ -268,11 +268,11 @@ export function OverviewTab({
       </div>
 
       {/* Recent Activity Feed */}
-      <div className="bg-white rounded-[3rem] p-6 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
-        <div className="flex justify-between items-center mb-10">
+      <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
+        <div className="flex justify-between items-center mb-6 md:mb-10">
           <div>
-            <h2 className="text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
-            <p className="text-charcoal/40 mt-1">{dict.studio.no_activity_desc || "Insights from your workshop's pulse."}</p>
+            <h2 className="text-xl md:text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
+            <p className="text-charcoal/40 text-xs md:text-sm mt-1">{dict.studio.no_activity_desc || "Insights from your workshop's pulse."}</p>
           </div>
         </div>
 

@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 import { useParams } from "next/navigation";
-
 export default function StudioLoading() {
   const params = useParams();
   const lang = params?.lang || "en";
@@ -24,9 +23,9 @@ export default function StudioLoading() {
   };
 
   return (
-    <div className="min-h-screen bg-cream/30 pb-32 overflow-x-hidden">
+    <div className="pb-32 overflow-x-hidden">
       {/* Premium Header Skeleton */}
-      <div className="bg-white border-b border-primary/5 pt-28 pb-12 md:pt-40 md:pb-20">
+      <div className="bg-white border-b border-primary/5 pt-6 pb-10 md:pt-8 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-4 md:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-10">
             <div className="space-y-4 md:space-y-6">

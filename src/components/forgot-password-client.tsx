@@ -106,7 +106,7 @@ export function ForgotPasswordClient({ dict }: { dict: any }) {
                       type="email" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Recover@circle.com"
+                      placeholder={dict.auth?.login_email_placeholder || "you@example.com"}
                       className="w-full h-16 ps-14 pe-6 rounded-2xl bg-white border border-primary/10 focus:outline-none focus:ring-4 focus:ring-accent/5 focus:border-accent transition-[border-color,box-shadow] duration-200 font-medium text-primary shadow-sm relative z-0"
                       required
                     />

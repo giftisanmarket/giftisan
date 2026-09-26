@@ -584,7 +584,7 @@
     "login_subtitle": "Continue your journey in the circle.",
     "login_google": "Sign in with Google",
     "login_email_label": "Email Address",
-    "login_email_placeholder": "name@studio.com",
+    "login_email_placeholder": "you@example.com",
     "login_password_label": "Password",
     "login_password_placeholder": "••••••••",
     "login_button": "Continue to Circle",

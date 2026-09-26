@@ -1632,7 +1632,6 @@ export async function updateArtisanProfile(userId: string, data: any) {
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/settings");
     revalidatePath("/");
     revalidatePath("/artisans");
     return {
@@ -3374,7 +3373,6 @@ export async function markMessagesAsRead(userId: string, senderId: string) {
         read: true
       }
     });
-    revalidatePath("/profile/messages");
     return { success: true };
   } catch (error) {
     return { success: false };

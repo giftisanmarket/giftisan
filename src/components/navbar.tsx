@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle, CheckCircle2, MapPin, Sparkles } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle, CheckCircle2, MapPin, Sparkles, Store, ChevronDown, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useNotifications } from "./notification-provider";
@@ -58,8 +58,11 @@ export function Navbar({ dict }: { dict?: any }) {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -158,26 +161,278 @@ export function Navbar({ dict }: { dict?: any }) {
     };
   }, [searchResults]);
 
+  const navCategories = useMemo(() => [
+    { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
+    { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
+    { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
+    { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
+    { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
+    { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
+    { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
+  ], [d]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+      const isClickInDesktopSearch = searchRef.current && searchRef.current.contains(e.target as Node);
+      const isClickInMobileSearch = mobileSearchRef.current && mobileSearchRef.current.contains(e.target as Node);
+      if (!isClickInDesktopSearch && !isClickInMobileSearch) {
         setShowResults(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowResults(false);
+        setIsProfileMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
+
+  useEffect(() => {
+    setIsProfileMenuOpen(false);
+    setIsMenuOpen(false);
+    setShowResults(false);
+  }, [pathname]);
+
+  const renderSearchOverlay = (isMobile = false) => {
+    if (!showResults) return null;
+    return (
+      <div className={cn(
+        "absolute top-full mt-2 bg-white shadow-2xl border border-primary/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50",
+        isMobile
+          ? "start-0 end-0 rounded-2xl max-h-[60vh] overflow-y-auto"
+          : "left-0 right-0 rounded-3xl border-primary/5 max-w-[calc(100vw-32px)] md:max-w-none"
+      )}>
+        {!searchQuery ? (
+          /* Empty Search State - Trending discovered */
+          <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+            <div className="flex justify-between items-center bg-accent/5 p-3 md:p-4 rounded-2xl border border-accent/10">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-accent flex items-center justify-center">
+                  <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-[9px] md:text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
+                  <p className="text-xs md:text-sm font-bold text-primary">{d.common.explore_trending}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
+              <div className="flex flex-wrap gap-1.5 md:gap-2">
+                {Object.entries(d.common.trending_tags || {}).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      const searchLabel = label as string;
+                      setSearchQuery(searchLabel);
+                      router.push(`/search?q=${encodeURIComponent(searchLabel)}`);
+                      setShowResults(false);
+                    }}
+                    className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-cream text-primary/60 text-[11px] md:text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
+                  >
+                    {label as string}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-primary/5">
+              <Link
+                href="/categories"
+                onClick={() => setShowResults(false)}
+                className="flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/5 flex items-center justify-center">
+                    <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                  </div>
+                  <span className="text-xs font-bold text-primary">{d.common.all_categories}</span>
+                </div>
+                <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="p-3 md:p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
+              <span className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
+                {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
+              </span>
+            </div>
+
+            {/* Split Multicolumn Suggestion Layout */}
+            <div className="max-h-[350px] md:max-h-[500px] overflow-y-auto">
+              {searchResults.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 p-3 md:p-5">
+                  {/* Left Column: Matching Products */}
+                  <div className="lg:col-span-7 space-y-3">
+                    <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2 px-1">
+                      {pathname.includes("/ar") ? "المنتجات المتطابقة" : "Matching Products"}
+                    </p>
+                    <div className="space-y-2">
+                      {suggestions.products.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/products/${p.slug || p.id}`}
+                          onClick={() => setShowResults(false)}
+                          className="flex items-center gap-3 p-2 hover:bg-primary/5 rounded-2xl transition-all group/item border border-transparent hover:border-primary/5"
+                        >
+                          <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shrink-0 border border-primary/5">
+                            <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="font-heading font-bold text-xs text-primary group-hover/item:text-accent transition-colors truncate">{p.name}</h4>
+                              <span className="text-xs font-bold text-primary whitespace-nowrap">EGP {p.price}</span>
+                            </div>
+                            <p className="text-[10px] text-charcoal/40 font-medium truncate">
+                              {p.artisan?.studioName || p.artisan?.user?.name}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Dynamic Categories & Artisans */}
+                  <div className="lg:col-span-5 space-y-4 md:space-y-6 lg:border-s lg:border-primary/5 lg:ps-5">
+                    {suggestions.categories.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-1">
+                          {pathname.includes("/ar") ? "الفئات الحرفية" : "Local Craft Categories"}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {suggestions.categories.map((cat) => {
+                            const catSlug = cat.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+                            const translatedName = d.common.categories_list?.[catSlug] || cat;
+                            return (
+                              <Link
+                                key={cat}
+                                href={`/category/${catSlug}`}
+                                onClick={() => setShowResults(false)}
+                                className="px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl bg-cream hover:bg-accent hover:text-white text-[10px] font-bold text-primary/70 transition-all border border-primary/5 hover:shadow-sm"
+                              >
+                                {translatedName}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {suggestions.artisans.length > 0 && (
+                      <div className="space-y-2 md:space-y-3">
+                        <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">
+                          {pathname.includes("/ar") ? "الاستوديوهات والحرفيون" : "Makers & Studios"}
+                        </p>
+                        <div className="space-y-1.5">
+                          {suggestions.artisans.map((artisan) => (
+                            <Link
+                              key={artisan.id}
+                              href={`/artisans/${artisan.slug}`}
+                              onClick={() => setShowResults(false)}
+                              className="flex items-center gap-2.5 p-1.5 md:p-2 hover:bg-accent/5 rounded-xl transition-all group/artisan"
+                            >
+                              <div className="relative w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden shrink-0 border border-primary/5 bg-cream">
+                                {artisan.avatar ? (
+                                  <Image src={artisan.avatar} alt={artisan.studioName} fill className="object-cover" sizes="32px" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-primary/40">
+                                    {artisan.studioName?.charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <h5 className="text-[11px] font-bold text-primary group-hover/artisan:text-accent transition-colors truncate">
+                                    {artisan.studioName}
+                                  </h5>
+                                  {artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent shrink-0" />}
+                                </div>
+                                <p className="text-[9px] text-charcoal/40 flex items-center gap-0.5 truncate">
+                                  <MapPin className="w-2.5 h-2.5 text-accent" /> {artisan.location}
+                                </p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : !isSearching ? (
+                <div className="p-6 md:p-8 text-center space-y-4 md:space-y-6">
+                  <div className="space-y-1 md:space-y-2">
+                    <p className="text-charcoal/40 text-xs md:text-sm font-medium italic">"{d.common.nothing_matches.replace('{query}', searchQuery)}"</p>
+                  </div>
+                  <div className="space-y-2 md:space-y-3">
+                    <p className="text-[9px] md:text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
+                    <div className="flex flex-wrap justify-center gap-1.5 md:gap-2">
+                      {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
+                        const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
+                        return (
+                          <button
+                            key={tagKey}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(tagLabel);
+                              router.push(`/search?q=${encodeURIComponent(tagLabel)}`);
+                              setShowResults(false);
+                            }}
+                            className="px-2.5 py-1 md:px-3 md:py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
+                          >
+                            {tagLabel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 md:p-8 text-center text-charcoal/40 animate-pulse text-xs font-bold uppercase tracking-widest">
+                  {d.common.scanning_workshop}
+                </div>
+              )}
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="p-2.5 md:p-3 bg-primary/5 text-center border-t border-primary/5">
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="text-[10px] font-black text-primary uppercase tracking-[0.25em] hover:text-accent transition-colors"
+                >
+                  {d.common.see_all_results} →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="sticky top-0 z-50 w-full">
       <FoundingBanner dict={d} />
       <VerificationBanner dict={d} />
       <nav className="w-full glass border-b border-primary/10">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-20 flex items-center justify-between gap-3 md:gap-4 lg:gap-6 xl:gap-8">
+        <div className="max-w-[1600px] mx-auto px-3.5 md:px-8 lg:px-12 h-14 md:h-20 flex items-center justify-between gap-2 md:gap-4 lg:gap-6 xl:gap-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <div className="relative w-10 h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md">
+          <Link href="/" className="flex items-center gap-1.5 md:gap-2 shrink-0 group">
+            <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md">
               <Image
                 src="/icon.png"
                 alt="Giftisan Logo"
@@ -186,7 +441,7 @@ export function Navbar({ dict }: { dict?: any }) {
                 sizes="40px"
               />
             </div>
-            <span className="text-2xl font-heading font-black text-primary tracking-tighter">
+            <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tighter">
               Giftisan
             </span>
           </Link>
@@ -215,281 +470,81 @@ export function Navbar({ dict }: { dict?: any }) {
                 >
                   <X className="w-4 h-4" />
                 </button>
-                )}
+              )}
 
-                {/* Quick Results Overlay */}
-                {showResults && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-primary/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50 max-w-[calc(100vw-32px)] md:max-w-none">
-                    {!searchQuery ? (
-                      /* Empty Search State - Trending discovered */
-                      <div className="p-6 space-y-6">
-                        <div className="flex justify-between items-center bg-accent/5 p-4 rounded-2xl border border-accent/10">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                              <Search className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-black text-accent uppercase tracking-widest leading-none">{d.common.discovery_mode}</p>
-                              <p className="text-sm font-bold text-primary">{d.common.explore_trending}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] ms-1">{d.common.popular_collections}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {Object.entries(d.common.trending_tags || {}).map(([key, label]) => (
-                              <button
-                                key={key}
-                                type="button"
-                                onClick={() => {
-                                  const searchLabel = label as string;
-                                  setSearchQuery(searchLabel);
-                                  router.push(`/search?q=${encodeURIComponent(searchLabel)}`);
-                                  setShowResults(false);
-                                }}
-                                className="px-4 py-2 rounded-full bg-cream text-primary/60 text-xs font-bold border border-primary/5 hover:bg-accent/5 hover:text-accent hover:border-accent/20 transition-all uppercase tracking-wider"
-                              >
-                                {label as string}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-primary/5">
-                          <Link
-                            href="/categories"
-                            onClick={() => setShowResults(false)}
-                            className="flex items-center justify-between group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center">
-                                <ShoppingCart className="w-4 h-4 text-primary" />
-                              </div>
-                              <span className="text-xs font-bold text-primary">{d.common.all_categories}</span>
-                            </div>
-                            <span className="text-accent group-hover:translate-x-1 transition-transform">→</span>
-                          </Link>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="p-4 border-b border-primary/5 flex justify-between items-center bg-cream/30">
-                          <span className="text-xs font-black text-primary/40 uppercase tracking-widest">{d.common.gifts_for_you}</span>
-                          <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">
-                            {isSearching ? d.common.searching : d.common.items_found.replace('{count}', searchResults.length.toString())}
-                          </span>
-                        </div>
-
-                        {/* Split Multicolumn Suggestion Layout */}
-                        <div className="max-h-[500px] overflow-y-auto">
-                          {searchResults.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-5">
-                              
-                              {/* Left Column: Matching Products (Products) */}
-                              <div className="lg:col-span-7 space-y-3">
-                                <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2 px-1">
-                                  {pathname.includes("/ar") ? "المنتجات المتطابقة" : "Matching Products"}
-                                </p>
-                                <div className="space-y-2.5">
-                                  {suggestions.products.map((p) => (
-                                    <Link
-                                      key={p.id}
-                                      href={`/products/${p.slug || p.id}`}
-                                      onClick={() => setShowResults(false)}
-                                      className="flex items-center gap-3 p-2 hover:bg-primary/5 rounded-2xl transition-all group/item border border-transparent hover:border-primary/5"
-                                    >
-                                      <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-primary/5">
-                                        <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start gap-2">
-                                          <h4 className="font-heading font-bold text-xs text-primary group-hover/item:text-accent transition-colors truncate">{p.name}</h4>
-                                          <span className="text-xs font-bold text-primary whitespace-nowrap">EGP {p.price}</span>
-                                        </div>
-                                        <p className="text-[10px] text-charcoal/40 font-medium truncate">
-                                          {p.artisan?.studioName || p.artisan?.user?.name}
-                                        </p>
-                                      </div>
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Right Column: Dynamic Categories & Artisans */}
-                              <div className="lg:col-span-5 space-y-6 lg:border-s lg:border-primary/5 lg:ps-5">
-                                
-                                {/* Dynamic Category Suggestions */}
-                                {suggestions.categories.length > 0 && (
-                                  <div className="space-y-2">
-                                    <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em] mb-2">
-                                      {pathname.includes("/ar") ? "الفئات الحرفية" : "Local Craft Categories"}
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {suggestions.categories.map((cat) => {
-                                        const catSlug = cat.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-                                        const translatedName = d.common.categories_list?.[catSlug] || cat;
-                                        return (
-                                          <Link
-                                            key={cat}
-                                            href={`/category/${catSlug}`}
-                                            onClick={() => setShowResults(false)}
-                                            className="px-3 py-1.5 rounded-xl bg-cream hover:bg-accent hover:text-white text-[10px] font-bold text-primary/70 transition-all border border-primary/5 hover:shadow-sm"
-                                          >
-                                            {translatedName}
-                                          </Link>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Dynamic Artisan Suggestions */}
-                                {suggestions.artisans.length > 0 && (
-                                  <div className="space-y-3">
-                                    <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">
-                                      {pathname.includes("/ar") ? "الاستوديوهات والحرفيون" : "Makers & Studios"}
-                                    </p>
-                                    <div className="space-y-2">
-                                      {suggestions.artisans.map((artisan) => (
-                                        <Link
-                                          key={artisan.id}
-                                          href={`/artisans/${artisan.slug}`}
-                                          onClick={() => setShowResults(false)}
-                                          className="flex items-center gap-2.5 p-2 hover:bg-accent/5 rounded-xl transition-all group/artisan"
-                                        >
-                                          <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-primary/5 bg-cream">
-                                            {artisan.avatar ? (
-                                              <Image src={artisan.avatar} alt={artisan.studioName} fill className="object-cover" sizes="32px" />
-                                            ) : (
-                                              <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-primary/40">
-                                                {artisan.studioName?.charAt(0)}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-1">
-                                              <h5 className="text-[11px] font-bold text-primary group-hover/artisan:text-accent transition-colors truncate">
-                                                {artisan.studioName}
-                                              </h5>
-                                              {artisan.isVerified && <CheckCircle2 className="w-3 h-3 text-accent shrink-0" />}
-                                            </div>
-                                            <p className="text-[9px] text-charcoal/40 flex items-center gap-0.5 truncate">
-                                              <MapPin className="w-2.5 h-2.5 text-accent" /> {artisan.location}
-                                            </p>
-                                          </div>
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ) : !isSearching ? (
-                            <div className="p-8 text-center space-y-6">
-                              <div className="space-y-2">
-                                <p className="text-charcoal/40 font-medium italic">"{d.common.nothing_matches.replace('{query}', searchQuery)}"</p>
-                              </div>
-                              <div className="space-y-3">
-                                <p className="text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
-                                <div className="flex flex-wrap justify-center gap-2">
-                                  {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
-                                    const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
-                                    return (
-                                      <button
-                                        key={tagKey}
-                                        type="button"
-                                        onClick={() => {
-                                          setSearchQuery(tagLabel);
-                                          router.push(`/search?q=${encodeURIComponent(tagLabel)}`);
-                                          setShowResults(false);
-                                        }}
-                                        className="px-3 py-1.5 rounded-full bg-cream text-primary/40 text-[10px] font-bold border border-primary/5 hover:text-accent uppercase tracking-tighter"
-                                      >
-                                        {tagLabel}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="p-8 text-center text-charcoal/40 animate-pulse text-xs font-bold uppercase tracking-widest">
-                              {d.common.scanning_workshop}
-                            </div>
-                          )}
-                        </div>
-
-                        {searchResults.length > 0 && (
-                          <div className="p-3 bg-primary/5 text-center border-t border-primary/5">
-                            <button
-                              type="button"
-                              onClick={handleSearch}
-                              className="text-[10px] font-black text-primary uppercase tracking-[0.25em] hover:text-accent transition-colors"
-                            >
-                              {d.common.see_all_results} →
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </form>
-            </div>
+              {renderSearchOverlay(false)}
+            </form>
+          </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 md:gap-2 xl:gap-4">
-            <Link href="/favorites" className="hidden md:block p-2 text-charcoal/60 hover:text-primary transition-colors relative active:scale-90">
-              <Heart className="w-6 h-6" />
+          <div className="flex items-center gap-1 md:gap-1.5 xl:gap-2">
+            {/* Favorites Icon (Visible on Mobile & Desktop) */}
+            <Link 
+              href="/favorites" 
+              title={d.common.favorites || "Favorites"} 
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full text-charcoal/70 hover:text-primary hover:bg-primary/5 transition-all relative active:scale-95"
+            >
+              <Heart className="w-4 h-4 md:w-5 md:h-5" />
               {allFavoritesCount > 0 && (
-                <span className="absolute -top-1 -end-1 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                <span className="absolute top-0.5 end-0.5 md:top-1 md:end-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-accent text-white text-[8px] md:text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-xs">
                   {allFavoritesCount}
                 </span>
               )}
             </Link>
 
-            {session ? (
-              <div className="flex items-center gap-2 xl:gap-3">
-                {/* Contextual Action Badge (Studio or Sell) */}
-                {session.user?.role === "ARTISAN" ? (
-                  <Link
-                    href="/studio"
-                    className={cn(
-                      "hidden md:flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-sm active:scale-95",
-                      pathname === "/studio"
-                        ? "bg-primary text-white"
-                        : "bg-accent/10 text-accent hover:bg-accent hover:text-white"
-                    )}
-                  >
-                    <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", pathname === "/studio" ? "bg-white" : "bg-accent")} />
-                    <span className="hidden xl:inline">{d.common.pro_studio}</span>
-                    <span className="xl:hidden">Studio</span>
-                  </Link>
-                ) : (
-                  <Link
-                    href="/become-artisan"
-                    className="hidden md:flex items-center h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 active:scale-95"
-                  >
-                    {d.common.sell}
-                  </Link>
+            {/* Studio Hub (Artisans only - Desktop) */}
+            {session?.user?.role === "ARTISAN" && (
+              <Link
+                href="/studio"
+                title={d.common.pro_studio || "Studio Hub"}
+                className={cn(
+                  "hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-all relative active:scale-95",
+                  pathname.startsWith("/studio")
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-charcoal/70 hover:text-primary hover:bg-primary/5"
                 )}
+              >
+                <Store className="w-5 h-5" />
+                <span className={cn(
+                  "absolute top-1.5 end-1.5 w-2 h-2 rounded-full ring-2 ring-white",
+                  pathname.startsWith("/studio") ? "bg-accent-light" : "bg-accent animate-pulse"
+                )} />
+              </Link>
+            )}
 
-                <Link
-                  href="/contact"
-                  className="hidden xl:flex items-center gap-1.5 px-3 h-9 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-all active:scale-95"
-                >
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  {d.common.support}
-                </Link>
+            {/* Cart Icon (Visible on Mobile & Desktop) */}
+            <button
+              type="button"
+              onClick={() => setIsCartOpen(true)}
+              title={d.common.cart || "Cart"}
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full text-charcoal/70 hover:text-primary hover:bg-primary/5 transition-all relative active:scale-95"
+            >
+              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+              {totalItems > 0 && (
+                <span className="absolute top-0.5 end-0.5 md:top-1 md:end-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-accent text-white text-[8px] md:text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                  {totalItems}
+                </span>
+              )}
+            </button>
 
-                {/* Consolidated Profile Hub (Desktop only) */}
-                <div className="hidden md:flex items-center gap-1 xl:gap-2 border-l border-primary/10 ps-2 xl:ps-3">
-                  <Link
-                    href="/profile"
-                    className="group flex items-center xl:gap-3 ps-1 xl:pe-3 py-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/5 active:scale-95"
+            {/* User Profile Hub (Avatar Dropdown or Sign In) */}
+            {session ? (
+              <>
+                {/* Desktop Profile Dropdown */}
+                <div ref={profileMenuRef} className="relative hidden md:block">
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    className={cn(
+                      "flex items-center gap-1 p-1 rounded-full transition-all focus:outline-none",
+                      isProfileMenuOpen
+                        ? "ring-2 ring-accent bg-accent/5"
+                        : "hover:ring-2 hover:ring-primary/10 hover:bg-primary/5"
+                    )}
+                    title={d.common.account || "Account"}
+                    aria-expanded={isProfileMenuOpen}
                   >
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white ring-1 ring-primary/10 shadow-sm group-hover:ring-accent/40 transition-all">
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden border border-primary/10 bg-cream flex items-center justify-center shadow-xs">
                       {session.user?.image ? (
                         <Image
                           src={session.user.image}
@@ -499,67 +554,183 @@ export function Navbar({ dict }: { dict?: any }) {
                           sizes="32px"
                         />
                       ) : (
-                        <div className="w-full h-full bg-cream flex items-center justify-center">
-                          <User className="w-4 h-4 text-primary/40" />
-                        </div>
+                        <User className="w-4 h-4 text-primary/60" />
                       )}
-                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-
-                    <div className="hidden xl:block">
-                      <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest leading-none mb-0.5">{d.common.account}</p>
-                      <p className="text-[12px] font-bold text-primary leading-none group-hover:text-accent transition-colors truncate max-w-[80px]">
-                        {session.user?.name?.split(' ')[0]}
-                      </p>
-                    </div>
-                  </Link>
-
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="p-2 text-charcoal/30 hover:text-red-500 transition-colors group active:scale-90"
-                    title={d.common.sign_out}
-                  >
-                    <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <ChevronDown
+                      className={cn(
+                        "w-3.5 h-3.5 text-charcoal/40 transition-transform duration-200 pe-0.5",
+                        isProfileMenuOpen && "rotate-180 text-accent"
+                      )}
+                    />
                   </button>
+
+                  {/* Etsy-Style Profile Dropdown Menu */}
+                  {isProfileMenuOpen && (
+                    <div className="absolute end-0 top-full mt-2 w-64 bg-white rounded-3xl shadow-2xl border border-primary/10 py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                      {/* User Header */}
+                      <div className="px-4 py-3 border-b border-primary/5">
+                        <p className="text-xs font-bold text-primary truncate">
+                          {session.user?.name || d.common.account}
+                        </p>
+                        <p className="text-[11px] text-charcoal/40 truncate">
+                          {session.user?.email}
+                        </p>
+                        {session.user?.role === "ARTISAN" ? (
+                          <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-accent/10 text-accent">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                            {d.common.pro_studio || "Master Artisan"}
+                          </span>
+                        ) : session.user?.role === "ADMIN" ? (
+                          <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-primary/10 text-primary">
+                            <ShieldCheck className="w-3 h-3 text-primary" />
+                            Admin
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {/* Menu Links */}
+                      <div className="py-1.5 px-2 text-xs font-bold text-primary/80 space-y-0.5">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-primary/40" />
+                          <span>{d.common.manage_profile || "View Profile"}</span>
+                        </Link>
+
+                        <Link
+                          href="/favorites"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors"
+                        >
+                          <Heart className="w-4 h-4 text-primary/40" />
+                          <div className="flex-1 flex justify-between items-center">
+                            <span>{d.common.favorites || "Favorites"}</span>
+                            {allFavoritesCount > 0 && (
+                              <span className="text-[10px] font-black bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+                                {allFavoritesCount}
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+
+                        {session.user?.role === "ARTISAN" ? (
+                          <Link
+                            href="/studio"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors text-accent font-black"
+                          >
+                            <Store className="w-4 h-4 text-accent" />
+                            <span>{d.common.pro_studio || "Studio Hub"}</span>
+                          </Link>
+                        ) : (
+                          <Link
+                            href="/become-artisan"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors text-accent font-black"
+                          >
+                            <Store className="w-4 h-4 text-accent" />
+                            <span>{d.common.sell || "Sell on Giftisan"}</span>
+                          </Link>
+                        )}
+
+                        {session.user?.role === "ADMIN" && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors text-primary font-bold"
+                          >
+                            <ShieldCheck className="w-4 h-4 text-primary" />
+                            <span>Admin Portal</span>
+                          </Link>
+                        )}
+
+                        <Link
+                          href="/contact"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors"
+                        >
+                          <HelpCircle className="w-4 h-4 text-primary/40" />
+                          <span>{d.common.support || "Support"}</span>
+                        </Link>
+                      </div>
+
+                      {/* Sign Out */}
+                      <div className="pt-1.5 px-2 border-t border-primary/5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            signOut({ callbackUrl: "/" });
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>{d.common.sign_out || "Sign Out"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+
+                {/* Mobile Quick Avatar Button */}
+                <Link
+                  href="/profile"
+                  className="md:hidden flex items-center justify-center w-8 h-8 rounded-full overflow-hidden border border-primary/10 bg-cream shadow-xs active:scale-95"
+                  title={d.common.profile || "Profile"}
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      width={32}
+                      height={32}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <User className="w-3.5 h-3.5 text-primary/60" />
+                  )}
+                </Link>
+              </>
             ) : (
-              <Link
-                href="/login"
-                className="hidden md:flex group items-center gap-2 h-10 px-5 border border-primary/10 rounded-full text-charcoal/60 hover:text-primary hover:border-primary/30 transition-all bg-white shadow-sm active:scale-95"
-              >
-                <User className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">{d.common.sign_in}</span>
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  className="hidden md:flex items-center gap-2 h-9 px-4 rounded-full text-xs font-bold text-primary hover:text-accent border border-primary/15 hover:border-primary/30 transition-all bg-white shadow-xs active:scale-95"
+                >
+                  <User className="w-4 h-4 text-primary/60" />
+                  <span>{d.common.sign_in}</span>
+                </Link>
+                <Link
+                  href="/login"
+                  className="md:hidden flex items-center justify-center w-8 h-8 rounded-full text-charcoal/70 hover:text-primary active:scale-95"
+                  title={d.common.sign_in}
+                >
+                  <User className="w-4 h-4" />
+                </Link>
+              </>
             )}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="p-2 text-charcoal/70 hover:text-primary transition-colors relative active:scale-90"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -end-1 w-5 h-5 bg-accent text-white text-[10px] font-black rounded-full flex items-center justify-center animate-in zoom-in-50 duration-300 shadow-sm">
-                  {totalItems}
-                </span>
-              )}
-            </button>
 
-
+            {/* Mobile Menu Toggle */}
             <button
+              type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="md:hidden p-2 text-charcoal/70 hover:text-primary transition-colors active:scale-90"
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-full text-charcoal/70 hover:text-primary hover:bg-primary/5 transition-colors active:scale-95"
+              title={d.common.menu || "Menu"}
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
 
             {/* Language Switcher */}
-            <div className="flex items-center gap-2 ms-2 ps-2 border-s border-primary/10">
+            <div className="flex items-center ps-1 border-s border-primary/10">
               <Link 
                 href={pathname.replace(/^\/(en|ar)/, pathname.startsWith('/en') ? '/ar' : '/en')}
                 onClick={() => {
                   document.cookie = `NEXT_LOCALE=${pathname.startsWith('/en') ? 'ar' : 'en'}; path=/; max-age=31536000`;
                 }}
-                className="text-xs font-black uppercase tracking-widest text-primary/40 hover:text-accent transition-colors active:scale-90"
+                className="px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[11px] md:text-xs font-bold text-primary/60 hover:text-primary hover:bg-primary/5 transition-colors active:scale-90"
                 title="Switch Language (Alt+L)"
               >
                 {pathname.startsWith('/en') ? 'عربي' : 'EN'}
@@ -567,18 +738,71 @@ export function Navbar({ dict }: { dict?: any }) {
             </div>
           </div>
         </div>
+
+        {/* Tier 2: Dedicated Mobile Search Bar (Etsy Style) */}
+        <div ref={mobileSearchRef} className="block md:hidden px-3.5 pb-2.5 relative">
+          <form onSubmit={handleSearch} className="w-full relative group">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowResults(true);
+              }}
+              onFocus={() => setShowResults(true)}
+              placeholder={d.common.search_placeholder}
+              className="w-full py-2 ps-9 pe-8 bg-white border border-primary/15 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent text-primary text-xs font-medium placeholder:text-primary/40 transition-all shadow-xs"
+            />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-charcoal/40 w-3.5 h-3.5 group-focus-within:text-accent transition-colors" />
+
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute end-2.5 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-charcoal p-1 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {renderSearchOverlay(true)}
+          </form>
+        </div>
+
+        {/* Tier 3: Mobile Category Pills Scroll (Etsy Style) */}
+        <div className="block md:hidden border-t border-primary/5 px-3 py-2 bg-cream/15 overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex items-center gap-1.5 whitespace-nowrap min-w-max">
+            {navCategories.map((cat) => {
+              const isActive = pathname.includes(`/category/${cat.id}`);
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/category/${cat.id}`}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap active:scale-95",
+                    isActive
+                      ? "bg-primary text-white shadow-xs"
+                      : "bg-white text-charcoal/70 border border-primary/10 hover:text-primary hover:border-accent"
+                  )}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
+            <Link
+              href="/categories"
+              className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 hover:bg-accent hover:text-white transition-all whitespace-nowrap shrink-0 active:scale-95"
+            >
+              {d.common.all_categories || "All"} →
+            </Link>
+          </div>
+        </div>
+
+        {/* Tier 4: Desktop Categories Bar */}
         <div className="hidden md:block border-t border-primary/5 py-3">
           <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between gap-8">
             <div className="flex items-center gap-6 lg:gap-10 overflow-x-auto no-scrollbar whitespace-nowrap flex-1 py-1">
-              {[
-                { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
-                { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
-                { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-                { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
-                { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
-              ].map((cat) => {
+              {navCategories.map((cat) => {
                 const isActive = pathname.includes(`/category/${cat.id}`);
                 return (
                   <Link
@@ -685,18 +909,19 @@ export function Navbar({ dict }: { dict?: any }) {
                     <Link
                       href="/studio"
                       onClick={() => setIsMenuOpen(false)}
-                      className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/10 text-center active:scale-95 transition-transform"
+                      className="flex flex-col items-center justify-center p-4 bg-accent/5 rounded-2xl border border-accent/15 text-center active:scale-95 transition-transform group"
                     >
-                      <div className="w-2 h-2 rounded-full bg-accent mb-2" />
+                      <Store className="w-5 h-5 text-accent mb-2 group-hover:scale-110 transition-transform" />
                       <span className="text-xs font-black text-accent uppercase">{d.common.studio}</span>
                     </Link>
                   ) : (
                     <Link
                       href="/become-artisan"
                       onClick={() => setIsMenuOpen(false)}
-                      className="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-2xl border border-primary text-center active:scale-95 transition-transform"
+                      className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center active:scale-95 transition-transform group"
                     >
-                      <span className="text-xs font-black uppercase tracking-widest">{d.common.sell}</span>
+                      <Store className="w-5 h-5 text-accent mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-xs font-black text-primary uppercase tracking-widest">{d.common.sell}</span>
                     </Link>
                   )}
                   <Link

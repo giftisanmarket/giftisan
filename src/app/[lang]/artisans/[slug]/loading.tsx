@@ -1,8 +1,10 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 export default function ArtisanDetailLoading() {
   return (
     <div className="min-h-screen bg-white">
+      <NavbarSkeleton />
       {/* Profile Header Skeleton */}
       <section className="pt-24 md:pt-32 pb-12 md:pb-20 bg-cream relative overflow-hidden min-h-[400px] md:min-h-[450px] flex items-end">
         <div className="container mx-auto px-4 relative z-10 w-full">

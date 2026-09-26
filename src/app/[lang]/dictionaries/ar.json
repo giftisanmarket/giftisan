@@ -584,7 +584,7 @@
     "login_subtitle": "واصل رحلتك في دائرة الإبداع.",
     "login_google": "سجل الدخول بواسطة جوجل",
     "login_email_label": "عنوان البريد الإلكتروني",
-    "login_email_placeholder": "name@studio.com",
+    "login_email_placeholder": "you@example.com",
     "login_password_label": "كلمة المرور",
     "login_password_placeholder": "••••••••",
     "login_button": "الدخول إلى الدائرة",

@@ -1,24 +1,13 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 export default function FavoritesLoading() {
   return (
     <div className="min-h-screen bg-cream">
-      {/* Sticky Navbar Skeleton mockup to completely prevent header flashing and maintain layout continuity */}
-      <div className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-primary/10">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-8">
-          <div className="flex items-center gap-2 shrink-0">
-            <Skeleton className="w-10 h-10 rounded-md" />
-            <Skeleton className="w-24 h-6 rounded-md" />
-          </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <Skeleton className="w-8 h-8 rounded-full" />
-            <Skeleton className="w-8 h-8 rounded-full" />
-            <Skeleton className="w-20 md:w-28 h-9 rounded-full" />
-          </div>
-        </div>
-      </div>
+      {/* Sticky Navbar Skeleton */}
+      <NavbarSkeleton />
 
-      <div className="container mx-auto px-4 pt-12 md:pt-16 pb-20">
+      <div className="container mx-auto px-4 pt-32 md:pt-40 pb-20">
         <div className="max-w-4xl mx-auto">
           {/* Favorites Header Mockup */}
           <header className="mb-12 text-center md:text-start space-y-4">

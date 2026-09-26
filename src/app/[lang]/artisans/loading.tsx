@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 function ArtisanCardSkeleton() {
   return (
@@ -42,18 +43,7 @@ export default function ArtisansLoading() {
   return (
     <div className="min-h-screen bg-cream pb-24">
       {/* Sticky Navbar Skeleton */}
-      <header className="sticky top-0 z-40 bg-cream/90 backdrop-blur-md border-b border-primary/5">
-        <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
-          <Skeleton className="w-28 md:w-36 h-9 md:h-10 rounded-xl shrink-0" />
-          <div className="hidden md:flex flex-1 max-w-xl mx-4">
-            <Skeleton className="w-full h-11 rounded-full" />
-          </div>
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <Skeleton className="w-9 h-9 rounded-full" />
-            <Skeleton className="w-9 h-9 rounded-full" />
-          </div>
-        </div>
-      </header>
+      <NavbarSkeleton />
 
       <div className="container mx-auto px-4 pt-32 md:pt-40 pb-20">
         {/* Header Skeleton */}

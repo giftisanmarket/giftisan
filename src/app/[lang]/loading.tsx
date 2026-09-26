@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 function ProductCardSkeleton() {
   return (
@@ -20,36 +21,7 @@ export default function Loading() {
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
 
       {/* Navbar Skeleton */}
-      <header className="sticky top-0 z-40 bg-cream/90 backdrop-blur-md border-b border-primary/5">
-        {/* Top Navbar Row */}
-        <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
-          {/* Logo Skeleton */}
-          <Skeleton className="w-28 md:w-36 h-9 md:h-10 rounded-xl shrink-0" />
-
-          {/* Search Bar Skeleton */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-4">
-            <Skeleton className="w-full h-11 rounded-full" />
-          </div>
-
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <Skeleton className="w-9 h-9 rounded-full hidden sm:block" />
-            <Skeleton className="w-24 h-9 rounded-full hidden lg:block" />
-            <Skeleton className="w-9 h-9 rounded-full" />
-            <Skeleton className="w-9 h-9 rounded-full" />
-          </div>
-        </div>
-
-        {/* Category Bar Skeleton */}
-        <div className="hidden md:block border-t border-primary/5">
-          <div className="container mx-auto px-4 py-2.5 flex items-center justify-between gap-6 overflow-hidden">
-            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <Skeleton key={i} className="w-20 lg:w-28 h-3.5 rounded" />
-            ))}
-            <Skeleton className="w-36 h-3.5 rounded shrink-0" />
-          </div>
-        </div>
-      </header>
+      <NavbarSkeleton />
 
       {/* Main Content Skeleton */}
       <div className="space-y-10 md:space-y-16 pb-20">

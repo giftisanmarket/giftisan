@@ -1,6 +1,4 @@
 "use client";
-
-import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
@@ -884,30 +882,27 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   };
 
   return (
-    <main className="min-h-screen bg-cream">
-      <Navbar dict={dict} />
-
-      <div className="container mx-auto px-4 pt-32 pb-20 max-w-4xl">
+    <main className="container mx-auto px-4 py-6 sm:py-8 md:py-12 max-w-4xl text-start">
         <Link
           href="/studio"
-          className="inline-flex items-center gap-2 text-primary/40 hover:text-primary text-sm font-bold uppercase tracking-widest mb-8 transition-colors group"
+          className="inline-flex items-center gap-2 text-primary/40 hover:text-primary text-sm font-bold uppercase tracking-widest mb-6 md:mb-8 transition-colors group"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          {dict.studio_profile.back_to_studio}
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
+          <span>{dict.studio_profile.back_to_studio}</span>
         </Link>
 
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-8 md:mb-12 gap-4 md:gap-6 text-start">
+          <div className="text-start">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-primary leading-tight text-start">
               {dict.new_product.list_new_treasure}{" "}
               <span className="serif italic font-normal text-accent">{dict.new_product.treasure_accent}</span>
             </h1>
-            <p className="text-charcoal/40 mt-1">{dict.new_product.share_craftsmanship}</p>
+            <p className="text-charcoal/40 mt-1.5 text-sm md:text-base text-start">{dict.new_product.share_craftsmanship}</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-10">
-          <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8 md:space-y-10">
+          <section className="bg-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-6 sm:space-y-8 text-start">
             <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
               <Sparkles className="w-6 h-6 text-accent" />
               <h2 className="text-2xl font-heading font-bold text-primary">{dict.new_product.the_essentials}</h2>
@@ -930,7 +925,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={dict.new_product.product_title_placeholder}
-                  className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-start"
                 />
               </div>
 
@@ -948,7 +943,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       placeholder={dict.new_product.price_placeholder}
-                      className="w-full py-4 px-8 pe-16 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm"
+                      className="w-full py-3.5 sm:py-4 px-4 sm:px-6 pe-16 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-start"
                     />
                     <div className="absolute end-4 px-3 py-1 bg-cream/60 border border-primary/10 rounded-xl text-xs font-black text-primary/60 pointer-events-none">
                       EGP
@@ -962,7 +957,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   <button
                     type="button"
                     onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                    className="w-full h-14 px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all text-start flex items-center justify-between shadow-sm"
+                    className="w-full h-12 sm:h-14 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all text-start flex items-center justify-between shadow-sm"
                   >
                     <span className={cn("font-medium", formData.category ? "text-primary" : "text-primary/50")}>
                       {categories.find(c => c.id === formData.category)?.label || dict.new_product.select_category}
@@ -1017,7 +1012,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder={dict.new_product.description_placeholder}
-                  className="w-full h-32 md:h-40 p-5 md:p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm text-sm md:text-base"
+                  className="w-full h-32 md:h-40 p-4 sm:p-5 md:p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm text-sm md:text-base text-start"
                 />
               </div>
             </div>
@@ -1345,7 +1340,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               {/* Initial Stock Input (for non-variant products) */}
               <div className="space-y-3 col-span-full md:col-span-1">
                 <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.initial_stock_label}</label>
-                <input type="number" min="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm" />
+                <input type="number" min="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full py-3.5 sm:py-4 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm text-start" />
               </div>
             </div>
           </section>
@@ -1369,9 +1364,9 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
         </form>
 
         {/* Floating Sticky Action Bar */}
-        <div className="fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-xl border-t border-primary/10 py-3.5 px-4 md:px-8 shadow-2xl transition-all">
-          <div className="container mx-auto max-w-4xl flex items-center justify-between gap-4">
-            <div className="min-w-0 hidden sm:block">
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-primary/10 py-3 px-4 md:px-8 shadow-2xl transition-all">
+          <div className="container mx-auto max-w-4xl flex items-center justify-between gap-3 sm:gap-4">
+            <div className="min-w-0 hidden sm:block text-start">
               <p className="text-xs font-bold text-primary truncate max-w-xs">
                 {formData.name || "Untitled Product"}
               </p>
@@ -1380,7 +1375,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </p>
             </div>
 
-            <div className="flex items-center gap-3 ms-auto">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto sm:ms-auto justify-end">
               <button
                 type="button"
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -1393,7 +1388,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="py-3 px-8 bg-primary text-white font-bold text-xs md:text-sm rounded-xl hover:bg-primary-light transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto py-3 px-6 sm:px-8 bg-primary text-white font-bold text-sm rounded-xl hover:bg-primary-light transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-accent" />
@@ -1405,7 +1400,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
             </div>
           </div>
         </div>
-      </div>
-    </main>
-  );
-}
+      </main>
+    );
+  }

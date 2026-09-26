@@ -1,0 +1,564 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { 
+  LayoutDashboard, 
+  Plus, 
+  Settings, 
+  ExternalLink, 
+  Store, 
+  User, 
+  Globe, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  CheckCircle2, 
+  Clock, 
+  LogOut, 
+  Sparkles,
+  HelpCircle
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-hot-toast";
+import { cn } from "@/lib/utils";
+
+interface StudioHeaderProps {
+  lang: string;
+  dict: any;
+  artisan?: {
+    id: string;
+    studioName?: string | null;
+    slug?: string | null;
+    avatar?: string | null;
+    status?: string | null;
+  } | null;
+  user: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string | null;
+  };
+}
+
+export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const profileRef = useRef<HTMLDivElement>(null);
+  const isAr = lang === "ar";
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsProfileOpen(false);
+  }, [pathname]);
+
+  // Language switch handler (and Alt + L shortcut)
+  const switchLanguage = () => {
+    const nextLang = lang === "en" ? "ar" : "en";
+    document.cookie = `NEXT_LOCALE=${nextLang}; path=/; max-age=31536000`;
+    const nextPath = pathname.replace(/^\/(en|ar)/, `/${nextLang}`);
+
+    toast.success(
+      nextLang === "ar" ? "جاري التحويل إلى اللغة العربية..." : "Switching to English...",
+      { id: "lang-switch-toast", duration: 1500 }
+    );
+    router.push(nextPath);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === "l" || e.key === "L" || e.key === "ل")) {
+        e.preventDefault();
+        switchLanguage();
+      }
+      if (e.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        setIsProfileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pathname, lang]);
+
+  // Handle avatar click: on mobile (< 768px), open full drawer; on desktop, toggle dropdown
+  const handleAvatarClick = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsMobileMenuOpen((prev) => !prev);
+      setIsProfileOpen(false);
+    } else {
+      setIsProfileOpen((prev) => !prev);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  // Navigation items
+  const navItems = useMemo(() => [
+    {
+      label: dict?.studio?.overview || (isAr ? "لوحة التحكم" : "Dashboard"),
+      href: `/${lang}/studio`,
+      icon: LayoutDashboard,
+      isActive: pathname === `/${lang}/studio` && !searchParams?.get("tab"),
+    },
+    {
+      label: dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product"),
+      href: `/${lang}/studio/new-product`,
+      icon: Plus,
+      isActive: pathname === `/${lang}/studio/new-product`,
+    },
+    {
+      label: dict?.studio?.studio_settings || (isAr ? "الإعدادات" : "Settings"),
+      href: `/${lang}/studio?tab=settings`,
+      icon: Settings,
+      isActive: pathname === `/${lang}/studio` && searchParams?.get("tab") === "settings",
+    },
+  ], [lang, pathname, dict, isAr, searchParams]);
+
+  const studioDisplayName = artisan?.studioName || user.name || (isAr ? "استوديو الحرفي" : "Artisan Studio");
+  const avatarImage = artisan?.avatar || user.image;
+  const isVerified = artisan?.status === "APPROVED";
+  const publicShopUrl = artisan?.slug ? `/${lang}/artisans/${artisan.slug}` : null;
+
+  return (
+    <>
+      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-xl border-b border-primary/10 shadow-xs">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-16 md:h-20 flex items-center justify-between gap-3 md:gap-6">
+        
+        {/* Brand Logo + Studio Indicator (Home Page Logo + Studio Label, linking to /studio) */}
+        <Link 
+          href={`/${lang}/studio`} 
+          className="flex items-center gap-1.5 md:gap-2.5 shrink-0 group focus:outline-none"
+          title={dict?.studio?.dashboard || (isAr ? "لوحة تحكم الاستوديو" : "Studio Dashboard")}
+        >
+          <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md shrink-0">
+            <Image
+              src="/icon.png"
+              alt="Giftisan Logo"
+              fill
+              className="object-cover"
+              sizes="40px"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tighter">
+              Giftisan
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
+              <Sparkles className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
+              {isAr ? "الاستوديو" : "Studio"}
+            </span>
+          </div>
+        </Link>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+          
+          {/* Primary CTA: Add Product (Desktop & Tablet; on mobile it lives in the bottom navigation bar) */}
+          <Link
+            href={`/${lang}/studio/new-product`}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold text-white bg-accent hover:bg-accent-light transition-all shadow-sm shadow-accent/20 active:scale-95 shrink-0 group"
+            title={dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}
+          >
+            <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90 duration-300" />
+            <span>{dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}</span>
+          </Link>
+
+          {/* View Live Shop (Artisan Storefront Preview - Desktop / Tablet) */}
+          {publicShopUrl && (
+            <Link
+              href={publicShopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 md:px-4 md:py-2 rounded-full text-xs font-bold text-primary hover:bg-primary/5 border border-primary/15 transition-all shadow-xs group"
+              title={isAr ? "فتح صفحة متجرك للجمهور" : "Preview your public shop on Giftisan"}
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-accent transition-colors" />
+              <span>{isAr ? "معاينة المتجر" : "View Live Shop"}</span>
+            </Link>
+          )}
+
+          {/* Language Switcher (Desktop / Tablet) */}
+          <button
+            type="button"
+            onClick={switchLanguage}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full text-xs font-bold text-charcoal/70 hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/10"
+            title={isAr ? "التبديل إلى الإنجليزية (Alt + L)" : "Switch to Arabic (Alt + L)"}
+          >
+            <Globe className="w-3.5 h-3.5 text-accent" />
+            <span className="uppercase text-[11px] font-black">{isAr ? "EN" : "العربية"}</span>
+          </button>
+
+          {/* Artisan Profile Menu */}
+          <div ref={profileRef} className="relative">
+            <button
+              type="button"
+              onClick={handleAvatarClick}
+              className={cn(
+                "flex items-center gap-1.5 p-1 rounded-full transition-all focus:outline-none",
+                (isProfileOpen || isMobileMenuOpen) ? "ring-2 ring-accent bg-accent/5" : "hover:ring-2 hover:ring-primary/10"
+              )}
+              aria-expanded={isProfileOpen || isMobileMenuOpen}
+              aria-label={studioDisplayName}
+            >
+              <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border border-primary/10 bg-cream flex items-center justify-center shadow-xs">
+                {avatarImage ? (
+                  <Image
+                    src={avatarImage}
+                    alt={studioDisplayName}
+                    fill
+                    className="object-cover"
+                    sizes="36px"
+                  />
+                ) : (
+                  <User className="w-4 h-4 text-primary/60" />
+                )}
+              </div>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-charcoal/40 transition-transform hidden sm:block", isProfileOpen && "rotate-180 text-accent")} />
+            </button>
+
+            {/* Profile Dropdown (Desktop & Tablet) */}
+            <AnimatePresence>
+              {isProfileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="hidden md:block absolute end-0 top-full mt-2 w-72 bg-white rounded-3xl shadow-2xl border border-primary/10 py-3 z-50 overflow-hidden"
+                >
+                  {/* Studio Header Info */}
+                  <div className="px-5 py-3 border-b border-primary/5 bg-cream/20">
+                    <p className="text-xs font-black text-primary truncate">
+                      {studioDisplayName}
+                    </p>
+                    <p className="text-[11px] text-charcoal/50 truncate font-sans">
+                      {user.email}
+                    </p>
+                    <div className="mt-2.5 flex items-center gap-1.5">
+                      {isVerified ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-50 text-green-700 border border-green-200">
+                          <CheckCircle2 className="w-3 h-3 text-green-600" />
+                          {isAr ? "استوديو موثق" : "Verified Studio"}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                          <Clock className="w-3 h-3 text-amber-600" />
+                          {isAr ? "قيد المراجعة" : "Under Review"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mode Switch: Marketplace / Buyer Mode */}
+                  <div className="p-2 border-b border-primary/5">
+                    <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary/40">
+                      {isAr ? "وضع التبديل" : "Switch Mode"}
+                    </div>
+                    <Link
+                      href={`/${lang}`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 rounded-2xl hover:bg-accent/5 text-primary font-bold text-xs transition-colors group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-white transition-colors">
+                          <Store className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold leading-tight">{isAr ? "العودة للسوق" : "Browse Marketplace"}</p>
+                          <p className="text-[10px] text-charcoal/40 font-normal">{isAr ? "التسوق واستكشاف المنتجات" : "Shop handcrafted gifts"}</p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-cream text-charcoal/60 border border-primary/5">
+                        {isAr ? "مشتري" : "Buyer"}
+                      </span>
+                    </Link>
+                  </div>
+
+                  {/* Studio Quick Shortcuts */}
+                  <div className="p-2 border-b border-primary/5 space-y-0.5">
+                    <Link
+                      href={`/${lang}/studio?tab=settings`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-accent" />
+                      <span>{dict?.studio?.studio_settings || (isAr ? "إعدادات الاستوديو" : "Studio Settings")}</span>
+                    </Link>
+                    <Link
+                      href={`/${lang}/profile`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-accent" />
+                      <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
+                    </Link>
+                    <Link
+                      href={`/${lang}/contact`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5 text-accent" />
+                      <span>{dict?.common?.support || (isAr ? "المساعدة والدعم" : "Help & Support")}</span>
+                    </Link>
+                  </div>
+
+                  {/* Sign Out */}
+                  <div className="p-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        signOut({ callbackUrl: `/${lang}` });
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-red-50 text-red-600 font-bold text-xs transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>{dict?.common?.sign_out || dict?.common?.logout || (isAr ? "تسجيل الخروج" : "Sign Out")}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer (Consolidated Single Sheet for Mobile) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden border-t border-primary/10 bg-white/98 backdrop-blur-2xl overflow-hidden px-4 py-5 shadow-2xl"
+          >
+            <div className="space-y-4">
+              {/* Studio Info Card */}
+              <div className="p-3.5 bg-cream/40 rounded-2xl border border-primary/5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-primary/10 bg-cream">
+                    {avatarImage ? (
+                      <Image src={avatarImage} alt={studioDisplayName} fill className="object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 m-2.5 text-primary/60" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-primary leading-tight">{studioDisplayName}</h4>
+                    <p className="text-[11px] text-charcoal/50">{user.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isVerified ? (
+                    <span className="text-[10px] font-black uppercase text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                      {isAr ? "موثق" : "Verified"}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      {isAr ? "مراجعة" : "Review"}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-charcoal/50 hover:text-primary hover:bg-primary/5 transition-colors"
+                    aria-label={isAr ? "إغلاق" : "Close"}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm transition-all",
+                        item.isActive
+                          ? "bg-primary text-white shadow-md shadow-primary/20"
+                          : "text-charcoal/80 hover:bg-primary/5 hover:text-primary"
+                      )}
+                    >
+                      <Icon className={cn("w-4 h-4", item.isActive ? "text-accent-light" : "text-accent")} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                {/* My Account Profile */}
+                <Link
+                  href={`/${lang}/profile`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-charcoal/80 hover:bg-primary/5 hover:text-primary transition-all"
+                >
+                  <User className="w-4 h-4 text-accent" />
+                  <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
+                </Link>
+
+                {/* Support */}
+                <Link
+                  href={`/${lang}/contact`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-charcoal/80 hover:bg-primary/5 hover:text-primary transition-all"
+                >
+                  <HelpCircle className="w-4 h-4 text-accent" />
+                  <span>{dict?.common?.support || (isAr ? "المساعدة والدعم" : "Help & Support")}</span>
+                </Link>
+              </div>
+
+              {/* View Live Shop Button */}
+              {publicShopUrl && (
+                <Link
+                  href={publicShopUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-accent text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-accent-light transition-all shadow-lg shadow-accent/20"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>{isAr ? "معاينة المتجر المباشر" : "View Live Shop"}</span>
+                </Link>
+              )}
+
+              {/* Language Switcher in Mobile Drawer */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-cream/60 border border-primary/5">
+                <span className="text-xs font-bold text-primary flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-accent" />
+                  {isAr ? "لغة التطبيق" : "Language"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    switchLanguage();
+                  }}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white text-primary border border-primary/10 shadow-xs hover:bg-accent hover:text-white transition-colors"
+                >
+                  {isAr ? "English" : "العربية"}
+                </button>
+              </div>
+
+              {/* Mode Switch & Logout */}
+              <div className="pt-2 border-t border-primary/5 space-y-2">
+                <Link
+                  href={`/${lang}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 rounded-2xl bg-cream/50 hover:bg-cream text-primary font-bold text-xs transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Store className="w-4 h-4 text-accent" />
+                    {isAr ? "العودة للسوق للتسوق" : "Browse Marketplace"}
+                  </span>
+                  <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-white text-primary/60 border border-primary/5">
+                    {isAr ? "مشتري" : "Buyer"}
+                  </span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signOut({ callbackUrl: `/${lang}` });
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-red-600 bg-red-50/50 hover:bg-red-50 font-bold text-xs transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{dict?.common?.sign_out || dict?.common?.logout || (isAr ? "تسجيل الخروج" : "Sign Out")}</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+
+    {/* Mobile Bottom Navigation Bar (Shopify / Etsy Seller App Pattern - Hidden on full-screen form pages) */}
+    {!pathname.includes("/studio/new-product") && (
+      <nav className="md:hidden fixed bottom-0 start-0 end-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-primary/10 px-2 py-1.5 flex items-center justify-around shadow-2xl">
+        {/* Dashboard */}
+        <Link
+          href={`/${lang}/studio`}
+          className={cn(
+            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
+            pathname === `/${lang}/studio` && !isMobileMenuOpen ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
+          )}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="text-[10px] font-bold">{isAr ? "الرئيسية" : "Dashboard"}</span>
+        </Link>
+
+        {/* Quick Add Product */}
+        <Link
+          href={`/${lang}/studio/new-product`}
+          className={cn(
+            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
+            pathname === `/${lang}/studio/new-product` ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
+          )}
+        >
+          <div className="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center shadow-md shadow-accent/20">
+            <Plus className="w-4 h-4" />
+          </div>
+          <span className="text-[10px] font-bold">{isAr ? "إضافة" : "Add"}</span>
+        </Link>
+
+
+        {/* Live Shop Preview */}
+        {publicShopUrl && (
+          <Link
+            href={publicShopUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-1 py-1 px-3 rounded-2xl text-charcoal/60 hover:text-primary transition-all active:scale-95"
+          >
+            <Store className="w-5 h-5" />
+            <span className="text-[10px] font-bold">{isAr ? "متجري" : "My Shop"}</span>
+          </Link>
+        )}
+
+        {/* More / Menu Drawer Toggle */}
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={cn(
+            "flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all active:scale-95",
+            isMobileMenuOpen ? "text-accent font-black" : "text-charcoal/60 hover:text-primary"
+          )}
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] font-bold">{isAr ? "المزيد" : "More"}</span>
+        </button>
+      </nav>
+    )}
+    </>
+  );
+}

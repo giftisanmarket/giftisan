@@ -1,8 +1,10 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 export default function SearchLoading() {
   return (
     <div className="min-h-screen bg-cream">
+      <NavbarSkeleton />
       <div className="flex flex-col container mx-auto px-4 py-20 space-y-12">
         <div className="space-y-4">
           <Skeleton className="w-64 h-12 rounded-lg" />

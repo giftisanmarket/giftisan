@@ -1,9 +1,8 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
   BarChart3,
@@ -81,9 +80,20 @@ interface StudioClientProps {
 
 export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview = false, dict, lang }: StudioClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showMask, setShowMask] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "reviews" | "settings" | "bio-link">("overview");
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && ["overview", "inventory", "sales", "reviews", "growth", "logistics", "settings", "bio-link"].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+      setTimeout(() => {
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [searchParams]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isSkipping, setIsSkipping] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -237,11 +247,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
 
   return (
     <>
-      <div className="min-h-screen bg-cream/30 selection:bg-accent/20">
-        <div className="no-print">
-          <Navbar dict={dict} />
-        </div>
-
+      <div>
         <main className="no-print max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
 
           <AnimatePresence>
@@ -420,50 +426,42 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
 
 
 
-            <div className="relative bg-primary text-white rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-12 lg:p-16 mb-12 shadow-2xl shadow-primary/20 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/20 opacity-40" />
+            {/* Compact Studio Header Banner */}
+            <div className="relative bg-primary text-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 mb-6 shadow-xl shadow-primary/10 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/20 opacity-40 pointer-events-none" />
 
-              {!isAdminPreview && (
-                <button
-                  onClick={() => {
-                    setActiveTab("settings");
-                    setTimeout(() => {
-                      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className="absolute top-6 end-6 md:top-10 md:end-10 z-20 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white hover:text-primary transition-all shadow-xl group active:scale-90"
-                  title={dict.studio.studio_settings}
-                >
-                  <Settings className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:rotate-90 duration-500" />
-                </button>
-              )}
-
-              <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-12">
-                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 text-center md:text-start w-full md:w-auto">
-                  <div className="relative w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden border-[6px] border-white/10 shadow-2xl shrink-0">
+              <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-5 md:gap-8">
+                <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 text-center sm:text-start w-full md:w-auto">
+                  <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[1.75rem] overflow-hidden border-2 border-white/20 shadow-xl shrink-0">
                     <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={artisan.studioName || artisan.user.name} fill className="object-cover" />
                   </div>
-                  <div className="space-y-3 md:space-y-4">
-                    <p className="text-accent-light font-black uppercase tracking-[0.25em] text-[9px] md:text-xs bg-white/5 w-fit px-3 py-1 rounded-full mx-auto md:mx-0 border border-white/10">{dict.studio.master_studio}</p>
-                    <h1 className="text-3xl md:text-4xl lg:text-7xl font-heading font-bold leading-[1.1] tracking-tight">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                      <span className="text-accent-light font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                        {dict.studio.master_studio}
+                      </span>
+                    </div>
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-black leading-tight tracking-tight">
                       {artisan.studioName || `${artisan.user.name}'s Studio`}
                     </h1>
-                    <p className="text-white/60 text-sm md:text-lg max-w-xl italic font-medium leading-relaxed line-clamp-3 md:line-clamp-4">
-                      "{artisan.bio}"
-                    </p>
+                    {artisan.bio && (
+                      <p className="text-white/70 text-xs md:text-sm max-w-xl italic font-medium leading-relaxed line-clamp-1">
+                        "{artisan.bio}"
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex gap-4 w-full md:w-auto justify-center pt-2 md:pt-0">
+                <div className="flex gap-3 w-full md:w-auto justify-center sm:justify-end">
                   {isAdminPreview && (
-                    <div className="h-12 md:h-16 px-8 bg-white/10 backdrop-blur-xl text-white font-bold rounded-2xl md:rounded-full border border-white/20 flex items-center gap-3 text-sm md:text-base shadow-xl">
-                      <ShieldCheck className="w-5 h-5 text-accent-light" />
+                    <div className="h-10 md:h-12 px-5 bg-white/10 backdrop-blur-xl text-white font-bold rounded-xl md:rounded-full border border-white/20 flex items-center gap-2.5 text-xs md:text-sm shadow-lg">
+                      <ShieldCheck className="w-4 h-4 text-accent-light" />
                       {dict.studio.auditor_access}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-30" />
+              <div className="absolute top-0 end-0 w-[300px] h-[300px] bg-accent/15 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             </div>
 
             <div className="relative mb-4">

@@ -24,8 +24,8 @@ export default function NewProductLoading() {
   };
 
   return (
-    <div className="min-h-screen bg-cream/30 pb-32 overflow-x-hidden">
-      <div className="bg-white border-b border-primary/5 pt-28 pb-12 md:pt-40 md:pb-20">
+    <div className="pb-32 overflow-x-hidden">
+      <div className="bg-white border-b border-primary/5 pt-6 pb-10 md:pt-8 md:pb-14">
         <div className="max-w-5xl mx-auto px-4 md:px-12">
           <div className="space-y-4">
              <div className="h-3 md:h-4 w-24 md:w-32 bg-primary/5 rounded-full animate-pulse" />

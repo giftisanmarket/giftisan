@@ -1,9 +1,11 @@
 import { Skeleton } from "@/components/skeleton";
+import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 export default function CategoriesLoading() {
   return (
     <div className="min-h-screen bg-cream">
-      <section className="pt-24 md:pt-40 pb-20">
+      <NavbarSkeleton />
+      <section className="pt-24 md:pt-36 pb-20">
         <div className="container mx-auto px-4">
           {/* Header Skeleton */}
           <div className="max-w-3xl mb-16 space-y-4">

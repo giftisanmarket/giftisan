@@ -1509,14 +1509,14 @@ export async function getAllArtisans() {
   try {
     const artisans = await prisma.artisanProfile.findMany({
       where: {
-        OR: [
-          { status: "APPROVED" },
-          { products: { some: { status: "APPROVED" } } }
-        ]
+        status: "APPROVED"
       },
       include: {
         user: true,
         products: {
+          where: {
+            status: "APPROVED"
+          },
           include: {
             reviews: {
               select: {

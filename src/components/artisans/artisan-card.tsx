@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Star, Heart, CheckCircle2, MapPin, Package, ArrowUpRight } from "lucide-react";
@@ -21,6 +20,7 @@ interface ArtisanCardProps {
   artisan: {
     id: string;
     slug?: string | null;
+    status?: string | null;
     studioName?: string | null;
     location?: string | null;
     avatar?: string | null;
@@ -35,9 +35,11 @@ interface ArtisanCardProps {
       slug?: string | null;
       images: string[];
       name?: string;
+      status?: string;
       reviews?: Array<{ rating: number }>;
     }>;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict?: any;
 }
 
@@ -55,6 +57,11 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
   const { isFavoriteArtisan, toggleFavoriteArtisan } = useFavorites();
   const isFollowed = isFavoriteArtisan(artisan.id);
 
+  // If artisan is not approved, do not render this card
+  if (artisan.status && artisan.status.toUpperCase() !== "APPROVED") {
+    return null;
+  }
+
   const toggleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -63,7 +70,15 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
 
   const artisanSlug = artisan.slug || artisan.user.name.toLowerCase().replace(/\s+/g, "-");
   const artisanUrl = `/artisans/${encodeURI(artisanSlug)}`;
-  const productCount = artisan.products?.length || 0;
+  
+  // Filter out any pending, draft, or non-approved products
+  const approvedProducts = (artisan.products && Array.isArray(artisan.products))
+    ? artisan.products.filter(
+        (p) => p && (!p.status || p.status.toUpperCase() === "APPROVED")
+      )
+    : [];
+
+  const productCount = approvedProducts.length;
   const isArabic = dict?.common?.home === "الرئيسية";
   const viewStudioText = isArabic ? "زيارة المتجر" : "Visit Studio";
 
@@ -71,12 +86,12 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
   const previewTiles: PreviewTile[] = [];
   const usedProductIds = new Set<string>();
 
-  if (artisan.products && Array.isArray(artisan.products)) {
-    for (const p of artisan.products) {
+  if (approvedProducts.length > 0) {
+    for (const p of approvedProducts) {
       if (!p || !p.id || usedProductIds.has(p.id)) continue;
       if (Array.isArray(p.images) && p.images.length > 0) {
         const validImg = p.images.find(
-          (img: any) => typeof img === "string" && img.trim().length > 0
+          (img: string) => typeof img === "string" && img.trim().length > 0
         );
         if (validImg) {
           usedProductIds.add(p.id);
@@ -96,8 +111,8 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
   }
 
   // 2. Only if the artisan has ONLY 1 product in total, allow alternate angles of that single product
-  if (previewTiles.length === 1 && artisan.products?.length === 1) {
-    const singleProduct = artisan.products[0];
+  if (previewTiles.length === 1 && approvedProducts.length === 1) {
+    const singleProduct = approvedProducts[0];
     if (Array.isArray(singleProduct.images)) {
       const slugOrId = (singleProduct.slug || singleProduct.id).trim();
       for (const img of singleProduct.images) {
@@ -163,8 +178,8 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
 
   // Review calculations
   let totalReviews = 0;
-  if (artisan.products && Array.isArray(artisan.products)) {
-    for (const p of artisan.products) {
+  if (approvedProducts.length > 0) {
+    for (const p of approvedProducts) {
       if (Array.isArray(p.reviews)) {
         totalReviews += p.reviews.length;
       }

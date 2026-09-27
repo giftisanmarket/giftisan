@@ -22,7 +22,7 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
         { slug: rawSlug },
         { slug: { equals: decodedSlug, mode: "insensitive" } }
       ],
-      status: { in: ["APPROVED", "PENDING"] }
+      status: "APPROVED"
     },
     include: {
       products: {
@@ -56,7 +56,7 @@ const getArtisanBySlug = cache(async (rawSlug: string) => {
     where: { 
       role: 'ARTISAN',
       artisanProfile: {
-        status: { in: ["APPROVED", "PENDING"] }
+        status: "APPROVED"
       }
     },
     include: {

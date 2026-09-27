@@ -19,18 +19,31 @@ export function slugify(text: string) {
 
 export function getOptimizedImageUrl(
   url?: string | null,
-  options: { width?: number; height?: number; quality?: string | number } = {}
+  options: { width?: number; height?: number; quality?: string | number; crop?: string } = {}
 ): string {
-  if (!url) return "/icon.png";
+  if (!url || typeof url !== "string") return "/icon.png";
   if (!url.includes("res.cloudinary.com")) return url;
-  if (url.includes("/upload/f_auto") || url.includes("/upload/q_auto")) return url;
 
-  const { width = 600, height, quality = "auto" } = options;
-  const transforms = [`f_auto`, `q_${quality}`];
+  const { width, height, quality = "auto", crop } = options;
+  const transforms: string[] = ["f_auto", `q_${quality}`];
 
-  if (width) transforms.push(`w_${width}`);
-  if (height) transforms.push(`h_${height}`, `c_fill`);
+  if (width) transforms.push(`w_${Math.round(width)}`);
+  if (height) transforms.push(`h_${Math.round(height)}`);
+  if (crop) {
+    transforms.push(`c_${crop}`);
+  } else if (width && height) {
+    transforms.push("c_fill");
+  } else if (width || height) {
+    transforms.push("c_limit");
+  }
 
   const transformString = transforms.join(",");
+
+  // Matches /image/upload/ followed by an optional existing transformation block (e.g. f_auto,q_auto,w_600/)
+  const match = url.match(/\/image\/upload\/(?:(?:[a-z]_[^/]+,?[^/]*)\/)?/i);
+  if (match) {
+    return url.replace(match[0], `/image/upload/${transformString}/`);
+  }
+
   return url.replace("/upload/", `/upload/${transformString}/`);
 }

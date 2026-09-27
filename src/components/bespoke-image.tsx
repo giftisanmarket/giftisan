@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image, { ImageProps } from "next/image";
 import { Skeleton } from "./skeleton";
-import { cn } from "@/lib/utils";
+import { cn, getOptimizedImageUrl } from "@/lib/utils";
 
 interface BespokeImageProps extends ImageProps {
   containerClassName?: string;
@@ -22,28 +22,27 @@ export function BespokeImage({
 }: BespokeImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const isFill = !!props.fill;
-  const isOptimized = !!(type && id);
 
-  // Simple hash or version key based on the image URL/content to bust browser cache
-  const getVersion = (s: any) => {
-    if (typeof s !== "string") return "1";
-    if (s.startsWith("data:")) {
-      let hash = 0;
-      for (let i = 0; i < Math.min(s.length, 100); i++) {
-        hash = (hash << 5) - hash + s.charCodeAt(i);
-        hash |= 0;
-      }
-      return `${s.length}-${Math.abs(hash)}`;
+  // Resolve image source: prefer direct source; fallback to internal endpoint only if src is absent
+  const rawSrc = typeof src === "string" ? src.trim() : "";
+  const resolvedSrc = rawSrc || (type && id ? `/api/image/${type}/${id}` : "/icon.png");
+
+  // Dynamic Edge CDN loader for Cloudinary and Unsplash
+  const cdnLoader = ({ src: lSrc, width, quality }: { src: string; width: number; quality?: number }) => {
+    if (!lSrc) return "/icon.png";
+    if (lSrc.includes("res.cloudinary.com")) {
+      return getOptimizedImageUrl(lSrc, { width, quality: quality || "auto" });
     }
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      hash = (hash << 5) - hash + s.charCodeAt(i);
-      hash |= 0;
+    if (lSrc.includes("images.unsplash.com")) {
+      const separator = lSrc.includes("?") ? "&" : "?";
+      return `${lSrc}${separator}w=${width}&q=${quality || 80}&auto=format`;
     }
-    return Math.abs(hash).toString();
+    return lSrc;
   };
 
-  const version = getVersion(src);
+  const isCdnEligible = typeof resolvedSrc === "string" && (
+    resolvedSrc.includes("res.cloudinary.com") || resolvedSrc.includes("images.unsplash.com")
+  );
 
   return (
     <div className={cn(
@@ -53,10 +52,8 @@ export function BespokeImage({
     )}>
       {isLoading && <Skeleton className="absolute inset-0 z-10" />}
       <Image
-        loader={isOptimized ? ({ src: loaderSrc, width, quality }) => {
-          return `/api/image/${type}/${id}?w=${width}&q=${quality || 85}&v=${version}`
-        } : undefined}
-        src={isOptimized ? `giftisan-${type}-${id}-${version}` : src}
+        loader={props.loader || (isCdnEligible ? cdnLoader : undefined)}
+        src={resolvedSrc}
         alt={alt}
         className={cn(
           "transition-all duration-700",
@@ -70,4 +67,5 @@ export function BespokeImage({
     </div>
   );
 }
+
 

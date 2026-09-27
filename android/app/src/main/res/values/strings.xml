@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Giftisan</string>
+    <string name="title_activity_main">Giftisan</string>
+    <string name="package_name">com.giftisan.app</string>
+    <string name="custom_url_scheme">com.giftisan.app</string>
+</resources>

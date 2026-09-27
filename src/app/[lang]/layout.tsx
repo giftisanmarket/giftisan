@@ -29,6 +29,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
@@ -86,6 +87,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "react-hot-toast";
 import { NotificationProvider } from "@/components/notification-provider";
+import { NativeLifecycle } from "@/components/native-lifecycle";
 
 
 export async function generateStaticParams() {
@@ -240,6 +242,7 @@ export default async function RootLayout({
           `}
         </Script>
         <SessionProvider session={session} key={session?.user?.id || "guest"}>
+          <NativeLifecycle />
           <NotificationProvider lang={lang}>
             <FavoritesProvider>
               <CartProvider>

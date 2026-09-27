@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
+import { getOptimizedImageUrl } from "@/lib/utils";
 
 export async function GET(
   request: NextRequest,
@@ -39,6 +40,17 @@ export async function GET(
 
     if (!imageData) {
       return new NextResponse("Image not found", { status: 404 });
+    }
+
+    // High performance shortcut: If image is hosted on Cloudinary CDN, redirect directly to Cloudinary's edge
+    if (imageData.includes("res.cloudinary.com")) {
+      const cdnUrl = getOptimizedImageUrl(imageData, { width, quality });
+      return NextResponse.redirect(cdnUrl, {
+        status: 307,
+        headers: {
+          "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
+        },
+      });
     }
 
     let buffer: Buffer;

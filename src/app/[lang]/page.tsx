@@ -87,11 +87,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       ]
     }),
 
-    // 2. Handcrafted Bags & Accessories (bags-and-purses)
+    // 2. Handcrafted Bags & Accessories (bags-and-purses + accessories like keychains, crochet bags)
     prisma.product.findMany({
       where: {
         status: "APPROVED",
-        category: { in: ["bags-and-purses"], mode: "insensitive" }
+        category: { in: ["bags-and-purses", "accessories"], mode: "insensitive" }
       },
       select: productSelect,
       take: 8,
@@ -101,11 +101,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       ]
     }),
 
-    // 3. Artisan Home & Living (home-and-living)
+    // 3. Artisan Home & Living (home-and-living only — ceramics/woodwork if they exist)
     prisma.product.findMany({
       where: {
         status: "APPROVED",
-        category: { in: ["home-and-living", "woodwork", "ceramics", "accessories"], mode: "insensitive" }
+        category: { in: ["home-and-living", "woodwork", "ceramics"], mode: "insensitive" }
       },
       select: productSelect,
       take: 8,

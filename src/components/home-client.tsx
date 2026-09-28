@@ -94,19 +94,19 @@ export default function HomeClient({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-7 md:mb-9 gap-4">
             <div>
               <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
-                {isArabic ? "حقائب ومصنوعات يدوية" : "Handcrafted Bags & Accessories"}
+                {isArabic ? "حقائب وإكسسوارات يدوية" : "Handcrafted Bags & Accessories"}
               </h2>
               <p className="text-charcoal/60 text-xs md:text-sm mt-1">
                 {isArabic
-                  ? "حقائب جلدية أصلية، كروشيه فاخر، وإكسسوارات صنعت لتدوم"
-                  : "Authentic leather totes, fine crochet purses, and handmade accessories"}
+                  ? "حقائب، كروشيه، مفاتيح، وإكسسوارات يدوية متنوعة"
+                  : "Handmade bags, purses, crochet keychains, and artisan accessories"}
               </p>
             </div>
             <Link
               href="/category/bags-and-purses"
               className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-1.5 group text-xs md:text-sm shrink-0"
             >
-              <span>{isArabic ? "تسوق الحقائب" : "Shop Bags"}</span>
+              <span>{isArabic ? "تسوق الحقائب والإكسسوارات" : "Shop Bags & Accessories"}</span>
               <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </Link>
           </div>

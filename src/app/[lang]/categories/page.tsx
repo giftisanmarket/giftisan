@@ -55,11 +55,283 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
     ]
   };
 
-  const categoryNames = [
-    "Ceramics", "Jewelry", "Gift Boxes & Sets", "Stationery", "Vintage", "Textiles",
-    "Woodwork", "Leatherwork", "Culinary Arts", "Beauty & Apothecary", "Metalwork",
-    "Glasswork", "Basketry", "Fashion",
-    "Wedding", "Personalized", "Art & Collectibles"
+  const departments = [
+    {
+      name: "Home & Living",
+      slug: "home-and-living",
+      subcategories: [
+        "Home Decor",
+        "Lighting",
+        "Floor & Rugs",
+        "Kitchen & Dining",
+        "Furniture",
+        "Bathroom",
+        "Storage & Organization",
+        "Outdoor & Gardening",
+        "Curtains & Window Treatments",
+        "Bedding",
+        "Office",
+        "Food & Drink",
+        "Spirituality & Religion",
+        "Home Improvement",
+        "Home Appliances",
+        "Cleaning Supplies"
+      ],
+      aliases: ["home-living", "home & living", "ceramics", "woodwork", "textiles", "metalwork", "glasswork", "basketry"]
+    },
+    {
+      name: "Jewelry",
+      slug: "jewelry",
+      subcategories: [
+        "Earrings",
+        "Necklaces",
+        "Rings",
+        "Bracelets",
+        "Watches",
+        "Jewelry Sets",
+        "Body Jewelry",
+        "Cremation & Memorial Jewelry",
+        "Jewelry Storage",
+        "Brooches, Pins & Clips",
+        "Smart Jewelry",
+        "Cuff Links & Tie Clips"
+      ],
+      aliases: ["jewelry", "adornments"]
+    },
+    {
+      name: "Clothing",
+      slug: "clothing",
+      subcategories: [
+        "Women's Clothing",
+        "Men's Clothing",
+        "Boys' Clothing",
+        "Girls' Clothing",
+        "Gender-Neutral Adult Clothing",
+        "Gender-Neutral Kids' Clothing"
+      ],
+      aliases: ["clothing", "fashion", "apparel", "clothing-shoes", "fashion-leather"]
+    },
+    {
+      name: "Bags & Purses",
+      slug: "bags-and-purses",
+      subcategories: [
+        "Handbags",
+        "Totes",
+        "Backpacks",
+        "Wallets & Money Clips",
+        "Pouches & Coin Purses",
+        "Cosmetic & Toiletry Storage",
+        "Luggage & Travel",
+        "Fanny Packs",
+        "Messenger Bags",
+        "Market Bags",
+        "Accessory Cases",
+        "Food & Insulated Bags",
+        "Clothing & Shoe Bags",
+        "Diaper Bags",
+        "Sports Bags"
+      ],
+      aliases: ["bags-and-purses", "bags-purses", "bags & purses", "leatherwork", "leather"]
+    },
+    {
+      name: "Accessories",
+      slug: "accessories",
+      subcategories: [
+        "Hair Accessories",
+        "Hats & Headwear",
+        "Patches & Appliqués",
+        "Keychains & Lanyards",
+        "Scarves & Wraps",
+        "Belts & Suspenders",
+        "Pins & Clips",
+        "Gloves & Sleeves",
+        "Costume Accessories",
+        "Sunglasses & Eyewear",
+        "Bouquets & Corsages",
+        "Aprons",
+        "Suit & Tie Accessories",
+        "Umbrellas & Rain Accessories",
+        "Face Masks & Accessories",
+        "Hand Fans",
+        "Collars"
+      ],
+      aliases: ["accessories", "adornments", "jewelry-accessories"]
+    },
+    {
+      name: "Art & Collectibles",
+      slug: "art-and-collectibles",
+      subcategories: [
+        "Prints",
+        "Painting",
+        "Sculpture",
+        "Collectibles",
+        "Glass Art",
+        "Fine Art Ceramics",
+        "Photography",
+        "Drawing & Illustration",
+        "Dolls & Miniatures",
+        "Fiber Arts",
+        "Mixed Media & Collage",
+        "Artist Trading Cards"
+      ],
+      aliases: ["art-and-collectibles", "art-collectibles", "art & collectibles", "fine art", "vintage", "vintage-heritage", "paintings", "sculptures"]
+    },
+    {
+      name: "Gifts",
+      slug: "gifts",
+      subcategories: ["Gift Boxes & Sets", "Personalized Gifts", "Keepsakes"],
+      aliases: ["gifts", "gifts-sets", "gifts & sets", "gift-boxes-sets", "personalized"]
+    },
+    {
+      name: "Bath & Beauty",
+      slug: "bath-and-beauty",
+      subcategories: [
+        "Spa & Relaxation",
+        "Fragrances",
+        "Skin Care",
+        "Bath Accessories",
+        "Makeup & Cosmetics",
+        "Soaps",
+        "Personal Care",
+        "Hair Care",
+        "Cosmetic & Toiletry Storage",
+        "Baby & Child Care",
+        "Essential Oils"
+      ],
+      aliases: ["bath-and-beauty", "bath-beauty", "bath & beauty", "beauty & apothecary", "bath & apothecary", "beauty-apothecary"]
+    },
+    {
+      name: "Weddings",
+      slug: "weddings",
+      subcategories: [
+        "Gifts & Mementos",
+        "Decorations",
+        "Accessories",
+        "Clothing",
+        "Jewelry",
+        "Invitations & Paper",
+        "Shoes"
+      ],
+      aliases: ["weddings", "wedding", "weddings & celebrations"]
+    },
+    {
+      name: "Craft Supplies & Tools",
+      slug: "craft-supplies-and-tools",
+      subcategories: [
+        "Home & Hobby",
+        "Sewing & Fiber",
+        "Jewelry & Beauty",
+        "Visual Arts",
+        "Paper, Party & Kids",
+        "Sculpting & Forming"
+      ],
+      aliases: ["craft-supplies-and-tools", "craft-supplies", "craft supplies & tools", "craft supplies"]
+    },
+    {
+      name: "Kids & Baby",
+      slug: "kids-and-baby",
+      subcategories: [
+        "Baby Gift Sets",
+        "Nursery Decor",
+        "Toys",
+        "Baby Blankets",
+        "Baby Clothing",
+        "Kids' Furniture",
+        "Games & Puzzles",
+        "Children's Books",
+        "Girls' Clothing",
+        "Baby Care",
+        "Boys' Clothing"
+      ],
+      aliases: ["kids-and-baby", "kids-baby", "kids & baby"]
+    },
+    {
+      name: "Paper & Party Supplies",
+      slug: "paper-and-party-supplies",
+      subcategories: [
+        "Party Supplies",
+        "Paper"
+      ],
+      aliases: ["paper-and-party-supplies", "stationery-paper", "paper & party supplies", "stationery"]
+    },
+    {
+      name: "Pet Supplies",
+      slug: "pet-supplies",
+      subcategories: [
+        "Pet Collars & Leashes",
+        "Pet Gates & Fences",
+        "Pet Bedding",
+        "Pet Furniture",
+        "Pet Clothing, Accessories & Shoes",
+        "Pet Toys",
+        "Pet Storage",
+        "Urns & Memorials",
+        "Pet Feeding",
+        "Riding & Farm Animals",
+        "Pet Carriers & Houses",
+        "Pet Health & Wellness",
+        "Beekeeping",
+        "Training"
+      ],
+      aliases: ["pet-supplies", "pet supplies"]
+    },
+    {
+      name: "Shoes",
+      slug: "shoes",
+      subcategories: [
+        "Women's Shoes",
+        "Men's Shoes",
+        "Girls' Shoes",
+        "Insoles & Accessories",
+        "Boys' Shoes"
+      ],
+      aliases: ["shoes", "footwear"]
+    },
+    {
+      name: "Toys & Games",
+      slug: "toys-and-games",
+      subcategories: [
+        "Games & Puzzles",
+        "Toys",
+        "Sports & Outdoor Recreation"
+      ],
+      aliases: ["toys-and-games", "toys & games"]
+    },
+    {
+      name: "Books, Movies & Music",
+      slug: "books-movies-and-music",
+      subcategories: [
+        "Books",
+        "Movies",
+        "Music",
+        "Video Cases & Tins"
+      ],
+      aliases: ["books-movies-and-music", "books, movies & music", "books"]
+    },
+    {
+      name: "Electronics & Accessories",
+      slug: "electronics-and-accessories",
+      subcategories: [
+        "Computers & Peripherals",
+        "Video Games",
+        "Gadgets",
+        "Car Parts & Accessories",
+        "Cameras & Equipment",
+        "Telephones & Handsets",
+        "Docking & Stands",
+        "Cell Phone Accessories",
+        "DIY Kits",
+        "Electronics Cases",
+        "Audio",
+        "Decals & Skins",
+        "TV & Projection",
+        "Cables & Cords",
+        "Batteries & Charging",
+        "Parts & Electrical",
+        "Maker Supplies"
+      ],
+      aliases: ["electronics-and-accessories", "electronics & accessories", "tech accessories"]
+    }
   ];
 
   const categoryCountsRaw = await prisma.product.groupBy({
@@ -75,50 +347,30 @@ export default async function CategoriesPage({ params }: { params: Promise<{ lan
     }
   });
 
-  // Initialize a map with 0 counts for all official category names (case-insensitive keys)
-  const categoryCountsMap = new Map<string, number>();
-  categoryNames.forEach(name => {
-    categoryCountsMap.set(name.toLowerCase(), 0);
-  });
+  const categories = departments.map(dept => {
+    const subKeys = new Set([
+      dept.name.toLowerCase(),
+      dept.slug.toLowerCase(),
+      ...(dept.aliases || []).map(a => a.toLowerCase()),
+      ...dept.subcategories.map(s => s.toLowerCase()),
+      ...dept.subcategories.map(s => s.toLowerCase().replace(/ & /g, "-").replace(/\s+/g, "-"))
+    ]);
 
-  // Category aliases for custom DB values
-  const categoryAliasMap: Record<string, string> = {
-    "home decor": "Woodwork",
-    "home-decor": "Woodwork",
-    "accessories": "Fashion",
-    "leatherwork": "Fashion",
-    "culinary": "Culinary Arts",
-    "beauty": "Beauty & Apothecary"
-  };
+    let totalCount = 0;
+    categoryCountsRaw.forEach(item => {
+      const raw = (item.category || "").toLowerCase().trim();
+      if (subKeys.has(raw)) {
+        totalCount += item._count._all;
+      }
+    });
 
-  // Accumulate counts from the database grouping, translating various database formats back to official names
-  categoryCountsRaw.forEach(item => {
-    const rawCategory = item.category;
-    if (!rawCategory) return;
-    
-    const normalizedRaw = rawCategory.toLowerCase().trim();
-    const aliasedName = categoryAliasMap[normalizedRaw];
-
-    const officialName = aliasedName || categoryNames.find(name => {
-      const slug1 = name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-      const slug2 = name.toLowerCase().replace(/\s+/g, "-");
-      const slug3 = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-      return slug1 === normalizedRaw || 
-             slug2 === normalizedRaw || 
-             slug3 === normalizedRaw || 
-             name.toLowerCase() === normalizedRaw;
-    }) || rawCategory;
-
-    const currentCount = categoryCountsMap.get(officialName.toLowerCase()) || 0;
-    categoryCountsMap.set(officialName.toLowerCase(), currentCount + item._count._all);
-  });
-
-  const categories = categoryNames
-    .map(name => ({
-      name,
-      count: categoryCountsMap.get(name.toLowerCase()) || 0
-    }))
-    .sort((a, b) => b.count - a.count);
+    return {
+      name: dept.name,
+      slug: dept.slug,
+      subcategories: dept.subcategories,
+      count: totalCount
+    };
+  }).sort((a, b) => b.count - a.count);
 
 
 

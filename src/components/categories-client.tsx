@@ -3,81 +3,114 @@
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { 
-  Sparkles, ArrowRight, Grid, Gift, Gem, Shapes, Hammer, 
-  Scissors, Shirt, Wand2, Brush, History, PencilLine,
-  Package, Utensils, Flame, Lightbulb, Briefcase, Heart, ShoppingBag
+  Home, Gem, Package, PencilLine, History, Shirt, 
+  Heart, Sparkles, Brush, ShoppingBag, ArrowRight,
+  Glasses, Footprints, Scissors, Baby, Gamepad2, Dog, Smartphone, BookOpen
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-interface CategoryData {
+interface DepartmentData {
   name: string;
+  slug?: string;
   count: number;
+  subcategories?: string[];
 }
 
-const descMap: Record<string, string> = {
-  "Gift Boxes & Sets": "Curated collections and beautifully packaged gift boxes ready to surprise.",
-  "Jewelry": "Bespoke adornments crafted from gold, silver, and precious stones.",
-  "Ceramics": "Hand-thrown pottery, glazed mugs, and clay artisan products.",
-  "Woodwork": "Natural mahogany and olive wood carved by master hands.",
-  "Textiles": "Woven heritage rugs, embroidered cushions, and handcrafted fabrics.",
-  "Fashion": "Artisan wearables, handmade leather bags, and unique accessories.",
-  "Art & Collectibles": "Investment-worthy collectibles, fine paintings, and wall decor.",
-  "Personalized": "One-of-a-kind products engraved and tailored just for you.",
-  "Wedding": "Handmade wedding favors and personalized keepsakes for special days.",
-  "Vintage": "Timeless finds and restored antiques with a unique story to tell.",
-  "Stationery": "Fine papers, calligraphy sets, and hand-bound journals.",
-  "Leatherwork": "Hand-stitched leather goods, bespoke bags, and accessories.",
-  "Culinary Arts": "Artisan flavors, handmade preserves, and traditional delicacies.",
-  "Beauty & Apothecary": "Natural skincare remedies and handcrafted bath essentials.",
-  "Metalwork": "Traditional hand-hammered brass, copper, and decorative ironware.",
-  "Glasswork": "Hand-blown glassware and traditional stained glass art.",
-  "Basketry": "Palm frond weaving and natural fiber baskets."
-};
-
-const iconMap: Record<string, any> = {
-  "Ceramics": Shapes,
+const departmentIconMap: Record<string, any> = {
+  // 17 Etsy Official Categories
+  "home-and-living": Home,
+  "Home & Living": Home,
+  "home-living": Home,
+  "jewelry": Gem,
   "Jewelry": Gem,
-  "Gift Boxes & Sets": Package,
-  "Stationery": PencilLine,
-  "Vintage": History,
-  "Textiles": Scissors,
-  "Woodwork": Hammer,
-  "Leatherwork": Briefcase,
-  "Culinary Arts": Utensils,
-  "Beauty & Apothecary": Sparkles,
-  "Metalwork": Flame,
-  "Glasswork": Lightbulb,
-  "Basketry": Grid,
-  "Fashion": Shirt,
-  "Wedding": Heart,
-  "Personalized": Wand2,
+  "clothing": Shirt,
+  "Clothing": Shirt,
+  "clothing-shoes": Shirt,
+  "fashion-leather": Shirt,
+  "bags-and-purses": ShoppingBag,
+  "Bags & Purses": ShoppingBag,
+  "bags-purses": ShoppingBag,
+  "accessories": Glasses,
+  "Accessories": Glasses,
+  "art-and-collectibles": Brush,
   "Art & Collectibles": Brush,
+  "art-collectibles": Brush,
+  "gifts": Package,
+  "Gifts": Package,
+  "gifts-sets": Package,
+  "Gifts & Sets": Package,
+  "bath-and-beauty": Sparkles,
+  "Bath & Beauty": Sparkles,
+  "bath-beauty": Sparkles,
+  "Bath & Apothecary": Sparkles,
+  "weddings": Heart,
+  "Weddings": Heart,
+  "Weddings & Celebrations": Heart,
+  "wedding": Heart,
+  "craft-supplies-and-tools": Scissors,
+  "Craft Supplies & Tools": Scissors,
+  "craft-supplies": Scissors,
+  "kids-and-baby": Baby,
+  "Kids & Baby": Baby,
+  "kids-baby": Baby,
+  "paper-and-party-supplies": PencilLine,
+  "Paper & Party Supplies": PencilLine,
+  "stationery-paper": PencilLine,
+  "Stationery & Paper": PencilLine,
+  "pet-supplies": Dog,
+  "Pet Supplies": Dog,
+  "shoes": Footprints,
+  "Shoes": Footprints,
+  "toys-and-games": Gamepad2,
+  "Toys & Games": Gamepad2,
+  "books-movies-and-music": BookOpen,
+  "Books, Movies & Music": BookOpen,
+  "electronics-and-accessories": Smartphone,
+  "Electronics & Accessories": Smartphone,
+  "vintage-heritage": History,
+  "Vintage & Heritage": History,
+  "vintage": History,
 };
 
-const categoryGroupMap: Record<string, string> = {
-  "Gift Boxes & Sets": "gifting",
-  "Personalized": "gifting",
-  "Wedding": "gifting",
+const departmentGroupMap: Record<string, string> = {
+  "Home & Living": "home",
   "Jewelry": "wearables",
-  "Fashion": "wearables",
-  "Ceramics": "home",
-  "Woodwork": "home",
-  "Textiles": "home",
+  "Clothing": "wearables",
+  "Bags & Purses": "wearables",
+  "Accessories": "wearables",
+  "Shoes": "wearables",
+  "Gifts": "gifting",
+  "Weddings": "gifting",
+  "Bath & Beauty": "gifting",
+  "Paper & Party Supplies": "gifting",
   "Art & Collectibles": "art",
-  "Vintage": "art",
-  "Stationery": "art",
-  "Leatherwork": "wearables",
-  "Culinary Arts": "gifting",
-  "Beauty & Apothecary": "gifting",
-  "Metalwork": "home",
-  "Glasswork": "home",
-  "Basketry": "home"
+  "Craft Supplies & Tools": "art",
+  "Toys & Games": "art",
+  "Kids & Baby": "art",
+  "Pet Supplies": "art",
+  "Books, Movies & Music": "art",
+  "Electronics & Accessories": "art",
+  // Legacy aliases
+  "Gifts & Sets": "gifting",
+  "Weddings & Celebrations": "gifting",
+  "Clothing & Leather Goods": "wearables",
+  "Vintage & Heritage": "art",
+  "Stationery & Paper": "gifting",
+  "Bath & Apothecary": "gifting"
 };
 
-export function CategoriesClient({ categories, dict }: { categories: CategoryData[], dict: any }) {
+export function CategoriesClient({ categories, dict }: { categories: DepartmentData[], dict: any }) {
   const [activeFilter, setActiveFilter] = useState<string>("all");
+
+  const categoryTabs = [
+    { id: "all", label: dict.common?.all_departments || dict.common?.all_collections || "All Departments" },
+    { id: "home", label: dict.common?.filter_home || "Home & Living" },
+    { id: "wearables", label: dict.common?.filter_wearables || "Jewelry & Wearables" },
+    { id: "gifting", label: dict.common?.filter_gifting || "Gifts & Celebrations" },
+    { id: "art", label: dict.common?.filter_art || "Art, Crafts & Play" },
+  ];
 
   // Priority sort: non-zero categories first, then descending by product count
   const sortedCategories = useMemo(() => {
@@ -90,109 +123,119 @@ export function CategoriesClient({ categories, dict }: { categories: CategoryDat
 
   const filteredCategories = useMemo(() => {
     if (activeFilter === "all") return sortedCategories;
-    return sortedCategories.filter(cat => categoryGroupMap[cat.name] === activeFilter);
+    return sortedCategories.filter(cat => departmentGroupMap[cat.name] === activeFilter);
   }, [sortedCategories, activeFilter]);
 
   return (
     <main className="min-h-screen bg-cream">
       <Navbar dict={dict} />
       
-      <section className="pt-24 md:pt-36 pb-20">
-        <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-          {/* Header */}
+      {/* Header (Etsy-Style Centered) */}
+      <section className="pt-8 md:pt-12 pb-6 text-center">
+        <div className="container mx-auto px-4 md:px-6">
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mb-12"
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="max-w-2xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-accent/10 rounded-full text-accent text-xs font-bold mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{dict.common.curated_collections || "Curated Artisan Collections"}</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold text-primary mb-4 leading-tight">
-              {(dict?.home?.browse_categories_base || dict?.home?.browse_categories?.split(' ')[0] || "Browse")}{' '}
-              <span className="serif italic font-normal text-accent">
-                {(dict?.home?.browse_categories_accent || (dict?.home?.browse_categories?.includes(' ') ? dict?.home?.browse_categories?.split(' ').slice(1).join(' ') : 'الفئات'))}
-              </span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-primary tracking-tight font-normal">
+              {dict.common?.all_categories || "Browse All Categories"}
             </h1>
-            <p className="text-base md:text-xl text-charcoal/60 leading-relaxed font-medium">
-              {dict.home.category_desc}
+            <p className="mt-2 md:mt-3 text-sm md:text-base text-charcoal/60 leading-relaxed font-normal max-w-xl mx-auto">
+              {dict.home?.category_desc || "Explore our diverse range of handcrafted collections from authentic Egyptian artisans."}
             </p>
           </motion.div>
+        </div>
+      </section>
 
-          {/* Quick Category Group Filters */}
-          <div className="flex flex-wrap gap-2 mb-10 pb-2 border-b border-primary/5">
-            {[
-              { id: "all", label: dict.common.all_collections || "All Collections" },
-              { id: "gifting", label: dict.common.filter_gifting || "Gift Sets & Personalized" },
-              { id: "home", label: dict.common.filter_home || "Home & Craft Decor" },
-              { id: "wearables", label: dict.common.filter_wearables || "Jewelry & Wearables" },
-              { id: "art", label: dict.common.filter_art || "Fine Art & Collectibles" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveFilter(tab.id)}
-                className={cn(
-                  "px-5 py-2.5 rounded-full text-xs font-bold transition-all border",
-                  activeFilter === tab.id
-                    ? "bg-primary text-white border-primary shadow-md shadow-primary/10"
-                    : "bg-white text-primary/70 border-primary/10 hover:border-accent/40 hover:text-primary"
-                )}
+      {/* Filter Tabs (Etsy-Style Pills) */}
+      <section className="container mx-auto px-4 md:px-6 mb-8 md:mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {categoryTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveFilter(tab.id)}
+              className={cn(
+                "px-4 py-1.5 md:py-2 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                activeFilter === tab.id
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Clean Minimalist Department Cards Grid (3 to 4 Columns) */}
+      <section className="container mx-auto px-4 md:px-6 pb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {filteredCategories.map((cat, idx) => {
+            const rawSlug = cat.slug || cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+            const Icon = departmentIconMap[cat.name] || departmentIconMap[rawSlug] || ShoppingBag;
+            const categoryTitle = dict.common?.categories_list?.[rawSlug] || dict.home?.categories_list?.[rawSlug] || cat.name;
+
+            return (
+              <motion.div
+                key={cat.name}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.025 }}
               >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Clean Icon Card Grid (3 Columns on Desktop) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {filteredCategories.map((cat, idx) => {
-              const Icon = iconMap[cat.name] || ShoppingBag;
-              const slug = cat.name.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
-              const categoryTitle = dict.common.categories_list?.[slug] || cat.name;
-              const desc = dict.common[`${slug.replace(/-/g, '_')}_desc`] || dict.common[`${slug}_desc`] || descMap[cat.name] || "Discover unique handcrafted items.";
-
-              return (
-                <motion.div
-                  key={cat.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04 }}
+                <Link 
+                  href={`/category/${rawSlug}`}
+                  className="group block h-full"
                 >
-                  <Link 
-                    href={`/category/${slug}`}
-                    className="group relative block h-full"
-                  >
-                    <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-primary/5 shadow-xl shadow-primary/5 transition-all hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 h-full flex flex-col justify-between">
-                      <div>
-                        <div className="w-14 h-14 rounded-2xl bg-cream flex items-center justify-center text-primary mb-6 group-hover:bg-accent group-hover:text-white transition-all duration-300">
-                          <Icon className="w-7 h-7" />
+                  <div className="bg-white rounded-2xl p-6 md:p-7 border border-primary/5 shadow-xs hover:shadow-md hover:border-primary/20 transition-all flex flex-col justify-between h-full active:scale-98 duration-200">
+                    <div>
+                      {/* Top Row: Icon + Count */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-cream flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-2xs">
+                          <Icon className="w-6 h-6 md:w-7 md:h-7 stroke-[1.5]" />
                         </div>
-
-                        <h3 className="text-2xl md:text-3xl font-heading font-bold text-primary mb-3 group-hover:text-accent transition-colors">
-                          {categoryTitle}
-                        </h3>
-
-                        <p className="text-charcoal/60 text-sm md:text-base leading-relaxed font-medium mb-8">
-                          {desc}
-                        </p>
-                      </div>
-
-                      <div className="pt-6 border-t border-primary/5 flex items-center justify-between mt-auto">
-                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-primary/40">
-                          {(dict.home.items_count || "{count} ITEMS").replace("{count}", cat.count.toString()).toUpperCase()}
+                        <span className="text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full bg-cream text-charcoal/60">
+                          {cat.count > 0 
+                            ? `${cat.count} ${cat.count === 1 ? (dict.common?.treasure_single || "product") : (dict.common?.treasure_plural || "products")}`
+                            : (dict.common?.explore || "Explore")}
                         </span>
-                        <div className="w-10 h-10 rounded-full bg-cream border border-primary/10 flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
-                          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-                        </div>
                       </div>
+
+                      {/* Title */}
+                      <h3 className="text-base sm:text-lg md:text-xl font-serif font-medium text-charcoal group-hover:text-primary transition-colors mb-2">
+                        {categoryTitle}
+                      </h3>
+
+                      {/* Sub-Craft Disciplines */}
+                      {cat.subcategories && cat.subcategories.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {cat.subcategories.map(sub => {
+                            const subSlug = sub.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+                            const subLabel = dict.common?.categories_list?.[subSlug] || dict.home?.categories_list?.[subSlug] || sub;
+                            return (
+                              <span 
+                                key={sub} 
+                                className="text-[11px] font-medium text-charcoal/50 bg-cream/70 px-2 py-0.5 rounded-md group-hover:text-primary/70 transition-colors"
+                              >
+                                {subLabel}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
+
+                    {/* Bottom Action */}
+                    <div className="pt-4 mt-4 border-t border-primary/5 flex items-center justify-between text-xs font-semibold text-primary">
+                      <span>{dict.common?.explore || "Shop Department"}</span>
+                      <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 

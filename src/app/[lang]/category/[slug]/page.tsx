@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ");
   
-  const title = (dict.common.categories_list as any)?.[slug] || categoryName;
+  const title = (dict as any).common?.categories_list?.[slug] || (dict as any).home?.categories_list?.[slug] || categoryName;
   const description = `${dict.home.category_desc_prefix || "Discover unique handcrafted" } ${title} ${dict.home.category_desc_suffix || "from authentic Egyptian artisans."}`;
   const ogImage = `${SITE_URL}/images/categories/${slug}.png`;
 
@@ -70,7 +70,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       {
         "@type": "ListItem",
         "position": 2,
-        "name": (dict.common?.categories_list as any)?.[slug] || slug,
+        "name": (dict as any).common?.categories_list?.[slug] || (dict as any).home?.categories_list?.[slug] || slug,
         "item": `${SITE_URL}/${lang}/category/${slug}`
       }
     ]

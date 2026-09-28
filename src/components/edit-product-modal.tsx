@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, memo, useMemo, useCallback } from "react";
-import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video, Loader2, ShieldCheck, Trash2, Upload, Plus } from "lucide-react";
+import { X, Sparkles, DollarSign, Tag, Type, Image as ImageIcon, CheckCircle2, Save, ChevronDown, Video, Loader2, ShieldCheck, Trash2, Upload, Plus, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateProduct } from "@/lib/actions";
-import { cn } from "@/lib/utils";
+import { cn, stripEmojis } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { EtsyCategoryPicker } from "@/components/studio/etsy-category-picker";
 
 interface EditProductModalProps {
   product: any;
@@ -43,7 +44,7 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
           required
           maxLength={100}
           value={name}
-          onChange={(e) => setTextData((prev: any) => ({...prev, name: e.target.value}))}
+          onChange={(e) => setTextData((prev: any) => ({...prev, name: stripEmojis(e.target.value)}))}
           disabled={readOnly}
           className={cn(
             "w-full py-3 px-5 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary shadow-sm text-sm",
@@ -96,7 +97,7 @@ const EssentialsSection = memo(({ name, price, category, description, setTextDat
           required
           maxLength={1500}
           value={description}
-          onChange={(e) => setTextData((prev: any) => ({...prev, description: e.target.value}))}
+          onChange={(e) => setTextData((prev: any) => ({...prev, description: stripEmojis(e.target.value)}))}
           disabled={readOnly}
           className={cn(
             "w-full h-28 md:h-32 p-4 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-medium text-primary resize-none shadow-sm text-sm",
@@ -1063,6 +1064,18 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
       return;
     }
 
+    if (textData.canPersonalize && !textData.personalizationPrompt?.trim()) {
+      toast.error(dict.new_product.personalization_prompt_required || "Please fill in the Personalization Instructions.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (textData.requiresClientImage && !textData.clientImagePrompt?.trim()) {
+      toast.error(dict.new_product.client_image_prompt_required || "Please fill in the Customer Image Upload instructions.");
+      setIsLoading(false);
+      return;
+    }
+
     const form = new FormData();
     form.append("name", textData.name);
     form.append("description", textData.description || "");
@@ -1236,84 +1249,13 @@ export function EditProductModal({ product, isOpen, onClose, readOnly = false, d
 }
 
 const CategoryDropdown = memo(({ value, onChange, disabled = false, dict }: { value: string, onChange: (val: string) => void, disabled?: boolean, dict: any }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const categories = [
-    { id: "ceramics", label: dict.common.ceramics },
-    { id: "jewelry", label: dict.common.jewelry },
-    { id: "gift-boxes-sets", label: dict.common.categories_list?.["gift-boxes-sets"] || "Gift Boxes & Sets" },
-    { id: "textiles", label: dict.common.textiles },
-    { id: "woodwork", label: dict.common.woodwork },
-    { id: "leatherwork", label: dict.common.leatherwork },
-    { id: "culinary-arts", label: dict.common.categories_list?.["culinary-arts"] || "Culinary Arts" },
-    { id: "beauty-apothecary", label: dict.common.categories_list?.["beauty-apothecary"] || "Beauty & Apothecary" },
-    { id: "metalwork", label: dict.common.metalwork },
-    { id: "glasswork", label: dict.common.glasswork },
-    { id: "basketry", label: dict.common.basketry },
-    { id: "fashion", label: dict.common.fashion },
-    { id: "wedding", label: dict.common.wedding },
-    { id: "personalized", label: dict.common.personalized },
-    { id: "art-collectibles", label: dict.common.art_collectibles },
-    { id: "vintage", label: dict.common.vintage },
-    { id: "stationery", label: dict.common.stationery }
-  ];
-
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={cn(
-          "w-full h-12 px-5 bg-cream/30 border border-primary/10 rounded-xl focus:outline-none focus:border-accent transition-all font-bold text-primary flex items-center justify-between group shadow-sm",
-          disabled && "cursor-default"
-        )}
-      >
-        <span className="truncate">
-          {categories.find(c => c.id === value)?.label || value}
-        </span>
-        <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-        >
-            <ChevronDown className="w-4 h-4 text-primary/40 group-hover:text-accent transition-colors" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <div 
-              className="fixed inset-0 z-[110]" 
-              onClick={() => setIsOpen(false)} 
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 5, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute start-0 end-0 top-full bg-white border border-primary/10 rounded-2xl shadow-2xl z-[120] py-2 overflow-y-auto max-h-72 scrollbar-thin scrollbar-thumb-primary/10 border-b-4 border-b-accent/20"
-            >
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => {
-                    onChange(cat.id);
-                    setIsOpen(false);
-                  }}
-                  className={cn(
-                    "w-full px-5 py-3 text-start text-[13px] font-bold transition-all",
-                    value === cat.id 
-                        ? "bg-primary text-white" 
-                        : "text-primary hover:bg-cream/50"
-                  )}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+    <EtsyCategoryPicker
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      dict={dict}
+    />
   );
 });
 

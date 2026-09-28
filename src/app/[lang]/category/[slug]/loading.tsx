@@ -6,48 +6,46 @@ export default function CategoryDetailLoading() {
     <div className="min-h-screen bg-cream">
       <NavbarSkeleton />
       {/* Category Header Skeleton */}
-      <section className="pt-24 md:pt-32 pb-12 md:pb-16 bg-primary text-white relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-2xl space-y-4 md:space-y-6">
-            <Skeleton className="w-40 h-4 md:w-48 md:h-5 bg-white/20 rounded-full" />
-            <Skeleton className="w-64 h-12 md:w-96 md:h-16 bg-white/20 rounded-xl" />
-            <Skeleton className="w-full h-12 bg-white/20 rounded-xl" />
+      <section className="pt-8 md:pt-12 pb-6 md:pb-8 text-center">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="max-w-xl mx-auto flex flex-col items-center space-y-3">
+            <Skeleton className="w-48 sm:w-64 md:w-80 h-10 md:h-12 rounded-xl" />
+            <Skeleton className="w-64 sm:w-96 h-4 md:h-5 rounded-full" />
           </div>
         </div>
-        {/* Background Accents */}
-        <div className="absolute top-0 end-0 w-96 h-96 bg-accent/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 start-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
       </section>
 
-      {/* Toolbar Skeleton */}
-      <div className="sticky top-[72px] md:top-[124px] z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-3 md:py-4">
-        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center gap-3">
-          <Skeleton className="w-32 h-4 md:w-48 md:h-5 rounded-md" />
-          <div className="flex items-center gap-2 md:gap-3">
-            <Skeleton className="w-20 h-7 md:w-32 md:h-10 rounded-full" />
-            <Skeleton className="w-20 h-7 md:w-32 md:h-10 rounded-full" />
+      {/* Filter Pills Toolbar Skeleton */}
+      <div className="sticky top-[72px] md:top-[124px] z-30 bg-cream/95 backdrop-blur-md py-3 border-y border-primary/5 mb-6 md:mb-8">
+        <div className="container mx-auto px-4 md:px-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-24 h-7 rounded-full" />
+            <Skeleton className="w-28 h-7 rounded-full" />
+            <Skeleton className="w-24 h-7 rounded-full" />
+            <Skeleton className="w-32 h-7 rounded-full" />
           </div>
+          <Skeleton className="w-16 h-4 rounded-md" />
         </div>
       </div>
 
       {/* Grid Skeleton */}
-      <section className="py-6 md:py-12 container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
+      <section className="pb-12 container mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="group block">
               {/* Image box mockup */}
-              <div className="relative aspect-[3/4] md:aspect-[4/5] rounded-[1.5rem] md:rounded-[3rem] overflow-hidden mb-3 md:mb-6">
+              <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2">
                 <Skeleton className="w-full h-full rounded-inherit" />
               </div>
               
               {/* Product title and info mockup */}
-              <div className="space-y-1.5 md:space-y-2 px-1">
-                <Skeleton className="w-20 h-3 md:w-32 md:h-4 rounded-md" />
-                <Skeleton className="w-full h-5 md:h-8 rounded-lg" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="w-16 h-4 md:w-20 md:h-5 rounded-md" />
-                  <Skeleton className="w-16 h-3 rounded-md" />
+              <div className="space-y-1.5 px-0.5">
+                <div className="flex justify-between items-center gap-2">
+                  <Skeleton className="w-3/4 h-3.5 rounded-md" />
+                  <Skeleton className="w-10 h-3 rounded-md" />
                 </div>
+                <Skeleton className="w-1/2 h-3 rounded-md" />
+                <Skeleton className="w-16 h-3.5 rounded-md" />
               </div>
             </div>
           ))}

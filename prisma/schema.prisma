@@ -199,6 +199,7 @@ model Product {
   price                 Float
   images                String[]
   category              String
+  subcategory           String?
   tags                  String[]
   canPersonalize        Boolean       @default(false)
   personalizationPrompt String? // Instruction for the buyer (e.g. "Enter name for engraving")

@@ -481,7 +481,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
               </div>
             )}
 
-            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 ps-6 py-2 break-words">
+            <p className="text-lg text-charcoal/70 leading-relaxed mb-8 border-l-4 border-accent/20 ps-6 py-2 break-words whitespace-pre-wrap">
               {product.description}
             </p>
 
@@ -792,7 +792,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         {dict.product.master_artisan || "Master Artisan"}: {product.artisan.user.name}
                       </p>
                     </div>
-                    <p className="text-lg text-charcoal/70 italic leading-relaxed">
+                    <p className="text-lg text-charcoal/70 italic leading-relaxed whitespace-pre-wrap">
                       "{product.artisan.bio}"
                     </p>
                     <div className="flex items-center gap-2 text-charcoal/40 font-medium justify-center md:justify-start">

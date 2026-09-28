@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { EtsyCategoryPicker } from "@/components/studio/etsy-category-picker";
 import {
   ArrowLeft,
   Upload,
@@ -19,11 +20,12 @@ import {
   X,
   Trash2,
   Star,
-  Plus
+  Plus,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createProduct } from "@/lib/actions";
-import { cn } from "@/lib/utils";
+import { cn, stripEmojis } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
 interface NewProductClientProps {
@@ -635,9 +637,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
   const [options, setOptions] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
 
   // Ensure page scrolls to top on mount
@@ -666,35 +666,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     });
   }, [formData.images, resolutions]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  const categories = [
-    { id: "ceramics", label: dict.common.categories_list?.["ceramics"] || dict.common.ceramics },
-    { id: "jewelry", label: dict.common.categories_list?.["jewelry"] || dict.common.jewelry },
-    { id: "gift-boxes-sets", label: dict.common.categories_list?.["gift-boxes-sets"] || "Gift Boxes & Sets" },
-    { id: "textiles", label: dict.common.categories_list?.["textiles"] || dict.common.textiles },
-    { id: "woodwork", label: dict.common.categories_list?.["woodwork"] || dict.common.woodwork },
-    { id: "leatherwork", label: dict.common.categories_list?.["leatherwork"] || dict.common.leatherwork },
-    { id: "culinary-arts", label: dict.common.categories_list?.["culinary-arts"] || "Culinary Arts" },
-    { id: "beauty-apothecary", label: dict.common.categories_list?.["beauty-apothecary"] || "Beauty & Apothecary" },
-    { id: "metalwork", label: dict.common.categories_list?.["metalwork"] || dict.common.metalwork },
-    { id: "glasswork", label: dict.common.categories_list?.["glasswork"] || dict.common.glasswork },
-    { id: "basketry", label: dict.common.categories_list?.["basketry"] || dict.common.basketry },
-    { id: "fashion", label: dict.common.categories_list?.["fashion"] || dict.common.fashion },
-    { id: "wedding", label: dict.common.categories_list?.["wedding"] || dict.common.wedding },
-    { id: "personalized", label: dict.common.categories_list?.["personalized"] || dict.common.personalized },
-    { id: "art-collectibles", label: dict.common.categories_list?.["art-collectibles"] || dict.common.art_collectibles },
-    { id: "vintage", label: dict.common.categories_list?.["vintage"] || dict.common.vintage },
-    { id: "stationery", label: dict.common.categories_list?.["stationery"] || dict.common.stationery }
-  ];
 
   const handleImageChange = useCallback((index: number, value: string) => {
     const newImages = [...formData.images];
@@ -846,6 +818,18 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
       return;
     }
 
+    if (formData.canPersonalize && !formData.personalizationPrompt.trim()) {
+      toast.error(dict.new_product.personalization_prompt_required || "Please fill in the Personalization Instructions.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.requiresClientImage && !formData.clientImagePrompt.trim()) {
+      toast.error(dict.new_product.client_image_prompt_required || "Please fill in the Customer Image Upload instructions.");
+      setIsLoading(false);
+      return;
+    }
+
     const form = new FormData();
     form.append("name", formData.name);
     form.append("description", formData.description);
@@ -923,7 +907,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   required
                   maxLength={100}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: stripEmojis(e.target.value) })}
                   placeholder={dict.new_product.product_title_placeholder}
                   className="w-full py-3.5 sm:py-4 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-start"
                 />
@@ -950,50 +934,15 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-2 relative" ref={dropdownRef}>
+                <div className="space-y-2">
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                     <Tag className="w-3 h-3" /> {dict.new_product.category_label}
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                    className="w-full h-12 sm:h-14 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all text-start flex items-center justify-between shadow-sm"
-                  >
-                    <span className={cn("font-medium", formData.category ? "text-primary" : "text-primary/50")}>
-                      {categories.find(c => c.id === formData.category)?.label || dict.new_product.select_category}
-                    </span>
-                    <ChevronDown className={cn("w-4 h-4 text-primary/40 transition-transform", isCategoryOpen && "rotate-180")} />
-                  </button>
-
-                  <AnimatePresence>
-                    {isCategoryOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-50 top-full start-0 end-0 mt-2 bg-white border border-primary/10 rounded-[2rem] shadow-2xl p-4 space-y-1 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/10"
-                      >
-                        {categories.map(cat => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => {
-                              setFormData({ ...formData, category: cat.id });
-                              setIsCategoryOpen(false);
-                            }}
-                            className={cn(
-                              "w-full px-5 md:px-6 py-2.5 md:py-3 text-start rounded-xl transition-all font-bold text-xs md:text-sm active:scale-[0.98]",
-                              formData.category === cat.id
-                                ? "bg-primary text-white shadow-lg"
-                                : "text-primary/60 hover:bg-primary/5"
-                            )}
-                          >
-                            {cat.label}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <EtsyCategoryPicker
+                    value={formData.category}
+                    onChange={(cat) => setFormData({ ...formData, category: cat })}
+                    dict={dict}
+                  />
                 </div>
               </div>
 
@@ -1010,7 +959,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   required
                   maxLength={1500}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, description: stripEmojis(e.target.value) })}
                   placeholder={dict.new_product.description_placeholder}
                   className="w-full h-32 md:h-40 p-4 sm:p-5 md:p-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-medium resize-none shadow-sm text-sm md:text-base text-start"
                 />

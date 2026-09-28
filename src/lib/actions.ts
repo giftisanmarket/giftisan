@@ -350,17 +350,215 @@ export async function getProductsByCategory(category: string) {
     return slug1 === category.toLowerCase() || slug2 === category.toLowerCase() || slug3 === category.toLowerCase();
   }) || category;
 
+  // Etsy Department to Craft Category Mapping
+  const departmentSubcategoryMap: Record<string, string[]> = {
+    "accessories": [
+      "Accessories", "Adornments", "Jewelry & Accessories",
+      "Hair Accessories", "Hats & Headwear", "Patches & Appliqués", "Keychains & Lanyards",
+      "Scarves & Wraps", "Belts & Suspenders", "Pins & Clips", "Gloves & Sleeves",
+      "Costume Accessories", "Sunglasses & Eyewear", "Bouquets & Corsages", "Aprons",
+      "Suit & Tie Accessories", "Umbrellas & Rain Accessories", "Face Masks & Accessories",
+      "Hand Fans", "Collars"
+    ],
+    "art-and-collectibles": [
+      "Art & Collectibles", "Fine Art", "Prints", "Painting", "Paintings",
+      "Sculpture", "Sculptures", "Collectibles", "Glass Art", "Fine Art Ceramics",
+      "Photography", "Drawing & Illustration", "Dolls & Miniatures", "Fiber Arts",
+      "Mixed Media & Collage", "Artist Trading Cards", "Vintage", "Antiques"
+    ],
+    "art-collectibles": [
+      "Art & Collectibles", "Fine Art", "Prints", "Painting", "Paintings",
+      "Sculpture", "Sculptures", "Collectibles", "Glass Art", "Fine Art Ceramics",
+      "Photography", "Drawing & Illustration", "Dolls & Miniatures", "Fiber Arts",
+      "Mixed Media & Collage", "Artist Trading Cards", "Vintage", "Antiques"
+    ],
+    "bags-and-purses": [
+      "Bags & Purses", "Leatherwork", "Handbags", "Totes", "Backpacks",
+      "Wallets & Money Clips", "Pouches & Coin Purses", "Cosmetic & Toiletry Storage",
+      "Luggage & Travel", "Fanny Packs", "Messenger Bags", "Market Bags",
+      "Accessory Cases", "Food & Insulated Bags", "Clothing & Shoe Bags",
+      "Diaper Bags", "Sports Bags"
+    ],
+    "bags-purses": [
+      "Bags & Purses", "Leatherwork", "Handbags", "Totes", "Backpacks",
+      "Wallets & Money Clips", "Pouches & Coin Purses", "Cosmetic & Toiletry Storage",
+      "Luggage & Travel", "Fanny Packs", "Messenger Bags", "Market Bags",
+      "Accessory Cases", "Food & Insulated Bags", "Clothing & Shoe Bags",
+      "Diaper Bags", "Sports Bags"
+    ],
+    "bath-and-beauty": [
+      "Bath & Beauty", "Beauty & Apothecary", "Bath & Apothecary",
+      "Spa & Relaxation", "Fragrances", "Skin Care", "Bath Accessories",
+      "Makeup & Cosmetics", "Soaps", "Personal Care", "Hair Care",
+      "Cosmetic & Toiletry Storage", "Baby & Child Care", "Essential Oils"
+    ],
+    "bath-beauty": [
+      "Bath & Beauty", "Beauty & Apothecary", "Bath & Apothecary",
+      "Spa & Relaxation", "Fragrances", "Skin Care", "Bath Accessories",
+      "Makeup & Cosmetics", "Soaps", "Personal Care", "Hair Care",
+      "Cosmetic & Toiletry Storage", "Baby & Child Care", "Essential Oils"
+    ],
+    "beauty-apothecary": [
+      "Bath & Beauty", "Beauty & Apothecary", "Bath & Apothecary",
+      "Spa & Relaxation", "Fragrances", "Skin Care", "Bath Accessories",
+      "Makeup & Cosmetics", "Soaps", "Personal Care", "Hair Care",
+      "Cosmetic & Toiletry Storage", "Baby & Child Care", "Essential Oils"
+    ],
+    "books-movies-and-music": [
+      "Books, Movies & Music", "Books", "Movies", "Music", "Video Cases & Tins",
+      "Journals"
+    ],
+    "clothing": [
+      "Clothing", "Fashion", "Apparel", "Women's Clothing", "Men's Clothing",
+      "Boys' Clothing", "Girls' Clothing", "Gender-Neutral Adult Clothing",
+      "Gender-Neutral Kids' Clothing", "Dresses", "Robes"
+    ],
+    "clothing-shoes": [
+      "Clothing", "Shoes", "Fashion", "Women's Clothing", "Men's Clothing",
+      "Boys' Clothing", "Girls' Clothing", "Gender-Neutral Adult Clothing",
+      "Gender-Neutral Kids' Clothing", "Leatherwork", "Accessories"
+    ],
+    "craft-supplies-and-tools": [
+      "Craft Supplies & Tools", "Craft Supplies", "Raw Materials",
+      "Home & Hobby", "Sewing & Fiber", "Jewelry & Beauty", "Visual Arts",
+      "Paper, Party & Kids", "Sculpting & Forming", "Beads", "Yarn"
+    ],
+    "craft-supplies": [
+      "Craft Supplies & Tools", "Craft Supplies", "Raw Materials",
+      "Home & Hobby", "Sewing & Fiber", "Jewelry & Beauty", "Visual Arts",
+      "Paper, Party & Kids", "Sculpting & Forming", "Beads", "Yarn"
+    ],
+    "electronics-and-accessories": [
+      "Electronics & Accessories", "Tech Accessories", "Computers & Peripherals",
+      "Video Games", "Gadgets", "Car Parts & Accessories", "Cameras & Equipment",
+      "Telephones & Handsets", "Docking & Stands", "Cell Phone Accessories",
+      "DIY Kits", "Electronics Cases", "Audio", "Decals & Skins", "TV & Projection",
+      "Cables & Cords", "Batteries & Charging", "Parts & Electrical", "Maker Supplies",
+      "Phone Cases"
+    ],
+    "gifts": ["Gifts", "Gift Boxes & Sets", "Gifts & Sets", "Personalized"],
+    "gifts-sets": ["Gifts", "Gift Boxes & Sets", "Gifts & Sets", "Personalized"],
+    "gift-boxes-sets": ["Gifts", "Gift Boxes & Sets", "Gifts & Sets", "Personalized"],
+    "home-and-living": [
+      "Home & Living", "Home Decor", "Lighting", "Floor & Rugs", "Kitchen & Dining",
+      "Furniture", "Bathroom", "Storage & Organization", "Outdoor & Gardening",
+      "Curtains & Window Treatments", "Bedding", "Office", "Food & Drink",
+      "Spirituality & Religion", "Home Improvement", "Home Appliances", "Cleaning Supplies",
+      "Ceramics", "Woodwork", "Textiles", "Metalwork", "Glasswork", "Basketry"
+    ],
+    "home-living": [
+      "Home & Living", "Home Decor", "Lighting", "Floor & Rugs", "Kitchen & Dining",
+      "Furniture", "Bathroom", "Storage & Organization", "Outdoor & Gardening",
+      "Curtains & Window Treatments", "Bedding", "Office", "Food & Drink",
+      "Spirituality & Religion", "Home Improvement", "Home Appliances", "Cleaning Supplies",
+      "Ceramics", "Woodwork", "Textiles", "Metalwork", "Glasswork", "Basketry"
+    ],
+    "jewelry": [
+      "Jewelry", "Jewelry & Accessories", "Adornments", "Earrings", "Necklaces",
+      "Rings", "Bracelets", "Watches", "Jewelry Sets", "Body Jewelry",
+      "Cremation & Memorial Jewelry", "Jewelry Storage", "Brooches, Pins & Clips",
+      "Smart Jewelry", "Cuff Links & Tie Clips"
+    ],
+    "kids-and-baby": [
+      "Kids & Baby", "Baby", "Nursery", "Kids Clothing", "Baby Gift Sets",
+      "Nursery Decor", "Toys", "Baby Blankets", "Baby Clothing", "Kids' Furniture",
+      "Games & Puzzles", "Children's Books", "Girls' Clothing", "Baby Care",
+      "Boys' Clothing"
+    ],
+    "kids-baby": [
+      "Kids & Baby", "Baby", "Nursery", "Kids Clothing", "Baby Gift Sets",
+      "Nursery Decor", "Toys", "Baby Blankets", "Baby Clothing", "Kids' Furniture",
+      "Games & Puzzles", "Children's Books", "Girls' Clothing", "Baby Care",
+      "Boys' Clothing"
+    ],
+    "paper-and-party-supplies": [
+      "Paper & Party Supplies", "Stationery & Paper", "Party Supplies", "Paper",
+      "Stationery", "Cards"
+    ],
+    "stationery-paper": [
+      "Paper & Party Supplies", "Stationery & Paper", "Party Supplies", "Paper",
+      "Stationery", "Cards"
+    ],
+    "stationery": [
+      "Paper & Party Supplies", "Stationery & Paper", "Party Supplies", "Paper",
+      "Stationery", "Cards"
+    ],
+    "pet-supplies": [
+      "Pet Supplies", "Pet Accessories", "Collars", "Pet Collars & Leashes",
+      "Pet Gates & Fences", "Pet Bedding", "Pet Furniture",
+      "Pet Clothing, Accessories & Shoes", "Pet Toys", "Pet Storage",
+      "Urns & Memorials", "Pet Feeding", "Riding & Farm Animals",
+      "Pet Carriers & Houses", "Pet Health & Wellness", "Beekeeping", "Training"
+    ],
+    "shoes": [
+      "Shoes", "Footwear", "Women's Shoes", "Men's Shoes", "Girls' Shoes",
+      "Insoles & Accessories", "Boys' Shoes", "Leather Shoes", "Slippers", "Sandals"
+    ],
+    "toys-and-games": [
+      "Toys & Games", "Games & Puzzles", "Toys", "Sports & Outdoor Recreation",
+      "Wooden Toys", "Puzzles"
+    ],
+    "weddings": [
+      "Weddings", "Weddings & Celebrations", "Wedding", "Bridal", "Gifts & Mementos",
+      "Decorations", "Accessories", "Clothing", "Jewelry", "Invitations & Paper", "Shoes"
+    ],
+    "wedding": [
+      "Weddings", "Weddings & Celebrations", "Wedding", "Bridal", "Gifts & Mementos",
+      "Decorations", "Accessories", "Clothing", "Jewelry", "Invitations & Paper", "Shoes"
+    ],
+    "vintage": ["Vintage & Heritage", "Vintage", "Antiques"],
+    "vintage-heritage": ["Vintage & Heritage", "Vintage", "Antiques"],
+    "fashion-leather": ["Clothing", "Bags & Purses", "Fashion", "Leatherwork"]
+  };
+
+  const normalizedCategory = category.toLowerCase().trim();
+
+  // If this is the curated Gifts Hub, fetch approved marketplace products to showcase all giftable crafts
+  if (normalizedCategory === "gifts" || normalizedCategory === "gift") {
+    try {
+      const products = await prisma.product.findMany({
+        where: {
+          status: "APPROVED",
+          artisan: {
+            status: "APPROVED"
+          }
+        },
+        include: {
+          artisan: {
+            include: {
+              user: true
+            }
+          },
+          reviews: true,
+          variants: true
+        },
+        orderBy: [
+          { views: "desc" },
+          { createdAt: "desc" }
+        ],
+        take: 80
+      });
+      return products;
+    } catch (error) {
+      console.error("Gifts fetch error:", error);
+      return [];
+    }
+  }
+
+  const subcategories = departmentSubcategoryMap[normalizedCategory] || [];
+
   // Generate all possible variations of the category string formats stored in the DB (e.g. "Gift Boxes & Sets", "gift-boxes-sets", "gift-boxes-&-sets", "gift boxes & sets")
-  const variations = Array.from(new Set([
-    category,
-    category.toLowerCase(),
-    matchedName,
-    matchedName.toLowerCase(),
-    matchedName.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-"), // gift-boxes-&-sets
-    matchedName.toLowerCase().replace(/\s+/g, "-"), // gift-boxes-sets
-    matchedName.toLowerCase().replace(/ & /g, " ").replace(/ /g, " "), // gift boxes sets
-    matchedName.replace(/ & /g, " & ").replace(/  +/g, " ")
-  ]));
+  const baseTargets = [category, matchedName, ...subcategories];
+  const variations = Array.from(new Set(
+    baseTargets.flatMap(target => [
+      target,
+      target.toLowerCase(),
+      target.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-"),
+      target.toLowerCase().replace(/\s+/g, "-"),
+      target.toLowerCase().replace(/ & /g, " ").replace(/ /g, " "),
+      target.replace(/ & /g, " & ").replace(/  +/g, " ")
+    ])
+  ));
 
   try {
     const products = await prisma.product.findMany({

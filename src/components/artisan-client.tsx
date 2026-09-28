@@ -150,7 +150,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
                 </div>
               </div>
  
-              <p className="text-sm md:text-2xl text-charcoal/70 leading-relaxed max-w-2xl serif text-balance px-4 md:px-0 italic font-medium">
+              <p className="text-sm md:text-2xl text-charcoal/70 leading-relaxed max-w-2xl serif text-balance px-4 md:px-0 italic font-medium whitespace-pre-wrap">
                 "{artisan.bio}"
               </p>
  

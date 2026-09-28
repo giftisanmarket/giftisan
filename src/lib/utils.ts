@@ -5,6 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Strips all emoji characters from a string (covers all Unicode emoji ranges)
+export function stripEmojis(str: string): string {
+  return str
+    .replace(/\p{Extended_Pictographic}/gu, "")
+    .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, "")  // flag sequences
+    .replace(/[\u200D\uFE0F]/gu, "");          // zero-width joiners & variation selectors
+}
+
 export function slugify(text: string) {
   return text
     .toString()

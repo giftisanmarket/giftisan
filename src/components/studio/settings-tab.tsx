@@ -29,7 +29,7 @@ import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, stripEmojis } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 
@@ -354,7 +354,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                               type="text"
                               required
                               value={studioName}
-                              onChange={(e) => setStudioName(e.target.value)}
+                              onChange={(e) => setStudioName(stripEmojis(e.target.value))}
                               className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
                               placeholder={dict.studio_profile.studio_name_placeholder}
                             />
@@ -399,7 +399,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                         <textarea
                           required
                           value={bio}
-                          onChange={(e) => setBio(e.target.value)}
+                          onChange={(e) => setBio(stripEmojis(e.target.value))}
                           rows={4}
                           className="w-full p-6 rounded-[2rem] bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-medium text-primary resize-none"
                           placeholder={dict.studio_profile.bio_placeholder}

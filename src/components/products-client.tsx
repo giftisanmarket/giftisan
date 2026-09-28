@@ -3,7 +3,7 @@
 import { Navbar } from "@/components/navbar";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
-import { Heart, SlidersHorizontal, ArrowLeft, ArrowUpDown, CheckCircle2, Search, X, Grid, Sparkles } from "lucide-react";
+import { Heart, SlidersHorizontal, ArrowUpDown, CheckCircle2, ChevronDown, Sparkles, Star, RotateCcw, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
@@ -17,61 +17,77 @@ interface ProductsClientProps {
 
 export function ProductsClient({ initialProducts, dict, lang }: ProductsClientProps) {
   const { toggleFavorite, isFavorite } = useFavorites();
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية" || dict?.common?.search?.includes("ابحث");
+  const currency = dict?.product?.currency || "EGP";
+
+  // Filter States
   const [showVerifiedOnly, setShowVerifiedOnly] = useState<boolean>(false);
+  const [showCustomizableOnly, setShowCustomizableOnly] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high" | "popular">("newest");
-  const [showSortOptions, setShowSortOptions] = useState<boolean>(false);
+  const [openDropdown, setOpenDropdown] = useState<"category" | "price" | "sort" | null>(null);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [stickyTop, setStickyTop] = useState<number | null>(null);
 
-  // Advanced scroll fade state and tracking for the horizontal categories container
-  const [showLeftScrollFade, setShowLeftScrollFade] = useState<boolean>(false);
-  const [showRightScrollFade, setShowRightScrollFade] = useState<boolean>(true);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
-  const updateScrollFades = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    const maxScroll = scrollWidth - clientWidth;
-
-    if (maxScroll <= 5) {
-      setShowLeftScrollFade(false);
-      setShowRightScrollFade(false);
-      return;
-    }
-
-    const isRtl = lang === "ar";
-    if (isRtl) {
-      const absScrollLeft = Math.abs(scrollLeft);
-      setShowRightScrollFade(absScrollLeft > 5);
-      setShowLeftScrollFade(absScrollLeft < maxScroll - 5);
-    } else {
-      setShowLeftScrollFade(scrollLeft > 5);
-      setShowRightScrollFade(scrollLeft < maxScroll - 5);
-    }
-  };
-
+  // Measure exact bottom of sticky navbar to ensure flawless alignment without overlap
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const updateStickyTop = () => {
+      const navContainer = document.querySelector("nav")?.closest(".sticky") as HTMLElement;
+      if (navContainer) {
+        setStickyTop(navContainer.offsetHeight);
+      }
+    };
 
-    // Run initial check
-    updateScrollFades();
+    updateStickyTop();
+    window.addEventListener("resize", updateStickyTop);
 
-    // Set up a ResizeObserver to adapt immediately on layout shift or orientation change
-    const resizeObserver = new ResizeObserver(() => {
-      updateScrollFades();
-    });
-    resizeObserver.observe(container);
-
-    container.addEventListener("scroll", updateScrollFades, { passive: true });
+    let observer: ResizeObserver | null = null;
+    const navContainer = document.querySelector("nav")?.closest(".sticky");
+    if (navContainer && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(updateStickyTop);
+      observer.observe(navContainer);
+    }
 
     return () => {
-      resizeObserver.disconnect();
-      container.removeEventListener("scroll", updateScrollFades);
+      window.removeEventListener("resize", updateStickyTop);
+      observer?.disconnect();
     };
-  }, [initialProducts]);
+  }, []);
+
+  // Prevent background scroll when mobile filter drawer is open
+  useEffect(() => {
+    if (isMobileDrawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileDrawerOpen]);
+
+  // Close dropdown on outside click or Escape key
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (toolbarRef.current && !toolbarRef.current.contains(target)) {
+        setOpenDropdown(null);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenDropdown(null);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Extract categories dynamically from products to ensure exact alignment with DB and dictionaries
   const dynamicCategories = useMemo(() => {
@@ -86,16 +102,45 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
 
   // Combine manual or dictionary-defined listings
   const categoriesList = useMemo(() => {
-    const rawList = dict.common?.categories_list || {};
+    const rawList = dict.common?.categories_list || dict.home?.categories_list || {};
     return [
-      { id: "all", label: lang === "ar" ? "كل المنتجات" : "All Products" },
+      { id: "all", label: isAr ? "كل المنتجات" : "All Products" },
       ...dynamicCategories.map((catId) => {
-        // Fallback to capitalizing the id if not found in translation file
         const label = rawList[catId] || catId.charAt(0).toUpperCase() + catId.slice(1).replace(/-/g, " ");
         return { id: catId, label };
       }),
     ];
-  }, [dynamicCategories, dict.common?.categories_list, lang]);
+  }, [dynamicCategories, dict.common?.categories_list, dict.home?.categories_list, isAr]);
+
+  const priceRanges = [
+    { id: "ALL", label: isAr ? "جميع الأسعار" : "All Prices" },
+    { id: "UNDER_250", label: isAr ? "أقل من 250 ج.م" : `Under 250 ${currency}`, min: 0, max: 250 },
+    { id: "250_500", label: isAr ? "250 إلى 500 ج.م" : `250 - 500 ${currency}`, min: 250, max: 500 },
+    { id: "500_1000", label: isAr ? "500 إلى 1,000 ج.م" : `500 - 1,000 ${currency}`, min: 500, max: 1000 },
+    { id: "OVER_1000", label: isAr ? "أكثر من 1,000 ج.م" : `Over 1,000 ${currency}`, min: 1000, max: Infinity }
+  ];
+
+  const sortOptions = [
+    { label: dict.home?.newest_arrivals || "Newest Arrivals", value: "newest" },
+    { label: isAr ? "الأكثر شعبية" : "Most Popular", value: "popular" },
+    { label: dict.home?.price_low_high || "Price: Low to High", value: "price-low" },
+    { label: dict.home?.price_high_low || "Price: High to Low", value: "price-high" }
+  ];
+
+  const activeFiltersCount = 
+    (showVerifiedOnly ? 1 : 0) +
+    (showCustomizableOnly ? 1 : 0) +
+    (selectedCategory !== "all" ? 1 : 0) +
+    (selectedPriceRange !== "ALL" ? 1 : 0);
+
+  const resetAllFilters = () => {
+    setShowVerifiedOnly(false);
+    setShowCustomizableOnly(false);
+    setSelectedCategory("all");
+    setSelectedPriceRange("ALL");
+    setSortBy("newest");
+    setOpenDropdown(null);
+  };
 
   // High fidelity filtering and sorting logic
   const filteredProducts = useMemo(() => {
@@ -110,14 +155,15 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
         // Verified Artisan Filter
         if (showVerifiedOnly && !p.artisan?.isVerified) return false;
 
-        // Search Query Filter
-        if (searchQuery.trim()) {
-          const query = searchQuery.toLowerCase();
-          const nameMatch = p.name.toLowerCase().includes(query);
-          const descMatch = p.description?.toLowerCase().includes(query);
-          const studioMatch = p.artisan?.studioName?.toLowerCase().includes(query);
-          const artistNameMatch = p.artisan?.user?.name?.toLowerCase().includes(query);
-          if (!nameMatch && !descMatch && !studioMatch && !artistNameMatch) return false;
+        // Customizable Filter
+        if (showCustomizableOnly && !p.canPersonalize && !p.requiresClientImage) return false;
+
+        // Price Range Filter
+        if (selectedPriceRange !== "ALL") {
+          const range = priceRanges.find(r => r.id === selectedPriceRange);
+          if (range && range.min !== undefined && range.max !== undefined) {
+            if (p.price < range.min || p.price > range.max) return false;
+          }
         }
 
         return true;
@@ -126,316 +172,732 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
         if (sortBy === "price-low") return a.price - b.price;
         if (sortBy === "price-high") return b.price - a.price;
         if (sortBy === "popular") {
-          // Sort by highest average reviews or review count
-          const aReviews = a.reviews?.length || 0;
-          const bReviews = b.reviews?.length || 0;
-          return bReviews - aReviews;
+          return (b.views || b.reviews?.length || 0) - (a.views || a.reviews?.length || 0);
         }
-        // Default: Newest arrivals
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [initialProducts, selectedCategory, showVerifiedOnly, searchQuery, sortBy]);
-
-  const sortOptions = [
-    { label: dict.home?.newest_arrivals || "Newest Arrivals", value: "newest" },
-    { label: dict.home?.price_low_high || "Price: Low to High", value: "price-low" },
-    { label: dict.home?.price_high_low || "Price: High to Low", value: "price-high" },
-    { label: lang === "ar" ? "الأكثر تميزاً" : "Most Desired / Popular", value: "popular" },
-  ];
-
-  const resetFilters = () => {
-    setSelectedCategory("all");
-    setSearchQuery("");
-    setShowVerifiedOnly(false);
-    setSortBy("newest");
-  };
+  }, [initialProducts, selectedCategory, showVerifiedOnly, showCustomizableOnly, selectedPriceRange, sortBy]);
 
   return (
     <main className="min-h-screen bg-cream">
       <Navbar dict={dict} />
 
-      {/* Hero Header */}
-      <section className="pt-24 md:pt-32 pb-12 md:pb-16 bg-primary text-white relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
+      {/* Editorial Header */}
+      <section className="pt-8 md:pt-12 pb-6 md:pb-8 text-center">
+        <div className="container mx-auto px-4 md:px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="max-w-2xl mx-auto space-y-2.5"
           >
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-white/50 hover:text-white text-[10px] md:text-sm font-bold uppercase tracking-widest mb-6 md:mb-8 transition-colors group"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
-              {dict.home?.back_to_collections || "Back to Home"}
-            </Link>
-            <div className="flex items-center gap-3 mb-3">
-              <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-accent">
-                {lang === "ar" ? "السوق المركزي الكامل" : "Central Artisan Marketplace"}
-              </span>
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/5 text-primary text-xs font-bold uppercase tracking-wider mb-1">
+              <span>{isAr ? "السوق المركزي الكامل" : "Central Artisan Marketplace"}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-4">
-              {dict.common?.explore || "Explore Products"}
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-normal text-primary tracking-tight">
+              {dict.common?.explore || (isAr ? "استكشف المنتجات اليدوية" : "Explore Handcrafted Products")}
             </h1>
-            <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-2xl">
-              {lang === "ar"
-                ? "تصفح واقتنِ تحفاً يدوية فريدة مصممة بشغف وروح من قبل أمهر المصممين والحرفيين المستقلين في مصر."
+
+            <p className="text-sm md:text-base text-charcoal/60 leading-relaxed font-normal max-w-xl mx-auto">
+              {isAr
+                ? "تصفح واقتنِ تحفاً يدوية فريدة مصممة بشغف وروح من قبل أمهر المصممين والحرفيين في مصر."
                 : "Browse and collect beautiful, high-fidelity handcrafted products, made with soul and historical heritage by Egypt's finest independent creators."}
             </p>
           </motion.div>
         </div>
-        {/* Decorative Background Circles */}
-        <div className="absolute top-0 end-0 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 start-0 w-64 h-64 bg-accent/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
       </section>
 
-      {/* Toolbar & Filters Bar */}
-      <div className="sticky top-[72px] md:top-[124px] z-40 bg-white/80 backdrop-blur-md border-b border-primary/5 py-4 shadow-sm">
-        <div className="container mx-auto px-4 md:px-6 space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Etsy-Style Filter Pills Toolbar */}
+      <div
+        ref={toolbarRef}
+        style={stickyTop !== null ? { top: `${stickyTop}px` } : undefined}
+        className="sticky top-[105px] md:top-[124px] z-30 bg-cream/95 backdrop-blur-md py-2.5 md:py-3 border-y border-primary/5 mb-6 md:mb-8 transition-all"
+      >
+        <div className="container mx-auto px-4 md:px-6">
+          
+          {/* Mobile Toolbar: Single Clean Row with Horizontal Swiping Pills & Filters Drawer Button */}
+          <div className="flex md:hidden items-center gap-2 w-full">
+            {/* All Filters Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileDrawerOpen(true)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border shadow-xs shrink-0 active:scale-95",
+                activeFiltersCount > 0
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-charcoal/80 border-primary/20 hover:border-primary/40"
+              )}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>{isAr ? "الفلاتر" : "Filters"}</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-accent text-white text-[10px] flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
 
-            {/* Search Input */}
-            <div className="relative w-full lg:max-w-md">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={lang === "ar" ? "البحث داخل المعرض..." : "Filter inside the gallery..."}
-                className="w-full h-11 ps-11 pe-10 bg-cream/30 border border-primary/10 rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent text-primary font-medium text-xs md:text-sm placeholder:text-primary/40 transition-all"
-              />
-              <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 w-4 h-4" />
-              {searchQuery && (
+            {/* Separator */}
+            <div className="h-5 w-px bg-primary/10 shrink-0" />
+
+            {/* Scrollable Pills Strip */}
+            <div className="flex-1 overflow-x-auto scrollbar-none flex items-center gap-1.5 whitespace-nowrap py-0.5">
+              {/* Quick Price Pills */}
+              <button
+                type="button"
+                onClick={() => setSelectedPriceRange(prev => prev === "UNDER_250" ? "ALL" : "UNDER_250")}
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border shrink-0 active:scale-95",
+                  selectedPriceRange === "UNDER_250"
+                    ? "bg-primary text-white border-primary shadow-xs"
+                    : "bg-white text-charcoal/80 border-primary/15"
+                )}
+              >
+                <span>{isAr ? "< 250 ج.م" : `< 250 ${currency}`}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedPriceRange(prev => prev === "250_500" ? "ALL" : "250_500")}
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border shrink-0 active:scale-95",
+                  selectedPriceRange === "250_500"
+                    ? "bg-primary text-white border-primary shadow-xs"
+                    : "bg-white text-charcoal/80 border-primary/15"
+                )}
+              >
+                <span>{isAr ? "250 - 500" : `250 - 500 ${currency}`}</span>
+              </button>
+
+              {/* Verified Artisans Pill */}
+              <button
+                type="button"
+                onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border shrink-0 active:scale-95",
+                  showVerifiedOnly
+                    ? "bg-accent text-white border-accent shadow-xs"
+                    : "bg-white text-charcoal/80 border-primary/15"
+                )}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{dict.home?.artisans_tab || (isAr ? "موثق" : "Verified")}</span>
+              </button>
+
+              {/* Customizable Pill */}
+              <button
+                type="button"
+                onClick={() => setShowCustomizableOnly(!showCustomizableOnly)}
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border shrink-0 active:scale-95",
+                  showCustomizableOnly
+                    ? "bg-accent text-white border-accent shadow-xs"
+                    : "bg-white text-charcoal/80 border-primary/15"
+                )}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{isAr ? "مخصصة" : "Personalizable"}</span>
+              </button>
+
+              {/* Active Category Chip */}
+              {selectedCategory !== "all" && (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute end-4 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-primary transition-colors"
+                  type="button"
+                  onClick={() => setSelectedCategory("all")}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary text-white border border-primary shrink-0"
                 >
-                  <X className="w-4 h-4" />
+                  <span>{categoriesList.find(c => c.id === selectedCategory)?.label}</span>
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Clear all on mobile if active */}
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold text-accent bg-accent/10 border border-accent/20 shrink-0"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{isAr ? "إلغاء" : "Reset"}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop Toolbar (>= md screen size) */}
+          <div className="hidden md:flex items-center justify-between gap-3 w-full">
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              
+              {/* Category Pill Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(prev => prev === "category" ? null : "category")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                    selectedCategory !== "all"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+                  )}
+                >
+                  <span>
+                    {selectedCategory !== "all" 
+                      ? categoriesList.find(c => c.id === selectedCategory)?.label 
+                      : (isAr ? "التصنيف" : "Category")}
+                  </span>
+                  <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", openDropdown === "category" && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === "category" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute start-0 top-full mt-2 w-56 bg-white border border-primary/10 shadow-xl rounded-2xl p-1.5 z-[100] max-h-64 overflow-y-auto"
+                    >
+                      {categoriesList.map(cat => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory(cat.id);
+                            setOpenDropdown(null);
+                          }}
+                          className={cn(
+                            "w-full text-start px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between",
+                            selectedCategory === cat.id
+                              ? "bg-primary/5 text-primary font-bold"
+                              : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                          )}
+                        >
+                          <span className="truncate">{cat.label}</span>
+                          {selectedCategory === cat.id && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Price Pill Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(prev => prev === "price" ? null : "price")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                    selectedPriceRange !== "ALL"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+                  )}
+                >
+                  <span>
+                    {selectedPriceRange !== "ALL" 
+                      ? priceRanges.find(r => r.id === selectedPriceRange)?.label 
+                      : `${isAr ? "السعر" : "Price"} (${currency})`}
+                  </span>
+                  <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", openDropdown === "price" && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === "price" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute start-0 top-full mt-2 w-52 bg-white border border-primary/10 shadow-xl rounded-2xl p-1.5 z-[100]"
+                    >
+                      {priceRanges.map(range => (
+                        <button
+                          key={range.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedPriceRange(range.id);
+                            setOpenDropdown(null);
+                          }}
+                          className={cn(
+                            "w-full text-start px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between",
+                            selectedPriceRange === range.id
+                              ? "bg-primary/5 text-primary font-bold"
+                              : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                          )}
+                        >
+                          <span>{range.label}</span>
+                          {selectedPriceRange === range.id && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Verified Artisans Pill */}
+              <button
+                type="button"
+                onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                  showVerifiedOnly
+                    ? "bg-accent text-white border-accent shadow-sm shadow-accent/20"
+                    : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+                )}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{dict.home?.artisans_tab || (isAr ? "حرفيون موثقون" : "Verified Artisans")}</span>
+              </button>
+
+              {/* Customizable Pill */}
+              <button
+                type="button"
+                onClick={() => setShowCustomizableOnly(!showCustomizableOnly)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                  showCustomizableOnly
+                    ? "bg-accent text-white border-accent shadow-sm shadow-accent/20"
+                    : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+                )}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{isAr ? "قابلة للتخصيص" : "Personalizable"}</span>
+              </button>
+
+              {/* Sort Pill Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(prev => prev === "sort" ? null : "sort")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-xs active:scale-95",
+                    sortBy !== "newest"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white text-charcoal/80 border-primary/15 hover:border-primary/30 hover:text-primary"
+                  )}
+                >
+                  <ArrowUpDown className="w-3 h-3 text-accent" />
+                  <span>{sortOptions.find(o => o.value === sortBy)?.label}</span>
+                  <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", openDropdown === "sort" && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdown === "sort" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute start-0 md:end-0 md:start-auto top-full mt-2 w-52 bg-white border border-primary/10 shadow-xl rounded-2xl p-1.5 z-[100]"
+                    >
+                      {sortOptions.map(option => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(option.value as any);
+                            setOpenDropdown(null);
+                          }}
+                          className={cn(
+                            "w-full text-start px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between",
+                            sortBy === option.value
+                              ? "bg-primary/5 text-primary font-bold"
+                              : "text-charcoal/70 hover:bg-cream hover:text-primary"
+                          )}
+                        >
+                          <span>{option.label}</span>
+                          {sortBy === option.value && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Reset Filters */}
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs font-bold text-accent hover:underline flex items-center gap-1 ps-1 transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{isAr ? "إعادة تعيين" : "Reset"}</span>
                 </button>
               )}
             </div>
 
-            {/* Quick Actions (Sort, Verified toggle) */}
-            <div className="flex items-center gap-2 w-full lg:w-auto shrink-0 justify-between lg:justify-end">
-              {/* Artisan badge filter toggle */}
-              <button
-                onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
-                className={cn(
-                  "flex-1 lg:flex-initial flex items-center justify-center gap-1.5 px-4 h-11 border rounded-full text-[9px] md:text-xs font-black uppercase tracking-widest transition-all active:scale-90",
-                  showVerifiedOnly
-                    ? "bg-accent text-white border-accent shadow-lg shadow-accent/20"
-                    : "bg-white border-primary/10 text-primary hover:bg-primary/5"
-                )}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>{dict.home?.artisans_tab || "Verified Studios"}</span>
-              </button>
-
-              {/* Sorting Filter */}
-              <div className="relative flex-1 lg:flex-initial">
-                <button
-                  onClick={() => setShowSortOptions(!showSortOptions)}
-                  className="w-full flex items-center justify-center gap-1.5 px-4 h-11 bg-white border border-primary/10 rounded-full text-[9px] md:text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-90"
-                >
-                  <ArrowUpDown className="w-3.5 h-3.5 text-primary/60" />
-                  <span>{sortOptions.find((o) => o.value === sortBy)?.label}</span>
-                </button>
-
-                <AnimatePresence>
-                  {showSortOptions && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowSortOptions(false)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute end-0 top-full mt-2 w-56 bg-white border border-primary/5 shadow-2xl rounded-2xl p-2 z-50 overflow-hidden"
-                      >
-                        {sortOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSortBy(option.value as any);
-                              setShowSortOptions(false);
-                            }}
-                            className={cn(
-                              "w-full text-start px-4 py-3 rounded-xl text-xs font-bold transition-all",
-                              sortBy === option.value
-                                ? "bg-primary/5 text-primary"
-                                : "text-charcoal/60 hover:bg-cream hover:text-primary"
-                            )}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
+            {/* Product Count */}
+            <div className="text-xs text-charcoal/50 font-medium shrink-0">
+              <span>{filteredProducts.length}</span>{" "}
+              <span>{filteredProducts.length === 1 ? (dict.common?.treasure_single || "product") : (dict.common?.treasure_plural || "products")}</span>
             </div>
           </div>
 
-          {/* Dynamic Horizontally-Scrollable Categories Bar */}
-          <div className="border-t border-primary/5 pt-3">
-            <div
-              className="scroll-fade-mask md:mask-none"
-              style={{
-                "--mask-left": showLeftScrollFade ? "transparent" : "black",
-                "--mask-right": showRightScrollFade ? "transparent" : "black",
-              } as React.CSSProperties}
-            >
-              <div
-                ref={scrollContainerRef}
-                onScroll={updateScrollFades}
-                className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5 -mx-4 px-8 md:mx-0 md:px-0"
-              >
-                {categoriesList.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={cn(
-                      "px-5 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider transition-all shrink-0 active:scale-95",
-                      selectedCategory === cat.id
-                        ? "bg-primary text-white shadow-md"
-                        : "bg-cream text-primary/70 hover:bg-primary/5 hover:text-primary"
-                    )}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Products Grid */}
-      <section className="py-12 container mx-auto px-4 md:px-6">
-
-        {/* Results Info */}
-        <div className="mb-8 flex justify-between items-center px-1">
-          <p className="text-[10px] md:text-sm font-medium text-charcoal/60 uppercase tracking-widest">
-            {lang === "ar" ? "المنتجات المتوفرة: " : "Products available: "}
-            <span className="text-primary font-bold">{filteredProducts.length}</span>
-          </p>
-          {(selectedCategory !== "all" || searchQuery || showVerifiedOnly) && (
-            <button
-              onClick={resetFilters}
-              className="text-[10px] md:text-xs font-black text-accent uppercase tracking-widest hover:underline active:scale-95"
-            >
-              {lang === "ar" ? "إعادة ضبط الفلاتر" : "Reset Filters"}
-            </button>
-          )}
-        </div>
-
+      {/* Grid */}
+      <section className="pb-12 container mx-auto px-4 md:px-6">
         {filteredProducts.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center space-y-6">
-            <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary/20">
-              <SlidersHorizontal className="w-10 h-10" />
+          <div className="py-16 md:py-24 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-primary/5 rounded-full flex items-center justify-center text-primary/30">
+              <SlidersHorizontal className="w-7 h-7 md:w-8 md:h-8" />
             </div>
-            <div className="space-y-3 px-4">
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary">
-                {lang === "ar" ? "لم نجد ما تبحث عنه..." : "No products match your criteria..."}
+            <div className="space-y-2 px-4 max-w-md">
+              <h2 className="text-lg md:text-2xl font-serif text-primary font-medium">
+                {activeFiltersCount > 0
+                  ? (isAr ? "لم نجد منتجات تطابق الفلاتر المحددة" : "No products match your selected filters")
+                  : (isAr ? "لم نجد ما تبحث عنه حالياً..." : "No products found...")}
               </h2>
-              <p className="text-charcoal/60 max-w-md mx-auto text-xs md:text-base leading-relaxed">
-                {lang === "ar"
-                  ? "جرب إزالة أو تعديل عوامل التصفية لعرض مجموعة المنتجات الكاملة المصنوعة يدوياً."
-                  : "Try adjusting your filters, modifying keywords, or searching for other authentic crafts."}
+              <p className="text-charcoal/60 text-xs md:text-sm font-normal leading-relaxed">
+                {activeFiltersCount > 0
+                  ? (isAr ? "جرب إزالة بعض الفلاتر لعرض المزيد من الإبداعات الحرفية." : "Try clearing some filters to explore more handcrafted treasures.")
+                  : (isAr ? "تصفح مجموعاتنا الأخرى أو استكشف الحرفيين المستقلين." : "Try adjusting your filters or explore other categories.")}
               </p>
-              <button
-                onClick={resetFilters}
-                className="mt-4 px-6 h-12 bg-primary text-white font-bold rounded-full hover:bg-primary-light transition-all shadow-lg active:scale-95 text-xs uppercase tracking-widest"
-              >
-                {lang === "ar" ? "عرض جميع المجموعات" : "View All Collections"}
-              </button>
+              {activeFiltersCount > 0 && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-full hover:bg-primary-light transition-all shadow-xs"
+                  >
+                    {isAr ? "إعادة تعيين الفلاتر" : "Clear All Filters"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product, idx) => (
-                <motion.div
-                  key={product.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.35, delay: Math.min(idx * 0.03, 0.3) }}
-                >
-                  <Link href={`/products/${product.slug || product.id}`} className="group block">
-                    <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow border border-primary/5 bg-white">
-                      <BespokeImage
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-1000"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      />
+              {filteredProducts.map((product, idx) => {
+                const artisanName = product.artisan?.studioName || product.artisan?.user?.name;
+                const hasReviews = product.reviews && product.reviews.length > 0;
+                const avgRating = hasReviews 
+                  ? (product.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / product.reviews.length).toFixed(1)
+                  : null;
+                const ratingCount = product.reviews?.length || 0;
 
-                      {/* Wishlist Heart Button */}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleFavorite(product);
-                        }}
-                        className={cn(
-                          "absolute top-3 end-3 md:top-5 md:end-5 p-2 md:p-3.5 rounded-full transition-all shadow-md active:scale-75",
-                          isFavorite(product.id)
-                            ? "bg-red-50 text-red-500 opacity-100"
-                            : "bg-white/90 backdrop-blur text-primary xl:opacity-0 xl:group-hover:opacity-100 opacity-100 hover:bg-white"
+                return (
+                  <motion.div
+                    key={product.id}
+                    layout
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.25) }}
+                  >
+                    <Link
+                      href={`/products/${product.slug || product.id}`}
+                      className="group block"
+                    >
+                      <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2 bg-cream/20 border border-primary/5 shadow-xs hover:shadow-md transition-shadow">
+                        <BespokeImage
+                          src={product.images[0]}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(product);
+                          }}
+                          className={cn(
+                            "absolute top-2 end-2 p-1.5 md:p-2 rounded-full transition-all shadow-sm active:scale-75 z-10",
+                            isFavorite(product.id)
+                              ? "bg-red-50 text-red-500 opacity-100"
+                              : "bg-white/90 backdrop-blur text-primary opacity-0 group-hover:opacity-100 hover:bg-white"
+                          )}
+                          aria-label="Save to favorites"
+                        >
+                          <Heart className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isFavorite(product.id) && "fill-current")} />
+                        </button>
+
+                        {product.badge && (
+                          <span className="absolute bottom-2 start-2 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/90 text-white backdrop-blur-xs">
+                            {product.badge}
+                          </span>
                         )}
-                      >
-                        <Heart className={cn("w-4 h-4 md:w-5 md:h-5", isFavorite(product.id) && "fill-current")} />
-                      </button>
-
-
-                    </div>
-
-                    <div className="space-y-1 px-1">
-                      <h3 className="text-xs md:text-xl font-heading font-bold text-primary group-hover:text-accent transition-colors leading-tight line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs md:text-lg font-heading font-black text-primary">
-                          {dict.product?.currency || "EGP"} {product.price}
-                        </p>
-                        <div className="h-3 w-px bg-primary/10" />
-                        <span className="text-[8px] md:text-[10px] font-bold text-charcoal/40 uppercase tracking-widest truncate">
-                          {dict.common?.categories_list?.[product.category?.toLowerCase()?.replace(/ & /g, "-")?.replace(/ /g, "-")] || product.category}
-                        </span>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+
+                      {/* Product Details (Etsy-Style Hierarchy) */}
+                      <div className="space-y-0.5 px-0.5">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3 className="text-xs sm:text-sm font-medium text-charcoal group-hover:text-primary transition-colors line-clamp-1 flex-1">
+                            {product.name}
+                          </h3>
+                          {avgRating && (
+                            <div className="flex items-center gap-0.5 text-[11px] font-bold text-charcoal shrink-0">
+                              <span>{avgRating}</span>
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                              {ratingCount > 0 && (
+                                <span className="text-charcoal/40 text-[10px]">({ratingCount})</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {artisanName && (
+                          <p className="text-[11px] sm:text-xs text-charcoal/60 truncate group-hover:text-primary/80 transition-colors">
+                            {artisanName}
+                          </p>
+                        )}
+
+                        <p className="text-xs sm:text-sm font-bold text-primary pt-0.5">
+                          {currency} {Number(product.price).toFixed(2)}
+                        </p>
+
+                        {(product.canPersonalize || product.requiresClientImage) && (
+                          <span className="inline-block mt-0.5 text-[9px] sm:text-[10px] font-bold text-accent px-1.5 py-0.2 bg-accent/10 rounded-md">
+                            {isAr ? "قابلة للتخصيص" : "Personalizable"}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}
       </section>
 
-      {/* Discovery Bottom Callout */}
-      <section className="py-20 md:py-32 border-t border-primary/5 mt-16 bg-cream text-center relative overflow-hidden">
-        <div className="container mx-auto px-6 max-w-2xl space-y-6 md:space-y-8 relative z-10">
-          <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary">
-            {dict.home?.not_found_title || "Not what you are looking for?"}
+      {/* Streamlined More Discovery Section */}
+      <section className="py-12 md:py-16 border-t border-primary/5 mt-10 bg-cream text-center">
+        <div className="container mx-auto px-4 max-w-xl space-y-3.5">
+          <h2 className="text-xl md:text-2xl font-serif text-primary font-normal">
+            {dict.home?.not_found_title || "Looking for something bespoke?"}
           </h2>
-          <p className="text-charcoal/60 text-base md:text-lg leading-relaxed">
-            {dict.home?.custom_commissions_desc || "Our master makers thrive on custom orders. Pitch your dream and customize a unique product today."}
+          <p className="text-charcoal/60 text-xs md:text-sm leading-relaxed max-w-md mx-auto">
+            {dict.home?.custom_commissions_desc || "Our master makers craft custom commissions made uniquely for you."}
           </p>
-          <Link href="/artisans">
-            <button className="h-14 md:h-16 px-8 md:px-12 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 group text-sm md:text-base active:scale-95 duration-200">
-              {dict.home?.explore_custom_makers || "Explore Makers"}
-              <span className="inline-block ms-2 group-hover:translate-x-1 transition-transform">→</span>
-            </button>
-          </Link>
+          <div className="pt-1">
+            <Link href="/artisans">
+              <button className="h-10 md:h-11 px-6 bg-primary text-white text-xs md:text-sm font-bold rounded-full hover:bg-primary-light transition-all shadow-md shadow-primary/10 group active:scale-95 duration-150">
+                {dict.home?.explore_custom_makers || "Explore Custom Makers"}
+                <span className="inline-block ms-1.5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">→</span>
+              </button>
+            </Link>
+          </div>
         </div>
-        <div className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(var(--accent-rgb),0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </section>
+
+      {/* Mobile Filter & Sort Bottom Sheet Drawer */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <div className="fixed inset-0 z-[100] md:hidden">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="absolute inset-0 bg-charcoal/50 backdrop-blur-xs"
+            />
+
+            {/* Bottom Sheet Drawer */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-cream rounded-t-[28px] shadow-2xl flex flex-col overflow-hidden border-t border-primary/10"
+            >
+              {/* Drag Handle Pill */}
+              <div className="w-12 h-1 bg-charcoal/20 rounded-full mx-auto mt-3 mb-1" />
+
+              {/* Drawer Header */}
+              <div className="px-5 py-3 border-b border-primary/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-primary" />
+                  <h3 className="text-base font-heading font-bold text-primary">
+                    {isAr ? "تصفية وترتيب" : "Filter & Sort"}
+                  </h3>
+                  {activeFiltersCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {activeFiltersCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={resetAllFilters}
+                      className="text-xs font-bold text-accent hover:underline"
+                    >
+                      {isAr ? "إعادة تعيين" : "Reset"}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileDrawerOpen(false)}
+                    className="p-1.5 hover:bg-primary/5 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-charcoal/70" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+                {/* Section: Sort by */}
+                <div>
+                  <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider mb-2.5 block">
+                    {isAr ? "الترتيب حسب" : "Sort By"}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {sortOptions.map(option => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setSortBy(option.value as any)}
+                        className={cn(
+                          "p-3 rounded-2xl text-xs font-bold text-center border transition-all flex items-center justify-between",
+                          sortBy === option.value
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-white text-charcoal border-primary/15 hover:border-primary/30"
+                        )}
+                      >
+                        <span>{option.label}</span>
+                        {sortBy === option.value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section: Category */}
+                <div>
+                  <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider mb-2.5 block">
+                    {isAr ? "التصنيف" : "Category"}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {categoriesList.map(cat => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={cn(
+                          "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all",
+                          selectedCategory === cat.id
+                            ? "bg-primary text-white border-primary shadow-xs"
+                            : "bg-white text-charcoal border-primary/15"
+                        )}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section: Price Range */}
+                <div>
+                  <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider mb-2.5 block">
+                    {isAr ? `السعر (${currency})` : `Price Range (${currency})`}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {priceRanges.map(range => (
+                      <button
+                        key={range.id}
+                        type="button"
+                        onClick={() => setSelectedPriceRange(range.id)}
+                        className={cn(
+                          "p-3 rounded-2xl text-xs font-bold text-center border transition-all flex items-center justify-between",
+                          selectedPriceRange === range.id
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-white text-charcoal border-primary/15 hover:border-primary/30"
+                        )}
+                      >
+                        <span>{range.label}</span>
+                        {selectedPriceRange === range.id && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section: Maker & Features */}
+                <div>
+                  <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider mb-2.5 block">
+                    {isAr ? "خيارات الحرفيين والميزات" : "Makers & Features"}
+                  </label>
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                      className={cn(
+                        "w-full p-3.5 rounded-2xl border transition-all flex items-center justify-between",
+                        showVerifiedOnly
+                          ? "bg-accent/10 border-accent text-accent font-bold"
+                          : "bg-white border-primary/15 text-charcoal hover:border-primary/30"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-accent" />
+                        <span className="text-xs font-semibold">
+                          {dict.home?.artisans_tab || (isAr ? "حرفيون موثقون فقط" : "Verified Artisans Only")}
+                        </span>
+                      </div>
+                      <span className={cn(
+                        "w-5 h-5 rounded-full border flex items-center justify-center text-xs transition-colors",
+                        showVerifiedOnly ? "bg-accent border-accent text-white" : "border-primary/20"
+                      )}>
+                        {showVerifiedOnly && "✓"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomizableOnly(!showCustomizableOnly)}
+                      className={cn(
+                        "w-full p-3.5 rounded-2xl border transition-all flex items-center justify-between",
+                        showCustomizableOnly
+                          ? "bg-accent/10 border-accent text-accent font-bold"
+                          : "bg-white border-primary/15 text-charcoal hover:border-primary/30"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Sparkles className="w-4 h-4 text-accent" />
+                        <span className="text-xs font-semibold">
+                          {isAr ? "قطع قابلة للتخصيص" : "Personalizable Items"}
+                        </span>
+                      </div>
+                      <span className={cn(
+                        "w-5 h-5 rounded-full border flex items-center justify-center text-xs transition-colors",
+                        showCustomizableOnly ? "bg-accent border-accent text-white" : "border-primary/20"
+                      )}>
+                        {showCustomizableOnly && "✓"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sticky Drawer Footer: Apply / View Count */}
+              <div className="p-4 border-t border-primary/10 bg-cream/90 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-full py-3.5 bg-primary text-white rounded-2xl text-sm font-bold shadow-lg hover:bg-primary-light active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                >
+                  <span>
+                    {isAr 
+                      ? `عرض ${filteredProducts.length} من المنتجات` 
+                      : `Show ${filteredProducts.length} ${filteredProducts.length === 1 ? (dict.common?.treasure_single || "Product") : (dict.common?.treasure_plural || "Products")}`}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

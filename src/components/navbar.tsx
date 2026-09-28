@@ -162,13 +162,23 @@ export function Navbar({ dict }: { dict?: any }) {
   }, [searchResults]);
 
   const navCategories = useMemo(() => [
-    { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-    { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
-    { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
-    { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-    { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
-    { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-    { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
+    { id: "gifts", label: d.common?.categories_list?.["gifts"] || d.home?.categories_list?.["gifts"] || "Gifts" },
+    { id: "home-and-living", label: d.common?.categories_list?.["home-and-living"] || d.home?.categories_list?.["home-and-living"] || "Home & Living" },
+    { id: "jewelry", label: d.common?.categories_list?.["jewelry"] || d.home?.categories_list?.["jewelry"] || "Jewelry" },
+    { id: "clothing", label: d.common?.categories_list?.["clothing"] || d.home?.categories_list?.["clothing"] || "Clothing" },
+    { id: "bags-and-purses", label: d.common?.categories_list?.["bags-and-purses"] || d.home?.categories_list?.["bags-and-purses"] || "Bags & Purses" },
+    { id: "accessories", label: d.common?.categories_list?.["accessories"] || d.home?.categories_list?.["accessories"] || "Accessories" },
+    { id: "art-and-collectibles", label: d.common?.categories_list?.["art-and-collectibles"] || d.home?.categories_list?.["art-and-collectibles"] || "Art & Collectibles" },
+    { id: "weddings", label: d.common?.categories_list?.["weddings"] || d.home?.categories_list?.["weddings"] || "Weddings" },
+    { id: "bath-and-beauty", label: d.common?.categories_list?.["bath-and-beauty"] || d.home?.categories_list?.["bath-and-beauty"] || "Bath & Beauty" },
+    { id: "craft-supplies-and-tools", label: d.common?.categories_list?.["craft-supplies-and-tools"] || d.home?.categories_list?.["craft-supplies-and-tools"] || "Craft Supplies & Tools" },
+    { id: "kids-and-baby", label: d.common?.categories_list?.["kids-and-baby"] || d.home?.categories_list?.["kids-and-baby"] || "Kids & Baby" },
+    { id: "paper-and-party-supplies", label: d.common?.categories_list?.["paper-and-party-supplies"] || d.home?.categories_list?.["paper-and-party-supplies"] || "Paper & Party Supplies" },
+    { id: "pet-supplies", label: d.common?.categories_list?.["pet-supplies"] || d.home?.categories_list?.["pet-supplies"] || "Pet Supplies" },
+    { id: "shoes", label: d.common?.categories_list?.["shoes"] || d.home?.categories_list?.["shoes"] || "Shoes" },
+    { id: "toys-and-games", label: d.common?.categories_list?.["toys-and-games"] || d.home?.categories_list?.["toys-and-games"] || "Toys & Games" },
+    { id: "books-movies-and-music", label: d.common?.categories_list?.["books-movies-and-music"] || d.home?.categories_list?.["books-movies-and-music"] || "Books, Movies & Music" },
+    { id: "electronics-and-accessories", label: d.common?.categories_list?.["electronics-and-accessories"] || d.home?.categories_list?.["electronics-and-accessories"] || "Electronics & Accessories" },
   ], [d]);
 
   useEffect(() => {
@@ -912,15 +922,7 @@ export function Navbar({ dict }: { dict?: any }) {
             <div className="space-y-4">
               <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.categories}</p>
               <div className="grid grid-cols-1 gap-2">
-                {[
-                  { id: "gift-boxes-sets", label: d.common.categories_list?.["gift-boxes-sets"] || d.common.gift_sets },
-                  { id: "jewelry", label: d.common.categories_list?.jewelry || d.common.jewelry },
-                  { id: "ceramics", label: d.common.categories_list?.ceramics || d.common.ceramics },
-                  { id: "woodwork", label: d.common.categories_list?.woodwork || d.common.woodwork },
-                  { id: "fashion", label: d.common.categories_list?.fashion || d.common.fashion },
-                  { id: "textiles", label: d.common.categories_list?.textiles || d.common.textiles },
-                  { id: "art-collectibles", label: d.common.categories_list?.["art-collectibles"] || d.common.art_collectibles }
-                ].map((cat) => {
+                {navCategories.map((cat) => {
                   const isActive = pathname.includes(`/category/${cat.id}`);
                   return (
                     <Link

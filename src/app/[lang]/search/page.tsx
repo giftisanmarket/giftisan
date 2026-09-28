@@ -83,7 +83,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Navbar dict={dict} />
-      <div className="pt-20">
+      <div>
         <Suspense fallback={<div className="container mx-auto px-4 py-20 text-center font-heading font-bold text-primary">{dict.home.searching_vaults}</div>}>
           <SearchClient query={query} initialProducts={products} dict={dict} />
         </Suspense>

@@ -184,7 +184,7 @@ export function ArtisanBioView({ artisan, lang }: ArtisanBioViewProps) {
           )}
 
           {artisan.bio && (
-            <p className="text-xs text-charcoal/80 max-w-sm mt-2.5 leading-relaxed font-medium px-2">
+            <p className="text-xs text-charcoal/80 max-w-sm mt-2.5 leading-relaxed font-medium px-2 whitespace-pre-wrap">
               {artisan.bio}
             </p>
           )}

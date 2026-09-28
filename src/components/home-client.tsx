@@ -1,39 +1,54 @@
 "use client";
 
+import { useEffect } from "react";
+import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { ProductCard } from "@/components/home/product-card";
-import Link from "next/link";
-import {
-  ArrowRight,
-  Leaf,
-  Trophy,
-  Palette
-} from "lucide-react";
+import { CategoryStoryStrip } from "@/components/home/category-story-strip";
+import { CuratedPicksGrid } from "@/components/home/curated-picks-grid";
+import { ProductShelfRow, ShelfProduct } from "@/components/home/product-shelf-row";
+import { EditorialSplitBanner } from "@/components/home/editorial-split-banner";
+import { VisualGiftCategories } from "@/components/home/visual-gift-categories";
+import { ArtisanSpotlightSection } from "@/components/home/artisan-spotlight-section";
+import { ArtisanRecruitmentBanner } from "@/components/home/artisan-recruitment-banner";
+import { MissionStatementBar } from "@/components/home/mission-statement-bar";
 import { BespokeImage } from "@/components/bespoke-image";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { useEffect } from "react";
 
 interface HomeClientProps {
-  featuredProducts?: any[];
-  products?: any[]; // backwards compatibility fallback
-  personalizedProducts?: any[];
-  textileFashionProducts?: any[];
-  homeDecorProducts?: any[];
+  trendingProducts?: ShelfProduct[];
+  bagProducts?: ShelfProduct[];
+  homeDecorProducts?: ShelfProduct[];
+  jewelryProducts?: ShelfProduct[];
+  crochetApparelProducts?: ShelfProduct[];
+  giftSetProducts?: ShelfProduct[];
+  featuredArtisans?: any[];
   artisanCount?: number;
   dict: any;
+  // Backward compatibility fallbacks
+  featuredProducts?: ShelfProduct[];
+  products?: ShelfProduct[];
+  personalizedProducts?: ShelfProduct[];
+  textileFashionProducts?: ShelfProduct[];
 }
 
 export default function HomeClient({
+  trendingProducts,
+  bagProducts = [],
+  homeDecorProducts = [],
+  jewelryProducts = [],
+  crochetApparelProducts = [],
+  giftSetProducts = [],
+  featuredArtisans = [],
+  artisanCount,
+  dict,
   featuredProducts,
   products,
-  personalizedProducts = [],
-  textileFashionProducts = [],
-  homeDecorProducts = [],
-  artisanCount,
-  dict
 }: HomeClientProps) {
-  const mainProducts = featuredProducts || products || [];
+  const isArabic = dict?.common?.home === "الرئيسية" || dict?.common?.search?.includes("ابحث");
+
+  // Fallback for trending products if legacy props were passed
+  const mainTrending = trendingProducts || featuredProducts || products || [];
 
   useEffect(() => {
     if (window.location.hash === "#newsletter") {
@@ -47,198 +62,214 @@ export default function HomeClient({
   }, []);
 
   return (
-    <main className="min-h-screen bg-cream relative overflow-hidden">
-      {/* Decorative Grid Background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b08_1px,transparent_1px),linear-gradient(to_bottom,#064e3b08_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
+    <main className="min-h-screen bg-cream relative overflow-hidden selection:bg-primary/20">
+      {/* Subtle Artisanal Grid Texture */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#064e3b06_1px,transparent_1px),linear-gradient(to_bottom,#064e3b06_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none -z-10" />
 
+      {/* Main Header / Sticky Navbar */}
       <Navbar dict={dict} />
+
+      {/* Giftisan Brand Hero */}
       <Hero artisanCount={artisanCount} dict={dict} />
 
-      {/* 1. Featured Products / Treasures of the Week */}
-      {mainProducts.length > 0 && (
-        <section className="py-10 md:py-16 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
-                {dict.home.treasures_week || "Products of the Week"}
-              </h2>
-              <p className="text-charcoal/60 text-xs md:text-sm mt-1">
-                {dict.home.treasures_desc || "Curated by our expert artisans for the perfect gift."}
-              </p>
-            </div>
-            <Link
-              href="/products"
-              className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-1.5 group text-xs md:text-sm shrink-0 underline-offset-4 decoration-accent decoration-2"
-            >
-              <span>{dict.home.shop_all_collections || "Shop All Collections"}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-            </Link>
-          </div>
+      {/* 1. Category Story Bubbles Strip — right below hero */}
+      <CategoryStoryStrip dict={dict} />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {mainProducts.map((product) => (
-              <ProductCard key={product.id} product={product} dict={dict} />
-            ))}
-          </div>
-        </section>
+      {/* 2. Curated Visual Picks ("Picks for you" - 5 Real Artisan Products) */}
+      <CuratedPicksGrid
+        dict={dict}
+        bagProduct={bagProducts[0]}
+        woodworkProduct={homeDecorProducts[0]}
+        jewelryProduct={jewelryProducts[0]}
+        apparelProduct={crochetApparelProducts[0]}
+        giftSetProduct={giftSetProducts[0]}
+      />
+
+      {/* 2. Primary Product Shelf ("Picks inspired by your shopping" - Trending Finds) */}
+      {mainTrending.length > 0 && (
+        <ProductShelfRow
+          title={isArabic ? "مختارات مستوحاة من اهتماماتك" : "Picks inspired by your shopping"}
+          subtitle={
+            isArabic
+              ? "قطع فريدة يدوية الصنع تحظى بإعجاب المتسوقين الآن"
+              : "Unique handmade creations shoppers are loving right now"
+          }
+          viewAllHref="/products"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={mainTrending}
+          dict={dict}
+        />
       )}
 
-      {/* 2. Personalized & Bespoke Gifts */}
-      {personalizedProducts.length > 0 && (
-        <section className="py-10 md:py-16 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 border-t border-primary/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
-                {dict.home.personalized_section_title || "Personalized & Bespoke Gifts"}
-              </h2>
-              <p className="text-charcoal/60 text-xs md:text-sm mt-1">
-                {dict.home.personalized_section_desc || "One-of-a-kind treasures custom-made with heart for you and your loved ones."}
-              </p>
-            </div>
-            <Link
-              href="/search?q=personalized"
-              className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-1.5 group text-xs md:text-sm shrink-0 underline-offset-4 decoration-accent decoration-2"
-            >
-              <span>{dict.home.shop_personalized || "Shop Personalized"}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-            </Link>
-          </div>
+      {/* 3. Editorial Split Banner ("Gifting feels more special with handcrafted picks" - Real Products) */}
+      <EditorialSplitBanner
+        dict={dict}
+        featuredProduct1={homeDecorProducts[1] || homeDecorProducts[0]}
+        featuredProduct2={bagProducts[1] || bagProducts[0]}
+      />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {personalizedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} dict={dict} />
-            ))}
-          </div>
-        </section>
+      {/* 4. Category Shelf: Handcrafted Bags & Leather Goods */}
+      {bagProducts.length > 0 && (
+        <ProductShelfRow
+          title={isArabic ? "حقائب ومصنوعات جلدية يدوية" : "Handcrafted Bags & Leather Goods"}
+          subtitle={
+            isArabic
+              ? "حقائب جلدية أصلية، كروشيه فاخر، وإكسسوارات صنعت لتدوم"
+              : "Authentic leather totes, fine crochet purses, and durable accessories"
+          }
+          viewAllHref="/category/bags-and-purses"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={bagProducts}
+          dict={dict}
+          defaultBadge={isArabic ? "صناعة يدوية" : "Handmade"}
+        />
       )}
 
-      {/* 3. Handcrafted Textiles & Wearables */}
-      {textileFashionProducts.length > 0 && (
-        <section className="py-10 md:py-16 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 border-t border-primary/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
-                {dict.home.textiles_section_title || "Handcrafted Textiles & Wearables"}
-              </h2>
-              <p className="text-charcoal/60 text-xs md:text-sm mt-1">
-                {dict.home.textiles_section_desc || "Authentic fabrics, woven heritage, and contemporary Egyptian fashion."}
-              </p>
-            </div>
-            <Link
-              href="/category/textiles"
-              className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-1.5 group text-xs md:text-sm shrink-0 underline-offset-4 decoration-accent decoration-2"
-            >
-              <span>{dict.home.shop_textiles || "Shop Textiles & Fashion"}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {textileFashionProducts.map((product) => (
-              <ProductCard key={product.id} product={product} dict={dict} />
-            ))}
-          </div>
-        </section>
+      {/* 5. Category Shelf: Bespoke Jewelry & Adornments */}
+      {jewelryProducts.length > 0 && (
+        <ProductShelfRow
+          title={isArabic ? "مجوهرات وحلي يدوية الصنع" : "Bespoke Jewelry & Keepsakes"}
+          subtitle={
+            isArabic
+              ? "فضة، أحجار كريمة، وقطع فنية مصممة بلمسة مصرية فريدة"
+              : "Handcrafted silver, semi-precious stones, and artisan jewelry"
+          }
+          viewAllHref="/category/jewelry"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={jewelryProducts}
+          dict={dict}
+        />
       )}
 
-      {/* 4. Artisan Woodwork & Home Collectibles */}
+      {/* 6. Category Shelf: Artisan Woodwork & Home Collectibles */}
       {homeDecorProducts.length > 0 && (
-        <section className="py-10 md:py-16 max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 border-t border-primary/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary italic serif">
-                {dict.home.homedecor_section_title || "Artisan Woodwork & Home Collectibles"}
-              </h2>
-              <p className="text-charcoal/60 text-xs md:text-sm mt-1">
-                {dict.home.homedecor_section_desc || "Transform your space with timeless carved wood and fine handmade decor."}
-              </p>
-            </div>
-            <Link
-              href="/category/woodwork"
-              className="text-primary font-bold hover:text-accent transition-colors flex items-center gap-1.5 group text-xs md:text-sm shrink-0 underline-offset-4 decoration-accent decoration-2"
-            >
-              <span>{dict.home.shop_homedecor || "Shop Home & Living"}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {homeDecorProducts.map((product) => (
-              <ProductCard key={product.id} product={product} dict={dict} />
-            ))}
-          </div>
-        </section>
+        <ProductShelfRow
+          title={isArabic ? "أعمال خشبية وديكورات فنية" : "Artisan Woodwork & Home Collectibles"}
+          subtitle={
+            isArabic
+              ? "خشب طبيعي منحوت يدويًا، صواني تراثية، ومقتنيات للمنزل العصري"
+              : "Carved natural wood, handcrafted trays, and authentic home accents"
+          }
+          viewAllHref="/category/home-and-living"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={homeDecorProducts}
+          dict={dict}
+        />
       )}
 
-      {/* Trust Bar */}
-      <section className="bg-primary/5 py-14 md:py-16 border-y border-primary/5 relative z-10 mt-8">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 grid md:grid-cols-3 gap-8 md:gap-12">
-          {[
-            {
-              title: dict.home.direct_artisans || "Direct from Artisans",
-              desc: dict.home.direct_artisans_desc || "Support independent local creators. Every purchase goes directly to the artist behind the work.",
-              icon: Palette
-            },
-            {
-              title: dict.home.curated_excellence || "Curated Excellence",
-              desc: dict.home.curated_excellence_desc || "Every item is vetted for quality and originality. We only feature the best in handmade crafts.",
-              icon: Trophy
-            },
-            {
-              title: dict.home.sustainable_gifting || "Sustainable Gifting",
-              desc: dict.home.sustainable_gifting_desc || "Eco-friendly packaging and ethical sourcing. Beautiful gifts that don't cost the earth.",
-              icon: Leaf
-            },
-          ].map((item) => (
-            <div key={item.title} className="text-center md:text-start space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-accent shadow-sm mx-auto md:mx-0">
-                <item.icon className="w-6 h-6" />
-              </div>
-              <h3 className="font-heading font-bold text-primary text-lg md:text-xl">{item.title}</h3>
-              <p className="text-charcoal/60 leading-relaxed text-xs md:text-sm">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* 7. Curated Visual Exploration Strip ("Gifts as special as they are" - Real Products with 🔍 Search Pills) */}
+      <VisualGiftCategories
+        dict={dict}
+        herProduct={bagProducts[2] || bagProducts[0]}
+        himProduct={homeDecorProducts[2] || homeDecorProducts[0]}
+        kidsProduct={
+          giftSetProducts.find((p) => p.category === "toys-and-games") ||
+          giftSetProducts[1] ||
+          giftSetProducts[0]
+        }
+        decorProduct={homeDecorProducts[3] || homeDecorProducts[0]}
+        accessoriesProduct={jewelryProducts[1] || jewelryProducts[0]}
+      />
 
-      {/* Newsletter */}
-      <section id="newsletter" className="py-20 md:py-24 bg-primary text-white overflow-hidden relative border-t border-white/10">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 relative z-10 text-center space-y-6 md:space-y-8">
-          <h2 className="text-3xl md:text-5xl font-heading font-bold">{dict.home.waitlist_title}</h2>
-          <p className="text-white/70 max-w-xl mx-auto text-base md:text-lg text-balance">
-            {dict.home.waitlist_desc}
+      {/* 8. Category Shelf: Handmade Crochet & Apparel */}
+      {crochetApparelProducts.length > 0 && (
+        <ProductShelfRow
+          title={isArabic ? "كروشية وأزياء يدوية الصنع" : "Handmade Crochet, Knits & Apparel"}
+          subtitle={
+            isArabic
+              ? "أزياء ومنسوجات مريحة صنعت بحب بواسطة أمهر الحرفيات"
+              : "Cozy knitwear, handcrafted wraps, and mindful everyday apparel"
+          }
+          viewAllHref="/category/clothing"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={crochetApparelProducts}
+          dict={dict}
+        />
+      )}
+
+      {/* 9. Category Shelf: Curated Gift Sets & Celebrations */}
+      {giftSetProducts.length > 0 && (
+        <ProductShelfRow
+          title={isArabic ? "صناديق هدايا ومجموعات راقية" : "Curated Gift Sets & Celebrations"}
+          subtitle={
+            isArabic
+              ? "باقات وتنسيقات جاهزة للإهداء ومعدة لإسعاد أحبائك"
+              : "Thoughtfully assembled bundles and keepsake boxes ready to delight"
+          }
+          viewAllHref="/gifts"
+          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          products={giftSetProducts}
+          dict={dict}
+        />
+      )}
+
+      {/* 10. Maker Spotlight ("Meet the Makers" / Real Egyptian Studios) */}
+      <ArtisanSpotlightSection artisans={featuredArtisans} dict={dict} />
+
+      {/* 11. Seller Recruitment Banner ("Sell on Giftisan" / 0% Platform Fees) */}
+      <ArtisanRecruitmentBanner dict={dict} />
+
+      {/* 12. Mission Statement & Value Pillars Bar (Etsy Signature Human Commerce Section) */}
+      <MissionStatementBar dict={dict} />
+
+      {/* 13. Newsletter Club */}
+      <section
+        id="newsletter"
+        className="py-16 md:py-20 bg-primary text-white overflow-hidden relative border-t border-white/10"
+      >
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 relative z-10 text-center space-y-5 md:space-y-6">
+          <h2 className="text-2xl md:text-4xl font-heading font-bold">
+            {dict?.home?.waitlist_title || (isArabic ? "انضم إلى مجتمع جيفتيزان" : "Join the Giftisan Circle")}
+          </h2>
+          <p className="text-white/75 max-w-xl mx-auto text-xs md:text-base text-balance leading-relaxed">
+            {dict?.home?.waitlist_desc ||
+              (isArabic
+                ? "اشترك لتصلك أحدث الإبداعات اليدوية وقصص الحرفيين والعروض الخاصة أولاً بأول."
+                : "Subscribe to discover new collection drops, authentic artisan stories, and exclusive offers delivered to your inbox.")}
           </p>
-          <NewsletterForm dict={dict} />
+          <div className="pt-2">
+            <NewsletterForm dict={dict} />
+          </div>
         </div>
 
-        {/* Background blobs */}
-        <div className="absolute top-0 end-0 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 start-0 w-96 h-96 bg-primary-light/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
+        {/* Subtle Ambient Blobs */}
+        <div className="absolute top-0 end-0 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 start-0 w-96 h-96 bg-primary-light/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-cream border-t border-primary/10">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 text-center">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="relative w-8 h-8 overflow-hidden rounded-lg">
+      {/* 14. Minimal Footer */}
+      <footer className="py-8 bg-cream border-t border-primary/10">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start">
+          <div className="flex items-center gap-2">
+            <div className="relative w-6 h-6 overflow-hidden rounded-md">
               <BespokeImage
                 src="/icon.png"
                 alt="Giftisan Logo"
                 fill
                 className="object-cover"
-                sizes="32px"
+                sizes="24px"
               />
             </div>
-            <span className="text-xl font-heading font-bold text-primary">Giftisan</span>
+            <span className="text-base font-heading font-bold text-primary">Giftisan</span>
+            <span className="text-charcoal/40 text-xs ps-2">
+              © {new Date().getFullYear()} Giftisan.{" "}
+              {dict?.home?.proudly_handcrafted || "Proudly Handcrafted in Egypt"}.
+            </span>
           </div>
-          <p className="text-charcoal/40 text-sm mb-4">
-            © 2026 Giftisan. {dict.home.proudly_handcrafted}. {dict.home.rights_reserved}
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-4 md:gap-x-8 gap-y-3">
-            <Link href="/terms" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.terms || 'Terms'}</Link>
-            <Link href="/shipping" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.shipping || 'Shipping'}</Link>
-            <Link href="/refund" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.refund || 'Refund'}</Link>
-            <Link href="/privacy" className="text-[9px] md:text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] hover:text-primary transition-colors whitespace-nowrap">{dict.common.privacy || 'Privacy'}</Link>
+
+          <div className="flex items-center gap-4 text-xs text-charcoal/50">
+            <Link href="/terms" className="hover:text-primary transition-colors">
+              {dict?.common?.terms || "Terms"}
+            </Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">
+              {dict?.common?.privacy || "Privacy"}
+            </Link>
+            <Link href="/shipping" className="hover:text-primary transition-colors">
+              {dict?.common?.shipping || "Shipping"}
+            </Link>
+            <Link href="/refund" className="hover:text-primary transition-colors">
+              {dict?.common?.refund || "Refund"}
+            </Link>
           </div>
         </div>
       </footer>

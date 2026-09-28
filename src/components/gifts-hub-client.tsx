@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import {
   Heart,
   Sparkles,
@@ -48,6 +48,7 @@ export function GiftsHubClient({ initialProducts, dict }: GiftsHubClientProps) {
   const [openDropdown, setOpenDropdown] = useState<"price" | "sort" | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
+  const dragControls = useDragControls();
 
   // Measure exact bottom of sticky navbar to ensure flawless alignment without overlap
   useEffect(() => {
@@ -987,17 +988,38 @@ export function GiftsHubClient({ initialProducts, dict }: GiftsHubClientProps) {
 
             {/* Bottom Sheet Drawer */}
             <motion.div
+              drag="y"
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.05, bottom: 0.7 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 60 || info.velocity.y > 300) {
+                  setIsMobileDrawerOpen(false);
+                }
+              }}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 280 }}
               className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-cream rounded-t-[28px] shadow-2xl flex flex-col overflow-hidden border-t border-primary/10"
             >
-              {/* Drag Handle Pill */}
-              <div className="w-12 h-1 bg-charcoal/20 rounded-full mx-auto mt-3 mb-1" />
+              {/* Drag Handle Pill Area */}
+              <div 
+                onPointerDown={(e) => dragControls.start(e)}
+                className="w-full pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none flex flex-col items-center justify-center select-none"
+              >
+                <div className="w-12 h-1.5 bg-charcoal/20 hover:bg-charcoal/30 rounded-full transition-colors" />
+              </div>
 
               {/* Drawer Header */}
-              <div className="px-5 py-3 border-b border-primary/10 flex items-center justify-between">
+              <div 
+                onPointerDown={(e) => {
+                  if ((e.target as HTMLElement).closest("button")) return;
+                  dragControls.start(e);
+                }}
+                className="px-5 py-3 border-b border-primary/10 flex items-center justify-between cursor-grab active:cursor-grabbing touch-none select-none"
+              >
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-primary" />
                   <h3 className="text-base font-heading font-bold text-primary">

@@ -211,7 +211,7 @@ export function CategoriesClient({ categories, dict }: { categories: DepartmentD
                       {cat.subcategories && cat.subcategories.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {cat.subcategories.map(sub => {
-                            const subSlug = sub.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-");
+                            const subSlug = sub.toLowerCase().replace(/ & /g, "-").replace(/[',().]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
                             const subLabel = dict.common?.categories_list?.[subSlug] || dict.home?.categories_list?.[subSlug] || sub;
                             return (
                               <span 

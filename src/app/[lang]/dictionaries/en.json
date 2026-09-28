@@ -303,7 +303,23 @@
       "wedding-clothing": "Clothing",
       "wedding-jewelry": "Jewelry",
       "invitations-paper": "Invitations & Paper",
-      "wedding-shoes": "Shoes"
+      "wedding-shoes": "Shoes",
+      "makeup-and-cosmetics": "Makeup & Cosmetics",
+      "dolls-and-miniatures": "Dolls & Miniatures",
+      "keepsakes": "Keepsakes",
+      "personalized-gifts": "Personalized Gifts",
+      "gift-boxes-sets": "Gift Boxes & Sets",
+      "wooden-toys": "Wooden Toys",
+      "puzzles": "Puzzles",
+      "gifts-mementos": "Gifts & Mementos",
+      "decorations": "Decorations",
+      "home-hobby": "Home & Hobby",
+      "sewing-fiber": "Sewing & Fiber",
+      "visual-arts": "Visual Arts",
+      "paper-party-kids": "Paper, Party & Kids",
+      "sculpting-forming": "Sculpting & Forming",
+      "party-supplies": "Party Supplies",
+      "leatherwork": "Handcrafted Leather Goods"
     },
     "find_treasure": "Find a Product",
     "your_studio_hub": "Your Studio Hub",
@@ -351,15 +367,14 @@
     "vintage_heritage_desc": "Timeless finds, restored antiques, and heritage pieces with a story.",
     "gifts_sets_desc": "Curated collections and beautifully packaged gift boxes ready to surprise.",
     "trending_tags": {
-      "ceramics": "Ceramics",
-      "jewelry": "Jewelry",
-      "bespoke_decor": "Bespoke Decor",
-      "wedding": "Wedding",
-      "vintage": "Vintage",
-      "handmade": "Handmade",
-      "gift_guides": "Gift Guides",
-      "art_prints": "Art Prints",
-      "minimalist": "Minimalist"
+      "tote_bags": "Tote Bags",
+      "home_decor": "Home Decor",
+      "personalized": "Personalized Gifts",
+      "crochet": "Crochet",
+      "handbags": "Handbags",
+      "lighting": "Lamps & Lighting",
+      "accessories": "Accessories",
+      "jewelry": "Handmade Jewelry"
     }
   },
   "admin": {

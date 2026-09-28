@@ -292,38 +292,198 @@ export async function resetPasswordAction(token: string, password: any) {
   }
 }
 
+const SEARCH_SYNONYMS: Record<string, { categories?: string[]; subcategories?: string[]; custom?: boolean; extraKeywords?: string[] }> = {
+  // Bags
+  "شنط": { categories: ["bags-and-purses"], subcategories: ["handbags", "totes", "pouches-coin-purses"] },
+  "شنطة": { categories: ["bags-and-purses"], subcategories: ["handbags", "totes", "pouches-coin-purses"] },
+  "شنط يد": { categories: ["bags-and-purses"], subcategories: ["handbags"] },
+  "حقائب": { categories: ["bags-and-purses"] },
+  "حقيبة": { categories: ["bags-and-purses"] },
+  "توت باج": { subcategories: ["totes"], extraKeywords: ["tote"] },
+  "tote": { subcategories: ["totes"] },
+  "totes": { subcategories: ["totes"] },
+  "tote bags": { subcategories: ["totes"] },
+  "bags": { categories: ["bags-and-purses"] },
+  "bag": { categories: ["bags-and-purses"] },
+  "handbag": { categories: ["bags-and-purses"], subcategories: ["handbags"] },
+  "handbags": { categories: ["bags-and-purses"], subcategories: ["handbags"] },
+
+  // Home Decor
+  "ديكور": { categories: ["home-and-living"], subcategories: ["home-decor"] },
+  "ديكور المنزل": { categories: ["home-and-living"], subcategories: ["home-decor"] },
+  "decor": { categories: ["home-and-living"], subcategories: ["home-decor"] },
+  "home decor": { categories: ["home-and-living"], subcategories: ["home-decor"] },
+
+  // Lighting
+  "إضاءة": { subcategories: ["lighting"], extraKeywords: ["اباجورة", "أباجورة", "اباجوره", "lamp"] },
+  "اضاءة": { subcategories: ["lighting"], extraKeywords: ["اباجورة", "أباجورة", "اباجوره", "lamp"] },
+  "أباجورات": { subcategories: ["lighting"], extraKeywords: ["اباجورة", "أباجورة"] },
+  "اباجورات": { subcategories: ["lighting"], extraKeywords: ["اباجورة", "أباجورة"] },
+  "أباجورات وإضاءة": { subcategories: ["lighting"], extraKeywords: ["اباجورة", "أباجورة", "اضاءة"] },
+  "lighting": { subcategories: ["lighting"] },
+  "lamps": { subcategories: ["lighting"] },
+  "lamps & lighting": { subcategories: ["lighting"] },
+
+  // Personalized & Gifts
+  "هدايا بالاسم": { custom: true, categories: ["gifts-sets"], extraKeywords: ["بإسم", "باسم", "حرف"] },
+  "هدايا": { categories: ["gifts-sets", "gifts-mementos"] },
+  "هدية": { categories: ["gifts-sets", "gifts-mementos"] },
+  "personalized": { custom: true, categories: ["gifts-sets"] },
+  "personalized gifts": { custom: true, categories: ["gifts-sets"] },
+
+  // Jewelry
+  "مجوهرات": { categories: ["jewelry"] },
+  "مجوهرات يدوية": { categories: ["jewelry"], extraKeywords: ["pearl", "عقد", "سلسلة", "اسورة"] },
+  "jewelry": { categories: ["jewelry"] },
+  "handmade jewelry": { categories: ["jewelry"] },
+
+  // Accessories
+  "إكسسوارات": { categories: ["accessories"] },
+  "اكسسوارات": { categories: ["accessories"] },
+  "accessories": { categories: ["accessories"] },
+
+  // Crochet
+  "كروشيه": { extraKeywords: ["crochet"] },
+  "crochet": { extraKeywords: ["كروشيه"] },
+
+  // Toys & Dolls
+  "دمى": { categories: ["toys-and-games"], subcategories: ["dolls-and-miniatures"] },
+  "ألعاب": { categories: ["toys-and-games"] },
+  "العاب": { categories: ["toys-and-games"] },
+  "dolls": { subcategories: ["dolls-and-miniatures"] },
+  "toys": { categories: ["toys-and-games"] },
+
+  // Ceramics
+  "سيراميك": { categories: ["ceramics"] },
+  "خزف": { categories: ["ceramics"] },
+  "ceramics": { categories: ["ceramics"] }
+};
+
 export async function searchProducts(query: string) {
   try {
-    const products = await prisma.product.findMany({
-      where: {
-        status: "APPROVED",
-        artisan: {
-          status: "APPROVED"
+    const q = (query || "").trim();
+
+    if (!q) {
+      return await prisma.product.findMany({
+        where: {
+          status: "APPROVED",
+          artisan: {
+            status: "APPROVED"
+          }
         },
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
-          { category: { contains: query, mode: "insensitive" } },
-          {
-            artisan: {
-              studioName: { contains: query, mode: "insensitive" },
+        include: {
+          artisan: {
+            include: {
+              user: true
             }
-          }
-        ]
-      },
-      include: {
-        artisan: {
-          include: {
-            user: true
-          }
+          },
+          reviews: true,
+          variants: true
         },
-        reviews: true,
-        variants: true
-      },
-      orderBy: {
-        createdAt: "desc"
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+    }
+
+    const normalizedQ = q.toLowerCase();
+    const orConditions: any[] = [
+      { name: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+      { category: { contains: q, mode: "insensitive" } },
+      { subcategory: { contains: q, mode: "insensitive" } },
+      {
+        artisan: {
+          studioName: { contains: q, mode: "insensitive" },
+        }
       }
-    });
+    ];
+
+    // Arabic letter normalizations (alif, taa marbouta, yaa)
+    const normalizedArabic = q
+      .replace(/[أإآ]/g, "ا")
+      .replace(/ة/g, "ه")
+      .replace(/ى/g, "ي");
+
+    if (normalizedArabic !== q) {
+      orConditions.push(
+        { name: { contains: normalizedArabic, mode: "insensitive" } },
+        { description: { contains: normalizedArabic, mode: "insensitive" } }
+      );
+    }
+
+    // Synonym, category & subcategory resolution
+    for (const [key, mapping] of Object.entries(SEARCH_SYNONYMS)) {
+      if (normalizedQ === key || normalizedQ.includes(key) || key.includes(normalizedQ)) {
+        if (mapping.categories?.length) {
+          orConditions.push({ category: { in: mapping.categories } });
+        }
+        if (mapping.subcategories?.length) {
+          orConditions.push({ subcategory: { in: mapping.subcategories } });
+        }
+        if (mapping.custom) {
+          orConditions.push({ canPersonalize: true });
+        }
+        if (mapping.extraKeywords?.length) {
+          for (const kw of mapping.extraKeywords) {
+            orConditions.push({ name: { contains: kw, mode: "insensitive" } });
+            orConditions.push({ description: { contains: kw, mode: "insensitive" } });
+          }
+        }
+      }
+    }
+
+    let products;
+    try {
+      products = await prisma.product.findMany({
+        where: {
+          status: "APPROVED",
+          artisan: {
+            status: "APPROVED"
+          },
+          OR: orConditions
+        },
+        include: {
+          artisan: {
+            include: {
+              user: true
+            }
+          },
+          reviews: true,
+          variants: true
+        },
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+    } catch (dbErr: any) {
+      if (dbErr?.message?.includes("subcategory")) {
+        const fallbackOr = orConditions.filter((c: any) => !("subcategory" in c));
+        products = await prisma.product.findMany({
+          where: {
+            status: "APPROVED",
+            artisan: {
+              status: "APPROVED"
+            },
+            OR: fallbackOr
+          },
+          include: {
+            artisan: {
+              include: {
+                user: true
+              }
+            },
+            reviews: true,
+            variants: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        });
+      } else {
+        throw dbErr;
+      }
+    }
 
     return products;
   } catch (error) {

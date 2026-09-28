@@ -378,7 +378,7 @@ export function Navbar({ dict }: { dict?: any }) {
                   <div className="space-y-2 md:space-y-3">
                     <p className="text-[9px] md:text-[10px] text-accent font-black uppercase tracking-widest">{d.common.try_trending}</p>
                     <div className="flex flex-wrap justify-center gap-1.5 md:gap-2">
-                      {["gift_guides", "art_prints", "minimalist"].map(tagKey => {
+                      {["tote_bags", "crochet", "home_decor", "personalized"].map(tagKey => {
                         const tagLabel = (d.common.trending_tags?.[tagKey]) || tagKey;
                         return (
                           <button

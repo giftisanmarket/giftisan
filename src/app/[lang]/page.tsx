@@ -67,19 +67,18 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   
   const dict = await getDictionary(lang as any);
 
-  // Fetch categorized product rows concurrently in parallel
+  // Fetch categorized product rows concurrently — matched to actual DB categories
   const [
-    featuredProducts,
-    personalizedProducts,
-    textileFashionProducts,
-    homeDecorProducts,
+    featuredProducts,      // all approved, newest first (hero row)
+    bagProducts,           // bags-and-purses (15 in DB)
+    homeDecorProducts,     // home-and-living (14 in DB)
+    apparelProducts,       // clothing + accessories (13 in DB combined)
+    giftSetProducts,       // gifts-sets + toys-and-games + weddings (7 in DB)
     artisanCount
   ] = await Promise.all([
-    // 1. Top Featured & Best Finds (10 items = 2 complete 5-card rows)
+    // 1. Top Picks — all approved products, newest first (10 items)
     prisma.product.findMany({
-      where: {
-        status: "APPROVED"
-      },
+      where: { status: "APPROVED" },
       select: productSelect,
       take: 10,
       orderBy: [
@@ -88,46 +87,56 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       ]
     }),
 
-    // 2. Personalized & Bespoke Gifts (5 items = 1 full row)
+    // 2. Handcrafted Bags & Accessories (bags-and-purses)
     prisma.product.findMany({
       where: {
         status: "APPROVED",
-        OR: [
-          { canPersonalize: true },
-          { requiresClientImage: true },
-          { category: { contains: "personalized", mode: "insensitive" } }
-        ]
+        category: { in: ["bags-and-purses"], mode: "insensitive" }
       },
       select: productSelect,
-      take: 5,
+      take: 8,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
       ]
     }),
 
-    // 3. Handcrafted Textiles & Wearables (5 items = 1 full row)
+    // 3. Artisan Home & Living (home-and-living)
     prisma.product.findMany({
       where: {
         status: "APPROVED",
-        category: { in: ["fashion", "textiles", "apparel", "wearables"], mode: "insensitive" }
+        category: { in: ["home-and-living", "woodwork", "ceramics", "accessories"], mode: "insensitive" }
       },
       select: productSelect,
-      take: 5,
+      take: 8,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
       ]
     }),
 
-    // 4. Authentic Handcrafted Woodwork (5 items = 1 full row)
+    // 4. Fashion, Clothing & Wearables
     prisma.product.findMany({
       where: {
         status: "APPROVED",
-        category: { equals: "woodwork", mode: "insensitive" }
+        category: { in: ["clothing", "fashion", "textiles", "jewelry"], mode: "insensitive" }
       },
       select: productSelect,
-      take: 5,
+      take: 8,
+      orderBy: [
+        { isFeatured: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    }),
+
+    // 5. Gifts, Toys & Celebrations
+    prisma.product.findMany({
+      where: {
+        status: "APPROVED",
+        category: { in: ["gifts-sets", "toys-and-games", "weddings", "gifts"], mode: "insensitive" }
+      },
+      select: productSelect,
+      take: 8,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
@@ -143,11 +152,13 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   return (
     <HomeClient
       featuredProducts={sanitizeProducts(featuredProducts)}
-      personalizedProducts={sanitizeProducts(personalizedProducts)}
-      textileFashionProducts={sanitizeProducts(textileFashionProducts)}
+      bagProducts={sanitizeProducts(bagProducts)}
       homeDecorProducts={sanitizeProducts(homeDecorProducts)}
+      apparelProducts={sanitizeProducts(apparelProducts)}
+      giftSetProducts={sanitizeProducts(giftSetProducts)}
       artisanCount={artisanCount}
       dict={dict}
     />
   );
 }
+

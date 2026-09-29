@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { useRouter } from "next/navigation";
 import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -230,7 +231,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
   };
 
   return (
-    <main className="min-h-screen bg-cream pb-20 overflow-x-hidden">
+    <main className="min-h-screen bg-cream overflow-x-hidden">
       <Navbar dict={dict} />
 
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-12">
@@ -1075,6 +1076,10 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Footer */}
+      <Footer dict={dict} />
+
       {/* Sticky Mobile Add to Cart Bar */}
       <div className="fixed bottom-0 start-0 end-0 z-40 md:hidden bg-white/95 backdrop-blur-xl border-t border-primary/10 p-3 md:p-4 safe-area-bottom shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
         <div className="flex items-center justify-between gap-3">

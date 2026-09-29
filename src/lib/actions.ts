@@ -356,7 +356,13 @@ const SEARCH_SYNONYMS: Record<string, { categories?: string[]; subcategories?: s
   // Ceramics
   "سيراميك": { categories: ["ceramics"] },
   "خزف": { categories: ["ceramics"] },
-  "ceramics": { categories: ["ceramics"] }
+  "ceramics": { categories: ["ceramics"] },
+
+  // Seasonal: Halloween & Fall
+  "halloween": { categories: ["art-and-collectibles", "clothing", "accessories", "home-and-living"] },
+  "هالوين": { categories: ["art-and-collectibles", "clothing", "accessories", "home-and-living"] },
+  "fall": { categories: ["home-and-living", "clothing", "accessories"] },
+  "خريف": { categories: ["home-and-living", "clothing", "accessories"] }
 };
 
 export async function searchProducts(query: string) {

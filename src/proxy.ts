@@ -92,6 +92,7 @@ export default function proxy(request: NextRequest) {
   const isAllowedInMaintenance = 
     purePathname === '/maintenance' ||
     purePathname.startsWith('/bio') ||
+    purePathname.startsWith('/about') ||
     purePathname.startsWith('/admin') ||
     purePathname.startsWith('/signup') ||
     purePathname.startsWith('/login') ||

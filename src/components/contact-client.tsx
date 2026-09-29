@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { Mail, Send, Sparkles, MessageCircle, HelpCircle, Loader2, CheckCircle2, MapPin } from "lucide-react";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { submitInquiry } from "@/lib/actions";
@@ -190,6 +191,8 @@ export function ContactClient({ dict }: { dict: any }) {
           </div>
         </div>
       </div>
+
+      <Footer dict={dict} />
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Link from "next/link";
 import { Truck, Package, Globe, Clock, ShieldCheck, ChevronRight } from "lucide-react";
 import { getDictionary } from "../dictionaries";
@@ -98,17 +99,7 @@ export default async function ShippingPage({ params }: { params: Promise<{ lang:
         </div>
       </main>
 
-      <footer className="py-12 border-t border-primary/5 mt-20">
-        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] font-bold text-primary/30 uppercase tracking-widest">{dict.shipping.footer_copyright}</p>
-          <div className="flex gap-8">
-            <Link href={`/${lang}`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.shipping.home}</Link>
-            <Link href={`/${lang}/privacy`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.privacy}</Link>
-            <Link href={`/${lang}/refund`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.refund || 'Refund'}</Link>
-            <Link href={`/${lang}/terms`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.terms}</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer dict={dict} />
     </div>
   );
 }

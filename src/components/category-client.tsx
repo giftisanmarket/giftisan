@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -801,6 +802,8 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
           </div>
         )}
       </AnimatePresence>
+
+      <Footer dict={dict} />
     </main>
   );
 }

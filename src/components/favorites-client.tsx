@@ -2,6 +2,7 @@
 
 import { useFavorites } from "@/context/favorites-context";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Trash2, ShoppingBag, Package, Store, ArrowRight } from "lucide-react";
@@ -301,6 +302,8 @@ export default function FavoritesClient({ dict, allArtisans = [] }: FavoritesCli
           )}
         </div>
       </div>
+
+      <Footer dict={dict} />
     </main>
   );
 }

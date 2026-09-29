@@ -1,19 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { CategoryStoryStrip } from "@/components/home/category-story-strip";
-import { CuratedPicksGrid } from "@/components/home/curated-picks-grid";
 import { ProductShelfRow, ShelfProduct } from "@/components/home/product-shelf-row";
-import { EditorialSplitBanner } from "@/components/home/editorial-split-banner";
 import { VisualGiftCategories } from "@/components/home/visual-gift-categories";
-import { ArtisanSpotlightSection } from "@/components/home/artisan-spotlight-section";
-import { ArtisanRecruitmentBanner } from "@/components/home/artisan-recruitment-banner";
 import { MissionStatementBar } from "@/components/home/mission-statement-bar";
-import { BespokeImage } from "@/components/bespoke-image";
 import { NewsletterForm } from "@/components/newsletter-form";
+import { Footer } from "@/components/footer";
 
 interface HomeClientProps {
   trendingProducts?: ShelfProduct[];
@@ -72,20 +66,7 @@ export default function HomeClient({
       {/* Giftisan Brand Hero */}
       <Hero artisanCount={artisanCount} dict={dict} />
 
-      {/* 1. Category Story Bubbles Strip — right below hero */}
-      <CategoryStoryStrip dict={dict} />
-
-      {/* 2. Curated Visual Picks ("Picks for you" - 5 Real Artisan Products) */}
-      <CuratedPicksGrid
-        dict={dict}
-        bagProduct={bagProducts[0]}
-        woodworkProduct={homeDecorProducts[0]}
-        jewelryProduct={jewelryProducts[0]}
-        apparelProduct={crochetApparelProducts[0]}
-        giftSetProduct={giftSetProducts[0]}
-      />
-
-      {/* 2. Primary Product Shelf ("Picks inspired by your shopping" - Trending Finds) */}
+      {/* Primary Product Shelf ("Picks inspired by your shopping" - Trending Finds) */}
       {mainTrending.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "مختارات مستوحاة من اهتماماتك" : "Picks inspired by your shopping"}
@@ -101,13 +82,6 @@ export default function HomeClient({
         />
       )}
 
-      {/* 3. Editorial Split Banner ("Gifting feels more special with handcrafted picks" - Real Products) */}
-      <EditorialSplitBanner
-        dict={dict}
-        featuredProduct1={homeDecorProducts[1] || homeDecorProducts[0]}
-        featuredProduct2={bagProducts[1] || bagProducts[0]}
-      />
-
       {/* 4. Category Shelf: Handcrafted Bags & Leather Goods */}
       {bagProducts.length > 0 && (
         <ProductShelfRow
@@ -121,7 +95,6 @@ export default function HomeClient({
           viewAllText={isArabic ? "عرض الكل" : "View all"}
           products={bagProducts}
           dict={dict}
-          defaultBadge={isArabic ? "صناعة يدوية" : "Handmade"}
         />
       )}
 
@@ -203,13 +176,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* 10. Maker Spotlight ("Meet the Makers" / Real Egyptian Studios) */}
-      <ArtisanSpotlightSection artisans={featuredArtisans} dict={dict} />
-
-      {/* 11. Seller Recruitment Banner ("Sell on Giftisan" / 0% Platform Fees) */}
-      <ArtisanRecruitmentBanner dict={dict} />
-
-      {/* 12. Mission Statement & Value Pillars Bar (Etsy Signature Human Commerce Section) */}
+      {/* Mission Statement & Value Pillars Bar (Etsy Signature Human Commerce Section) */}
       <MissionStatementBar dict={dict} />
 
       {/* 13. Newsletter Club */}
@@ -237,42 +204,8 @@ export default function HomeClient({
         <div className="absolute bottom-0 start-0 w-96 h-96 bg-primary-light/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
       </section>
 
-      {/* 14. Minimal Footer */}
-      <footer className="py-8 bg-cream border-t border-primary/10">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start">
-          <div className="flex items-center gap-2">
-            <div className="relative w-6 h-6 overflow-hidden rounded-md">
-              <BespokeImage
-                src="/icon.png"
-                alt="Giftisan Logo"
-                fill
-                className="object-cover"
-                sizes="24px"
-              />
-            </div>
-            <span className="text-base font-heading font-bold text-primary">Giftisan</span>
-            <span className="text-charcoal/40 text-xs ps-2">
-              © {new Date().getFullYear()} Giftisan.{" "}
-              {dict?.home?.proudly_handcrafted || "Proudly Handcrafted in Egypt"}.
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs text-charcoal/50">
-            <Link href="/terms" className="hover:text-primary transition-colors">
-              {dict?.common?.terms || "Terms"}
-            </Link>
-            <Link href="/privacy" className="hover:text-primary transition-colors">
-              {dict?.common?.privacy || "Privacy"}
-            </Link>
-            <Link href="/shipping" className="hover:text-primary transition-colors">
-              {dict?.common?.shipping || "Shipping"}
-            </Link>
-            <Link href="/refund" className="hover:text-primary transition-colors">
-              {dict?.common?.refund || "Refund"}
-            </Link>
-          </div>
-        </div>
-      </footer>
+      {/* 14. Comprehensive Best-Practice Marketplace Footer */}
+      <Footer dict={dict} />
     </main>
   );
 }

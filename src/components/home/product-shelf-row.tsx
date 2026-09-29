@@ -154,9 +154,13 @@ export function ProductShelfRow({
             const slugOrId = (product.slug || product.id).trim();
             const productUrl = `/products/${encodeURI(slugOrId)}`;
             const artisanName = product.artisan?.studioName || product.artisan?.user?.name;
+            const isHandmadeBadge = (b?: string | null) =>
+              b ? ["handmade", "صناعة يدوية", "صنع يدوي"].includes(b.trim().toLowerCase()) : false;
+            const validBadge = product.badge && !isHandmadeBadge(product.badge) ? product.badge : null;
+            const validDefaultBadge = defaultBadge && !isHandmadeBadge(defaultBadge) ? defaultBadge : null;
             const hasBadge =
-              product.badge ||
-              defaultBadge ||
+              validBadge ||
+              validDefaultBadge ||
               (idx === 0 ? (isArabic ? "الأكثر طلباً" : "Best seller") : null);
 
             return (

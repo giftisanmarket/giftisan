@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Link from "next/link";
 import { RefreshCcw, Heart, ShieldCheck, Clock, FileText, ChevronRight } from "lucide-react";
 import { getDictionary } from "../dictionaries";
@@ -107,16 +108,7 @@ export default async function RefundPage({ params }: { params: Promise<{ lang: s
         </div>
       </main>
 
-      <footer className="py-12 border-t border-primary/5 mt-20">
-        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] font-bold text-primary/30 uppercase tracking-widest">{dict.refund.footer_copyright}</p>
-          <div className="flex gap-8">
-            <Link href={`/${lang}`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.refund.home}</Link>
-            <Link href={`/${lang}/shipping`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.shipping}</Link>
-            <Link href={`/${lang}/privacy`} className="text-[10px] font-bold text-primary/30 uppercase tracking-widest hover:text-primary transition-colors">{dict.common.privacy}</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer dict={dict} />
     </div>
   );
 }

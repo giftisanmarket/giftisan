@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { SettingsClient } from "@/components/settings-client";
 import { getDictionary } from "../../dictionaries";
 
@@ -40,6 +41,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ lang:
       <div className="container mx-auto px-4 py-24 md:py-32">
         <SettingsClient user={sanitizedUser} dict={dict} lang={lang} />
       </div>
+      <Footer dict={dict} />
     </main>
   );
 }

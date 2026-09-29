@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
@@ -134,7 +135,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
   }
 
   return (
-    <main className="min-h-screen bg-cream pb-10 md:pb-20 overflow-x-hidden">
+    <main className="min-h-screen bg-cream overflow-x-hidden">
       <AnimatePresence mode="wait">
         {(isLoading || session?.user?.role === "ARTISAN") && (
           <motion.div
@@ -175,7 +176,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
       <Navbar dict={dict} />
 
-      <div className="container mx-auto px-4 pt-16 md:pt-32 max-w-6xl">
+      <div className="container mx-auto px-4 pt-16 md:pt-32 pb-16 md:pb-24 max-w-6xl">
 
         {/* Hero Header */}
         <div className="text-center mb-6 md:mb-16">
@@ -368,6 +369,8 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
           </div>
         </div>
       </div>
+
+      <Footer dict={dict} />
     </main>
   );
 }

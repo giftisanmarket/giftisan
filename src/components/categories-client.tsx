@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Link from "next/link";
 import { 
   Home, Gem, Package, PencilLine, History, Shirt, 
@@ -239,13 +240,7 @@ export function CategoriesClient({ categories, dict }: { categories: DepartmentD
         </div>
       </section>
 
-      <footer className="py-12 bg-cream/30 border-t border-primary/5">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">
-            {dict.home.rights_reserved}
-          </p>
-        </div>
-      </footer>
+      <Footer dict={dict} />
     </main>
   );
 }

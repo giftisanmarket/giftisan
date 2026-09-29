@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { Heart, SlidersHorizontal, ArrowUpDown, CheckCircle2, ChevronDown, Sparkles, Star, RotateCcw, X } from "lucide-react";
@@ -622,7 +623,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                           <Heart className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isFavorite(product.id) && "fill-current")} />
                         </button>
 
-                        {product.badge && (
+                        {product.badge && !["handmade", "صناعة يدوية", "صنع يدوي"].includes(product.badge.trim().toLowerCase()) && (
                           <span className="absolute bottom-2 start-2 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/90 text-white backdrop-blur-xs">
                             {product.badge}
                           </span>
@@ -920,6 +921,8 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
           </div>
         )}
       </AnimatePresence>
+
+      <Footer dict={dict} />
     </main>
   );
 }

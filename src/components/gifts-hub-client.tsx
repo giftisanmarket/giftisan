@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { BespokeImage } from "@/components/bespoke-image";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
@@ -1245,6 +1246,8 @@ export function GiftsHubClient({ initialProducts, dict }: GiftsHubClientProps) {
           </div>
         )}
       </AnimatePresence>
+
+      <Footer dict={dict} />
     </main>
 
   );

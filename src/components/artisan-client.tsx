@@ -1,5 +1,7 @@
 "use client";
+
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Link from "next/link";
 import { MapPin, Star, ShieldCheck, Share2, Globe, Check } from "lucide-react";
 import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe } from "react-icons/fa6";
@@ -265,12 +267,8 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
         </div>
       </section>
 
-      {/* Footer (Simple) */}
-      <footer className="py-12 bg-cream/30 border-t border-primary/5">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest">{dict.artisan_detail.copyright}</p>
-        </div>
-      </footer>
+      {/* Etsy-style Footer */}
+      <Footer dict={dict} />
     </main>
   );
 }

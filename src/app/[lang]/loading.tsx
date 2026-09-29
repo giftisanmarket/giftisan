@@ -1,16 +1,83 @@
 import { Skeleton } from "@/components/skeleton";
 import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
-function ProductCardSkeleton() {
+function ShelfProductSkeleton() {
   return (
-    <div className="space-y-2">
-      <Skeleton className="aspect-square rounded-xl md:rounded-2xl w-full" />
-      <div className="space-y-1.5 pt-1">
-        <Skeleton className="w-20 h-3 rounded" />
-        <Skeleton className="w-4/5 h-4 rounded" />
-        <Skeleton className="w-16 h-3.5 rounded" />
+    <div className="w-[160px] sm:w-[195px] md:w-[220px] lg:w-[235px] shrink-0 space-y-2">
+      <Skeleton className="aspect-square rounded-xl md:rounded-2xl w-full bg-primary/10" />
+      <div className="space-y-1.5 pt-0.5">
+        <Skeleton className="w-4/5 h-3.5 rounded bg-primary/15" />
+        <Skeleton className="w-24 h-3 rounded bg-primary/10" />
+        <Skeleton className="w-16 h-3.5 rounded bg-primary/20 font-bold" />
       </div>
     </div>
+  );
+}
+
+function ProductShelfSkeleton({ titleWidth = "w-64" }: { titleWidth?: string }) {
+  return (
+    <section className="w-full max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8 border-t border-primary/5">
+      <div className="flex justify-between items-end mb-4 md:mb-5">
+        <div className="space-y-2">
+          <Skeleton className={`${titleWidth} h-7 md:h-8 rounded-lg bg-primary/15`} />
+          <Skeleton className="w-48 sm:w-72 h-3.5 rounded-md bg-primary/10" />
+        </div>
+        <Skeleton className="w-20 h-7 rounded-full bg-primary/10 hidden sm:block" />
+      </div>
+
+      <div className="flex gap-3 sm:gap-4 md:gap-5 overflow-hidden pb-2 pt-1">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <ShelfProductSkeleton key={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function VisualCategoriesSkeleton() {
+  return (
+    <section className="w-full max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-10 border-t border-primary/5">
+      <div className="flex justify-between items-end mb-4 md:mb-6">
+        <div className="space-y-2">
+          <Skeleton className="w-56 h-7 md:h-8 rounded-lg bg-primary/15" />
+          <Skeleton className="w-64 h-3.5 rounded-md bg-primary/10" />
+        </div>
+        <Skeleton className="w-24 h-4 rounded bg-primary/10 hidden sm:block" />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className="rounded-2xl overflow-hidden aspect-[4/5] bg-primary/10 border border-primary/5 p-4 flex flex-col justify-end"
+          >
+            <Skeleton className="w-24 h-6 rounded-full bg-white/70 mx-auto" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MissionStatementSkeleton() {
+  return (
+    <section className="w-full bg-primary/5 border-t border-primary/10 mt-10 py-12">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
+        <div className="text-center max-w-xl mx-auto mb-10 space-y-3 flex flex-col items-center">
+          <Skeleton className="w-72 h-8 rounded-lg bg-primary/15" />
+          <Skeleton className="w-96 h-4 rounded-md bg-primary/10" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="p-5 rounded-2xl bg-white/70 border border-primary/5 space-y-3">
+              <Skeleton className="w-10 h-10 rounded-xl bg-primary/10" />
+              <Skeleton className="w-32 h-4 rounded bg-primary/15" />
+              <Skeleton className="w-full h-3 rounded bg-primary/10" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -24,101 +91,64 @@ export default function Loading() {
       <NavbarSkeleton />
 
       {/* Main Content Skeleton */}
-      <div className="space-y-10 md:space-y-16 pb-20">
-        {/* Hero Section Skeleton */}
-        <section className="w-full max-w-[1520px] mx-auto px-4 md:px-8 py-3 md:py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch">
-            {/* Left Card: Main Hero Banner */}
-            <div className="lg:col-span-7 xl:col-span-8 rounded-2xl md:rounded-3xl overflow-hidden bg-primary/10 border border-primary/10 grid grid-cols-1 sm:grid-cols-2 min-h-[380px] lg:min-h-[430px]">
-              <div className="flex flex-col justify-center items-center text-center p-8 sm:p-10 space-y-6">
-                <Skeleton className="w-28 h-6 rounded-full bg-primary/15" />
-                <div className="space-y-3 w-full flex flex-col items-center">
-                  <Skeleton className="w-4/5 h-9 md:h-11 rounded-xl bg-primary/15" />
-                  <Skeleton className="w-3/5 h-9 md:h-11 rounded-xl bg-primary/15" />
+      <div className="space-y-6 md:space-y-8 pb-16">
+        {/* Etsy-Style Hero Section Skeleton */}
+        <section className="w-full max-w-[1520px] mx-auto px-4 md:px-8 py-2 md:py-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 items-stretch">
+            {/* Left Card: Main Hero Banner (Etsy Split & Mobile Arch Layout) */}
+            <div className="lg:col-span-8 rounded-2xl overflow-hidden bg-primary/10 border border-primary/10 shadow-xs">
+              {/* Mobile Layout (< sm): Arched Cutout Skeleton */}
+              <div className="sm:hidden flex flex-col w-full h-[300px] justify-between pt-6 px-4 pb-0">
+                <div className="flex flex-col items-center space-y-2 px-2">
+                  <Skeleton className="w-52 h-6 rounded-md bg-primary/20" />
+                  <Skeleton className="w-36 h-6 rounded-md bg-primary/20" />
                 </div>
-                <Skeleton className="w-36 h-11 rounded-full bg-primary/20" />
+
+                {/* Dome / Arch shaped image skeleton */}
+                <div className="w-full h-[190px] overflow-hidden rounded-t-[140px] bg-primary/15 animate-pulse" />
               </div>
-              <div className="w-full h-full min-h-[220px] sm:min-h-[380px] bg-primary/15" />
-            </div>
 
-            {/* Right Card: Artisan Spotlight */}
-            <div className="hidden lg:flex lg:col-span-5 xl:col-span-4 rounded-2xl md:rounded-3xl overflow-hidden min-h-[380px] lg:min-h-[430px] border border-primary/10 bg-primary/10 p-8 flex-col justify-end space-y-4">
-              <Skeleton className="w-28 h-5 rounded-full bg-primary/15" />
-              <div className="space-y-2">
-                <Skeleton className="w-4/5 h-7 rounded-lg bg-primary/15" />
-                <Skeleton className="w-3/5 h-4 rounded-md bg-primary/15" />
-              </div>
-              <Skeleton className="w-32 h-10 rounded-full bg-primary/20" />
-            </div>
-          </div>
-        </section>
-
-        {/* Section 1: Featured Products / Products of the Week */}
-        <section className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div className="space-y-2">
-              <Skeleton className="w-56 md:w-72 h-8 md:h-9 rounded-lg" />
-              <Skeleton className="w-72 md:w-96 h-4 rounded-md" />
-            </div>
-            <Skeleton className="w-36 h-5 rounded-md" />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        </section>
-
-        {/* Section 2: Personalized & Bespoke Gifts */}
-        <section className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 pt-10 border-t border-primary/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div className="space-y-2">
-              <Skeleton className="w-64 md:w-80 h-8 md:h-9 rounded-lg" />
-              <Skeleton className="w-80 md:w-[420px] h-4 rounded-md" />
-            </div>
-            <Skeleton className="w-36 h-5 rounded-md" />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        </section>
-
-        {/* Section 3: Handcrafted Textiles & Wearables */}
-        <section className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 pt-10 border-t border-primary/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 md:mb-10 gap-4">
-            <div className="space-y-2">
-              <Skeleton className="w-64 md:w-80 h-8 md:h-9 rounded-lg" />
-              <Skeleton className="w-80 md:w-[420px] h-4 rounded-md" />
-            </div>
-            <Skeleton className="w-36 h-5 rounded-md" />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        </section>
-
-        {/* Trust Bar Skeleton */}
-        <section className="max-w-[1520px] mx-auto px-4 md:px-8 pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 py-10 md:py-14 border-t border-primary/5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-white/50 border border-primary/5">
-                <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="w-36 h-5 rounded-md" />
-                  <Skeleton className="w-full h-4 rounded-md" />
-                  <Skeleton className="w-4/5 h-4 rounded-md" />
+              {/* Desktop / Tablet Layout (sm and up): Side-by-side Split Banner */}
+              <div className="hidden sm:flex h-[260px] md:h-[275px] lg:h-[290px] w-full">
+                {/* Content Half */}
+                <div className="basis-[60%] flex flex-col justify-center items-center text-center p-6 md:p-8 lg:p-9 space-y-4">
+                  <div className="space-y-2.5 w-full flex flex-col items-center">
+                    <Skeleton className="w-64 md:w-80 h-7 md:h-8 rounded-lg bg-primary/20" />
+                    <Skeleton className="w-48 md:w-60 h-7 md:h-8 rounded-lg bg-primary/20" />
+                  </div>
+                  <Skeleton className="w-28 md:w-32 h-9 rounded-full bg-primary/25" />
                 </div>
+
+                {/* Image Half */}
+                <div className="relative basis-[40%] h-full bg-primary/15 animate-pulse" />
               </div>
-            ))}
+            </div>
+
+            {/* Right Card: Grown-up Halloween Fans Skeleton */}
+            <div className="hidden lg:flex lg:col-span-4 rounded-2xl overflow-hidden h-[260px] md:h-[275px] lg:h-[290px] shadow-xs border border-primary/10 bg-primary/10 p-5 flex-col justify-end space-y-2">
+              <Skeleton className="w-4/5 h-6 rounded-lg bg-primary/20" />
+              <Skeleton className="w-20 h-4 rounded-md bg-primary/15" />
+            </div>
           </div>
         </section>
+
+        {/* Shelf 1: Trending Finds (Picks inspired by your shopping) */}
+        <ProductShelfSkeleton titleWidth="w-72" />
+
+        {/* Shelf 2: Handcrafted Bags & Leather Goods */}
+        <ProductShelfSkeleton titleWidth="w-64" />
+
+        {/* Shelf 3: Bespoke Jewelry & Adornments */}
+        <ProductShelfSkeleton titleWidth="w-60" />
+
+        {/* Visual Gift Categories Strip */}
+        <VisualCategoriesSkeleton />
+
+        {/* Shelf 4: Artisan Woodwork & Home Collectibles */}
+        <ProductShelfSkeleton titleWidth="w-72" />
+
+        {/* Mission Statement Bar */}
+        <MissionStatementSkeleton />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { ArtisanCard } from "@/components/artisans/artisan-card";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
@@ -57,6 +58,8 @@ export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
           </div>
         )}
       </div>
+
+      <Footer dict={dict} />
     </main>
   );
 }

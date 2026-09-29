@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
 import { 
@@ -658,6 +659,9 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
         </div>
       </div>
     </div>
+
+      <Footer dict={dict} />
+
       <ConfirmationModal
         isOpen={orderToCancel !== null}
         onClose={() => setOrderToCancel(null)}

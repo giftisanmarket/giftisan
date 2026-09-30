@@ -8,8 +8,17 @@ const config: CapacitorConfig = {
     // In production, Capacitor loads directly from your live Next.js domain
     // During local development, you can change this to your LAN IP (e.g., http://192.168.1.X:3000)
     url: process.env.CAPACITOR_SERVER_URL || 'https://www.giftisan.com',
-    cleartext: false,
+    cleartext: true,
     androidScheme: 'https',
+    allowNavigation: [
+      'giftisan.com',
+      '*.giftisan.com',
+      'www.giftisan.com',
+      '*.paymob.com',
+      '*.bosta.co',
+      '*.cloudinary.com',
+      'res.cloudinary.com',
+    ],
   },
   plugins: {
     SplashScreen: {
@@ -24,9 +33,6 @@ const config: CapacitorConfig = {
       overlaysWebView: false,
       backgroundColor: '#064E3B', // Giftisan brand primary forest green
       style: 'DARK', // White text on dark green bar
-    },
-    PushNotifications: {
-      presentationOptions: ['badge', 'sound', 'alert'],
     },
   },
 };

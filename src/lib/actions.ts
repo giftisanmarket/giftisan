@@ -1995,6 +1995,13 @@ export async function updateArtisanProfile(userId: string, data: any) {
       }
     });
 
+    if (avatarUrl) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { image: avatarUrl }
+      });
+    }
+
     revalidatePath("/studio");
     revalidatePath("/");
     revalidatePath("/artisans");
@@ -2018,6 +2025,65 @@ export async function updateArtisanProfile(userId: string, data: any) {
     return { error: error.message || "Failed to update studio profile" };
   }
 }
+
+export async function updateProfileAvatar(avatarData: string, targetUserId?: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "You must be signed in to perform this action" };
+    }
+
+    const isAdmin = session.user.role === "ADMIN";
+    const userId = (isAdmin && targetUserId) ? targetUserId : session.user.id;
+
+    if (!isAdmin && targetUserId && targetUserId !== session.user.id) {
+      return { error: "Unauthorized" };
+    }
+
+    if (!avatarData || typeof avatarData !== "string" || !avatarData.trim()) {
+      return { error: "Invalid avatar data" };
+    }
+
+    const avatarUrl = await processImage(avatarData);
+    if (!avatarUrl) {
+      return { error: "Failed to process image" };
+    }
+
+    // 1. Update User image
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image: avatarUrl }
+    });
+
+    // 2. If user has an artisan profile, update artisanProfile.avatar too
+    const existingArtisan = await prisma.artisanProfile.findUnique({
+      where: { userId }
+    });
+
+    if (existingArtisan) {
+      await prisma.artisanProfile.update({
+        where: { userId },
+        data: { avatar: avatarUrl }
+      });
+    }
+
+    revalidatePath("/studio");
+    revalidatePath("/profile");
+    revalidatePath("/settings");
+    revalidatePath("/artisans");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      avatar: avatarUrl
+    };
+  } catch (error: any) {
+    console.error("Update profile avatar error:", error);
+    return { error: error.message || "Failed to update profile avatar" };
+  }
+}
+
+export const updateArtisanAvatar = updateProfileAvatar;
 
 export async function generateUniqueProductSlug(name: string, productId?: string): Promise<string> {
   const baseSlug = slugify(name);

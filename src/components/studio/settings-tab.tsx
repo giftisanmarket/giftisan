@@ -25,7 +25,7 @@ import {
   FaPinterestP, 
   FaFacebook 
 } from "react-icons/fa6";
-import { updateArtisanProfile, checkSlugAvailability } from "@/lib/actions";
+import { updateArtisanProfile, updateProfileAvatar, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -47,6 +47,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const [location, setLocation] = useState(artisan.location || "");
   const [yearsOfExperience, setYearsOfExperience] = useState<number>(artisan.yearsOfExperience ?? 1);
   const [avatar, setAvatar] = useState(artisan.avatar || "");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [instagram, setInstagram] = useState(artisan.instagram || "");
   const [website, setWebsite] = useState(artisan.website || "");
   const [pinterest, setPinterest] = useState(artisan.pinterest || "");
@@ -139,6 +140,69 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
 
     return () => clearTimeout(timer);
   }, [slug, artisan.slug, artisan.userId]);
+
+  const handleAvatarUpload = (file: File) => {
+    if (!file) return;
+    setIsUploadingAvatar(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new (window as any).Image();
+      img.onload = async () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 1000;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) ctx.imageSmoothingQuality = 'high';
+          ctx?.drawImage(img, 0, 0, width, height);
+          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          const compressedDataUrl = canvas.toDataURL(outType, 0.9);
+
+          // Optimistically show the avatar
+          setAvatar(compressedDataUrl);
+
+          // Auto-save immediately to server without needing "Save Profile"
+          const res = await updateProfileAvatar(compressedDataUrl, artisan.userId);
+          if (res.success && res.avatar) {
+            setAvatar(res.avatar);
+            await update({ image: res.avatar });
+            toast.success(
+              lang === "ar"
+                ? (dict.studio_profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
+                : (dict.studio_profile?.avatar_updated || "Profile avatar updated successfully!"),
+              { icon: <Check className="w-5 h-5 text-green-500" /> }
+            );
+            router.refresh();
+          } else {
+            setAvatar(artisan.avatar || "");
+            toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update avatar"));
+          }
+        } catch (err: any) {
+          console.error("Avatar auto-save error:", err);
+          setAvatar(artisan.avatar || "");
+          toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
+        } finally {
+          setIsUploadingAvatar(false);
+        }
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,99 +309,70 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                             alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
+
+                        {/* Uploading Spinner Overlay */}
+                        {isUploadingAvatar && (
+                          <div className="absolute inset-0 bg-primary/70 backdrop-blur-sm rounded-full flex flex-col items-center justify-center z-30 text-white shadow-xl animate-in fade-in duration-200">
+                            <Loader2 className="w-8 h-8 animate-spin text-accent mb-1" />
+                            <span className="text-[10px] font-bold tracking-wider uppercase">
+                              {lang === "ar" ? (dict.studio_profile?.avatar_updating || "جاري الحفظ...") : (dict.studio_profile?.avatar_updating || "Saving...")}
+                            </span>
+                          </div>
+                        )}
+
                         {/* Permanent Camera Action Badge */}
                         <div className="absolute bottom-1 end-1 w-9 h-9 rounded-full bg-accent text-white border-2 border-white shadow-xl flex items-center justify-center z-10 pointer-events-none group-hover:scale-110 transition-transform">
                           <Camera className="w-4 h-4" />
                         </div>
-                        <label className="absolute inset-0 flex items-center justify-center bg-primary/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white z-20" title={dict.studio_profile.change_avatar || "Click to Change Logo"}>
+
+                        <label
+                          className={cn(
+                            "absolute inset-0 flex items-center justify-center bg-primary/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all rounded-full cursor-pointer border-4 border-white z-20",
+                            isUploadingAvatar && "pointer-events-none opacity-0"
+                          )}
+                          title={dict.studio_profile.change_avatar || "Click to Change Logo"}
+                        >
                           <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-xl">
                             <Camera className="w-5 h-5 md:w-6 md:h-6" />
                           </div>
                           <input
                             type="file"
                             accept="image/*"
+                            disabled={isUploadingAvatar}
                             className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  const img = new (window as any).Image();
-                                  img.onload = () => {
-                                    const canvas = document.createElement('canvas');
-                                    const MAX_SIZE = 1000;
-                                    let width = img.width;
-                                    let height = img.height;
-                                    if (width > height) {
-                                      if (width > MAX_SIZE) {
-                                        height *= MAX_SIZE / width;
-                                        width = MAX_SIZE;
-                                      }
-                                    } else {
-                                      if (height > MAX_SIZE) {
-                                        width *= MAX_SIZE / height;
-                                        height = MAX_SIZE;
-                                      }
-                                    }
-                                     canvas.width = width;
-                                     canvas.height = height;
-                                     const ctx = canvas.getContext('2d');
-                                     if (ctx) ctx.imageSmoothingQuality = 'high';
-                                     ctx?.drawImage(img, 0, 0, width, height);
-                                     const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                                     setAvatar(canvas.toDataURL(outType, 0.9));
-                                   };
-                                  img.src = reader.result as string;
-                                };
-                                reader.readAsDataURL(file);
-                              }
+                              if (file) handleAvatarUpload(file);
                             }}
                           />
                         </label>
                       </div>
+
                       <div className="text-center lg:text-start space-y-0.5">
                         <p className="text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio_profile.studio_avatar}</p>
-                        <label className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center justify-center lg:justify-start gap-1.5 cursor-pointer">
-                          <Camera className="w-3.5 h-3.5" />
-                          <span>{dict.studio_profile.change_avatar || "Click to Change Logo"}</span>
+                        <label className={cn(
+                          "text-xs font-bold text-accent hover:text-primary transition-colors flex items-center justify-center lg:justify-start gap-1.5 cursor-pointer",
+                          isUploadingAvatar && "opacity-60 pointer-events-none"
+                        )}>
+                          {isUploadingAvatar ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>{lang === "ar" ? (dict.studio_profile?.avatar_updating || "جاري حفظ الصورة...") : (dict.studio_profile?.avatar_updating || "Saving photo...")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="w-3.5 h-3.5" />
+                              <span>{dict.studio_profile.change_avatar || "Click to Change Logo"}</span>
+                            </>
+                          )}
                           <input
                             type="file"
                             accept="image/*"
+                            disabled={isUploadingAvatar}
                             className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  const img = new (window as any).Image();
-                                  img.onload = () => {
-                                    const canvas = document.createElement('canvas');
-                                    const MAX_SIZE = 1000;
-                                    let width = img.width;
-                                    let height = img.height;
-                                    if (width > height) {
-                                      if (width > MAX_SIZE) {
-                                        height *= MAX_SIZE / width;
-                                        width = MAX_SIZE;
-                                      }
-                                    } else {
-                                      if (height > MAX_SIZE) {
-                                        width *= MAX_SIZE / height;
-                                        height = MAX_SIZE;
-                                      }
-                                    }
-                                     canvas.width = width;
-                                     canvas.height = height;
-                                     const ctx = canvas.getContext('2d');
-                                     if (ctx) ctx.imageSmoothingQuality = 'high';
-                                     ctx?.drawImage(img, 0, 0, width, height);
-                                     const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                                     setAvatar(canvas.toDataURL(outType, 0.9));
-                                   };
-                                  img.src = reader.result as string;
-                                };
-                                reader.readAsDataURL(file);
-                              }
+                              if (file) handleAvatarUpload(file);
                             }}
                           />
                         </label>

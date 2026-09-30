@@ -84,45 +84,11 @@ export async function initNativeApp(onNavigateBack?: () => void): Promise<void> 
 
 /**
  * Request permission and register for native Push Notifications
+ * (Requires google-services.json from Firebase Console)
  */
 export async function registerPushNotifications(
-  onTokenReceived?: (token: string) => void
+  _onTokenReceived?: (token: string) => void
 ): Promise<void> {
   if (!isNativePlatform()) return;
-
-  try {
-    const { PushNotifications } = await import("@capacitor/push-notifications");
-
-    let permStatus = await PushNotifications.checkPermissions();
-
-    if (permStatus.receive === "prompt") {
-      permStatus = await PushNotifications.requestPermissions();
-    }
-
-    if (permStatus.receive !== "granted") {
-      console.warn("Push notification permission was not granted");
-      return;
-    }
-
-    await PushNotifications.register();
-
-    // Listeners
-    PushNotifications.addListener("registration", (token) => {
-      if (onTokenReceived) onTokenReceived(token.value);
-    });
-
-    PushNotifications.addListener("registrationError", (err) => {
-      console.error("Push registration error: ", err.error);
-    });
-
-    PushNotifications.addListener("pushNotificationReceived", (notification) => {
-      console.log("Push received in foreground: ", notification);
-    });
-
-    PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-      console.log("Push notification tapped: ", action);
-    });
-  } catch (error) {
-    console.warn("Push notifications initialization failed:", error);
-  }
+  // Push notifications can be wired with Firebase Cloud Messaging once google-services.json is added
 }

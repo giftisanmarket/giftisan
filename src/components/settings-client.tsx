@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, Camera, Save, ArrowLeft, Check, X, AlertTriangle, Trash2, Mail, Edit3, Eye, EyeOff } from "lucide-react";
-import { updateUser, deleteAccountAction, changeEmailAction } from "@/lib/actions";
+import { User, Camera, Save, ArrowLeft, Check, X, AlertTriangle, Trash2, Mail, Edit3, Eye, EyeOff, Loader2 } from "lucide-react";
+import { updateUser, updateProfileAvatar, deleteAccountAction, changeEmailAction } from "@/lib/actions";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -44,7 +44,7 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new (window as any).Image();
-        img.onload = () => {
+        img.onload = async () => {
           // Create a canvas to resize/compress the image
           const canvas = document.createElement('canvas');
           let width = img.width;
@@ -74,7 +74,31 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
           const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
           const compressedDataUrl = canvas.toDataURL(outType, 0.9);
           setImage(compressedDataUrl);
-          setIsCompressing(false);
+
+          try {
+            // Auto-save immediately to server without needing "Save Changes"
+            const res = await updateProfileAvatar(compressedDataUrl, user.id);
+            if (res.success && res.avatar) {
+              setImage(res.avatar);
+              await update({ image: res.avatar });
+              toast.success(
+                lang === "ar"
+                  ? (dict.profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
+                  : (dict.profile?.avatar_updated || "Profile photo updated successfully!"),
+                { icon: <Check className="w-5 h-5 text-green-500" /> }
+              );
+              router.refresh();
+            } else {
+              setImage(user.image || "");
+              toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update profile photo"));
+            }
+          } catch (err: any) {
+            console.error("Auto-save avatar error:", err);
+            setImage(user.image || "");
+            toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
+          } finally {
+            setIsCompressing(false);
+          }
         };
         img.src = reader.result as string;
       };
@@ -209,9 +233,18 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                    className="object-cover"
                  />
                </div>
-               <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full">
-                 <Camera className="w-8 h-8 text-white" />
-               </div>
+               {isCompressing ? (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-primary/70 backdrop-blur-sm rounded-full text-white z-20 shadow-xl animate-in fade-in duration-200">
+                   <Loader2 className="w-8 h-8 animate-spin text-accent mb-1" />
+                   <span className="text-[10px] font-bold tracking-wider uppercase">
+                     {lang === "ar" ? (dict.profile?.avatar_updating || "جاري الحفظ...") : (dict.profile?.avatar_updating || "Saving...")}
+                   </span>
+                 </div>
+               ) : (
+                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full">
+                   <Camera className="w-8 h-8 text-white" />
+                 </div>
+               )}
              </div>
              <h3 className="font-heading font-bold text-primary truncate w-full text-base md:text-xl">{name || dict.profile.your_name}</h3>
              <p className="text-[9px] md:text-[10px] text-charcoal/40 font-bold uppercase tracking-widest mt-1">{dict.profile.profile_preview}</p>

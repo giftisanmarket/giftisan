@@ -154,14 +154,19 @@ export function ProductShelfRow({
             const slugOrId = (product.slug || product.id).trim();
             const productUrl = `/products/${encodeURI(slugOrId)}`;
             const artisanName = product.artisan?.studioName || product.artisan?.user?.name;
-            const isHandmadeBadge = (b?: string | null) =>
-              b ? ["handmade", "صناعة يدوية", "صنع يدوي"].includes(b.trim().toLowerCase()) : false;
-            const validBadge = product.badge && !isHandmadeBadge(product.badge) ? product.badge : null;
-            const validDefaultBadge = defaultBadge && !isHandmadeBadge(defaultBadge) ? defaultBadge : null;
-            const hasBadge =
-              validBadge ||
-              validDefaultBadge ||
-              (idx === 0 ? (isArabic ? "الأكثر طلباً" : "Best seller") : null);
+            const isIgnoredBadge = (b?: string | null) => {
+              if (!b) return true;
+              const lower = b.trim().toLowerCase();
+              return (
+                ["handmade", "صناعة يدوية", "صنع يدوي", "best seller", "bestseller", "الأكثر طلباً", "الأكثر مبيعاً"].includes(lower) ||
+                lower.startsWith("best seller") ||
+                lower.startsWith("الأكثر مبيعاً") ||
+                lower.startsWith("الأكثر طلباً")
+              );
+            };
+            const validBadge = product.badge && !isIgnoredBadge(product.badge) ? product.badge : null;
+            const validDefaultBadge = defaultBadge && !isIgnoredBadge(defaultBadge) ? defaultBadge : null;
+            const hasBadge = validBadge || validDefaultBadge;
 
             return (
               <div

@@ -192,13 +192,17 @@ export function ArtisanBioView({ artisan, lang }: ArtisanBioViewProps) {
         ? featuredProduct.reviews!.reduce((acc, r) => acc + r.rating, 0) / reviewCount
         : 0;
 
-    if (salesCount > 0) {
-      return {
-        label: isRtl ? `الأكثر مبيعاً (${salesCount})` : `Best Seller (${salesCount})`,
-        icon: "fire",
-        bg: "bg-gradient-to-r from-rose-500 to-red-600",
-      };
-    }
+    const isIgnored = (b?: string | null) => {
+      if (!b) return true;
+      const lower = b.trim().toLowerCase();
+      return (
+        ["handmade", "صناعة يدوية", "صنع يدوي", "best seller", "bestseller", "الأكثر طلباً", "الأكثر مبيعاً"].includes(lower) ||
+        lower.startsWith("best seller") ||
+        lower.startsWith("الأكثر مبيعاً") ||
+        lower.startsWith("الأكثر طلباً")
+      );
+    };
+
     if (avgRating >= 4.5 && reviewCount > 0) {
       return {
         label: `${avgRating.toFixed(1)} ★ (${reviewCount})`,
@@ -206,7 +210,7 @@ export function ArtisanBioView({ artisan, lang }: ArtisanBioViewProps) {
         bg: "bg-gradient-to-r from-amber-500 to-amber-600",
       };
     }
-    if (featuredProduct.badge) {
+    if (featuredProduct.badge && !isIgnored(featuredProduct.badge)) {
       return {
         label: featuredProduct.badge,
         icon: "sparkles",

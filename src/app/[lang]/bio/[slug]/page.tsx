@@ -31,8 +31,22 @@ const getArtisanBioBySlug = cache(async (rawSlug: string) => {
       },
       products: {
         where: { status: "APPROVED" },
-        take: 6,
-        orderBy: { createdAt: "desc" },
+        include: {
+          reviews: { select: { rating: true } },
+          orderItems: {
+            where: {
+              order: {
+                status: { notIn: ["PENDING", "CANCELLED", "REFUNDED"] },
+              },
+            },
+            select: { id: true },
+          },
+        },
+        orderBy: [
+          { isFeatured: "desc" },
+          { createdAt: "desc" },
+        ],
+        take: 50,
       },
     },
   });
@@ -52,7 +66,25 @@ const getArtisanBioBySlug = cache(async (rawSlug: string) => {
         include: {
           user: { select: { name: true, image: true } },
           bioLinks: { orderBy: { order: "asc" } },
-          products: { where: { status: "APPROVED" }, take: 6, orderBy: { createdAt: "desc" } },
+          products: {
+            where: { status: "APPROVED" },
+            include: {
+              reviews: { select: { rating: true } },
+              orderItems: {
+                where: {
+                  order: {
+                    status: { notIn: ["PENDING", "CANCELLED", "REFUNDED"] },
+                  },
+                },
+                select: { id: true },
+              },
+            },
+            orderBy: [
+              { isFeatured: "desc" },
+              { createdAt: "desc" },
+            ],
+            take: 50,
+          },
         },
       },
     },

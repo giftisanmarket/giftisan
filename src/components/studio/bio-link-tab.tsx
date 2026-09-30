@@ -349,21 +349,14 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
                 {pinterest && <FaPinterest className="w-4 h-4 text-red-600" />}
               </div>
 
-              {/* Action Buttons Live Preview (Arabic / English Localized) */}
-              <div className="w-full space-y-2">
+              {/* Action Button Live Preview (Shop My Collection Hero CTA) */}
+              <div className="w-full">
                 <div className="w-full p-3 rounded-xl bg-[#064E3B] text-white text-[11px] font-bold flex items-center justify-between shadow-sm">
                   <span className="flex items-center gap-2">
                     <Store className="w-3.5 h-3.5 text-amber-300" />
                     {isRtl ? "تصفح متجري الكامل" : "Shop My Collection"}
                   </span>
                   <ArrowRight className={`w-3.5 h-3.5 text-amber-300 ${isRtl ? "rotate-180" : ""}`} />
-                </div>
-                <div className="w-full p-3 rounded-xl bg-white text-[#064E3B] text-[11px] font-bold flex items-center justify-between border border-[#064E3B]/15 shadow-sm">
-                  <span className="flex items-center gap-2">
-                    <LayoutGrid className="w-3.5 h-3.5 text-[#064E3B]/60" />
-                    {isRtl ? "تصفح الأقسام" : "Explore Categories"}
-                  </span>
-                  <ArrowRight className={`w-3.5 h-3.5 text-[#064E3B]/60 ${isRtl ? "rotate-180" : ""}`} />
                 </div>
               </div>
 

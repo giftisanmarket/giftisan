@@ -311,7 +311,7 @@ export function ContactArtisanButton({
                         <CheckCircle2 className="w-4 h-4 text-accent fill-accent/10" />
                       </div>
                       <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest leading-none mt-1">
-                        {isRtl ? "محادثة مباشرة مع الاستوديو" : "Direct studio dialogue"}
+                        {isRtl ? "محادثة مباشرة مع المتجر" : "Direct shop dialogue"}
                       </p>
                     </div>
                   </div>

@@ -1030,7 +1030,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                   {dict.home?.upload_rules?.no_logos_note || "NO LOGOS OR WATERMARKS ALLOWED"}
                 </p>
                 <p className="text-[10px] text-amber-700 font-medium mt-0.5">
-                  {dict.home?.upload_rules?.clean_media_note || "High quality photos without text, borders or studio logos."}
+                  {dict.home?.upload_rules?.clean_media_note || "High quality photos without text, borders or shop logos."}
                 </p>
               </div>
             </div>

@@ -430,11 +430,11 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
   }
 
   const isAr = lang === 'ar';
-  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من استوديو الخاص بك! (#${orderId})` : `New Sale Alert: A product has been claimed! (#${orderId})`;
+  const subject = isAr ? `تنبيه مبيعة جديدة: تم طلب قطعة من متجرك! (#${orderId})` : `New Sale Alert: A product has been claimed! (#${orderId})`;
 
   const arContent = `
     <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${ACCENT_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 12px 0;">تنبيه مبيعة جديدة!</h1>
-    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني المنتجات بشراء قطعة من الاستوديو الخاص بك الآن.</p>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.8;">أهلاً ${artisanName}، لقد قام أحد مقتني المنتجات بشراء قطعة من متجرك الآن.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
       <tr>
         <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8;">
@@ -445,15 +445,15 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
         </td>
       </tr>
     </table>
-    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.8;">يرجى تسجيل الدخول إلى لوحة تحكم الاستوديو لمعاينة بيانات الشحن والبدء في تجهيز الطلب.</p>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.8;">يرجى تسجيل الدخول إلى لوحة تحكم المتجر لمعاينة بيانات الشحن والبدء في تجهيز الطلب.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'دخول الاستوديو', PRIMARY_COLOR, 'ar')}</td></tr>
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'دخول المتجر', PRIMARY_COLOR, 'ar')}</td></tr>
     </table>
   `;
 
   const enContent = `
     <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${ACCENT_COLOR}; font-size: 24px; font-weight: 800; margin: 0 0 12px 0;">New Sale Alert!</h1>
-    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a product from your studio.</p>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 15px; margin: 0 0 24px 0; line-height: 1.7;">Hi ${artisanName}, a collector has just claimed a product from your shop.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
       <tr>
         <td style="background-color: #f9fafb; padding: 22px 24px; border-radius: 12px; border: 1px solid #f0ede8;">
@@ -464,9 +464,9 @@ export const sendOrderNotification = async (artisanEmail: string, artisanName: s
         </td>
       </tr>
     </table>
-    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.7;">Please log in to your Studio Dashboard to view shipment details and begin fulfillment.</p>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; margin: 0 0 28px 0; line-height: 1.7;">Please log in to your Shop Dashboard to view shipment details and begin fulfillment.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'Enter Studio', PRIMARY_COLOR, 'en')}</td></tr>
+      <tr><td align="center">${getCtaButton(`${BASE_URL}/studio`, 'Enter Shop', PRIMARY_COLOR, 'en')}</td></tr>
     </table>
   `;
 
@@ -529,7 +529,7 @@ export const sendVerificationEmail = async (email: string, token: string, lang: 
 
   const arContent = `
     <h1 style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">توثيق عنوان البريد الإلكتروني</h1>
-    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.9; margin: 0 0 28px 0;">قبل البدء في استكشاف الخزائن أو فتح الاستوديو الخاص بك، يرجى تأكيد بريدك الإلكتروني لضمان أمان حسابك وفتح كافة المميزات.</p>
+    <p style="font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.9; margin: 0 0 28px 0;">قبل البدء في استكشاف الخزائن أو فتح متجرك الخاص، يرجى تأكيد بريدك الإلكتروني لضمان أمان حسابك وفتح كافة المميزات.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
       <tr><td align="center">${getCtaButton(confirmLink, 'تأكيد البريد الإلكتروني', ACCENT_COLOR, 'ar')}</td></tr>
     </table>
@@ -547,7 +547,7 @@ export const sendVerificationEmail = async (email: string, token: string, lang: 
 
   const enContent = `
     <h1 style="font-family: Helvetica, Arial, sans-serif; color: ${PRIMARY_COLOR}; font-size: 23px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3;">Verify your email address</h1>
-    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 28px 0;">Before you explore the vault or open your studio, please confirm your email address to secure your account and unlock all platform features.</p>
+    <p style="font-family: Helvetica, Arial, sans-serif; color: #6b7280; font-size: 14px; line-height: 1.8; margin: 0 0 28px 0;">Before you explore the vault or open your shop, please confirm your email address to secure your account and unlock all platform features.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
       <tr><td align="center">${getCtaButton(confirmLink, 'Confirm Email Address', ACCENT_COLOR, 'en')}</td></tr>
     </table>
@@ -604,14 +604,14 @@ export const sendOrderStatusUpdateEmail = async (
   };
 
   const statusTextAr: Record<string, string> = {
-    'PROCESSING': 'قيد التجهيز الآن في الاستوديو',
+    'PROCESSING': 'قيد التجهيز الآن في المتجر',
     'SHIPPED': 'تم شحنها وهي في طريقها إليك',
     'DELIVERED': 'تم توصيلها بنجاح',
     'CANCELLED': 'تم إلغاؤها'
   };
 
   const statusTextEn: Record<string, string> = {
-    'PROCESSING': 'is being prepared in the studio',
+    'PROCESSING': 'is being prepared in the shop',
     'SHIPPED': 'has been shipped and is on its way',
     'DELIVERED': 'has been delivered successfully',
     'CANCELLED': 'has been cancelled'
@@ -796,12 +796,12 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
 
   const isAr = lang === 'ar';
   const subject = isAr 
-    ? 'مبروك! تم اعتماد الاستوديو الخاص بك في جيفتيزان وأصبح متاحاً الآن'
-    : 'Welcome to the Guild: Your Studio is Officially Live! | Giftisan';
+    ? 'مبروك! تم اعتماد متجرك في جيفتيزان وأصبح متاحاً الآن'
+    : 'Welcome to the Guild: Your Shop is Officially Live! | Giftisan';
 
   const arContent = `
-    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">مبروك! تم اعتماد الاستوديو الخاص بك</h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">أهلاً يا ${name}، لقد قام فريق التقييم بمراجعة الاستوديو الخاص بك والتأكد من استيفاء كافة بياناتك ومنتجاتك. يسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان"! استوديو إبداعاتك ومنتجاتك الآن متاحة للجمهور وجاهزة لاستقبال الطلبات من مقتني المنتجات.</p>
+    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">مبروك! تم اعتماد متجرك</h1>
+    <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 25px;">أهلاً يا ${name}، لقد قام فريق التقييم بمراجعة متجرك والتأكد من استيفاء كافة بياناتك ومنتجاتك. يسعدنا جداً أن نرحب بك رسمياً في دائرة "جيفتيزان"! متجرك ومنتجاتك الآن متاحة للجمهور وجاهزة لاستقبال الطلبات من مقتني المنتجات.</p>
     
     <div style="background-color: #f0fdf4; padding: 22px; border-radius: 18px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
       <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em;">✨ شارة الحرفي المؤسس 2026</p>
@@ -811,9 +811,9 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
     <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">خطواتك التالية:</p>
       <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 2; padding-right: 20px;">
-        <li><strong>شارك رابط الاستوديو</strong> على حساباتك في السوشيال ميديا للبدء في استقبال عملائك</li>
+        <li><strong>شارك رابط المتجر</strong> على حساباتك في السوشيال ميديا للبدء في استقبال عملائك</li>
         <li><strong>أضف المزيد من القطع الفنية</strong> في أي وقت لتوسيع معروضاتك</li>
-        <li><strong>أدر طلباتك وتابع أرباحك</strong> بسهولة مباشرة من لوحة تحكم الاستوديو</li>
+        <li><strong>أدر طلباتك وتابع أرباحك</strong> بسهولة مباشرة من لوحة تحكم المتجر</li>
       </ul>
     </div>
 
@@ -825,15 +825,15 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
     </div>
 
     <div style="margin: 30px 0; text-align: center;">
-      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">دخول لوحة تحكم الاستوديو</a>
+      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">دخول لوحة تحكم المتجر</a>
     </div>
 
     <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center; margin-top: 25px;">نحن متشوقون لرؤية إبداعاتك ونموك معنا في مجتمع جيفتيزان!</p>
   `;
 
   const enContent = `
-    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">Congratulations! Your Studio is Approved</h1>
-    <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 25px;">Hi ${name}, our curators have reviewed your studio and verified all your onboarding requirements. We're thrilled to officially welcome you to the Giftisan Guild! Your studio and handcrafted products are now live and visible to collectors across the marketplace.</p>
+    <h1 class="heading" style="color: ${ACCENT_COLOR}; font-size: 26px; margin-bottom: 18px;">Congratulations! Your Shop is Approved</h1>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 25px;">Hi ${name}, our curators have reviewed your shop and verified all your onboarding requirements. We're thrilled to officially welcome you to the Giftisan Guild! Your shop and handcrafted products are now live and visible to collectors across the marketplace.</p>
     
     <div style="background-color: #f0fdf4; padding: 22px; border-radius: 18px; border: 1px solid #bbf7d0; margin-bottom: 25px;">
       <p style="margin: 0; color: #166534; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em;">✨ 2026 Founding Member Status</p>
@@ -841,11 +841,11 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
     </div>
 
     <div style="background-color: #f9fafb; padding: 22px; border-radius: 18px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
-      <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">What's next for your studio:</p>
+      <p style="margin: 0; color: ${PRIMARY_COLOR}; font-weight: bold; font-size: 14px;">What's next for your shop:</p>
       <ul style="color: #4b5563; font-size: 13px; margin-top: 10px; line-height: 1.8; padding-left: 20px;">
-        <li><strong>Share your studio link</strong> on your social channels to welcome collectors</li>
+        <li><strong>Share your shop link</strong> on your social channels to welcome collectors</li>
         <li><strong>Add new creations</strong> anytime to grow your storefront catalog</li>
-        <li><strong>Manage orders & earnings</strong> seamlessly in your Pro Studio Dashboard</li>
+        <li><strong>Manage orders & earnings</strong> seamlessly in your Shop Dashboard</li>
       </ul>
     </div>
 
@@ -857,7 +857,7 @@ export const sendArtisanApprovalEmail = async (email: string, name: string, lang
     </div>
 
     <div style="margin: 30px 0; text-align: center;">
-      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">Enter Studio Dashboard</a>
+      <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 15px; display: inline-block;">Enter Shop Dashboard</a>
     </div>
 
     <p style="color: #9ca3af; font-size: 13px; font-style: italic; text-align: center; margin-top: 25px;">We can't wait to see what you create and grow with us!</p>
@@ -884,10 +884,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
       شفت شغل الـ <strong style="color: ${ACCENT_COLOR};">${product}</strong> بتاعك النهاردة، وبجد حاجة تشرف ومستواها عالي جداً. ده بالظبط نوع الفن اللي نفسنا نعرضه ونكبره في "جيفتيزان".
     </p>
     <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 18px;">
-      إحنا بنأسس منصة حصرية قائمة على الدعوات الخاصة، معمول مخصوص عشان يريح "الحرفيين" والفنانين من دوشة المبيعات واللوجستيات. بمجرد انضمامك، بنوفرلك لوحة تحكم <strong>برو استوديو</strong> متكاملة تقدر من خلالها تعرض منتجاتك، تتابع أرباحك وتدير طلباتك بكل سهولة، بالإضافة لرسائل التواصل المباشر مع العملاء. والأهم إن النظام بيتولى إرسال كل إيميلات التأكيد أوتوماتيك، عشان تفضل "رايق" ومركز بس في فنك ومساحتك الإبداعية.
+      إحنا بنأسس منصة حصرية قائمة على الدعوات الخاصة، معمول مخصوص عشان يريح "الحرفيين" والفنانين من دوشة المبيعات واللوجستيات. بمجرد انضمامك، بنوفرلك لوحة تحكم <strong>المتجر</strong> متكاملة تقدر من خلالها تعرض منتجاتك، تتابع أرباحك وتدير طلباتك بكل سهولة، بالإضافة لرسائل التواصل المباشر مع العملاء. والأهم إن النظام بيتولى إرسال كل إيميلات التأكيد أوتوماتيك، عشان تفضل "رايق" ومركز بس في فنك ومساحتك الإبداعية.
     </p>
     <p style="color: #4b5563; font-size: 16px; line-height: 2; margin-bottom: 22px;">
-      والأهم من ده كله، إحنا شغالين دلوقتي على تفعيل أنظمة دفع وشحن مباشر متكاملة على الموقع، وبنعمل حملات تسويق مخصوص لكل استوديو عشان نضمن إن فنك ياخد "اللقطة" والتقدير اللي يستاهله بجد.
+      والأهم من ده كله، إحنا شغالين دلوقتي على تفعيل أنظمة دفع وشحن مباشر متكاملة على الموقع، وبنعمل حملات تسويق مخصوص لكل متجر عشان نضمن إن فنك ياخد "اللقطة" والتقدير اللي يستاهله بجد.
     </p>
     <div style="background-color: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="color: ${PRIMARY_COLOR}; font-size: 15px; font-weight: bold; line-height: 1.8; margin: 0;">
@@ -911,10 +911,10 @@ export const sendArtisanOutreachEmail = async (email: string, name: string, prod
       I came across your work on <strong style="color: ${ACCENT_COLOR};">${product}</strong> today, and I have to say — it's genuinely impressive. It's exactly the kind of craft we want to celebrate and showcase on <strong>Giftisan</strong>.
     </p>
     <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 18px;">
-      We're building an invite-only platform designed specifically to free artisans and creators from the noise of selling, logistics, and marketing. Once you join, we give you a fully-equipped <strong>Pro Studio Dashboard</strong> where you can list your products, track your earnings, manage orders effortlessly, and message customers directly — while our system handles all confirmation emails automatically.
+      We're building an invite-only platform designed specifically to free artisans and creators from the noise of selling, logistics, and marketing. Once you join, we give you a fully-equipped <strong>Shop Dashboard</strong> where you can list your products, track your earnings, manage orders effortlessly, and message customers directly — while our system handles all confirmation emails automatically.
     </p>
     <p style="color: #4b5563; font-size: 15px; line-height: 1.8; margin-bottom: 22px;">
-      We're also actively building integrated payment and shipping systems, and we run dedicated marketing campaigns for each studio to make sure your art gets the recognition it truly deserves.
+      We're also actively building integrated payment and shipping systems, and we run dedicated marketing campaigns for each shop to make sure your art gets the recognition it truly deserves.
     </p>
     <div style="background-color: #f9fafb; padding: 20px; border-radius: 16px; border: 1px solid #f3f4f6; margin-bottom: 25px;">
       <p style="color: ${PRIMARY_COLOR}; font-size: 15px; font-weight: bold; line-height: 1.7; margin: 0;">
@@ -1017,7 +1017,7 @@ export const sendProductStatusUpdateEmail = async (
 
     <div style="margin: 30px 0; text-align: center;">
       <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">
-        ${isApproved ? 'معاينة في الاستوديو' : 'دخول الاستوديو'}
+        ${isApproved ? 'معاينة في المتجر' : 'دخول المتجر'}
       </a>
     </div>
   `;
@@ -1038,7 +1038,7 @@ export const sendProductStatusUpdateEmail = async (
 
     <div style="margin: 30px 0; text-align: center;">
       <a href="${BASE_URL}/studio" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 18px 40px; text-decoration: none; border-radius: 16px; font-weight: 800; font-size: 14px; display: inline-block;">
-        ${isApproved ? 'View in Studio' : 'Go to Studio'}
+        ${isApproved ? 'View in Shop' : 'Go to Shop'}
       </a>
     </div>
   `;

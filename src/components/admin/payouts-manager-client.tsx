@@ -176,8 +176,8 @@ export function PayoutsManagerClient({
     }
 
     const headers = isRTL 
-      ? ["المعرف", "التاريخ", "الأستوديو", "البريد الإلكتروني", "الوصف", "الحالة", "المبلغ (ج.م)"]
-      : ["ID", "Date", "Studio", "Email", "Description", "Status", "Amount (EGP)"];
+      ? ["المعرف", "التاريخ", "المتجر", "البريد الإلكتروني", "الوصف", "الحالة", "المبلغ (ج.م)"]
+      : ["ID", "Date", "Shop", "Email", "Description", "Status", "Amount (EGP)"];
 
     const rows = pastPayouts.map((tx: any) => [
       tx.id,
@@ -469,7 +469,7 @@ export function PayoutsManagerClient({
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30" />
               <input
                 type="text"
-                placeholder={isRTL ? "البحث باسم الأستوديو..." : "Search studio..."}
+                placeholder={isRTL ? "البحث باسم المتجر..." : "Search shop..."}
                 value={historySearch}
                 onChange={(e) => setHistorySearch(e.target.value)}
                 className="w-full h-10 ps-10 pe-4 rounded-xl border border-primary/10 bg-cream/10 text-xs font-bold focus:outline-none focus:border-accent"
@@ -741,7 +741,7 @@ export function PayoutsManagerClient({
                       </p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "أستوديو العارض" : "Artisan Studio"}</p>
+                      <p className="text-[10px] text-primary/40 font-black uppercase tracking-wider mb-0.5">{isRTL ? "متجر العارض" : "Artisan Shop"}</p>
                       <p className="font-bold text-primary text-xs">
                         {selectedReceipt.artisan?.studioName || selectedReceipt.artisan?.user?.name || "Artisan"} ({selectedReceipt.artisan?.user?.email})
                       </p>

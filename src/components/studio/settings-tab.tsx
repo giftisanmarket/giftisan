@@ -207,7 +207,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studioName.trim() || !bio.trim() || !location.trim() || !phoneNumber.trim() || !slug.trim() || !pickupAddress.trim() || !pickupCity.trim()) {
-      toast.error(lang === "ar" ? "جميع البيانات الأساسية وعنوان الاستلام التفصيلي مطلوبة." : "Studio Name, Slug, Bio, Location, Phone Number, and Pickup Address are all required.");
+      toast.error(lang === "ar" ? "جميع البيانات الأساسية وعنوان الاستلام التفصيلي مطلوبة." : "Shop Name, Handle, Bio, Location, Phone Number, and Pickup Address are all required.");
       return;
     }
     setIsSaving(true);
@@ -246,7 +246,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       });
       router.refresh();
     } else {
-      toast.error(res.error || "Failed to update studio");
+      toast.error(res.error || (lang === "ar" ? "فشل تحديث بيانات المتجر" : "Failed to update shop"));
     }
     setIsSaving(false);
   };
@@ -424,7 +424,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           </div>
                           <p className="text-[11px] font-medium text-charcoal/60 ms-2 mt-1.5 flex items-center gap-1.5 flex-wrap min-w-0">
                             <span className="shrink-0">{dict.studio_profile.public_link}</span>
-                            <span className="font-mono text-accent font-bold dir-ltr break-all">giftisan.com/artisans/{slug || "your-studio-link"}</span>
+                            <span className="font-mono text-accent font-bold dir-ltr break-all">giftisan.com/artisans/{slug || "your-shop-link"}</span>
                           </p>
                         </div>
                       </div>

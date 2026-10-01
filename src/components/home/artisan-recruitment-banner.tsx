@@ -68,7 +68,7 @@ export function ArtisanRecruitmentBanner({ dict }: ArtisanRecruitmentBannerProps
               <div className="flex items-center gap-1.5 justify-center lg:justify-start text-accent-light">
                 <ShieldCheck className="w-4 h-4" />
                 <span className="text-xs sm:text-sm font-bold text-white">
-                  {isArabic ? "استوديو موثق" : "Verified Badge"}
+                  {isArabic ? "متجر موثق" : "Verified Badge"}
                 </span>
               </div>
               <p className="text-[11px] text-white/60">
@@ -83,7 +83,7 @@ export function ArtisanRecruitmentBanner({ dict }: ArtisanRecruitmentBannerProps
               href="/become-artisan"
               className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-accent text-white font-bold text-xs sm:text-sm hover:bg-accent-dark transition-all duration-200 shadow-md active:scale-95"
             >
-              <span>{isArabic ? "قدم لفتح استوديو" : "Apply to Open a Studio"}</span>
+              <span>{isArabic ? "قدم لفتح متجرك" : "Apply to Open a Shop"}</span>
               <ArrowRight className="w-4 h-4 ms-2 rtl:rotate-180" />
             </Link>
 

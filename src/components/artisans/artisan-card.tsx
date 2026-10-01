@@ -80,7 +80,7 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
 
   const productCount = approvedProducts.length;
   const isArabic = dict?.common?.home === "الرئيسية";
-  const viewStudioText = isArabic ? "زيارة المتجر" : "Visit Studio";
+  const viewStudioText = isArabic ? "زيارة المتجر" : "Visit Shop";
 
   // 1. FIRST PRIORITY: Exactly 1 primary image from each DIFFERENT product
   const previewTiles: PreviewTile[] = [];
@@ -315,7 +315,7 @@ export function ArtisanCard({ artisan, dict }: ArtisanCardProps) {
         <button
           type="button"
           onClick={toggleFollow}
-          aria-label="Favorite studio"
+          aria-label="Favorite shop"
           className={cn(
             "p-2 rounded-full border transition-all shrink-0 active:scale-75",
             isFollowed

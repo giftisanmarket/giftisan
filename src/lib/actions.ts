@@ -1605,7 +1605,7 @@ export async function requestPayoutAction(
     });
 
     if (!artisan || artisan.userId !== session.user.id) {
-      return { error: "You are not authorized to make withdrawal requests for this studio" };
+      return { error: "You are not authorized to make withdrawal requests for this shop" };
     }
 
     const balance = artisan.balances[0] || { withdrawable: 0 };
@@ -1931,7 +1931,7 @@ export async function updateArtisanProfile(userId: string, data: any) {
     }
 
     if (!data.studioName?.trim() || !data.slug?.trim() || !data.bio?.trim() || !data.location?.trim() || !data.phoneNumber?.trim() || !data.pickupAddress?.trim() || !data.pickupCity?.trim()) {
-      return { error: "Studio Name, Handle (Slug), Bio, Location, Phone Number, and Pickup Address are all required." };
+      return { error: "Shop Name, Handle (Slug), Bio, Location, Phone Number, and Pickup Address are all required." };
     }
 
     // Only generate slug if it's not manually provided OR it's a new profile
@@ -2020,9 +2020,9 @@ export async function updateArtisanProfile(userId: string, data: any) {
     console.error("Update artisan error:", error);
     // Return specific message for unique constraint (slug/studioName)
     if (error.code === 'P2002') {
-      return { error: "This Studio Name is already taken. Please try another one." };
+      return { error: "This Shop Name is already taken. Please try another one." };
     }
-    return { error: error.message || "Failed to update studio profile" };
+    return { error: error.message || "Failed to update shop profile" };
   }
 }
 
@@ -2122,7 +2122,7 @@ export async function createProduct(artisanId: string, formData: FormData) {
     });
 
     if (!artisan || artisan.userId !== session.user.id) {
-      return { error: "You are not authorized to list creations in this studio" };
+      return { error: "You are not authorized to list creations in this shop" };
     }
 
     const data = {
@@ -2958,7 +2958,7 @@ export async function promoteToArtisan(userId: string, studioData: any) {
     });
 
     if (!studioData.studioName?.trim() || !studioData.bio?.trim() || !studioData.location?.trim() || !studioData.phoneNumber?.trim()) {
-      return { error: "Studio Name, Bio, Location, and Phone Number are all required for artisan registration." };
+      return { error: "Shop Name, Bio, Location, and Phone Number are all required for artisan registration." };
     }
 
     const baseSlug = slugify(studioData.studioName);
@@ -3280,7 +3280,7 @@ export async function updateArtisanStatus(artisanId: string, status: "PENDING" |
     return { success: true };
   } catch (error) {
     console.error("Update status error:", error);
-    return { error: "Failed to update studio status" };
+    return { error: "Failed to update shop status" };
   }
 }
 

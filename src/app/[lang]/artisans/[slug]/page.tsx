@@ -151,7 +151,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: ogImage,
         width: 1200,
         height: 630,
-        alt: lang === 'ar' ? `استوديو ${data.name || ""}` : `The ${data.name || ""} Studio`
+        alt: lang === 'ar' ? `متجر ${data.name || ""}` : `${data.name || ""} Shop`
       }],
       type: "profile",
     },

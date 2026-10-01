@@ -287,7 +287,7 @@ export function FloatingChatHub({ dict, lang }: { dict: any; lang: string }) {
 
   // Safe UI fallback dictionary parameters
   const ui = {
-    launcherTitle: isRtl ? "مركز محادثات الأستوديو" : "Studio Chat Hub",
+    launcherTitle: isRtl ? "مركز محادثات المتجر" : "Shop Chat Hub",
     activeTitle: isRtl ? "محادثاتك النشطة" : "Active Client Threads",
     back: isRtl ? "عودة" : "Back",
     noThreads: isRtl ? "لا توجد رسائل واردة بعد" : "No client inquiries yet",

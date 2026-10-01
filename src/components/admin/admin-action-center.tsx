@@ -59,7 +59,7 @@ export function AdminActionCenter({ stats, dict, isAr }: AdminActionCenterProps)
   const actionItems = [
     {
       count: pendingArtisans,
-      label: isAr ? "استوديوهات حرفية بانتظار الاعتماد" : "Artisan Studios awaiting approval",
+      label: isAr ? "متاجر حرفية بانتظار الاعتماد" : "Artisan Shops awaiting approval",
       href: "/admin/users?filter=PENDING",
       icon: Store,
       badgeColor: "bg-amber-500 text-white",

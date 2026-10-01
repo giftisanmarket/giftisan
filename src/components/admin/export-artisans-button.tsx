@@ -22,7 +22,7 @@ export default function ExportArtisansButton({ users, dict }: { users: any[]; di
     // Filter only artisans
     const artisans = users.filter(u => u.role === "ARTISAN");
     
-    const headers = ["Studio Name", "Artisan Name", "Email", "Phone Number", "Location"];
+    const headers = ["Shop Name", "Artisan Name", "Email", "Phone Number", "Location"];
     const rows = artisans.map(u => [
       u.artisanProfile?.studioName || u.name,
       u.name,

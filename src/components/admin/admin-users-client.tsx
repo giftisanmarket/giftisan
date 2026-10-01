@@ -123,7 +123,7 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
             {dict.admin?.artisans_title || "Artisans"} & <span className="serif italic text-accent font-normal">{dict.admin?.users_accent || "Users"}</span>
           </h1>
           <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-md">
-            {dict.admin?.manage_members_desc || "Manage permissions, approve artisan studios, set commission rates, and audit platform activity."}
+            {dict.admin?.manage_members_desc || "Manage permissions, approve artisan shops, set commission rates, and audit platform activity."}
           </p>
         </div>
 
@@ -406,10 +406,10 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
                           <div className="flex flex-col gap-3 min-w-0">
                             <div className="space-y-1">
                               <p className="font-bold text-primary text-sm truncate">
-                                {user.artisanProfile.studioName || `${user.name}'s Studio`}
+                                {user.artisanProfile.studioName || `${user.name}'s Shop`}
                               </p>
                               <p className="text-[10px] text-charcoal/40 italic">
-                                {user.artisanProfile.location || dict.admin?.global_studio || "Global Studio"}
+                                {user.artisanProfile.location || dict.admin?.global_studio || "Global Shop"}
                               </p>
                             </div>
                             <div className="flex flex-col gap-2">
@@ -417,7 +417,7 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
                                  href={`/studio?artisanUserId=${user.id}`}
                                  className="h-8 md:h-9 px-4 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary-light transition-all active:scale-95 shadow-sm"
                                >
-                                 {dict.admin?.preview_studio || "Preview Studio"}
+                                 {dict.admin?.preview_studio || "Preview Shop"}
                                </Link>
                                <VerifyArtisanButton 
                                  artisanId={user.artisanProfile.id} 

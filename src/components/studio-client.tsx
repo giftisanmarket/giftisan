@@ -352,7 +352,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   <div className="space-y-4">
                     {[
                       {
-                        label: dict.studio.checklist_settings || "Fill required studio details in Settings",
+                        label: dict.studio.checklist_settings || "Fill required shop details in Settings",
                         done: !!artisan.studioName?.trim() && !!artisan.slug?.trim() && !!artisan.bio?.trim() && !!artisan.location?.trim() && !!artisan.phoneNumber?.trim() && !!artisan.pickupAddress?.trim() && !!artisan.pickupCity?.trim(),
                         link: "#settings"
                       },
@@ -442,7 +442,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                       </span>
                     </div>
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading font-black leading-tight tracking-tight">
-                      {artisan.studioName || `${artisan.user.name}'s Studio`}
+                      {artisan.studioName || (lang === "ar" ? `متجر ${artisan.user.name}` : `${artisan.user.name}'s Shop`)}
                     </h1>
                     {artisan.bio && (
                       <p className="text-white/70 text-xs md:text-sm max-w-xl italic font-medium leading-relaxed line-clamp-1">
@@ -777,7 +777,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
 
                 <div className="grid grid-cols-2 gap-12 mb-12">
                   <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.artisan_studio || "Artisan Studio"}</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin?.artisan_studio || (lang === "ar" ? "متجر الحرفي" : "Artisan Shop")}</h3>
                     <div className="space-y-1">
                       <p className="text-lg font-black text-primary">{artisan.studioName || artisan.user.name}</p>
                       <p className="text-sm font-bold text-charcoal/60">{artisan.location}</p>

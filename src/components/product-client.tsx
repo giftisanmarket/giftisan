@@ -754,7 +754,7 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
                         <BespokeImage type="artisan" id={product.artisan.id} src={product.artisan.avatar} alt="" fill className="object-cover" />
                       </div>
                       <div className="text-white">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-accent-light mb-0.5">The Studio</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-accent-light mb-0.5">{lang === "ar" ? "المتجر" : "The Shop"}</p>
                         <h4 className="font-heading font-bold text-lg leading-none">{product.artisan.studioName || product.artisan.user.name}</h4>
                       </div>
                     </div>

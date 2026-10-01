@@ -20,7 +20,7 @@ export function ArtisanSpotlightSection({ artisans, dict }: ArtisanSpotlightSect
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent text-[11px] font-bold uppercase tracking-wider mb-1.5">
             <Sparkles className="w-3 h-3" />
-            <span>{isArabic ? "استوديوهات الحرفيين" : "Maker Spotlight"}</span>
+            <span>{isArabic ? "متاجر الحرفيين" : "Maker Spotlight"}</span>
           </div>
           <h2 className="text-xl md:text-2xl lg:text-3xl font-heading font-bold text-primary italic serif">
             {isArabic
@@ -38,7 +38,7 @@ export function ArtisanSpotlightSection({ artisans, dict }: ArtisanSpotlightSect
           href="/artisans"
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-primary/20 hover:border-primary hover:bg-primary hover:text-cream text-xs font-bold text-primary transition-all group shrink-0 active:scale-95 shadow-2xs"
         >
-          <span>{isArabic ? "عرض جميع الاستوديوهات" : dict?.home?.view_studios || "Explore All Studios"}</span>
+          <span>{isArabic ? "عرض جميع المتاجر" : dict?.home?.view_studios || "Explore All Shops"}</span>
           <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
         </Link>
       </div>

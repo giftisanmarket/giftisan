@@ -43,7 +43,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
       }
 
       if (!formData.studioName.trim() || !formData.bio.trim() || !formData.location.trim() || !formData.phoneNumber.trim()) {
-        toast.error(lang === 'ar' ? 'جميع الحقول (اسم الاستوديو، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Studio name, location, phone number, and bio are all required.');
+        toast.error(lang === 'ar' ? 'جميع الحقول (اسم المتجر، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Shop name, location, phone number, and bio are all required.');
         setIsLoading(false);
         return;
       }
@@ -282,7 +282,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
             <div className="hidden md:block p-8 bg-primary rounded-[2rem] text-white space-y-4">
               <h4 className="font-heading font-bold text-xl">Need Help?</h4>
               <p className="text-white/60 text-sm">
-                Our curation team is here to help you set up your studio and showcase your unique products.
+                Our curation team is here to help you set up your shop and showcase your unique products.
               </p>
               <a href="mailto:support@giftisan.com" className="inline-flex items-center gap-2 text-accent font-bold hover:gap-3 transition-all">
                 Contact Curation <ArrowRight className="w-4 h-4" />
@@ -365,7 +365,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
                   disabled={isLoading}
                   className="w-full h-13 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-lg active:scale-95 group"
                 >
-                  {isLoading ? dict.home.launch_loading : (dict.home.launch_button || "Open Your Studio")}
+                  {isLoading ? dict.home.launch_loading : (dict.home.launch_button || "Open Your Shop")}
                   <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                 </button>
                 <div className="flex items-center gap-2 text-[10px] md:text-xs text-charcoal/40 font-medium">

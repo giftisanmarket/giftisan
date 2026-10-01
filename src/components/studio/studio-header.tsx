@@ -139,22 +139,22 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
     },
   ], [lang, pathname, dict, isAr, searchParams]);
 
-  const studioDisplayName = artisan?.studioName || user.name || (isAr ? "استوديو الحرفي" : "Artisan Studio");
+  const studioDisplayName = artisan?.studioName || user.name || (isAr ? "متجر الحرفي" : "Artisan Shop");
   const avatarImage = artisan?.avatar || user.image;
   const isVerified = artisan?.status === "APPROVED";
-  const publicShopUrl = artisan?.slug ? `/${lang}/artisans/${artisan.slug}` : null;
+  const publicShopUrl = isVerified && artisan?.slug ? `/${lang}/artisans/${artisan.slug}` : null;
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-xl border-b border-primary/10 shadow-xs">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-16 md:h-20 flex items-center justify-between gap-3 md:gap-6">
         
-        {/* Brand Logo + Studio Indicator (Home Page Logo + Studio Label, linking to /studio) */}
+        {/* Brand Logo + Shop Subtitle (Stacked layout matching Admin branding) */}
         <Link 
           href={`/${lang}/studio`} 
-          className="flex items-center gap-1.5 md:gap-2.5 shrink-0 group focus:outline-none"
-          title={dict?.studio?.dashboard || (isAr ? "لوحة تحكم الاستوديو" : "Studio Dashboard")}
+          className="flex items-center gap-2 md:gap-3 shrink-0 group focus:outline-none"
+          title={dict?.studio?.dashboard || (isAr ? "لوحة تحكم المتجر" : "Shop Dashboard")}
         >
-          <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden shadow-lg shadow-primary/5 rounded-md shrink-0">
+          <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden shadow-sm rounded-xl border border-primary/10 shrink-0 group-hover:scale-105 transition-transform duration-300">
             <Image
               src="/icon.png"
               alt="Giftisan Logo"
@@ -163,13 +163,12 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
               sizes="40px"
             />
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tighter">
+          <div className="flex flex-col">
+            <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tighter leading-none">
               Giftisan
             </span>
-            <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
-              <Sparkles className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
-              {isAr ? "الاستوديو" : "Studio"}
+            <span className="text-[10px] md:text-[11px] text-accent font-black uppercase tracking-widest leading-none mt-1">
+              {isAr ? "المتجر" : "Shop"}
             </span>
           </div>
         </Link>
@@ -262,7 +261,7 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
                       {isVerified ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-50 text-green-700 border border-green-200">
                           <CheckCircle2 className="w-3 h-3 text-green-600" />
-                          {isAr ? "استوديو موثق" : "Verified Studio"}
+                          {isAr ? "متجر موثق" : "Verified Shop"}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
@@ -298,24 +297,38 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
                     </Link>
                   </div>
 
-                  {/* Studio Quick Shortcuts */}
+                  {/* Shop Quick Shortcuts */}
                   <div className="p-2 border-b border-primary/5 space-y-0.5">
+                    <Link
+                      href={`/${lang}/studio/new-product`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-accent/5 text-charcoal/80 font-bold text-xs transition-colors group"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-accent group-hover:rotate-90 transition-transform duration-300" />
+                      <span>{dict?.studio?.add_treasure || (isAr ? "إضافة منتج جديد" : "Add New Product")}</span>
+                    </Link>
                     <Link
                       href={`/${lang}/studio?tab=settings`}
                       onClick={() => setIsProfileOpen(false)}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors"
                     >
                       <Settings className="w-3.5 h-3.5 text-accent" />
-                      <span>{dict?.studio?.studio_settings || (isAr ? "إعدادات الاستوديو" : "Studio Settings")}</span>
+                      <span>{dict?.studio?.studio_settings || (isAr ? "إعدادات المتجر" : "Shop Settings")}</span>
                     </Link>
-                    <Link
-                      href={`/${lang}/profile`}
-                      onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors"
-                    >
-                      <User className="w-3.5 h-3.5 text-accent" />
-                      <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
-                    </Link>
+                    {publicShopUrl && (
+                      <Link
+                        href={publicShopUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center justify-between px-3 py-2 rounded-2xl hover:bg-primary/5 text-charcoal/80 font-bold text-xs transition-colors group"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <ExternalLink className="w-3.5 h-3.5 text-accent" />
+                          <span>{isAr ? "معاينة المتجر المباشر" : "View Live Shop"}</span>
+                        </div>
+                      </Link>
+                    )}
                     <a
                       href={WHATSAPP_COMMUNITY_URL}
                       target="_blank"
@@ -428,16 +441,6 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
                     </Link>
                   );
                 })}
-
-                {/* My Account Profile */}
-                <Link
-                  href={`/${lang}/profile`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-sm text-charcoal/80 hover:bg-primary/5 hover:text-primary transition-all"
-                >
-                  <User className="w-4 h-4 text-accent" />
-                  <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
-                </Link>
 
                 {/* Artisan WhatsApp Group */}
                 <a

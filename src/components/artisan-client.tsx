@@ -70,7 +70,7 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${displayName} | Giftisan Studio`,
+      title: `${displayName} | Giftisan Shop`,
       text: `${dict.home.category_desc_prefix} ${displayName} ${dict.home.category_desc_suffix}`,
       url: window.location.href,
     };

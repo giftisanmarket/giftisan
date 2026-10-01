@@ -127,7 +127,7 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
         <div className="space-y-2 max-w-xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#064E3B]/10 text-[#064E3B] text-xs font-bold">
             <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
-            {isRtl ? "رابط البايو المعتمد لمتجرك" : "Official Studio Bio Link"}
+            {isRtl ? "رابط البايو المعتمد لمتجرك" : "Official Shop Bio Link"}
           </div>
           <h2 className="text-2xl md:text-3xl font-heading font-bold text-[#064E3B] tracking-tight">
             {isRtl ? "رابط البايو & QR Code" : "Bio Link & Packaging QR"}
@@ -196,7 +196,7 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
                     type="text"
                     value={instagram}
                     onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="e.g. my_studio"
+                    placeholder="e.g. my_shop"
                     className="w-full bg-cream/40 border border-[#064E3B]/15 rounded-xl px-3.5 py-2.5 text-xs font-medium text-charcoal focus:outline-none focus:border-[#064E3B] transition"
                   />
                 </div>
@@ -211,7 +211,7 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
                     type="text"
                     value={tiktok}
                     onChange={(e) => setTiktok(e.target.value)}
-                    placeholder="e.g. @studio_crafts"
+                    placeholder="e.g. @shop_crafts"
                     className="w-full bg-cream/40 border border-[#064E3B]/15 rounded-xl px-3.5 py-2.5 text-xs font-medium text-charcoal focus:outline-none focus:border-[#064E3B] transition"
                   />
                 </div>
@@ -226,7 +226,7 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
                     type="text"
                     value={facebook}
                     onChange={(e) => setFacebook(e.target.value)}
-                    placeholder="e.g. mystudio"
+                    placeholder="e.g. myshop"
                     className="w-full bg-cream/40 border border-[#064E3B]/15 rounded-xl px-3.5 py-2.5 text-xs font-medium text-charcoal focus:outline-none focus:border-[#064E3B] transition"
                   />
                 </div>
@@ -241,7 +241,7 @@ export function BioLinkTab({ artisan, lang }: BioLinkTabProps) {
                     type="text"
                     value={pinterest}
                     onChange={(e) => setPinterest(e.target.value)}
-                    placeholder="e.g. studio"
+                    placeholder="e.g. shop"
                     className="w-full bg-cream/40 border border-[#064E3B]/15 rounded-xl px-3.5 py-2.5 text-xs font-medium text-charcoal focus:outline-none focus:border-[#064E3B] transition"
                   />
                 </div>

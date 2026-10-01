@@ -51,7 +51,7 @@ export default function FavoritesClient({ dict, allArtisans = [] }: FavoritesCli
               {dict.home?.favorites_desc ||
                 (isArabic
                   ? "تشكيلة مختارة من منتجاتك ومتاجرك المفضلة. احفظها لوقت لاحق أو أضفها إلى مجموعتك اليوم."
-                  : "A curated collection of your favorite artisanal products and studios. Save them for later or add them to your collection.")}
+                  : "A curated collection of your favorite artisanal products and shops. Save them for later or add them to your collection.")}
             </p>
           </header>
 
@@ -92,7 +92,7 @@ export default function FavoritesClient({ dict, allArtisans = [] }: FavoritesCli
               )}
             >
               <Store className="w-4 h-4" />
-              <span>{isArabic ? "المتاجر والحرفيون" : "Studios & Makers"}</span>
+              <span>{isArabic ? "المتاجر والحرفيون" : "Shops & Makers"}</span>
               <span
                 className={cn(
                   "px-2 py-0.5 rounded-full text-xs font-mono",
@@ -265,12 +265,12 @@ export default function FavoritesClient({ dict, allArtisans = [] }: FavoritesCli
                     <Store className="w-10 h-10 text-primary/20" />
                   </div>
                   <h2 className="text-2xl font-heading font-bold text-primary">
-                    {isArabic ? "لم تقم بحفظ أي متجر بعد" : "No favorite studios yet"}
+                    {isArabic ? "لم تقم بحفظ أي متجر بعد" : "No favorite shops yet"}
                   </h2>
                   <p className="text-charcoal/60 mt-2 mb-8">
                     {isArabic
                       ? "استكشف سجل الحرفيين وتعرف على صناع الحرف المصريين المبدعين واحفظ متاجرك المفضلة."
-                      : "Explore the Master Registry to discover and save Egyptian craft studios you love."}
+                      : "Explore the Master Registry to discover and save Egyptian craft shops you love."}
                   </p>
                   <Link
                     href="/artisans"

@@ -32,13 +32,13 @@ export function Navbar({ dict }: { dict?: any }) {
       manage_profile: "Manage Profile",
       support: "Support",
       become_artisan: "Apply to Join",
-      open_studio: "Open Your Studio",
+      open_studio: "Open Your Shop",
       start_shopping: "Start Shopping",
       search_placeholder: "Search for unique gifts...",
       explore_trending: "Explore Trending Products",
       all_categories: "Browse All Categories",
       sell: "Sell",
-      pro_studio: "Pro Studio",
+      pro_studio: "Shop Manager",
       sign_in: "Sign In",
       sign_out: "Sign Out",
       menu: "Menu",
@@ -333,7 +333,7 @@ export function Navbar({ dict }: { dict?: any }) {
                     {suggestions.artisans.length > 0 && (
                       <div className="space-y-2 md:space-y-3">
                         <p className="text-[9px] font-black text-primary/30 uppercase tracking-[0.2em]">
-                          {pathname.includes("/ar") ? "الاستوديوهات والحرفيون" : "Makers & Studios"}
+                          {pathname.includes("/ar") ? "المتاجر والحرفيون" : "Makers & Shops"}
                         </p>
                         <div className="space-y-1.5">
                           {suggestions.artisans.map((artisan) => (
@@ -490,11 +490,11 @@ export function Navbar({ dict }: { dict?: any }) {
               )}
             </Link>
 
-            {/* Studio Hub (Artisans only - Desktop) */}
+            {/* Shop Hub (Artisans only - Desktop) */}
             {session?.user?.role === "ARTISAN" && (
               <Link
                 href="/studio"
-                title={d.common.pro_studio || "Studio Hub"}
+                title={d.common.pro_studio || "Shop Manager"}
                 className={cn(
                   "hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-all relative active:scale-95",
                   pathname.startsWith("/studio")
@@ -621,7 +621,7 @@ export function Navbar({ dict }: { dict?: any }) {
                             className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors text-accent font-black"
                           >
                             <Store className="w-4 h-4 text-accent" />
-                            <span>{d.common.pro_studio || "Studio Hub"}</span>
+                            <span>{d.common.pro_studio || "Shop Manager"}</span>
                           </Link>
                         ) : (
                           <Link

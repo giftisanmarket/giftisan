@@ -77,7 +77,7 @@ export function Footer({ dict }: FooterProps) {
                   </li>
                   <li>
                     <Link href="/artisans" className="hover:text-primary hover:underline transition-all">
-                      {isArabic ? "استوديوهات الحرفيين" : "Artisan Studios"}
+                      {isArabic ? "متاجر الحرفيين" : "Artisan Shops"}
                     </Link>
                   </li>
                   <li>
@@ -96,7 +96,7 @@ export function Footer({ dict }: FooterProps) {
                 <ul className="space-y-2.5 text-[13px] text-charcoal/80">
                   <li>
                     <Link href="/become-artisan" className="hover:text-primary hover:underline transition-all">
-                      {isArabic ? "افتح استوديو في جيفتيزان" : "Sell on Giftisan"}
+                      {isArabic ? "افتح متجرك في جيفتيزان" : "Sell on Giftisan"}
                     </Link>
                   </li>
                   <li>

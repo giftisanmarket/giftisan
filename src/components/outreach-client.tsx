@@ -289,7 +289,7 @@ export function OutreachClient({
         setGmailBody(`
           <p>أهلاً بك،</p>
           <p>لقد لفتت إبداعاتكم ومنتجاتكم اليدوية الراقية انتباه فريق التقييم لدينا في <strong>جيفتيزان</strong>.</p>
-          <p>نحن منصة متخصصة تسعى لتمكين الحرفيين المحليين وإيصال إبداعاتهم إلى جمهور يقدر الفن والأصالة. يسرنا دعوتكم لافتتاح استوديو خاص بكم وعرض منتجاتكم على المنصة.</p>
+          <p>نحن منصة متخصصة تسعى لتمكين الحرفيين المحليين وإيصال إبداعاتهم إلى جمهور يقدر الفن والأصالة. يسرنا دعوتكم لافتتاح متجر خاص بكم وعرض منتجاتكم على المنصة.</p>
           <p>يسعدنا ترتيب جلسة تعريفية سريعة للإجابة عن أي استفسار.</p>
           <p>دمتم مبدعين،</p>
         `);
@@ -299,7 +299,7 @@ export function OutreachClient({
         setGmailBody(`
           <p>Hello,</p>
           <p>Our curation team at <strong>Giftisan</strong> was truly captivated by your exceptional craftsmanship and artistic creations.</p>
-          <p>We are a dedicated marketplace celebrating authentic craftsmanship and connecting passionate artisans with collectors who appreciate quality. We would be thrilled to invite you to establish your own studio on our platform.</p>
+          <p>We are a dedicated marketplace celebrating authentic craftsmanship and connecting passionate artisans with collectors who appreciate quality. We would be thrilled to invite you to establish your own shop on our platform.</p>
           <p>Let us know if you would like a brief walkthrough to answer any questions.</p>
           <p>Warmest regards,</p>
         `);

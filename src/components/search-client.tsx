@@ -1005,7 +1005,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
                 {availableLocations.length > 0 && (
                   <div>
                     <label className="text-xs font-bold text-charcoal/70 uppercase tracking-wider mb-2.5 block">
-                      {isAr ? "المحافظة / الورشة" : "Governorate / Studio Location"}
+                      {isAr ? "المحافظة / الورشة" : "Governorate / Shop Location"}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       <button

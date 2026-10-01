@@ -10,7 +10,7 @@ export function PreLaunchBanner({ dict }: { dict?: any }) {
     common: {
       prelaunch_protocol: "Platform Announcement",
       soft_launch_in_progress: "This is a new website and everyone should be prepared.",
-      complete_first_order: "Collectors are making their accounts and artisans are preparing their studios.",
+      complete_first_order: "Collectors are making their accounts and artisans are preparing their shops.",
       manual_shipping_note: "The payment system will be implemented soon."
     }
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle, CheckCircle2, MapPin, Sparkles, Store, ChevronDown, ShieldCheck } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, MessageSquare, HelpCircle, CheckCircle2, MapPin, Sparkles, Store, ChevronDown, ShieldCheck, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useNotifications } from "./notification-provider";
@@ -30,6 +30,8 @@ export function Navbar({ dict }: { dict?: any }) {
       home: "Home",
       artisans: "Artisans",
       manage_profile: "Manage Profile",
+      purchases_orders: "Purchases & Orders",
+      your_account: "Your Account",
       support: "Support",
       become_artisan: "Apply to Join",
       open_studio: "Open Your Shop",
@@ -599,6 +601,15 @@ export function Navbar({ dict }: { dict?: any }) {
                         </Link>
 
                         <Link
+                          href="/profile"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors"
+                        >
+                          <Package className="w-4 h-4 text-primary/40" />
+                          <span>{d.common.purchases_orders || "Purchases & Orders"}</span>
+                        </Link>
+
+                        <Link
                           href="/favorites"
                           onClick={() => setIsProfileMenuOpen(false)}
                           className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cream/60 transition-colors"
@@ -856,21 +867,25 @@ export function Navbar({ dict }: { dict?: any }) {
             {/* User Specific Links */}
             {session ? (
               <div className="space-y-4">
-                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{d.common.your_studio_hub}</p>
+                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">
+                  {session.user?.role === "ARTISAN" 
+                    ? (d.common.your_studio_hub || "Your Shop") 
+                    : (d.common.your_account || "Your Account")}
+                </p>
                 <div className="grid grid-cols-2 gap-3">
                   <Link
                     href="/profile"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
+                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center active:scale-95 transition-transform"
                   >
-                    <User className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">{d.common.profile}</span>
+                    <Package className="w-5 h-5 text-primary/40 mb-2" />
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.purchases_orders || (pathname.startsWith('/ar') ? "الطلبات" : "Orders")}</span>
                   </Link>
 
                   <Link
                     href="/favorites"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center"
+                    className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center active:scale-95 transition-transform"
                   >
                     <Heart className="w-5 h-5 text-primary/40 mb-2" />
                     <span className="text-xs font-bold text-primary uppercase">{d.common.favorites}</span>
@@ -895,12 +910,12 @@ export function Navbar({ dict }: { dict?: any }) {
                     </Link>
                   )}
                   <Link
-                    href="/contact"
+                    href="/profile"
                     onClick={() => setIsMenuOpen(false)}
                     className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-primary/5 text-center active:scale-95 transition-transform"
                   >
-                    <HelpCircle className="w-5 h-5 text-primary/40 mb-2" />
-                    <span className="text-xs font-bold text-primary uppercase">{d.common.support}</span>
+                    <User className="w-5 h-5 text-primary/40 mb-2" />
+                    <span className="text-xs font-bold text-primary uppercase">{d.common.profile}</span>
                   </Link>
                 </div>
               </div>

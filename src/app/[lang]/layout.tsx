@@ -112,6 +112,7 @@ export default async function RootLayout({
     <html
       lang={lang}
       dir={dir}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>

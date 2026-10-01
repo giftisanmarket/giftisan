@@ -8,6 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { promoteToArtisan } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users, Phone } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
@@ -95,6 +96,13 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
       title: dict.home.artisan_onboarding?.benefits?.badge_title || "Founding Badge",
       desc: dict.home.artisan_onboarding?.benefits?.badge_desc || "A permanent mark of excellence on your studio profile.",
       icon: <BadgeCheck className="w-6 h-6 text-accent" />,
+    },
+    {
+      title: lang === 'ar' ? "دعم ومساعدة مباشرة" : "Dedicated Team Support",
+      desc: lang === 'ar' 
+        ? "خط واتساب مباشر مع إدارة جيفتيزان لمساعدتك في كل خطوة، الإجابة عن استفساراتك، وحل أي مشكلة تقنية فوراً." 
+        : "A direct WhatsApp support channel with the Giftisan team to assist you with onboarding, questions, and instant help.",
+      icon: <FaWhatsapp className="w-6 h-6 text-accent" />,
     },
   ];
 
@@ -216,7 +224,7 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
             ))}
           </div>
           {/* Desktop: cards grid */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, i) => (
               <motion.div
                 key={i}

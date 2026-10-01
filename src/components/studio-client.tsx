@@ -45,6 +45,8 @@ import {
   MapPin,
   Link2
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
+import { WHATSAPP_COMMUNITY_URL } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -66,6 +68,7 @@ import { PaymentTab } from "./studio/payment-tab";
 import { ReviewsTab } from "./studio/reviews-tab";
 import { SettingsTab } from "./studio/settings-tab";
 import { BioLinkTab } from "./studio/bio-link-tab";
+import { ArtisanSupportModal } from "./studio/artisan-support-modal";
 
 
 interface StudioClientProps {
@@ -101,6 +104,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [shippingItem, setShippingItem] = useState<any | null>(null);
   const [trackingNumber, setTrackingNumber] = useState("");
@@ -452,14 +456,14 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   </div>
                 </div>
 
-                <div className="flex gap-3 w-full md:w-auto justify-center sm:justify-end">
-                  {isAdminPreview && (
+                {isAdminPreview && (
+                  <div className="flex flex-wrap gap-3 w-full md:w-auto justify-center sm:justify-end items-center">
                     <div className="h-10 md:h-12 px-5 bg-white/10 backdrop-blur-xl text-white font-bold rounded-xl md:rounded-full border border-white/20 flex items-center gap-2.5 text-xs md:text-sm shadow-lg">
                       <ShieldCheck className="w-4 h-4 text-accent-light" />
                       {dict.studio.auditor_access}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               <div className="absolute top-0 end-0 w-[300px] h-[300px] bg-accent/15 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             </div>
@@ -859,6 +863,30 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
             </>
           )}
         </AnimatePresence>
+
+        {/* Floating WhatsApp Artisan Support Bubble */}
+        <div className="fixed bottom-6 end-6 z-40 print:hidden">
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => setIsSupportModalOpen(true)}
+            className="flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded-full bg-[#25D366] text-white font-bold text-xs sm:text-sm shadow-2xl shadow-[#25D366]/40 hover:bg-[#20ba59] border-2 border-white/30 transition-all cursor-pointer"
+            title={lang === "ar" ? "تواصل مع فريق الدعم والمساعدة على واتساب" : "Chat with Giftisan Support on WhatsApp"}
+          >
+            <FaWhatsapp className="w-5 h-5" />
+            <span className="hidden sm:inline">{lang === "ar" ? "مساعدة الصُنّاع" : "Artisan Help"}</span>
+          </motion.button>
+        </div>
+
+        {/* Artisan Support Popup Modal */}
+        <ArtisanSupportModal
+          isOpen={isSupportModalOpen}
+          onClose={() => setIsSupportModalOpen(false)}
+          lang={lang}
+        />
       </div>
     </>
   );

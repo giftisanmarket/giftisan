@@ -45,7 +45,7 @@ export function Hero({ dict }: HeroProps) {
                 fill
                 priority
                 className="object-cover object-[center_60%] group-hover/mobile:scale-104 transition-transform duration-700 ease-out"
-                sizes="100vw"
+                sizes="(max-width: 640px) 100vw, 450px"
               />
             </div>
           </Link>

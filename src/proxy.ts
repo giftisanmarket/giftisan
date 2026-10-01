@@ -112,6 +112,8 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Catch everything except static assets
-  matcher: '/((?!_next/static|_next/image|favicon.ico).*)',
+  // Catch everything except API routes, static assets, and metadata files
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|icon.png|manifest.webmanifest|robots.txt|sitemap.xml).*)',
+  ],
 };

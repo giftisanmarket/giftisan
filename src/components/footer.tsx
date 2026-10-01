@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { Globe, Mail } from "lucide-react";
 
@@ -158,57 +159,16 @@ export function Footer({ dict }: FooterProps) {
           </div>
 
           {/* Right: Signature Handcrafted Artisan Illustration */}
-          <div className="lg:col-span-4 flex justify-center lg:justify-end">
-            <div className="w-full max-w-[260px] sm:max-w-[290px] select-none">
-              <svg 
-                viewBox="0 0 320 220" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-auto drop-shadow-2xs"
-                aria-label="Giftisan Egyptian Artisans Crafting"
-              >
-                {/* Framed Canvas */}
-                <rect x="135" y="45" width="130" height="95" rx="8" stroke="#1F2937" strokeWidth="2.5" fill="#FFFFFF"/>
-                <rect x="142" y="52" width="116" height="81" rx="5" stroke="#1F2937" strokeWidth="1" strokeDasharray="3 3" fill="#FDFCF0"/>
-                
-                {/* Egyptian Botanical Lotus & Palm Motifs */}
-                <path d="M175 110C175 90 190 75 210 75C215 88 210 102 195 108C185 112 178 110 175 110Z" fill="#D97706" opacity="0.9"/>
-                <path d="M195 105C200 95 215 90 225 95C225 108 215 115 205 112" stroke="#064E3B" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="170" cy="85" r="4.5" fill="#D97706"/>
-                <circle cx="160" cy="98" r="3.5" fill="#064E3B"/>
-                <circle cx="225" cy="75" r="4" fill="#064E3B"/>
-
-                {/* Artisan 1 (Left - Maker in Terracotta Apron) */}
-                <circle cx="108" cy="72" r="11" fill="#D97706"/>
-                <path d="M102 78C102 72 108 67 114 67C121 67 126 72 126 80C126 87 119 92 112 92C106 92 102 85 102 78Z" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2"/>
-                <path d="M104 74C108 70 118 69 123 75" stroke="#1F2937" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="118" cy="77" r="1.5" fill="#1F2937"/>
-                <path d="M117 83C119 84 121 83 122 81" stroke="#1F2937" strokeWidth="1.5" strokeLinecap="round"/>
-                
-                {/* Apron in Giftisan Amber & Terracotta */}
-                <path d="M96 112C96 98 104 94 116 94C128 94 135 100 135 112L132 185H92L96 112Z" fill="#D97706" stroke="#1F2937" strokeWidth="2"/>
-                <path d="M108 94V125" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="3 3"/>
-                <path d="M100 135H128V155C128 159 124 163 120 163H108C104 163 100 159 100 155V135Z" fill="#B45309" stroke="#1F2937" strokeWidth="1.5"/>
-
-                {/* Arm & Paintbrush */}
-                <path d="M125 105C136 102 148 94 158 84" stroke="#1F2937" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="156" y1="86" x2="168" y2="76" stroke="#1F2937" strokeWidth="2.5" strokeLinecap="round"/>
-                <polygon points="167,77 172,72 170,71 165,76" fill="#D97706"/>
-
-                {/* Artisan 2 (Right - Craftsman in Giftisan Deep Forest Emerald Coat) */}
-                <circle cx="258" cy="80" r="13" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2"/>
-                <path d="M246 76C248 68 256 66 266 67C272 68 274 74 274 80C268 76 256 76 246 76Z" fill="#1F2937"/>
-                <path d="M240 102C230 108 220 125 210 145C222 152 238 154 252 145L265 185H295L285 110C282 102 270 96 258 96C250 96 244 99 240 102Z" fill="#064E3B"/>
-
-                {/* Hands holding the craft frame */}
-                <path d="M205 130C210 120 216 110 220 95" stroke="#1F2937" strokeWidth="2.5" strokeLinecap="round"/>
-                <circle cx="218" cy="94" r="4" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2"/>
-                <path d="M232 142C236 130 240 115 244 102" stroke="#1F2937" strokeWidth="2.5" strokeLinecap="round"/>
-                <circle cx="242" cy="100" r="4" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2"/>
-
-                {/* Workshop Baseline */}
-                <line x1="60" y1="185" x2="305" y2="185" stroke="#064E3B" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.3"/>
-              </svg>
+          <div className="lg:col-span-4 flex justify-center lg:justify-end items-end">
+            <div className="w-full max-w-[280px] sm:max-w-[320px] select-none">
+              <Image
+                src="/footer-artisan.jpg"
+                alt="Egyptian artisan handcrafting pottery — Giftisan"
+                width={640}
+                height={427}
+                className="w-full h-auto object-contain"
+                priority={false}
+              />
             </div>
           </div>
 

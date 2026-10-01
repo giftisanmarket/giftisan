@@ -201,7 +201,7 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isAr ? "ابحث باسم المستخدم، البريد، اسم الاستوديو، أو الهاتف..." : "Search by name, email, studio name, or phone..."}
+              placeholder={isAr ? "ابحث باسم المستخدم، البريد، اسم المتجر، أو الهاتف..." : "Search by name, email, shop name, or phone..."}
               className="w-full h-12 ps-11 pe-10 bg-cream/30 border border-primary/5 rounded-2xl text-xs font-bold text-primary placeholder:text-primary/30 focus:outline-none focus:border-accent focus:bg-white transition-all shadow-inner"
             />
             {searchQuery && (
@@ -291,10 +291,10 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
             ))}
           </div>
 
-          {/* Studio Status Filter */}
+          {/* Shop Status Filter */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 me-1">
-              {isAr ? "حالة الاستوديو:" : "Studio Status:"}
+              {dict.admin?.studio_status ? `${dict.admin.studio_status}:` : (isAr ? "حالة المتجر:" : "Shop Status:")}
             </span>
             {[
               { key: "ALL", label: isAr ? "الكل" : "All" },

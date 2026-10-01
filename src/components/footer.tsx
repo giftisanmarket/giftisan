@@ -162,10 +162,11 @@ export function Footer({ dict }: FooterProps) {
           <div className="lg:col-span-4 flex justify-center lg:justify-end items-end">
             <div className="w-full max-w-[280px] sm:max-w-[320px] select-none">
               <Image
-                src="/footer-artisan.jpg"
+                src="/footer-artisan.webp"
                 alt="Egyptian artisan handcrafting pottery — Giftisan"
                 width={640}
                 height={427}
+                sizes="(max-width: 640px) 280px, 320px"
                 className="w-full h-auto object-contain"
                 priority={false}
               />

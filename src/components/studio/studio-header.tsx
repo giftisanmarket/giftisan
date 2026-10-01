@@ -22,6 +22,8 @@ import {
   Sparkles,
   HelpCircle
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
+import { WHATSAPP_COMMUNITY_URL } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
@@ -314,6 +316,19 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
                       <User className="w-3.5 h-3.5 text-accent" />
                       <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
                     </Link>
+                    <a
+                      href={WHATSAPP_COMMUNITY_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsProfileOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 rounded-2xl hover:bg-emerald-50/70 text-charcoal/80 hover:text-emerald-800 font-bold text-xs transition-colors group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <FaWhatsapp className="w-3.5 h-3.5 text-[#25D366] transition-transform group-hover:scale-110" />
+                        <span>{dict?.studio?.whatsapp_community || (isAr ? "جروب واتساب الصنّاع" : "Artisan WhatsApp Group")}</span>
+                      </div>
+                      <ExternalLink className="w-3 h-3 text-charcoal/30 group-hover:text-emerald-700 rtl:rotate-180" />
+                    </a>
                     <Link
                       href={`/${lang}/contact`}
                       onClick={() => setIsProfileOpen(false)}
@@ -423,6 +438,21 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
                   <User className="w-4 h-4 text-accent" />
                   <span>{isAr ? "حسابي وملفي الشخصي" : "My Account Profile"}</span>
                 </Link>
+
+                {/* Artisan WhatsApp Group */}
+                <a
+                  href={WHATSAPP_COMMUNITY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-sm text-charcoal/80 hover:bg-emerald-50 hover:text-emerald-800 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <FaWhatsapp className="w-4 h-4 text-[#25D366] transition-transform group-hover:scale-110" />
+                    <span>{dict?.studio?.whatsapp_community || (isAr ? "جروب واتساب الصنّاع" : "Artisan WhatsApp Group")}</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-charcoal/30 group-hover:text-emerald-700 rtl:rotate-180" />
+                </a>
 
                 {/* Support */}
                 <Link

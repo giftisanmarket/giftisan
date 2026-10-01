@@ -19,6 +19,8 @@ interface ContactArtisanButtonProps {
   productImage?: string;
   artisanUserId: string;
   dict: any;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 const compressImage = (base64Str: string, maxWidth = 800, maxHeight = 800): Promise<string> => {
@@ -74,7 +76,9 @@ export function ContactArtisanButton({
   productName, 
   productImage,
   artisanUserId, 
-  dict 
+  dict,
+  className,
+  children
 }: ContactArtisanButtonProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -272,10 +276,14 @@ export function ContactArtisanButton({
     <>
       <button 
         onClick={handleOpenDrawer}
-        className="flex items-center gap-2 px-6 py-4 bg-white border-2 border-primary/10 rounded-2xl text-xs md:text-sm font-black text-primary uppercase tracking-widest hover:bg-primary/5 hover:border-accent hover:text-accent transition-all duration-300 shadow-sm active:scale-95"
+        className={className || "flex items-center gap-2 px-6 py-4 bg-white border-2 border-primary/10 rounded-2xl text-xs md:text-sm font-black text-primary uppercase tracking-widest hover:bg-primary/5 hover:border-accent hover:text-accent transition-all duration-300 shadow-sm active:scale-95"}
       >
-        <MessageSquare className="w-4 h-4" />
-        {dict.contact_artisan.message_artisan}
+        {children || (
+          <>
+            <MessageSquare className="w-4 h-4" />
+            {dict.contact_artisan?.message_artisan || "Message Shop"}
+          </>
+        )}
       </button>
 
       <AnimatePresence>

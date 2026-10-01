@@ -3,8 +3,10 @@
 import { useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
+import { TrustBar } from "@/components/home/trust-bar";
+import { GiftDiscoveryHub } from "@/components/home/gift-discovery-hub";
+import { ArtisanSpotlightRow } from "@/components/home/artisan-spotlight-row";
 import { ProductShelfRow, ShelfProduct } from "@/components/home/product-shelf-row";
-import { VisualGiftCategories } from "@/components/home/visual-gift-categories";
 import { MissionStatementBar } from "@/components/home/mission-statement-bar";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { Footer } from "@/components/footer";
@@ -63,26 +65,37 @@ export default function HomeClient({
       {/* Main Header / Sticky Navbar */}
       <Navbar dict={dict} />
 
-      {/* Giftisan Brand Hero */}
+      {/* 1. Giftisan Brand Hero: Direct Value Proposition */}
       <Hero artisanCount={artisanCount} dict={dict} />
 
-      {/* Primary Product Shelf ("Picks inspired by your shopping" - Trending Finds) */}
+      {/* 2. Trust Bar: High Reassurance for Buyers Directly Beneath Hero */}
+      <TrustBar dict={dict} />
+
+      {/* 3. Gift-First Discovery Concierge: Shop by Recipient, Occasion & Budget */}
+      <GiftDiscoveryHub dict={dict} />
+
+      {/* 4. Primary Product Shelf: Trending Handcrafted Gifts */}
       {mainTrending.length > 0 && (
         <ProductShelfRow
-          title={isArabic ? "مختارات مستوحاة من اهتماماتك" : "Picks inspired by your shopping"}
+          title={isArabic ? "أشهر الهدايا طلباً وإعجاباً" : "Popular Gifts Loved Right Now"}
           subtitle={
             isArabic
-              ? "قطع فريدة يدوية الصنع تحظى بإعجاب المتسوقين الآن"
-              : "Unique handmade creations shoppers are loving right now"
+              ? "قطع فريدة يدوية الصنع تحظى بإعجاب المتسوقين وتصلح كهدية لا تُنسى"
+              : "Handcrafted creations shoppers are choosing for special moments"
           }
-          viewAllHref="/products"
-          viewAllText={isArabic ? "عرض الكل" : "View all"}
+          viewAllHref="/gifts"
+          viewAllText={isArabic ? "تصفح دليل الهدايا" : "Browse Gifts Hub"}
           products={mainTrending}
           dict={dict}
         />
       )}
 
-      {/* 4. Category Shelf: Handcrafted Bags & Leather Goods */}
+      {/* 5. Artisan Spotlight: Real Egyptian Makers Behind the Products */}
+      {featuredArtisans.length > 0 && (
+        <ArtisanSpotlightRow artisans={featuredArtisans} dict={dict} />
+      )}
+
+      {/* 6. Category Shelf: Handcrafted Bags & Leather Goods */}
       {bagProducts.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "حقائب ومصنوعات جلدية يدوية" : "Handcrafted Bags & Leather Goods"}
@@ -98,7 +111,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* 5. Category Shelf: Bespoke Jewelry & Adornments */}
+      {/* 7. Category Shelf: Bespoke Jewelry & Adornments */}
       {jewelryProducts.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "مجوهرات وحلي يدوية الصنع" : "Bespoke Jewelry & Keepsakes"}
@@ -114,7 +127,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* 6. Category Shelf: Artisan Woodwork & Home Collectibles */}
+      {/* 8. Category Shelf: Artisan Woodwork & Home Collectibles */}
       {homeDecorProducts.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "أعمال خشبية وديكورات فنية" : "Artisan Woodwork & Home Collectibles"}
@@ -130,21 +143,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* 7. Curated Visual Exploration Strip ("Gifts as special as they are" - Real Products with 🔍 Search Pills) */}
-      <VisualGiftCategories
-        dict={dict}
-        herProduct={bagProducts[2] || bagProducts[0]}
-        himProduct={homeDecorProducts[2] || homeDecorProducts[0]}
-        kidsProduct={
-          giftSetProducts.find((p) => p.category === "toys-and-games") ||
-          giftSetProducts[1] ||
-          giftSetProducts[0]
-        }
-        decorProduct={homeDecorProducts[3] || homeDecorProducts[0]}
-        accessoriesProduct={jewelryProducts[1] || jewelryProducts[0]}
-      />
-
-      {/* 8. Category Shelf: Handmade Crochet & Apparel */}
+      {/* 9. Category Shelf: Handmade Crochet & Apparel */}
       {crochetApparelProducts.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "كروشية وأزياء يدوية الصنع" : "Handmade Crochet, Knits & Apparel"}
@@ -160,7 +159,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* 9. Category Shelf: Curated Gift Sets & Celebrations */}
+      {/* 11. Category Shelf: Curated Gift Sets & Celebrations */}
       {giftSetProducts.length > 0 && (
         <ProductShelfRow
           title={isArabic ? "صناديق هدايا ومجموعات راقية" : "Curated Gift Sets & Celebrations"}
@@ -176,7 +175,7 @@ export default function HomeClient({
         />
       )}
 
-      {/* Mission Statement & Value Pillars Bar (Etsy Signature Human Commerce Section) */}
+      {/* 12. Mission Statement & Value Pillars Bar */}
       <MissionStatementBar dict={dict} />
 
       {/* 13. Newsletter Club */}

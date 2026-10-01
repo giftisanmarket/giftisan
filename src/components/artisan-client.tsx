@@ -3,41 +3,75 @@
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Link from "next/link";
-import { MapPin, Star, ShieldCheck, Share2, Globe, Check } from "lucide-react";
-import { FaInstagram, FaTiktok, FaPinterestP, FaFacebook, FaGlobe } from "react-icons/fa6";
-import { motion, AnimatePresence } from "framer-motion";
+import { 
+  MapPin, 
+  Star, 
+  ShieldCheck, 
+  Share2, 
+  Check, 
+  ChevronRight, 
+  Heart, 
+  Package, 
+  Clock,
+  Sparkles
+} from "lucide-react";
 import { BespokeImage } from "./bespoke-image";
-import { useState, useEffect } from "react";
+import { ProductCard } from "@/components/home/product-card";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toggleFollowAction, checkFollowStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
-
 import { toast } from "react-hot-toast";
 
-export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
+interface ArtisanClientProps {
+  artisan: any;
+  dict: any;
+  lang?: string;
+}
+
+export function ArtisanClient({ artisan, dict, lang = "en" }: ArtisanClientProps) {
   const { data: session } = useSession();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [filter, setFilter] = useState<'available' | 'soldout'>('available');
+  const [filter, setFilter] = useState<'all' | 'available' | 'soldout'>('all');
+  
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية";
   const products = artisan.products || [];
-  const displayName = artisan.studioName || artisan.user.name;
-  
+  const displayName = artisan.studioName || artisan.user?.name || (isAr ? "متجر الحرفي" : "Artisan Studio");
+
   // Real Data Calculations
-  const allReviews = products.flatMap((p: any) => p.reviews || []);
+  const allReviews = useMemo(() => {
+    return products.flatMap((p: any) => p.reviews || []);
+  }, [products]);
+
   const totalReviews = allReviews.length;
-  const avgRating = totalReviews > 0 
-    ? (allReviews.reduce((acc: number, r: any) => acc + r.rating, 0) / totalReviews).toFixed(1) 
+  const avgRating = totalReviews > 0
+    ? (allReviews.reduce((acc: number, r: any) => acc + r.rating, 0) / totalReviews).toFixed(1)
     : "5.0";
-  
-  const positiveReviewsCount = allReviews.filter((r: any) => r.rating >= 4).length;
-  const feedbackScore = totalReviews > 0 ? Math.round((positiveReviewsCount / totalReviews) * 100) : 100;
-  
-  // Heuristic-based real numbers for sales and followers
-  const totalSales = products.reduce((acc: number, p: any) => {
-    return acc + (p.orderItems?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0);
-  }, 0);
-  const followersCount = Math.round(totalSales * 2.4 + (products.length * 8)) + (isFollowing ? 1 : 0);
-  const yearsExp = artisan.yearsOfExperience ?? ((new Date().getFullYear() - new Date(artisan.createdAt).getFullYear()) + 1);
+
+  const totalSales = useMemo(() => {
+    return products.reduce((acc: number, p: any) => {
+      return acc + (p.orderItems?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0);
+    }, 0);
+  }, [products]);
+
+  const yearsExp = artisan.yearsOfExperience ?? (
+    Math.max(1, (new Date().getFullYear() - new Date(artisan.createdAt || Date.now()).getFullYear()) + 1)
+  );
+
+  const availableProducts = useMemo(() => {
+    return products.filter((p: any) => (p.stock ?? 1) > 0);
+  }, [products]);
+
+  const soldOutProducts = useMemo(() => {
+    return products.filter((p: any) => (p.stock ?? 1) <= 0);
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (filter === 'available') return availableProducts;
+    if (filter === 'soldout') return soldOutProducts;
+    return products;
+  }, [filter, products, availableProducts, soldOutProducts]);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -47,22 +81,25 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
 
   const handleFollow = async () => {
     if (!session?.user?.id) {
-      toast.error(dict.artisan_detail.signin_to_follow, {
-        style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
+      toast.error(dict.artisan_detail?.signin_to_follow || (isAr ? "يرجى تسجيل الدخول لمتابعة المتجر" : "Please sign in to follow this shop"), {
+        style: { borderRadius: '12px', background: '#064E3B', color: '#fff' }
       });
       return;
     }
-    
+
     setIsPending(true);
     const res = await toggleFollowAction(artisan.id, session.user.id as string);
-    
+
     if (res.success) {
       setIsFollowing(res.action === "followed");
       if (res.action === "followed") {
-         toast.success(dict.artisan_detail.now_following.replace('{name}', displayName), {
-           icon: '✨',
-           style: { borderRadius: '20px', background: '#1a2c2c', color: '#fff' }
-         });
+        toast.success(
+          (dict.artisan_detail?.now_following || (isAr ? "أنت الآن تتابع {name}" : "You are now following {name}")).replace('{name}', displayName),
+          {
+            icon: '✨',
+            style: { borderRadius: '12px', background: '#064E3B', color: '#fff' }
+          }
+        );
       }
     }
     setIsPending(false);
@@ -70,8 +107,8 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${displayName} | Giftisan Shop`,
-      text: `${dict.home.category_desc_prefix} ${displayName} ${dict.home.category_desc_suffix}`,
+      title: `${displayName} | Giftisan`,
+      text: `${dict.home?.category_desc_prefix || ""} ${displayName} ${dict.home?.category_desc_suffix || ""}`.trim(),
       url: window.location.href,
     };
 
@@ -80,8 +117,8 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success(dict.artisan_detail.studio_link_copied, {
-          style: { borderRadius: '15px', background: '#1a2c2c', color: '#fff' }
+        toast.success(dict.artisan_detail?.studio_link_copied || (isAr ? "تم نسخ رابط المتجر!" : "Shop link copied to clipboard!"), {
+          style: { borderRadius: '12px', background: '#064E3B', color: '#fff' }
         });
       }
     } catch (err) {
@@ -89,187 +126,281 @@ export function ArtisanClient({ artisan, dict }: { artisan: any, dict: any }) {
     }
   };
 
-  const filteredProducts = products.filter((p: any) => 
-    filter === 'available' ? p.stock > 0 : p.stock === 0
-  );
-
   return (
-    <main className="min-h-screen bg-white" style={{ '--brand-color': artisan.brandColor || '#da7b5a' } as any}>
-      <style jsx global>{`
-        .text-brand { color: var(--brand-color) !important; }
-        .bg-brand { background-color: var(--brand-color) !important; }
-        .border-brand { border-color: var(--brand-color) !important; }
-        .fill-brand { fill: var(--brand-color) !important; }
-        .shadow-brand { --tw-shadow-color: var(--brand-color); }
-      `}</style>
+    <main className="min-h-screen bg-cream">
       <Navbar dict={dict} />
 
-      {/* Profile Header */}
-      <section className="pt-24 md:pt-32 pb-12 md:pb-20 bg-cream relative overflow-hidden min-h-[400px] md:min-h-[450px] flex items-end">
-        {artisan.bannerImage && (
-          <motion.div 
-            initial={{ scale: 1.1, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
-            transition={{ duration: 1.5 }}
-            className="absolute inset-0 z-0"
-          >
-            <BespokeImage src={artisan.bannerImage} alt="" fill className="object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/80 to-transparent" />
-          </motion.div>
-        )}
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-            {/* Avatar */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="relative w-32 h-32 md:w-52 md:h-52 rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border-4 border-white shadow-2xl shadow-primary/10 group mb-2 md:mb-0"
-            >
-              <BespokeImage type="artisan" id={artisan.id} src={artisan.avatar} alt={displayName} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" sizes="(max-width: 768px) 128px, 208px" />
-            </motion.div>
- 
-            {/* Info */}
-            <div className="flex-1 text-center md:text-start space-y-4 md:space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-5">
-                <h1 className="text-3xl md:text-6xl font-heading font-bold text-primary tracking-tight leading-none">{displayName}</h1>
-                {artisan.isVerified && (
-                  <div className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200 shrink-0 w-fit mx-auto md:mx-0 shadow-sm">
-                    <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="text-[9px] md:text-xs font-black uppercase tracking-widest">{dict.artisan_detail.verified_artisan}</span>
-                  </div>
-                )}
-              </div>
- 
-              <div className="flex items-center justify-center md:justify-start gap-5 md:gap-8 text-charcoal/60">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-brand" />
-                  <span className="text-xs md:text-base font-bold uppercase tracking-widest">{artisan.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-brand fill-brand" />
-                  <span className="text-xs md:text-base font-bold text-primary">{avgRating} <span className="text-charcoal/40 font-medium ms-1">({totalSales} {dict.artisan_detail.sales})</span></span>
-                </div>
-              </div>
- 
-              <p className="text-sm md:text-2xl text-charcoal/70 leading-relaxed max-w-2xl serif text-balance px-4 md:px-0 italic font-medium whitespace-pre-wrap">
-                "{artisan.bio}"
-              </p>
- 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-5 pt-4 md:pt-6">
-                <button 
-                  onClick={handleFollow}
-                  disabled={isPending}
-                  className={cn(
-                    "h-12 md:h-16 px-8 md:px-14 text-sm md:text-lg font-bold rounded-full transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 duration-200",
-                    isFollowing 
-                      ? "bg-green-600 text-white hover:bg-green-700 shadow-green-100" 
-                      : "bg-primary text-white hover:bg-primary-light shadow-primary/10"
-                  )}
-                >
-                  {isFollowing ? (
-                    <>
-                      <Check className="w-4 h-4 md:w-5 md:h-5" />
-                      {dict.artisan_detail.following}
-                    </>
-                  ) : isPending ? dict.artisan_detail.wait : dict.artisan_detail.follow_studio}
-                </button>
-                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 max-w-full">
-                  <button 
-                    onClick={handleShare}
-                    className="w-11 h-11 md:w-16 md:h-16 border border-primary/10 rounded-full hover:bg-white flex items-center justify-center transition-all bg-white/50 backdrop-blur-sm active:scale-90 shadow-sm group"
-                  >
-                    <Share2 className="w-5 h-5 md:w-6 md:h-6 text-primary group-hover:text-brand" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Bar */}
-      <div className="border-y border-primary/5 bg-white py-8 md:py-12 relative overflow-hidden">
-        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 relative z-10">
-          <div className="text-center md:border-r border-primary/5 last:border-0">
-            <p className="text-2xl md:text-5xl font-heading font-bold text-primary tracking-tighter">{products.length}</p>
-            <p className="text-[9px] md:text-[11px] font-black text-brand uppercase tracking-[0.2em] mt-1">{dict.artisan_detail.studio_creations}</p>
-          </div>
-          <div className="text-center md:border-r border-primary/5 last:border-0">
-            <p className="text-2xl md:text-5xl font-heading font-bold text-primary tracking-tighter">{(followersCount / 1000).toFixed(1)}k</p>
-            <p className="text-[9px] md:text-[11px] font-black text-brand uppercase tracking-[0.2em] mt-1">{dict.artisan_detail.patrons}</p>
-          </div>
-          <div className="text-center md:border-r border-primary/5 last:border-0">
-            <p className="text-2xl md:text-5xl font-heading font-bold text-primary tracking-tighter">{yearsExp}</p>
-            <p className="text-[9px] md:text-[11px] font-black text-brand uppercase tracking-[0.2em] mt-1">{dict.artisan_detail.yrs_mastery}</p>
-          </div>
-          <div className="text-center last:border-0">
-            <p className="text-2xl md:text-5xl font-heading font-bold text-primary tracking-tighter">{feedbackScore}%</p>
-            <p className="text-[9px] md:text-[11px] font-black text-brand uppercase tracking-[0.2em] mt-1">{dict.artisan_detail.curation_score}</p>
-          </div>
+      {/* Breadcrumbs Strip */}
+      <div className="bg-cream-dark/40 border-b border-primary/5 py-2.5">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs lg:text-sm text-charcoal/60">
+            <Link href={`/${lang}`} className="hover:text-primary transition-colors">
+              {dict.common?.home || (isAr ? "الرئيسية" : "Home")}
+            </Link>
+            <ChevronRight className={cn("w-3.5 h-3.5 text-charcoal/40 shrink-0", isAr && "rotate-180")} />
+            <Link href={`/${lang}/artisans`} className="hover:text-primary transition-colors font-medium">
+              {dict.common?.artisans || (isAr ? "الحرفيون" : "Artisans")}
+            </Link>
+            <ChevronRight className={cn("w-3.5 h-3.5 text-charcoal/40 shrink-0", isAr && "rotate-180")} />
+            <span className="text-primary font-bold truncate">
+              {displayName}
+            </span>
+          </nav>
         </div>
       </div>
 
-      {/* Portfolio Grid */}
-      <section className="py-16 md:py-32 container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-20 gap-6">
-          <div className="space-y-2">
-            <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary tracking-tight">{dict.artisan_detail.in_the_studio}</h2>
-            <p className="text-charcoal/40 font-medium text-xs md:text-lg">{dict.artisan_detail.vault_exploring}</p>
-          </div>
-          <div className="flex items-center gap-6 md:gap-8 border-b border-primary/5 pb-2">
-            <button 
-              onClick={() => setFilter('available')}
-              className={cn(
-                "text-[10px] md:text-sm font-black uppercase tracking-widest transition-all relative py-2",
-                filter === 'available' ? "text-primary after:absolute after:bottom-0 after:start-0 after:w-full after:h-0.5 after:bg-brand" : "text-charcoal/30 hover:text-primary"
-              )}
-            >
-              {dict.artisan_detail.available}
-            </button>
-            <button 
-              onClick={() => setFilter('soldout')}
-              className={cn(
-                "text-[10px] md:text-sm font-black uppercase tracking-widest transition-all relative py-2",
-                filter === 'soldout' ? "text-primary after:absolute after:bottom-0 after:start-0 after:w-full after:h-0.5 after:bg-brand" : "text-charcoal/30 hover:text-primary"
-              )}
-            >
-              {dict.artisan_detail.archive}
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-12 gap-y-10 md:gap-y-20">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: any, idx: number) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="active:scale-[0.98] transition-transform"
-            >
-              <Link href={`/products/${product.slug || product.id}`} className="group block">
-                <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden mb-4 md:mb-8 shadow-2xl shadow-primary/5 border border-primary/5">
-                  <BespokeImage src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" sizes="(max-width: 768px) 50vw, 33vw" />
-
-                </div>
-                <h3 className="text-sm md:text-2xl font-heading font-bold text-primary group-hover:text-brand transition-colors line-clamp-1 leading-tight">{product.name}</h3>
-                <p className="text-xs md:text-xl font-bold text-brand mt-1 md:mt-2">{dict.product.currency} {product.price}</p>
-              </Link>
-            </motion.div>
-            ))
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pt-6 sm:pt-8 lg:pt-10 pb-16 lg:pb-24">
+        {/* Cover Banner */}
+        <div className="relative rounded-2xl sm:rounded-3xl lg:rounded-[2rem] overflow-hidden border border-primary/10 shadow-xs bg-cream-dark/30">
+          {artisan.bannerImage ? (
+            <div className="relative h-44 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
+              <BespokeImage 
+                src={artisan.bannerImage} 
+                alt={`${displayName} banner`} 
+                fill 
+                className="object-cover" 
+                priority 
+                sizes="(max-width: 1600px) 100vw, 1600px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+            </div>
           ) : (
-            <div className="col-span-full py-20 md:py-32 text-center bg-cream/5 rounded-[2.5rem] md:rounded-[4rem] border-2 border-dashed border-primary/5">
-              <p className="text-charcoal/30 font-black uppercase tracking-[0.2em] text-[10px] md:text-base">{dict.artisan_detail.no_pieces}</p>
+            <div className="h-32 sm:h-40 md:h-48 lg:h-60 xl:h-72 w-full bg-gradient-to-r from-emerald-900/10 via-primary/5 to-amber-900/10 relative overflow-hidden flex items-center justify-end px-8 lg:px-12">
+              <div className="absolute -end-10 -bottom-10 w-48 lg:w-72 h-48 lg:h-72 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+              <div className="hidden sm:flex items-center gap-3 text-primary/20">
+                <Sparkles className="w-8 h-8 lg:w-12 lg:h-12" />
+              </div>
             </div>
           )}
         </div>
-      </section>
 
-      {/* Etsy-style Footer */}
+        {/* Profile Card Header Info */}
+        <div className="relative -mt-12 sm:-mt-14 md:-mt-16 lg:-mt-20 xl:-mt-24 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 lg:gap-8">
+            {/* Left: Avatar + Title & Meta */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 lg:gap-8 text-center sm:text-start">
+              {/* Avatar */}
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 lg:border-[6px] border-white shadow-lg bg-white shrink-0 ring-1 ring-primary/10">
+                <BespokeImage 
+                  type="artisan" 
+                  id={artisan.id} 
+                  src={artisan.avatar} 
+                  alt={displayName} 
+                  fill 
+                  className="object-cover" 
+                  sizes="(max-width: 640px) 96px, (max-width: 768px) 112px, (max-width: 1024px) 128px, 176px" 
+                />
+              </div>
+
+              {/* Identity & Badges */}
+              <div className="space-y-1.5 lg:space-y-2 pb-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 lg:gap-3">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-serif text-[#222222] font-semibold tracking-tight">
+                    {displayName}
+                  </h1>
+                  {artisan.isVerified && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 lg:px-3 lg:py-1 rounded-full text-[11px] lg:text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
+                      <ShieldCheck className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-emerald-700" />
+                      <span>{dict.artisan_detail?.verified_artisan || (isAr ? "حرفي موثق" : "Verified Artisan")}</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Metadata Pills */}
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm lg:text-base text-charcoal/70 pt-0.5 lg:pt-1">
+                  {artisan.location && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-charcoal/50 shrink-0" />
+                      <span>{artisan.location}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-500 fill-amber-400 shrink-0" />
+                    <span className="font-semibold text-primary">{avgRating}</span>
+                    <span className="text-charcoal/50 font-normal">
+                      ({totalReviews > 0 ? `${totalReviews} ${isAr ? "تقييم" : "reviews"}` : `${totalSales} ${dict.artisan_detail?.sales || (isAr ? "مبيعات" : "Sales")}`})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-charcoal/60">
+                    <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-charcoal/40 shrink-0" />
+                    <span>
+                      {yearsExp} {yearsExp === 1 ? (isAr ? "سنة خبرة" : "Yr Mastery") : (isAr ? "سنوات خبرة" : "Yrs Mastery")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center justify-center sm:justify-start md:justify-end gap-2.5 lg:gap-3.5 pb-1">
+              {/* Follow Button */}
+              <button
+                onClick={handleFollow}
+                disabled={isPending}
+                className={cn(
+                  "h-10 sm:h-11 lg:h-12 px-5 sm:px-6 lg:px-8 rounded-full text-xs sm:text-sm lg:text-base font-semibold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-95",
+                  isFollowing
+                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                    : "bg-primary text-white hover:bg-primary-light"
+                )}
+              >
+                {isFollowing ? (
+                  <>
+                    <Check className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span>{dict.artisan_detail?.following || (isAr ? "تتابع المتجر" : "Following")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                    <span>{isPending ? (dict.artisan_detail?.wait || "...") : (dict.artisan_detail?.follow_studio || (isAr ? "متابعة المتجر" : "Follow Shop"))}</span>
+                  </>
+                )}
+              </button>
+
+              {/* Share Button */}
+              <button
+                onClick={handleShare}
+                aria-label="Share"
+                className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-full border border-primary/15 bg-white text-charcoal/70 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all shadow-xs active:scale-90"
+              >
+                <Share2 className="w-4 h-4 lg:w-5 lg:h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bio Quote */}
+          {artisan.bio && (
+            <div className="mt-5 lg:mt-7 pt-5 lg:pt-6 border-t border-primary/5">
+              <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-charcoal/75 font-serif italic max-w-2xl lg:max-w-3xl xl:max-w-4xl leading-relaxed whitespace-pre-wrap">
+                &ldquo;{artisan.bio}&rdquo;
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Minimal Metrics Strip */}
+        <div className="bg-white rounded-2xl lg:rounded-3xl border border-primary/10 shadow-xs p-4 sm:p-5 lg:p-6 xl:p-8 mt-8 lg:mt-12 mb-12 lg:mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8 divide-y md:divide-y-0 md:divide-x divide-primary/5 rtl:md:divide-x-reverse">
+          <div className="text-center pt-2 md:pt-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-serif font-bold text-primary">{products.length}</p>
+            <p className="text-[11px] sm:text-xs lg:text-sm text-charcoal/60 uppercase tracking-wider font-medium mt-0.5 lg:mt-1">
+              {dict.artisan_detail?.studio_creations || (isAr ? "منتجات المتجر" : "Shop Products")}
+            </p>
+          </div>
+          <div className="text-center pt-2 md:pt-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-serif font-bold text-primary">{totalSales}</p>
+            <p className="text-[11px] sm:text-xs lg:text-sm text-charcoal/60 uppercase tracking-wider font-medium mt-0.5 lg:mt-1">
+              {dict.artisan_detail?.sales || (isAr ? "مبيعات مكتملة" : "Sales Completed")}
+            </p>
+          </div>
+          <div className="text-center pt-2 md:pt-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-serif font-bold text-primary">{yearsExp}</p>
+            <p className="text-[11px] sm:text-xs lg:text-sm text-charcoal/60 uppercase tracking-wider font-medium mt-0.5 lg:mt-1">
+              {dict.artisan_detail?.yrs_mastery || (isAr ? "سنوات الخبرة" : "Yrs Mastery")}
+            </p>
+          </div>
+          <div className="text-center pt-2 md:pt-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-serif font-bold text-primary">{avgRating} ★</p>
+            <p className="text-[11px] sm:text-xs lg:text-sm text-charcoal/60 uppercase tracking-wider font-medium mt-0.5 lg:mt-1">
+              {totalReviews > 0 ? (isAr ? `${totalReviews} تقييم حقيقي` : `${totalReviews} Verified Reviews`) : (dict.artisan_detail?.curation_score || "Quality Rating")}
+            </p>
+          </div>
+        </div>
+
+        {/* Shop Catalog Section */}
+        <section className="mt-8 lg:mt-12">
+          {/* Section Header & Filter Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-6 border-b border-primary/10 gap-4 mb-8 lg:mb-10">
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif text-[#222222] font-semibold">
+                  {dict.artisan_detail?.in_the_studio || (isAr ? "معروضات المتجر" : "In the Shop")}
+                </h2>
+                <span className="inline-flex items-center px-2.5 py-0.5 lg:px-3 lg:py-1 rounded-full text-xs lg:text-sm font-semibold bg-primary/10 text-primary">
+                  {filteredProducts.length}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm lg:text-base text-charcoal/60 mt-1">
+                {dict.artisan_detail?.vault_exploring || (isAr ? "استكشف قطعاً فريدة مصنوعة يدوياً بحرفية مصرية أصيلة." : "Exploring the collection of handcrafted pieces.")}
+              </p>
+            </div>
+
+            {/* Filter Pill Tabs */}
+            <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+              <button
+                onClick={() => setFilter('all')}
+                className={cn(
+                  "px-3.5 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all",
+                  filter === 'all'
+                    ? "bg-primary text-white shadow-xs"
+                    : "bg-white border border-primary/10 text-charcoal/70 hover:text-primary hover:border-primary/25"
+                )}
+              >
+                {isAr ? "الكل" : "All"} ({products.length})
+              </button>
+              <button
+                onClick={() => setFilter('available')}
+                className={cn(
+                  "px-3.5 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all",
+                  filter === 'available'
+                    ? "bg-primary text-white shadow-xs"
+                    : "bg-white border border-primary/10 text-charcoal/70 hover:text-primary hover:border-primary/25"
+                )}
+              >
+                {dict.artisan_detail?.available || (isAr ? "متاح حالياً" : "Available")} ({availableProducts.length})
+              </button>
+              {soldOutProducts.length > 0 && (
+                <button
+                  onClick={() => setFilter('soldout')}
+                  className={cn(
+                    "px-3.5 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all",
+                    filter === 'soldout'
+                      ? "bg-primary text-white shadow-xs"
+                      : "bg-white border border-primary/10 text-charcoal/70 hover:text-primary hover:border-primary/25"
+                  )}
+                >
+                  {dict.artisan_detail?.archive || (isAr ? "أرشيف الأعمال" : "Archive")} ({soldOutProducts.length})
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Products Grid: Responsive up to 6 columns on ultra-wide screens */}
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-7">
+              {filteredProducts.map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    artisan: {
+                      studioName: displayName,
+                      user: artisan.user
+                    }
+                  }}
+                  dict={dict}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 sm:py-20 lg:py-28 text-center bg-white rounded-2xl lg:rounded-3xl border border-dashed border-primary/15 p-8 max-w-lg mx-auto">
+              <Package className="w-10 h-10 lg:w-14 lg:h-14 text-primary/30 mx-auto mb-3" />
+              <p className="text-sm lg:text-base font-medium text-charcoal/70">
+                {dict.artisan_detail?.no_pieces || (isAr ? "لا توجد منتجات متوفرة حالياً في هذا القسم." : "No pieces available in this section.")}
+              </p>
+              {filter !== 'all' && (
+                <button
+                  onClick={() => setFilter('all')}
+                  className="mt-4 px-4 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                >
+                  {isAr ? "عرض جميع المنتجات" : "View all pieces"}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
+
       <Footer dict={dict} />
     </main>
   );
 }
-

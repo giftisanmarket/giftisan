@@ -38,7 +38,7 @@ export function CuratedPicksGrid({
       titleAr: "أعمال خشبية وديكور",
       href: "/category/home-and-living",
       product: woodworkProduct,
-      fallbackImg: "/inlaid-box.png",
+      fallbackImg: "/inlaid-box.webp",
     },
     {
       id: "jewelry",
@@ -62,7 +62,7 @@ export function CuratedPicksGrid({
       titleAr: "صناديق هدايا مختارة",
       href: "/gifts",
       product: giftSetProduct,
-      fallbackImg: "/kilim-rug.png",
+      fallbackImg: "/kilim-rug.webp",
     },
   ];
 

@@ -48,56 +48,54 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
         className={cn(
-          "w-full py-4 px-5 bg-white border rounded-xl md:rounded-2xl transition-all flex items-center justify-between text-left cursor-pointer shadow-sm hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-accent/20",
+          "w-full h-12 px-3.5 bg-white border rounded-xl transition-all flex items-center justify-between text-start cursor-pointer shadow-2xs hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15",
           hasError 
-            ? "border-accent ring-2 ring-accent/10" 
-            : "border-primary/20 hover:shadow-md"
+            ? "border-red-500 ring-2 ring-red-100" 
+            : "border-primary/20"
         )}
       >
-        <div className="flex items-center gap-3 min-w-0 me-2">
-          <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0">
-            <MapPin className="w-4 h-4 text-accent" />
-          </div>
-          <span className={cn("text-sm md:text-base font-bold truncate", selectedGov ? "text-primary" : "text-primary/40")}>
+        <div className="flex items-center gap-2 min-w-0 me-2">
+          <MapPin className="w-4 h-4 text-emerald-800 shrink-0" />
+          <span className={cn("text-sm font-medium truncate", selectedGov ? "text-[#222222]" : "text-charcoal/40")}>
             {selectedGov 
               ? (isAr ? selectedGov.nameAr : selectedGov.nameEn)
               : (isAr ? "-- اختر المحافظة --" : "-- Select Governorate --")}
           </span>
         </div>
 
-        <ChevronDown className={cn("w-5 h-5 text-primary/40 transition-transform duration-300 shrink-0", isOpen && "rotate-180 text-accent")} />
+        <ChevronDown className={cn("w-4 h-4 text-charcoal/40 transition-transform duration-200 shrink-0", isOpen && "rotate-180 text-emerald-800")} />
       </button>
 
       {/* Dropdown Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            initial={{ opacity: 0, y: 4, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.98 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-primary/10 shadow-2xl shadow-primary/15 z-50 overflow-hidden p-2 backdrop-blur-lg"
+            exit={{ opacity: 0, y: 4, scale: 0.99 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl border border-primary/15 shadow-xl z-50 overflow-hidden p-1.5"
           >
             {/* Quick Search Bar */}
-            <div className="relative mb-2 px-1 pt-1">
-              <Search className={cn("w-4 h-4 text-primary/30 absolute top-1/2 -translate-y-1/2", isAr ? "right-4" : "left-4")} />
+            <div className="relative mb-1.5 px-0.5 pt-0.5">
+              <Search className={cn("w-3.5 h-3.5 text-charcoal/40 absolute top-1/2 -translate-y-1/2", isAr ? "right-3" : "left-3")} />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={isAr ? "ابحث عن محافظة..." : "Search governorate..."}
                 className={cn(
-                  "w-full py-2.5 border border-primary/10 rounded-xl text-xs font-medium text-primary placeholder:text-primary/30 focus:outline-none focus:ring-1 focus:ring-accent focus:bg-white transition-all bg-cream/60",
-                  isAr ? "pe-9 ps-4" : "ps-9 pe-4"
+                  "w-full h-8 border border-primary/10 rounded-lg text-xs font-medium text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-1 focus:ring-emerald-800 focus:bg-white transition-all bg-cream/40",
+                  isAr ? "pe-8 ps-3" : "ps-8 pe-3"
                 )}
                 autoFocus
               />
             </div>
 
             {/* List Items */}
-            <div className="max-h-60 overflow-y-auto space-y-1 custom-scrollbar pe-1">
+            <div className="max-h-56 overflow-y-auto space-y-0.5 custom-scrollbar pe-1">
               {filteredGovs.length === 0 ? (
-                <div className="py-6 text-center text-xs font-medium text-primary/40">
+                <div className="py-4 text-center text-xs font-medium text-charcoal/40">
                   {isAr ? "لم يتم العثور على نتائج" : "No governorate found"}
                 </div>
               ) : (
@@ -113,14 +111,14 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
                         setSearch("");
                       }}
                       className={cn(
-                        "w-full px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-all text-left",
+                        "w-full px-3 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-between transition-colors text-start",
                         isSelected 
-                          ? "bg-primary text-white shadow-md shadow-primary/20" 
-                          : "text-primary/80 hover:bg-accent/10 hover:text-accent"
+                          ? "bg-emerald-800 text-white font-semibold shadow-2xs" 
+                          : "text-charcoal/80 hover:bg-cream/60 hover:text-[#222222]"
                       )}
                     >
                       <span className="truncate">{isAr ? gov.nameAr : gov.nameEn}</span>
-                      {isSelected && <Check className="w-4 h-4 text-white shrink-0 ms-2" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ms-2" />}
                     </button>
                   );
                 })

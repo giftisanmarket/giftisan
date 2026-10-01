@@ -1,59 +1,91 @@
 "use client";
 
 import { useCart } from "@/context/cart-context";
-import { Navbar } from "@/components/navbar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ShieldCheck, Truck, Lock, ChevronLeft, CreditCard, CheckCircle2, MessageSquare, Loader2, MapPin, Gift, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { 
+  ShieldCheck, 
+  Truck, 
+  Lock, 
+  ChevronLeft, 
+  ChevronRight,
+  CheckCircle2, 
+  MessageSquare, 
+  Loader2, 
+  MapPin, 
+  Gift, 
+  AlertCircle,
+  ShoppingBag,
+  CreditCard,
+  Banknote,
+  ChevronDown,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Clock
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { createOrder, validateCouponAction, getAllShippingMethods } from "@/lib/actions";
 import { EGYPT_GOVERNORATES, findZoneForGovernorate, matchEgyptGovernorate, translateShippingZone, translateDeliveryDays } from "@/lib/egypt-governorates";
 import { GovernorateSelect } from "@/components/ui/governorate-select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
 export function CheckoutClient({ dict }: { dict: any }) {
   const params = useParams();
-  const lang = params?.lang as string || "en";
-  // ⚙️ FEATURE FLAGS:
-  const ENABLE_COUPONS = true;          // Keep this true to still show the promo input field
-  const APPLY_COUPON_DISCOUNTS = true;  // Set this to true to fully calculate and apply discounts at checkout!
+  const lang = (params?.lang as string) || "en";
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية";
+  const router = useRouter();
+
+  // Feature Flags
+  const ENABLE_COUPONS = true;
+  const APPLY_COUPON_DISCOUNTS = true;
 
   const { cart, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState<(keyof typeof shippingData)[]>([]);
-  const router = useRouter();
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Promo Coupon / Discount Code States
+  // Mobile Order Summary Accordion
+  const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
+
+  // Promo Coupon States
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [couponError, setCouponError] = useState("");
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  // Shipping Methods & Zone
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [isLoadingMethods, setIsLoadingMethods] = useState(true);
   const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>("cairo");
   const [gpsPinUrl, setGpsPinUrl] = useState<string>("");
 
-  // Use the lang param directly — avoids brittle translation string comparisons
-  const isAr = lang === 'ar';
+  // Payment Method: 'paymob' (Card / Wallet / InstaPay) or 'cod' (Cash on Delivery)
+  const [paymentMethod, setPaymentMethod] = useState<"paymob" | "cod">("paymob");
+
   const promoPlaceholder = isAr ? "كود الخصم (مثال: GIFT10)" : "Promo Code (e.g. GIFT10)";
   const promoApply = isAr ? "تطبيق" : "Apply";
   const promoRemove = isAr ? "إزالة" : "Remove";
-  const promoDiscountLabel = isAr ? "خصم" : "Discount";
+  const promoDiscountLabel = isAr ? "خصم ترويجي" : "Promo Discount";
 
   const [shippingData, setShippingData] = useState({
     firstName: "",
     lastName: "",
     address: "",
-    city: "",
+    building: "",
+    floor: "",
+    apartment: "",
+    city: "Cairo",
     zip: "",
     country: "Egypt",
     phone: "",
@@ -73,16 +105,50 @@ export function CheckoutClient({ dict }: { dict: any }) {
           firstName: prev.firstName || parsed.firstName || "",
           lastName: prev.lastName || parsed.lastName || "",
           address: prev.address || parsed.address || "",
-          city: prev.city || parsed.city || "",
+          building: prev.building || parsed.building || "",
+          floor: prev.floor || parsed.floor || "",
+          apartment: prev.apartment || parsed.apartment || "",
+          city: prev.city || parsed.city || "Cairo",
           zip: prev.zip || parsed.zip || "",
           phone: prev.phone || parsed.phone || "",
-          email: prev.email || parsed.email || ""
+          email: prev.email || parsed.email || session?.user?.email || ""
         }));
       }
     } catch (e) {
       // Ignore parse error
     }
-  }, []);
+  }, [session]);
+
+  // Load Shipping Methods on mount
+  useEffect(() => {
+    async function loadMethods() {
+      try {
+        const res = await getAllShippingMethods();
+        const methodsList = Array.isArray(res) ? res : (res as any)?.data || [];
+        if (methodsList.length > 0) {
+          setShippingMethods(methodsList);
+          const matched = findZoneForGovernorate(selectedGovernorateId, methodsList);
+          if (matched) {
+            setSelectedMethod(matched);
+          } else {
+            setSelectedMethod(methodsList[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load shipping methods:", err);
+      } finally {
+        setIsLoadingMethods(false);
+      }
+    }
+    loadMethods();
+  }, [selectedGovernorateId]);
+
+  const updateShippingField = (field: string, value: any) => {
+    setShippingData(prev => ({ ...prev, [field]: value }));
+    if (validationErrors.includes(field)) {
+      setValidationErrors(prev => prev.filter(f => f !== field));
+    }
+  };
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -103,11 +169,9 @@ export function CheckoutClient({ dict }: { dict: any }) {
             const detectedCity = data.address.city || data.address.state || data.address.town || data.address.governorate || "Cairo";
             const detectedStreet = [data.address.road, data.address.suburb, data.address.neighbourhood].filter(Boolean).join(", ") || data.display_name?.split(",")[0] || "";
 
-            // Use the full address object + display name for rich governorate matching
             const matchedGov = matchEgyptGovernorate(data.address, data.display_name || "");
             if (matchedGov) {
               setSelectedGovernorateId(matchedGov.id);
-              // Also sync the shipping method zone
               const matched = findZoneForGovernorate(matchedGov.id, shippingMethods);
               if (matched) setSelectedMethod(matched);
             }
@@ -141,43 +205,6 @@ export function CheckoutClient({ dict }: { dict: any }) {
     );
   };
 
-  // Smart-clear error state
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(""), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  // Load Shipping Methods ONCE on mount
-  useEffect(() => {
-    async function loadShipping() {
-      const methods = await getAllShippingMethods();
-      const activeMethods = methods.filter((m: any) => m.isActive);
-      setShippingMethods(activeMethods);
-      setIsLoadingMethods(false);
-    }
-    loadShipping();
-  }, []);
-
-  // Sync selectedMethod instantly whenever selectedGovernorateId or shippingMethods change
-  useEffect(() => {
-    if (shippingMethods.length > 0 && selectedGovernorateId) {
-      const matched = findZoneForGovernorate(selectedGovernorateId, shippingMethods);
-      if (matched) {
-        setSelectedMethod(matched);
-      }
-    }
-  }, [selectedGovernorateId, shippingMethods]);
-
-  const updateShippingField = (field: keyof typeof shippingData, value: string) => {
-    setShippingData(prev => ({ ...prev, [field]: value }));
-    if (error) setError("");
-    if (validationErrors.includes(field)) {
-      setValidationErrors(prev => prev.filter(f => f !== field));
-    }
-  };
-
   const handleApplyCoupon = async () => {
     if (!ENABLE_COUPONS || !couponCode.trim()) return;
 
@@ -194,25 +221,32 @@ export function CheckoutClient({ dict }: { dict: any }) {
       if (res.success && res.coupon) {
         setAppliedCoupon(res.coupon);
         setCouponError("");
+        toast.success(isAr ? "تم تطبيق كود الخصم بنجاح!" : "Promo code applied successfully!");
       } else {
-        setCouponError(res.error || "Invalid coupon code.");
+        setCouponError(res.error || (isAr ? "كود الخصم غير صالح." : "Invalid coupon code."));
         setAppliedCoupon(null);
       }
     } catch (err) {
-      setCouponError("Failed to apply coupon.");
+      setCouponError(isAr ? "تعذر تطبيق كود الخصم." : "Failed to apply coupon.");
       setAppliedCoupon(null);
     } finally {
       setIsValidatingCoupon(false);
     }
   };
 
+  const discountValue = ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
+  const shippingCost = selectedMethod?.price || 0;
+  const finalPrice = Math.max(totalPrice - discountValue + shippingCost, 0);
+
   const handlePurchase = async () => {
     const mandatoryFields: (keyof typeof shippingData)[] = ["firstName", "lastName", "address", "city", "phone", "email"];
     const emptyFields = mandatoryFields.filter(field => !shippingData[field]);
 
     if (emptyFields.length > 0) {
-      setError(dict.checkout.error_shipping);
-      setValidationErrors(emptyFields);
+      setError(dict.checkout?.error_shipping || (isAr ? "يرجى ملء جميع بيانات الشحن الإلزامية." : "Please fill in all mandatory shipping details."));
+      setValidationErrors(emptyFields as string[]);
+      // Smooth scroll to top of form
+      window.scrollTo({ top: 120, behavior: "smooth" });
       return;
     }
 
@@ -224,17 +258,24 @@ export function CheckoutClient({ dict }: { dict: any }) {
     }
 
     setIsProcessing(true);
-    const discountValue = ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.appliedDiscount : 0;
-    const shippingCost = selectedMethod?.price || 0;
-    const finalPrice = Math.max(totalPrice - discountValue + shippingCost, 0);
 
-    const fullAddressForOrder = gpsPinUrl && !shippingData.address.includes("[GPS Pin:")
-      ? `${shippingData.address} [GPS Pin: ${gpsPinUrl}]`
-      : shippingData.address;
+    const addressDetailsParts = [
+      shippingData.address,
+      shippingData.building ? (isAr ? `عمارة/مبنى: ${shippingData.building}` : `Bldg: ${shippingData.building}`) : "",
+      shippingData.floor ? (isAr ? `دور: ${shippingData.floor}` : `Floor: ${shippingData.floor}`) : "",
+      shippingData.apartment ? (isAr ? `شقة: ${shippingData.apartment}` : `Apt: ${shippingData.apartment}`) : ""
+    ].filter(Boolean).join(" - ");
+
+    const fullAddressForOrder = gpsPinUrl && !addressDetailsParts.includes("[GPS Pin:")
+      ? `${addressDetailsParts} [GPS Pin: ${gpsPinUrl}]`
+      : addressDetailsParts;
+
+    const notesWithPayment = `${paymentMethod === 'cod' ? '[COD - Cash on Delivery]' : '[Paymob Online]'} ${shippingData.isGift && shippingData.giftMessage ? `[Gift Note: ${shippingData.giftMessage}]` : ''}`.trim();
 
     const res = await createOrder(session?.user?.id || null, finalPrice, cart, {
       ...shippingData,
       address: fullAddressForOrder,
+      orderNotes: notesWithPayment,
       couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
       discountApplied: discountValue,
       shippingMethodId: selectedMethod?.id,
@@ -247,6 +288,9 @@ export function CheckoutClient({ dict }: { dict: any }) {
           firstName: shippingData.firstName,
           lastName: shippingData.lastName,
           address: shippingData.address,
+          building: shippingData.building,
+          floor: shippingData.floor,
+          apartment: shippingData.apartment,
           city: shippingData.city,
           zip: shippingData.zip,
           phone: shippingData.phone,
@@ -257,287 +301,408 @@ export function CheckoutClient({ dict }: { dict: any }) {
       }
       setIsRedirecting(true);
       clearCart();
-      if (res.paymentUrl) {
+      if (res.paymentUrl && paymentMethod === 'paymob') {
         window.location.href = res.paymentUrl;
       } else {
         router.push(`/${lang}/checkout/success?orderId=${res.orderId}`);
       }
     } else {
-      setError(res.error || "An error occurred during checkout.");
+      setError(res.error || (isAr ? "حدث خطأ أثناء معالجة الطلب." : "An error occurred during checkout."));
       setIsProcessing(false);
     }
   };
 
+  // Back Navigation Arrow Icon
+  const ArrowBackIcon = isAr ? ArrowRight : ArrowLeft;
+
+  // Empty Cart State
   if (cart.length === 0 && !isRedirecting) {
     return (
       <main className="min-h-screen bg-cream">
-        <Navbar dict={dict} />
-        <div className="container mx-auto px-4 py-32 text-center space-y-6">
-          <h1 className="text-4xl font-heading font-bold text-primary">{dict.cart.cart_empty}</h1>
-          <p className="text-charcoal/60">{dict.checkout.empty_checkout_desc}</p>
-          <Link href="/" className="px-8 py-4 bg-primary text-white font-bold rounded-full flex items-center justify-center mx-auto w-fit leading-none">
-            {dict.checkout.continue_shopping}
-          </Link>
+        {/* Minimal Distraction-free Header */}
+        <header className="w-full bg-white/80 backdrop-blur-md border-b border-primary/10 sticky top-0 z-50">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between">
+            <Link href={`/${lang}`} className="flex items-center gap-2 group">
+              <div className="relative w-8 h-8 md:w-9 md:h-9 overflow-hidden rounded-md shadow-sm">
+                <Image src="/icon.png" alt="Giftisan" fill className="object-cover" sizes="36px" />
+              </div>
+              <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tight">Giftisan</span>
+            </Link>
+            <div className="flex items-center gap-1.5 text-xs text-charcoal/70 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10">
+              <Lock className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium">{isAr ? "دفع آمن 256-Bit" : "256-Bit Secure Checkout"}</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-xl mx-auto px-4 py-28 text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 mx-auto">
+            <ShoppingBag className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-serif text-[#222222] font-semibold">
+              {dict.cart?.cart_empty || (isAr ? "سلتك فارغة حالياً" : "Your Cart is Empty")}
+            </h1>
+            <p className="text-sm text-charcoal/60 leading-relaxed max-w-md mx-auto">
+              {dict.checkout?.empty_checkout_desc || (isAr ? "أضف بعض القطع الحرفية الفريدة لتصلك مغلفة بحب وإتقان." : "Explore one-of-a-kind handcrafted gifts from local Egyptian artisans.")}
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link 
+              href={`/${lang}/gifts`}
+              className="inline-flex items-center justify-center px-8 py-3.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary-light transition-all shadow-xs active:scale-95"
+            >
+              {dict.checkout?.continue_shopping || (isAr ? "تصفح الهدايا الحرفية" : "Explore Handcrafted Gifts")}
+            </Link>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-cream pb-20">
-      <Navbar dict={dict} />
+    <main className="min-h-screen bg-cream pb-24">
+      {/* 1. Distraction-Free High-Trust Checkout Header */}
+      <header className="w-full bg-white/90 backdrop-blur-md border-b border-primary/10 sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between">
+          {/* Brand Logo */}
+          <Link href={`/${lang}`} className="flex items-center gap-2 group">
+            <div className="relative w-8 h-8 md:w-9 md:h-9 overflow-hidden rounded-md shadow-sm">
+              <Image src="/icon.png" alt="Giftisan" fill className="object-cover" sizes="36px" />
+            </div>
+            <span className="text-xl md:text-2xl font-heading font-black text-primary tracking-tight">Giftisan</span>
+          </Link>
 
-      <div className="container mx-auto px-4 pt-24 md:pt-32">
-        <div className="flex items-center gap-2 mb-6 md:mb-8 group cursor-pointer w-fit" onClick={() => window.history.back()}>
-          <ChevronLeft className="w-5 h-5 text-primary group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-bold text-primary uppercase tracking-widest">{dict.checkout.back_to_studio}</span>
+          {/* Secure Trust Badge */}
+          <div className="hidden sm:flex items-center gap-2 text-xs text-charcoal/70 bg-primary/5 px-3.5 py-1.5 rounded-full border border-primary/10">
+            <Lock className="w-3.5 h-3.5 text-primary" />
+            <span className="font-medium">{isAr ? "دفع آمن ومشفّر 256-Bit SSL" : "256-Bit SSL Encrypted Checkout"}</span>
+          </div>
+
+          {/* Return to Cart / Shopping Link */}
+          <button 
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-charcoal/70 hover:text-primary transition-colors"
+          >
+            <ArrowBackIcon className="w-4 h-4" />
+            <span>{isAr ? "العودة للسلة" : "Back to cart"}</span>
+          </button>
         </div>
+      </header>
 
-        <div className="grid lg:grid-cols-12 gap-8 md:gap-12 items-start">
-          {/* Order Summary: Shown SECOND on mobile, sticky on desktop */}
-          <div className="lg:col-span-5 lg:sticky lg:top-32 order-last lg:order-last">
-            <section className="bg-primary text-white rounded-[2rem] md:rounded-[2.5rem] px-5 py-8 md:p-10 shadow-2xl shadow-primary/20">
-              <h2 className="text-xl md:text-2xl font-heading font-bold mb-6 md:mb-8 flex items-center gap-2">
-                <Lock className="w-5 h-5 text-accent-light" />
-                {dict.checkout.order_summary}
-              </h2>
+      {/* 2. Mobile Collapsible Order Summary Accordion (Screens < lg) */}
+      <div className="lg:hidden bg-white border-b border-primary/10 sticky top-16 z-40">
+        <button
+          type="button"
+          onClick={() => setIsMobileSummaryOpen(!isMobileSummaryOpen)}
+          className="w-full px-4 sm:px-6 py-3.5 flex items-center justify-between text-xs sm:text-sm"
+        >
+          <div className="flex items-center gap-2 text-primary font-semibold">
+            <ShoppingBag className="w-4 h-4 text-primary" />
+            <span>
+              {isMobileSummaryOpen 
+                ? (isAr ? "إخفاء ملخص الطلب" : "Hide order summary") 
+                : (isAr ? "عرض ملخص الطلب" : "Show order summary")}
+            </span>
+            <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isMobileSummaryOpen && "rotate-180")} />
+          </div>
+          <span className="font-serif font-bold text-primary text-base">
+            {dict.product?.currency || "EGP"} {finalPrice}.00
+          </span>
+        </button>
 
-              <div className="space-y-4 md:space-y-5 mb-8 max-h-[300px] md:max-h-[400px] overflow-y-auto pe-2 custom-scrollbar no-scrollbar">
+        {/* Collapsed Drawer Content */}
+        <AnimatePresence>
+          {isMobileSummaryOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden bg-cream-dark/30 border-t border-primary/5 px-4 sm:px-6 py-5 space-y-4"
+            >
+              {/* Item Previews */}
+              <div className="space-y-3 max-h-64 overflow-y-auto pe-1">
                 {cart.map((item) => (
-                  <div key={item.id + (item.personalization || "")} className="animate-in slide-in-from-end-4 duration-300">
-                    <div className="flex gap-4 items-center">
-                      <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 shadow-lg shadow-black/20">
-                        <Image src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-heading font-bold text-xs md:text-sm line-clamp-1">{item.name}</h4>
-                        {item.variantName && <p className="text-accent-light text-[8px] md:text-[10px] font-bold uppercase tracking-widest leading-none mb-1">{item.variantName}</p>}
-                        <p className="text-white/60 text-[9px] md:text-xs font-medium uppercase tracking-widest">{dict.checkout.qty}: {item.quantity}</p>
-                      </div>
-                      <p className="font-bold text-sm md:text-base whitespace-nowrap">EGP {item.price * item.quantity}</p>
+                  <div key={item.id + (item.personalization || "")} className="flex items-center gap-3">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-primary/10 bg-white">
+                      <Image src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
                     </div>
-                    {item.personalization && (
-                      <div className="ms-16 md:ms-20 mt-1 ps-3 border-l-2 border-accent/30 bg-white/5 py-1.5 px-3 rounded-lg">
-                        <p className="text-[8px] text-white/40 uppercase font-black tracking-widest leading-none mb-1">{dict.cart.bespoke_detail}:</p>
-                        <p className="text-[10px] md:text-[11px] text-accent-light italic leading-tight">"{item.personalization}"</p>
-                      </div>
-                    )}
-                    {item.customImage && (
-                      <div className="ms-16 md:ms-20 mt-1.5 flex items-center gap-2 bg-white/10 p-2 rounded-lg border border-white/10">
-                        <div className="relative w-8 h-8 rounded overflow-hidden shrink-0 border border-white/20">
-                          <img src={item.customImage} alt="Custom upload" className="w-full h-full object-cover" />
-                        </div>
-                        <span className="text-[10px] text-accent-light font-bold">{dict.product.custom_image_attached || "Custom photo attached"}</span>
-                      </div>
-                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[#222222] truncate">{item.name}</p>
+                      {item.variantName && (
+                        <p className="text-[10px] text-charcoal/60">{item.variantName}</p>
+                      )}
+                      <p className="text-[10px] text-charcoal/50">{dict.checkout?.qty || "Qty"}: {item.quantity}</p>
+                    </div>
+                    <span className="text-xs font-semibold text-primary">
+                      {dict.product?.currency || "EGP"} {item.price * item.quantity}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              {/* Promo Coupon Module */}
+              {/* Promo Code Input on Mobile */}
               {ENABLE_COUPONS && (
-                <div className="pt-6 pb-2 border-t border-white/10 mt-6 animate-in fade-in duration-300">
-                  <div className="flex gap-2.5">
-                    <input
-                      type="text"
-                      placeholder={promoPlaceholder}
-                      value={couponCode}
-                      onChange={(e) => {
-                        setCouponCode(e.target.value);
-                        if (couponError) setCouponError("");
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleApplyCoupon();
-                        }
-                      }}
-                      disabled={appliedCoupon !== null}
-                      className="flex-1 py-3 px-4 bg-white/10 text-white placeholder:text-white/40 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light text-sm font-medium transition-all disabled:opacity-50 uppercase tracking-wider"
-                    />
-                    {appliedCoupon ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAppliedCoupon(null);
-                          setCouponCode("");
-                        }}
-                        className="px-4 py-3 bg-white/15 text-white/80 font-bold rounded-xl text-xs hover:bg-white/20 hover:text-white transition-all whitespace-nowrap"
-                      >
-                        {promoRemove}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleApplyCoupon}
-                        disabled={isValidatingCoupon || !couponCode.trim()}
-                        className="px-5 py-3 bg-white text-primary hover:bg-cream disabled:bg-white/20 disabled:text-white/40 font-bold rounded-xl text-xs shadow-md active:scale-95 transition-all whitespace-nowrap"
-                      >
-                        {isValidatingCoupon ? "..." : promoApply}
-                      </button>
-                    )}
-                  </div>
-
-                  {couponError && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-accent-light text-[10px] font-bold mt-2 ps-1 uppercase tracking-wider flex items-center gap-1"
+                <div className="pt-3 border-t border-primary/10 flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={promoPlaceholder}
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={appliedCoupon !== null}
+                    className="flex-1 h-10 px-3 bg-white border border-primary/15 rounded-lg text-xs outline-none focus:border-primary uppercase tracking-wider"
+                  />
+                  {appliedCoupon ? (
+                    <button
+                      type="button"
+                      onClick={() => { setAppliedCoupon(null); setCouponCode(""); }}
+                      className="px-3 h-10 bg-white border border-primary/15 text-charcoal/70 rounded-lg text-xs font-medium"
                     >
-                      <AlertCircle className="w-3 h-3 text-accent-light shrink-0" />
-                      {couponError}
-                    </motion.p>
-                  )}
-
-                  {appliedCoupon && (
-                    <motion.div
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-4 py-2.5 rounded-xl text-xs font-bold mt-3"
+                      {promoRemove}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isValidatingCoupon || !couponCode.trim()}
+                      className="px-4 h-10 bg-primary text-white rounded-lg text-xs font-medium disabled:opacity-50"
                     >
-                      <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        {isAr ? "تم تطبيق الكود" : "Code"} {appliedCoupon.code} {isAr ? "بنجاح" : "applied"} (-{dict.product.currency} {appliedCoupon.appliedDiscount})
-                      </span>
-                    </motion.div>
+                      {isValidatingCoupon ? "..." : promoApply}
+                    </button>
                   )}
                 </div>
               )}
 
-              <div className="space-y-3 md:space-y-4 pt-6 border-t border-white/10">
-                <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
-                  <span>{dict.cart.subtotal}</span>
-                  <span>{dict.product.currency} {totalPrice}.00</span>
+              {/* Price Breakdown */}
+              <div className="pt-3 border-t border-primary/10 space-y-1.5 text-xs text-charcoal/70">
+                <div className="flex justify-between">
+                  <span>{dict.cart?.subtotal || "Subtotal"}</span>
+                  <span className="font-medium text-[#222222]">{dict.product?.currency || "EGP"} {totalPrice}.00</span>
                 </div>
                 {appliedCoupon && (
-                  <div className="flex justify-between text-emerald-300 text-[10px] md:text-sm uppercase font-bold tracking-widest animate-in fade-in duration-300">
+                  <div className="flex justify-between text-emerald-700 font-medium">
                     <span>{promoDiscountLabel} ({appliedCoupon.code})</span>
-                    <span>-{dict.product.currency} {appliedCoupon.appliedDiscount}.00</span>
+                    <span>-{dict.product?.currency || "EGP"} {appliedCoupon.appliedDiscount}.00</span>
                   </div>
                 )}
                 {selectedMethod && (
-                  <div className="flex justify-between text-white/70 text-[10px] md:text-sm uppercase font-bold tracking-widest">
+                  <div className="flex justify-between">
                     <span>{translateShippingZone(selectedMethod.name, isAr)}</span>
-                    <span className="text-accent-light">
-                      {selectedMethod.price === 0 ? dict.checkout.free : `${dict.product.currency} ${selectedMethod.price}`}
+                    <span className="font-medium text-[#222222]">
+                      {selectedMethod.price === 0 ? (dict.checkout?.free || "Free") : `${dict.product?.currency || "EGP"} ${selectedMethod.price}`}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between font-heading font-bold pt-4 border-t border-white/10">
-                  <span className="text-lg md:text-xl">{dict.checkout.total}</span>
-                  <span className="text-2xl md:text-3xl">
-                    {dict.product.currency} {Math.max(totalPrice - (appliedCoupon?.appliedDiscount || 0) + (selectedMethod?.price || 0), 0)}.00
-                  </span>
+                <div className="flex justify-between pt-2 border-t border-primary/10 text-sm font-serif font-bold text-primary">
+                  <span>{dict.checkout?.total || "Total"}</span>
+                  <span>{dict.product?.currency || "EGP"} {finalPrice}.00</span>
                 </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-              <div className="mt-8 md:mt-10 space-y-6">
-                <button
-                  onClick={handlePurchase}
-                  disabled={isProcessing}
-                  className="w-full py-4 md:py-5 bg-white text-primary font-bold rounded-xl md:rounded-2xl hover:bg-cream transition-all flex items-center justify-center shadow-xl text-base md:text-lg group disabled:opacity-50 active:scale-95 duration-200"
-                >
-                  {isProcessing ? dict.checkout.processing : dict.checkout.place_order}
-                  <CheckCircle2 className="w-5 h-5 ms-2 text-accent" />
-                </button>
-
-                <p className="text-[9px] md:text-[11px] text-center text-white/60 leading-relaxed max-w-sm mx-auto italic">
-                  {dict.checkout.prelaunch_manual_desc}
-                </p>
+      {/* 3. Main Checkout Grid (max-w-[1600px] matching rest of site) */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pt-6 sm:pt-8 lg:pt-10">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+          
+          {/* Left Column: Delivery, Gifting & Payment Forms */}
+          <div className="lg:col-span-7 xl:col-span-7 space-y-6 lg:space-y-8">
+            
+            {/* Step 1: Contact & Delivery Address Card */}
+            <section className="bg-white rounded-2xl lg:rounded-3xl border border-primary/10 shadow-xs p-6 sm:p-8 lg:p-10">
+              <div className="flex items-center justify-between pb-4 border-b border-primary/10 mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-serif text-[#222222] font-semibold flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary shrink-0" />
+                    <span>{isAr ? "بيانات وعنوان التوصيل" : "Delivery Details"}</span>
+                  </h2>
+                  <p className="text-xs sm:text-sm text-charcoal/60 mt-0.5">
+                    {isAr ? "أدخل تفاصيل الشحن ليصلك طلبك مباشرة حتى باب المنزل" : "Where should we send your handcrafted order?"}
+                  </p>
+                </div>
+                <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/5 text-primary border border-primary/10">
+                  {isAr ? "الخطوة 1 من 2" : "Step 1 of 2"}
+                </span>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-white/5 flex flex-row flex-wrap items-center justify-between gap-x-4 gap-y-3">
-                <div className="flex items-center gap-2.5 text-[10px] md:text-xs text-white/40">
-                  <ShieldCheck className="w-4 h-4 text-accent/40 shrink-0" />
-                  <span className="whitespace-nowrap">{dict.checkout.secure_ssl}</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-[10px] md:text-xs text-white/40">
-                  <Truck className="w-4 h-4 text-accent/40 shrink-0" />
-                  <span className="whitespace-nowrap">{dict.checkout.sustainable_packaging}</span>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Checkout Form: Shown FIRST on mobile */}
-          <div className="lg:col-span-7 space-y-6 md:space-y-8 order-first lg:order-first">
-            <motion.section 
-              animate={validationErrors.length > 0 ? { x: [-2, 2, -2, 2, 0], transition: { duration: 0.4 } } : {}}
-              className="bg-white rounded-[2rem] md:rounded-[2.5rem] px-5 py-8 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5"
-            >
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary mb-6 md:mb-8">{dict.checkout.shipping_gallery}</h2>
-              <form className="space-y-4 md:space-y-6">
-                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.first_name}</label>
+              <form className="space-y-4 sm:space-y-5" onSubmit={(e) => { e.preventDefault(); handlePurchase(); }}>
+                {/* Name Row */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-charcoal/80 flex items-center justify-between">
+                      <span>{dict.checkout?.first_name || (isAr ? "الاسم الأول" : "First Name")} *</span>
+                    </label>
                     <input
                       type="text"
                       name="firstName"
                       autoComplete="given-name"
-                      placeholder="Jane"
+                      placeholder={isAr ? "أحمد" : "Jane"}
                       value={shippingData.firstName}
                       onChange={(e) => updateShippingField("firstName", e.target.value)}
                       className={cn(
-                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                        validationErrors.includes("firstName") 
-                          ? "border-accent ring-2 ring-accent/10" 
-                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
+                        "w-full h-12 px-4 rounded-xl border bg-white text-sm outline-none transition-all placeholder:text-charcoal/30",
+                        validationErrors.includes("firstName")
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/15"
                       )}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.last_name}</label>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{dict.checkout?.last_name || (isAr ? "اسم العائلة" : "Last Name")} *</span>
+                    </label>
                     <input
                       type="text"
                       name="lastName"
                       autoComplete="family-name"
-                      placeholder="Doe"
+                      placeholder={isAr ? "محمود" : "Doe"}
                       value={shippingData.lastName}
                       onChange={(e) => updateShippingField("lastName", e.target.value)}
                       className={cn(
-                        "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                        validationErrors.includes("lastName") 
-                          ? "border-accent ring-2 ring-accent/10" 
-                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
+                        "w-full h-12 px-4 rounded-xl border bg-white text-sm outline-none transition-all placeholder:text-charcoal/30",
+                        validationErrors.includes("lastName")
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/15"
                       )}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+
+                {/* Phone & Email Row */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{dict.checkout?.phone_number || (isAr ? "رقم الهاتف للمندوب" : "Phone Number (for courier)")} *</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      autoComplete="tel"
+                      placeholder="01012345678"
+                      value={shippingData.phone}
+                      onChange={(e) => updateShippingField("phone", e.target.value)}
+                      className={cn(
+                        "w-full h-12 px-4 rounded-xl border bg-white text-sm outline-none transition-all placeholder:text-charcoal/30",
+                        validationErrors.includes("phone")
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{dict.checkout?.email || (isAr ? "البريد الإلكتروني للإيصال" : "Email (for confirmation)")} *</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      placeholder="name@example.com"
+                      value={shippingData.email}
+                      onChange={(e) => updateShippingField("email", e.target.value)}
+                      className={cn(
+                        "w-full h-12 px-4 rounded-xl border bg-white text-sm outline-none transition-all placeholder:text-charcoal/30",
+                        validationErrors.includes("email")
+                          ? "border-red-500 ring-2 ring-red-100"
+                          : "border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Street Address Row with GPS auto-detect button */}
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.shipping_address}</label>
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{dict.checkout?.shipping_address || (isAr ? "اسم الشارع والحي" : "Street Address")} *</span>
+                    </label>
                     <button
                       type="button"
                       onClick={handleDetectLocation}
                       disabled={isDetectingLocation}
-                      className="text-[10px] font-bold text-accent hover:text-accent-light flex items-center gap-1 transition-colors disabled:opacity-50"
+                      className="text-xs font-medium text-emerald-800 hover:text-emerald-900 flex items-center gap-1 transition-colors disabled:opacity-50"
                     >
                       <MapPin className={cn("w-3.5 h-3.5", isDetectingLocation && "animate-spin")} />
-                      <span>{isDetectingLocation ? (isAr ? "جاري التحديد..." : "Detecting...") : (isAr ? "تحديد موقعي" : "Use current location")}</span>
+                      <span>{isDetectingLocation ? (isAr ? "جاري التحديد..." : "Detecting GPS...") : (isAr ? "تحديد موقعي تلقائياً" : "Use current GPS location")}</span>
                     </button>
                   </div>
+                  
                   <input
                     type="text"
                     name="address"
                     autoComplete="street-address"
-                    placeholder={dict.checkout.street_placeholder}
+                    placeholder={dict.checkout?.street_placeholder || (isAr ? "اسم الشارع، الحي أو المنطقة" : "Street name, district or area")}
                     value={shippingData.address}
                     onChange={(e) => updateShippingField("address", e.target.value)}
                     className={cn(
-                      "w-full py-4 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                      validationErrors.includes("address") 
-                        ? "border-accent ring-2 ring-accent/10" 
-                        : "border-primary/20 focus:ring-accent/20 focus:border-accent"
+                      "w-full h-12 px-4 rounded-xl border bg-white text-sm outline-none transition-all placeholder:text-charcoal/30",
+                      validationErrors.includes("address")
+                        ? "border-red-500 ring-2 ring-red-100"
+                        : "border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/15"
                     )}
                   />
-                  <p className="text-[11px] text-charcoal/50 font-medium italic mt-1.5 flex items-center gap-1">
-                    <span>{dict.checkout.address_details_hint}</span>
-                  </p>
                 </div>
-                <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-                  <div className="space-y-2 lg:col-span-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">
-                      {isAr ? "المحافظة (المنطقة)" : "Governorate (Region)"}
+
+                {/* Building, Floor, Apartment Row (Responsive on same line) */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <label className="text-[11px] sm:text-xs font-semibold text-charcoal/80 block truncate">
+                      <span className="hidden sm:inline">{isAr ? "رقم المبنى / الفيلا" : "Building / Villa"}</span>
+                      <span className="sm:hidden">{isAr ? "المبنى" : "Building"}</span>
+                      <span className="hidden md:inline text-[10px] text-charcoal/40 font-normal ms-1">({isAr ? "مهم" : "Req"})</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="building"
+                      placeholder={isAr ? "14 أو فيلا 5" : "14 / Villa 5"}
+                      value={shippingData.building}
+                      onChange={(e) => updateShippingField("building", e.target.value)}
+                      className="w-full h-11 sm:h-12 px-2.5 sm:px-3.5 rounded-xl border border-primary/20 bg-white text-xs sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all placeholder:text-charcoal/30"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <label className="text-[11px] sm:text-xs font-semibold text-charcoal/80 block truncate">
+                      <span>{isAr ? "الدور" : "Floor"}</span>
+                      <span className="hidden sm:inline text-[10px] text-charcoal/40 font-normal ms-1">({isAr ? "اختياري" : "Opt"})</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="floor"
+                      placeholder={isAr ? "الدور 3" : "3rd"}
+                      value={shippingData.floor}
+                      onChange={(e) => updateShippingField("floor", e.target.value)}
+                      className="w-full h-11 sm:h-12 px-2.5 sm:px-3.5 rounded-xl border border-primary/20 bg-white text-xs sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all placeholder:text-charcoal/30"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <label className="text-[11px] sm:text-xs font-semibold text-charcoal/80 block truncate">
+                      <span className="hidden sm:inline">{isAr ? "رقم الشقة" : "Apartment"}</span>
+                      <span className="sm:hidden">{isAr ? "الشقة" : "Apt"}</span>
+                      <span className="hidden sm:inline text-[10px] text-charcoal/40 font-normal ms-1">({isAr ? "اختياري" : "Opt"})</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="apartment"
+                      placeholder={isAr ? "شقة 12" : "Apt 12"}
+                      value={shippingData.apartment}
+                      onChange={(e) => updateShippingField("apartment", e.target.value)}
+                      className="w-full h-11 sm:h-12 px-2.5 sm:px-3.5 rounded-xl border border-primary/20 bg-white text-xs sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all placeholder:text-charcoal/30"
+                    />
+                  </div>
+                </div>
+
+                {/* Governorate & Postal Code */}
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{isAr ? "المحافظة" : "Governorate (Region)"} *</span>
                     </label>
                     <GovernorateSelect
                       value={selectedGovernorateId}
@@ -555,8 +720,12 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       }}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.postal_code} ({dict.checkout.optional})</label>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-charcoal/80">
+                      <span>{dict.checkout?.postal_code || (isAr ? "الرمز البريدي" : "Postal Code")}</span>
+                      <span className="text-charcoal/40 ms-1 font-normal">({dict.checkout?.optional || "Optional"})</span>
+                    </label>
                     <input
                       type="text"
                       name="zip"
@@ -564,149 +733,369 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       placeholder="11511"
                       value={shippingData.zip}
                       onChange={(e) => updateShippingField("zip", e.target.value)}
-                      className="w-full py-4 px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/20 text-sm md:text-base"
-                    />
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.email || (isAr ? "البريد الإلكتروني" : "Email Address")}</label>
-                    <input
-                      type="email"
-                      name="email"
-                      autoComplete="email"
-                      placeholder="jane@example.com"
-                      value={shippingData.email}
-                      onChange={(e) => updateShippingField("email", e.target.value)}
-                      className={cn(
-                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                        validationErrors.includes("email") 
-                          ? "border-accent ring-2 ring-accent/10" 
-                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
-                      )}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.checkout.phone_number}</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      autoComplete="tel"
-                      placeholder="+20 100 000 0000"
-                      value={shippingData.phone}
-                      onChange={(e) => updateShippingField("phone", e.target.value)}
-                      className={cn(
-                        "w-full h-14 px-6 bg-white border rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 transition-all placeholder:text-primary/20 text-sm md:text-base",
-                        validationErrors.includes("phone") 
-                          ? "border-accent ring-2 ring-accent/10" 
-                          : "border-primary/20 focus:ring-accent/20 focus:border-accent"
-                      )}
+                      className="w-full h-12 px-4 rounded-xl border border-primary/20 bg-white text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 placeholder:text-charcoal/30"
                     />
                   </div>
                 </div>
 
-                {/* Shipping Rate Confirmation Card */}
+                {/* Delivery Zone Confirmation Badge */}
                 {selectedMethod && (
-                  <div className="pt-6 border-t border-primary/5">
-                    <h3 className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-accent" />
-                      {isAr ? "خدمة وتكلفة الشحن" : "Shipping & Delivery"}
-                    </h3>
-                    
-                    <div className="p-4 md:p-5 rounded-2xl bg-accent/5 border border-accent/20 flex items-center justify-between shadow-sm">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-accent text-white flex items-center justify-center shrink-0 shadow-md shadow-accent/20">
-                          <Truck className="w-5 h-5" />
+                  <div className="pt-2">
+                    <div className="p-3.5 sm:p-4 rounded-xl bg-cream border border-primary/10 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200/60 text-emerald-800 flex items-center justify-center shrink-0">
+                          <Truck className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-primary">
+                          <p className="text-xs sm:text-sm font-semibold text-[#222222]">
                             {translateShippingZone(selectedMethod.name, isAr)}
                           </p>
-                          <p className="text-xs text-charcoal/60 mt-0.5">
-                            {isAr ? "التوصيل حتى باب المنزل" : "Door-to-door delivery"} • {translateDeliveryDays(selectedMethod.estimatedDays || "1-3 Days", isAr)}
+                          <p className="text-[11px] text-charcoal/60">
+                            {isAr ? "توصيل حتى باب المنزل" : "Door-to-door delivery"} • {translateDeliveryDays(selectedMethod.estimatedDays || "1-3 Days", isAr)}
                           </p>
                         </div>
                       </div>
-                      <div className="text-end shrink-0">
-                        <span className="font-heading font-bold text-base md:text-lg text-primary block">
-                          {selectedMethod.price === 0 ? dict.checkout.free : `EGP ${selectedMethod.price}`}
-                        </span>
-                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-primary shrink-0">
+                        {selectedMethod.price === 0 ? (dict.checkout?.free || "FREE") : `${dict.product?.currency || "EGP"} ${selectedMethod.price}`}
+                      </span>
                     </div>
                   </div>
                 )}
+              </form>
+            </section>
 
-                <div className="pt-8 space-y-4 border-t border-primary/5">
-                  <div
-                    className={cn(
-                      "p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer",
-                      shippingData.isGift ? "bg-accent/5 border-accent shadow-sm" : "bg-white border-primary/5 hover:border-primary/20"
-                    )}
-                    onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}
+            {/* Step 2: Giftisan Signature Gifting Card */}
+            <section className="bg-white rounded-2xl lg:rounded-3xl border border-primary/10 shadow-xs p-6 sm:p-8">
+              <div 
+                className={cn(
+                  "p-4 rounded-xl border transition-all cursor-pointer",
+                  shippingData.isGift 
+                    ? "bg-amber-50/60 border-amber-300 shadow-2xs" 
+                    : "bg-white border-primary/10 hover:border-primary/20"
+                )}
+                onClick={() => setShippingData(prev => ({ ...prev, isGift: !prev.isGift }))}
+              >
+                <div className="flex items-start gap-3.5">
+                  <div className={cn(
+                    "w-5 h-5 rounded-md border flex items-center justify-center transition-all mt-0.5 shrink-0",
+                    shippingData.isGift 
+                      ? "bg-amber-600 border-amber-600 text-white" 
+                      : "border-primary/25 bg-white"
+                  )}>
+                    {shippingData.isGift && <Check className="w-3.5 h-3.5" />}
+                  </div>
+                  <div className="flex-1 space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-amber-700" />
+                      <h3 className="text-sm font-semibold text-[#222222]">
+                        {dict.checkout?.mark_as_gift || (isAr ? "إرسال هذا الطلب كهدية" : "This order is a gift")}
+                      </h3>
+                    </div>
+                    <p className="text-xs text-charcoal/60 leading-relaxed">
+                      {dict.checkout?.mark_as_gift_desc || (isAr ? "سيتم إخفاء الفاتورة السعرية وسيقوم الحرفي بتغليف القطع بعناية خاصة كهدية تليق بأحبائك." : "Prices will be hidden on receipt, and artisans will pack items with special gift wrapping.")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expandable Gift Note Box */}
+              <AnimatePresence>
+                {shippingData.isGift && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden pt-4 space-y-2"
                   >
-                    <div className="flex items-start gap-3.5">
-                      <div className={cn(
-                        "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 mt-0.5 shrink-0",
-                        shippingData.isGift ? "bg-accent border-accent shadow-md shadow-accent/20" : "border-primary/20 bg-white"
-                      )}>
-                        {shippingData.isGift && <CheckCircle2 className="w-4 h-4 text-white" />}
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Gift className="w-4 h-4 text-accent" />
-                          <h4 className="text-sm md:text-base font-bold text-primary">{dict.checkout.mark_as_gift}</h4>
-                        </div>
-                        <p className="text-xs text-charcoal/60 font-medium leading-relaxed">
-                          {dict.checkout.mark_as_gift_desc || "Prices will be hidden on the package receipt, and artisans will wrap your items with special gift care."}
-                        </p>
-                      </div>
+                    <label className="text-xs font-semibold text-charcoal/80 flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
+                      <span>{dict.checkout?.gift_message_label || (isAr ? "رسالة الإهداء (تُطبع داخل كارت خاص مع الهدية)" : "Gift Message (Printed on a card inside)")}</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={shippingData.giftMessage}
+                      onChange={(e) => setShippingData(prev => ({ ...prev, giftMessage: e.target.value }))}
+                      placeholder={dict.checkout?.gift_message_placeholder || (isAr ? "اكتب رسالة دافئة من القلب للمستلم..." : "Write a personal note for the recipient...")}
+                      className="w-full p-3.5 rounded-xl border border-primary/15 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 bg-white resize-none shadow-2xs placeholder:text-charcoal/30"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 3: Payment Transparency Card */}
+            <section className="bg-white rounded-2xl lg:rounded-3xl border border-primary/10 shadow-xs p-6 sm:p-8">
+              <div className="pb-4 border-b border-primary/10 mb-5">
+                <h3 className="text-lg sm:text-xl font-serif text-[#222222] font-semibold flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-primary shrink-0" />
+                  <span>{isAr ? "طريقة الدفع" : "Payment Method"}</span>
+                </h3>
+                <p className="text-xs text-charcoal/60 mt-0.5">
+                  {isAr ? "اختر الطريقة الأنسب لك لإتمام الطلب" : "Choose how you would like to complete your order."}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {/* Option 1: Online Payment via Paymob (Cards, Wallets, InstaPay) */}
+                <div 
+                  onClick={() => setPaymentMethod("paymob")}
+                  className={cn(
+                    "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between",
+                    paymentMethod === "paymob"
+                      ? "bg-primary/5 border-primary shadow-2xs"
+                      : "bg-white border-primary/10 hover:border-primary/20"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-4 h-4 rounded-full border flex items-center justify-center shrink-0",
+                      paymentMethod === "paymob" ? "border-primary" : "border-charcoal/30"
+                    )}>
+                      {paymentMethod === "paymob" && <div className="w-2 h-2 rounded-full bg-primary" />}
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold text-[#222222]">
+                        {isAr ? "بطاقات ائتمان / محافظ إلكترونية / إنستاباي" : "Credit/Debit Card, Wallets & InstaPay"}
+                      </p>
+                      <p className="text-[11px] text-charcoal/60">
+                        {isAr ? "دفع فوري مؤمن بالكامل عبر بوابة Paymob المعتمدة" : "Instant secure processing via Paymob"}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1.5 shrink-0 text-charcoal/50 text-[11px] font-medium">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                    <span className="hidden sm:inline">{isAr ? "مشفّر 100%" : "Encrypted"}</span>
+                  </div>
+                </div>
 
-                  {shippingData.isGift && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 pt-2 px-1"
-                    >
-                      <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 flex items-center gap-1.5">
-                        <MessageSquare className="w-3 h-3 text-accent" />
-                        {dict.checkout.gift_message_label || "Gift Message (Optional)"}
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={shippingData.giftMessage}
-                        onChange={(e) => setShippingData(prev => ({ ...prev, giftMessage: e.target.value }))}
-                        placeholder={dict.checkout.gift_message_placeholder || "Write a heartfelt note for the recipient..."}
-                        className="w-full p-4 rounded-xl border border-primary/10 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none font-medium bg-white shadow-xs resize-none transition-all placeholder:text-primary/30"
-                      />
-                      <p className="text-[11px] text-charcoal/50 font-medium italic">
-                        {dict.checkout.gift_message_subtitle || "Your message will be printed on a card included inside the gift package."}
+                {/* Option 2: Cash on Delivery (COD) - SOON */}
+                <div 
+                  className="p-4 rounded-xl border border-primary/10 bg-cream/40 opacity-70 cursor-not-allowed select-none flex items-center justify-between transition-all"
+                  title={isAr ? "الدفع عند الاستلام سيتوفر قريباً" : "Cash on delivery will be available soon"}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full border border-charcoal/30 bg-charcoal/10 flex items-center justify-center shrink-0">
+                      <Clock className="w-2.5 h-2.5 text-charcoal/50" />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold text-[#222222]/80 flex items-center gap-2">
+                        <span>{isAr ? "الدفع عند الاستلام (COD)" : "Cash on Delivery (COD)"}</span>
                       </p>
-                    </motion.div>
-                  )}
+                      <p className="text-[11px] text-charcoal/50">
+                        {isAr ? "خدمة الدفع عند الاستلام ستتوفر قريباً. يرجى استخدام الدفع الإلكتروني حالياً." : "Cash on delivery will be available soon. Please use secure online payment."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-charcoal/60 bg-white/80 border border-primary/10 px-2.5 py-1 rounded-full shrink-0 shadow-2xs">
+                    <Clock className="w-3 h-3 text-charcoal/40" />
+                    <span>{isAr ? "قريباً" : "Soon"}</span>
+                  </div>
                 </div>
-
-                <div className="pt-6 border-t border-primary/5">
-                  <p className="text-[10px] text-charcoal/30 flex items-center gap-2 italic">
-                    <span className="w-1 h-1 bg-accent rounded-full animate-pulse" />
-                    {dict.checkout.artisan_confirmed_desc}
-                  </p>
-                </div>
-              </form>
-            </motion.section>
+              </div>
+            </section>
 
           </div>
+
+          {/* Right Column: Desktop Order Summary (Sticky) */}
+          <div className="lg:col-span-5 xl:col-span-5">
+            <div className="lg:sticky lg:top-24 space-y-6">
+              <section className="bg-white rounded-2xl lg:rounded-3xl border border-primary/10 shadow-xs p-6 sm:p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-primary/10 mb-5">
+                <h3 className="text-lg sm:text-xl font-serif text-[#222222] font-semibold">
+                  {dict.checkout?.order_summary || (isAr ? "ملخص الطلب" : "Order Summary")}
+                </h3>
+                <span className="text-xs text-charcoal/60 font-medium">
+                  {cart.length} {cart.length === 1 ? (isAr ? "قطعة" : "item") : (isAr ? "قطع" : "items")}
+                </span>
+              </div>
+
+              {/* Items List */}
+              <div className="space-y-4 max-h-[340px] overflow-y-auto pe-2 custom-scrollbar">
+                {cart.map((item) => (
+                  <div key={item.id + (item.personalization || "")} className="space-y-1">
+                    <div className="flex gap-3 items-center">
+                      <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-primary/10 bg-cream">
+                        <Image src={item.image || item.images[0]} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs sm:text-sm font-medium text-[#222222] line-clamp-1">{item.name}</h4>
+                        {item.variantName && (
+                          <span className="inline-block text-[10px] text-charcoal/60 bg-cream px-2 py-0.5 rounded border border-primary/5 mt-0.5">
+                            {item.variantName}
+                          </span>
+                        )}
+                        <p className="text-[11px] text-charcoal/50 mt-0.5">{dict.checkout?.qty || "Qty"}: {item.quantity}</p>
+                      </div>
+                      <p className="text-xs sm:text-sm font-semibold text-primary shrink-0">
+                        {dict.product?.currency || "EGP"} {item.price * item.quantity}
+                      </p>
+                    </div>
+
+                    {/* Personalization Note */}
+                    {item.personalization && (
+                      <div className="ms-16 text-[11px] text-charcoal/70 bg-cream/70 py-1 px-2.5 rounded-lg border border-primary/5 italic">
+                        <span className="font-semibold text-primary not-italic me-1">{dict.cart?.bespoke_detail || "Custom"}:</span>
+                        &ldquo;{item.personalization}&rdquo;
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Promo Coupon Module */}
+              {ENABLE_COUPONS && (
+                <div className="pt-5 pb-1 border-t border-primary/10 mt-5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={promoPlaceholder}
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value);
+                        if (couponError) setCouponError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                      disabled={appliedCoupon !== null}
+                      className="flex-1 h-11 px-3.5 bg-cream/30 border border-primary/15 rounded-xl text-xs sm:text-sm outline-none focus:border-primary focus:bg-white uppercase tracking-wider"
+                    />
+                    {appliedCoupon ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppliedCoupon(null);
+                          setCouponCode("");
+                        }}
+                        className="px-4 h-11 bg-white border border-primary/15 text-charcoal/70 hover:text-red-600 rounded-xl text-xs font-semibold transition-colors"
+                      >
+                        {promoRemove}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={isValidatingCoupon || !couponCode.trim()}
+                        className="px-5 h-11 bg-primary text-white hover:bg-primary-light disabled:opacity-50 rounded-xl text-xs font-semibold shadow-xs transition-all"
+                      >
+                        {isValidatingCoupon ? "..." : promoApply}
+                      </button>
+                    )}
+                  </div>
+
+                  {couponError && (
+                    <p className="text-red-600 text-[11px] font-medium mt-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{couponError}</span>
+                    </p>
+                  )}
+
+                  {appliedCoupon && (
+                    <div className="flex items-center gap-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-xs font-medium mt-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                      <span>{isAr ? "تم تطبيق كود" : "Code"} {appliedCoupon.code} (-{dict.product?.currency || "EGP"} {appliedCoupon.appliedDiscount})</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Price Breakdown */}
+              <div className="pt-5 border-t border-primary/10 space-y-2 text-xs sm:text-sm text-charcoal/75">
+                <div className="flex justify-between">
+                  <span>{dict.cart?.subtotal || (isAr ? "المجموع الفرعي" : "Subtotal")}</span>
+                  <span className="font-medium text-[#222222]">{dict.product?.currency || "EGP"} {totalPrice}.00</span>
+                </div>
+
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-800 font-medium">
+                    <span>{promoDiscountLabel} ({appliedCoupon.code})</span>
+                    <span>-{dict.product?.currency || "EGP"} {appliedCoupon.appliedDiscount}.00</span>
+                  </div>
+                )}
+
+                {selectedMethod && (
+                  <div className="flex justify-between">
+                    <span>{translateShippingZone(selectedMethod.name, isAr)}</span>
+                    <span className="font-medium text-[#222222]">
+                      {selectedMethod.price === 0 ? (dict.checkout?.free || "FREE") : `${dict.product?.currency || "EGP"} ${selectedMethod.price}`}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-baseline pt-3 border-t border-primary/10">
+                  <span className="text-base sm:text-lg font-serif font-bold text-[#222222]">{dict.checkout?.total || (isAr ? "الإجمالي المستحق" : "Total")}</span>
+                  <span className="text-2xl sm:text-3xl font-serif font-bold text-primary">
+                    {dict.product?.currency || "EGP"} {finalPrice}.00
+                  </span>
+                </div>
+              </div>
+
+              {/* Primary Place Order CTA */}
+              <div className="mt-6 space-y-4">
+                <button
+                  type="button"
+                  onClick={handlePurchase}
+                  disabled={isProcessing}
+                  className="w-full py-4 bg-primary text-white hover:bg-primary-light font-semibold rounded-full text-base sm:text-lg shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>{dict.checkout?.processing || (isAr ? "جاري تجهيز الطلب..." : "Processing Order...")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>
+                        {dict.checkout?.place_order || (isAr ? `إتمام الطلب والدفع • ${finalPrice} ج.م` : `Complete Order & Pay • EGP ${finalPrice}`)}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                <p className="text-[11px] text-center text-charcoal/50 leading-relaxed italic">
+                  {dict.checkout?.prelaunch_manual_desc || (isAr ? "سيتم توجيهك بأمان لإتمام الدفع الإلكتروني المشفّر عبر Paymob." : "You will be securely routed to complete encrypted payment via Paymob.")}
+                </p>
+              </div>
+
+              {/* Trust Badges Strip */}
+              <div className="mt-6 pt-5 border-t border-primary/5 grid grid-cols-2 gap-3 text-[11px] text-charcoal/60">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span>{dict.checkout?.secure_ssl || (isAr ? "اتصال مشفّر SSL" : "256-Bit SSL Encrypted")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>{dict.checkout?.sustainable_packaging || (isAr ? "تغليف هدايا فاخر ومستدام" : "Luxury Sustainable Pack")}</span>
+                </div>
+              </div>
+            </section>
+            </div>
+          </div>
+
         </div>
       </div>
 
+      {/* Floating Error Toast */}
       {error && (
-        <div className="fixed bottom-10 start-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md p-4 bg-accent text-white rounded-2xl shadow-2xl animate-in slide-in-from-bottom-5 font-bold text-center text-sm">
-          {error}
+        <div className="fixed bottom-8 start-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md p-4 bg-red-600 text-white rounded-2xl shadow-xl font-medium text-sm text-center flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2 text-start">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setError("")}
+            className="text-white/80 hover:text-white text-xs font-bold underline shrink-0"
+          >
+            {isAr ? "إغلاق" : "Dismiss"}
+          </button>
         </div>
       )}
     </main>
   );
 }
-

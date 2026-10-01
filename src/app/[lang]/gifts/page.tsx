@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getProductsByCategory } from "@/lib/actions";
 import { SITE_URL } from "@/lib/constants";
 import { getDictionary, hasLocale } from "../dictionaries";
@@ -16,12 +16,12 @@ export async function generateMetadata({
   const isAr = lang === "ar";
 
   const title = isAr
-    ? "دليل الهدايا | هدايا لها، هدايا له، هدايا للأطفال"
-    : "Gifts Guide | Gifts for Her, Him, and Kids";
+    ? "دليل الهدايا الحرفية | هدايا لها، هدايا له، لست الحبايب، وللعروسين"
+    : "Handcrafted Gift Guide | Gifts for Her, Him, Mom, & Couples";
   const description = isAr
-    ? "وجهتك الأولى للهدايا المميزة والفريدة من المبدعين والورش المحلية في مصر."
-    : "THE place for meaningful presents from small shops. Discover curated gifts for her, him, and kids.";
-  const ogImage = `${SITE_URL}/images/gifts/gifts-for-her.jpg`;
+    ? "وجهتك الأولى للهدايا اليدوية المميزة والفريدة من الحرفيين والمبدعين في مصر."
+    : "THE place for meaningful handcrafted presents from independent Egyptian artisans.";
+  const ogImage = `${SITE_URL}/images/gifts/gifts-for-her.webp`;
 
   return {
     title,
@@ -29,6 +29,9 @@ export async function generateMetadata({
     keywords: [
       isAr ? "هدايا لها" : "Gifts for Her",
       isAr ? "هدايا له" : "Gifts for Him",
+      isAr ? "هدايا لست الحبايب" : "Gifts for Mom",
+      isAr ? "هدايا للعروسين" : "Wedding Gifts",
+      isAr ? "هدايا للأصدقاء" : "Gifts for Friends",
       isAr ? "هدايا اطفال" : "Gifts for Kids",
       isAr ? "هدايا يدوية" : "Handmade Gifts",
       isAr ? "هدايا مصرية" : "Egyptian Handmade",
@@ -64,15 +67,51 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function GiftsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ lang: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
+
+  const resolvedSearchParams = await searchParams;
+  const initialRecipient = typeof resolvedSearchParams?.recipient === "string" ? resolvedSearchParams.recipient : undefined;
+  
+  let initialPrice = typeof resolvedSearchParams?.price === "string" ? resolvedSearchParams.price : undefined;
+  if (!initialPrice) {
+    if (resolvedSearchParams?.maxPrice === "250") {
+      initialPrice = "UNDER_250";
+    } else if (resolvedSearchParams?.maxPrice === "500") {
+      initialPrice = "UNDER_500";
+    } else if (resolvedSearchParams?.maxPrice === "1000") {
+      initialPrice = "UNDER_1000";
+    } else if (resolvedSearchParams?.minPrice === "1000") {
+      initialPrice = "OVER_1000";
+    }
+  }
+
+  // Gracefully redirect legacy query URLs to clean dedicated subpages
+  if (initialRecipient && initialRecipient !== "all") {
+    const slugMap: Record<string, string> = {
+      her: "for-her",
+      him: "for-him",
+      mom: "for-mom",
+      couples: "for-couples",
+      friends: "for-friends",
+      kids: "for-kids",
+    };
+    const targetSlug = slugMap[initialRecipient] || initialRecipient;
+    redirect(`/${lang}/gifts/${targetSlug}${initialPrice ? `?price=${initialPrice}` : ""}`);
+  }
+
+  if (initialPrice && (!initialRecipient || initialRecipient === "all")) {
+    redirect(`/${lang}/gifts/all?price=${initialPrice}`);
+  }
 
   const dict = await getDictionary(lang as any);
   const products = await getProductsByCategory("gifts");
@@ -96,27 +135,17 @@ export default async function GiftsPage({
     ],
   };
 
-  const itemListJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    itemListElement: products.map((p, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: `${SITE_URL}/${lang}/products/${p.slug || p.id}`,
-    })),
-  };
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      <GiftsHubClient 
+        initialProducts={products} 
+        dict={dict} 
+        lang={lang}
       />
-      <GiftsHubClient initialProducts={products} dict={dict} />
     </>
   );
 }

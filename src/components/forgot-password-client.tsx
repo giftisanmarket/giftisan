@@ -34,7 +34,7 @@ export function ForgotPasswordClient({ dict }: { dict: any }) {
       {/* Visual Side */}
       <div className="hidden lg:block relative overflow-hidden h-full">
         <BespokeImage 
-          src="/images/auth/forgot-password.png" 
+          src="/images/auth/forgot-password.webp" 
           alt="Artisan compass on leather" 
           fill 
           className="object-cover"

@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 
 const FALLBACK_CRAFT_IMAGES = [
   "/hero.webp",
-  "/inlaid-box.png",
-  "/kilim-rug.png",
-  "/muski-vase.png",
+  "/inlaid-box.webp",
+  "/kilim-rug.webp",
+  "/muski-vase.webp",
   "/earrings.webp",
   "/journal.webp",
 ];

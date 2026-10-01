@@ -83,7 +83,7 @@ export default async function AboutPage({ params }: Props) {
   const stats = [
     { value: about.stat1_value || "100%", label: about.stat1_label || "Egyptian Handcrafted" },
     { value: about.stat2_value || "27", label: about.stat2_label || "Governorates Delivered" },
-    { value: about.stat3_value || "0%", label: about.stat3_label || "Middleman Exploitation" },
+    { value: about.stat3_value || "Fairer", label: about.stat3_label || (isAr ? "دعم مباشر للحرفيين" : "Support for Independent Makers") },
     { value: about.stat4_value || "1-of-a-Kind", label: about.stat4_label || "Artisanal Pieces" },
   ];
 

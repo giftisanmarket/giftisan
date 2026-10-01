@@ -16,6 +16,7 @@ interface ProductCardProps {
     canPersonalize?: boolean;
     requiresClientImage?: boolean;
     category?: string;
+    stock?: number;
     artisan: {
       studioName?: string | null;
       user?: {
@@ -64,6 +65,15 @@ export function ProductCard({ product, dict }: ProductCardProps) {
               <Heart className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isFavorite(product.id) && "fill-current")} />
             </button>
           </div>
+
+          {/* Out of Stock / Archived Badge */}
+          {product.stock !== undefined && product.stock <= 0 && (
+            <div className="absolute bottom-2 start-2 z-10">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-charcoal/80 text-white backdrop-blur-sm shadow-xs">
+                {dict?.artisan_detail?.archive || dict?.product?.sold_out || "Archived"}
+              </span>
+            </div>
+          )}
         </div>
       </Link>
 

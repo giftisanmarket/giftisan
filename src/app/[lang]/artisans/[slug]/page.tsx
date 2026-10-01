@@ -244,7 +244,7 @@ export default async function ArtisanPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <ArtisanClient artisan={data.artisanProfile} dict={dict} />
+      <ArtisanClient artisan={data.artisanProfile} dict={dict} lang={lang} />
     </>
   );
 }

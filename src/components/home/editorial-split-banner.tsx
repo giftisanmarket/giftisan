@@ -18,7 +18,7 @@ export function EditorialSplitBanner({
   const isArabic = dict?.common?.home === "الرئيسية" || dict?.common?.search?.includes("ابحث");
 
   const prod1Img = featuredProduct1?.images?.[0] || "/hero.webp";
-  const prod2Img = featuredProduct2?.images?.[0] || "/inlaid-box.png";
+  const prod2Img = featuredProduct2?.images?.[0] || "/inlaid-box.webp";
 
   const prod1Url = featuredProduct1 ? `/products/${encodeURI(featuredProduct1.slug || featuredProduct1.id)}` : "/products";
   const prod2Url = featuredProduct2 ? `/products/${encodeURI(featuredProduct2.slug || featuredProduct2.id)}` : "/category/home-and-living";

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   const title = (dict as any).common?.categories_list?.[slug] || (dict as any).home?.categories_list?.[slug] || categoryName;
   const description = `${dict.home.category_desc_prefix || "Discover unique handcrafted" } ${title} ${dict.home.category_desc_suffix || "from authentic Egyptian artisans."}`;
-  const ogImage = `${SITE_URL}/images/categories/${slug}.png`;
+  const ogImage = `${SITE_URL}/images/categories/${slug}.webp`;
 
   return {
     title,

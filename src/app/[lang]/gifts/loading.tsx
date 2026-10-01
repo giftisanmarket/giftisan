@@ -1,62 +1,93 @@
-import { Skeleton } from "@/components/skeleton";
+import { Skeleton, ProductCardSkeleton } from "@/components/skeleton";
 import { NavbarSkeleton } from "@/components/navbar-skeleton";
 
 export default function GiftsLoading() {
   return (
     <div className="min-h-screen bg-cream">
+      {/* Sticky Navbar Skeleton */}
       <NavbarSkeleton />
 
-      {/* Hero Skeleton with lavender tone */}
-      <section className="bg-gradient-to-b from-[#EFE9F6] via-[#F7F4FA] to-cream pt-10 md:pt-16 pb-12 md:pb-16 border-b border-primary/5">
+      {/* 1. Etsy Editorial Hero Skeleton */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#EFE9F6] via-[#F7F4FA] to-cream pt-8 sm:pt-12 md:pt-16 pb-10 sm:pb-14 border-b border-primary/5">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center max-w-2xl mx-auto space-y-3 mb-10 md:mb-14 flex flex-col items-center">
-            <Skeleton className="w-64 md:w-80 h-10 md:h-14 rounded-2xl bg-primary/10" />
-            <Skeleton className="w-80 md:w-96 h-5 rounded-lg bg-primary/10" />
+          {/* Header Title & Subtitle */}
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-10 md:mb-12 flex flex-col items-center">
+            {/* Guide Badge */}
+            <Skeleton className="w-36 h-6 rounded-full mb-3" />
+            {/* Main Headline */}
+            <Skeleton className="w-72 sm:w-96 md:w-[440px] h-10 sm:h-14 rounded-2xl mb-3" />
+            {/* Subtitle */}
+            <Skeleton className="w-80 sm:w-[420px] md:w-[500px] max-w-full h-4 sm:h-5 rounded-md" />
           </div>
 
-          {/* 3 Cards Skeleton */}
-          <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto overflow-x-auto md:overflow-visible pb-4 pt-1 px-4 -mx-4 md:px-0 md:mx-auto snap-x snap-mandatory scrollbar-none">
-            {[1, 2, 3].map((i) => (
+          {/* 6 Recipient Cards Grid / Carousel */}
+          <div className="flex md:grid md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 max-w-7xl mx-auto overflow-x-auto md:overflow-visible pb-4 pt-1 px-4 -mx-4 md:px-0 md:mx-auto">
+            {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="w-[76vw] max-w-[310px] sm:w-[46vw] md:w-auto shrink-0 snap-center md:snap-align-none rounded-3xl p-3 md:p-3.5 bg-white/70 border border-primary/10 space-y-3"
+                className="w-[70vw] max-w-[270px] sm:w-[42vw] md:w-auto shrink-0 rounded-2xl md:rounded-3xl p-3 bg-white/70 backdrop-blur-sm border border-primary/10 space-y-3"
               >
-                <Skeleton className="aspect-[4/5] rounded-2xl md:rounded-[22px] w-full bg-primary/10" />
-                <div className="space-y-2 px-1">
-                  <Skeleton className="w-32 h-5 rounded-lg bg-primary/10" />
-                  <Skeleton className="w-44 h-3.5 rounded bg-primary/10" />
-                  <Skeleton className="w-20 h-3.5 rounded bg-primary/10 mt-2" />
+                {/* Card Image Mockup */}
+                <Skeleton className="aspect-[4/5] rounded-xl md:rounded-[18px] w-full" />
+                
+                {/* Content Mockup */}
+                <div className="space-y-1.5 px-0.5">
+                  <Skeleton className="w-3/4 h-5 rounded-md" />
+                  <Skeleton className="w-full h-3 rounded" />
+                  <Skeleton className="w-4/5 h-3 rounded" />
+                  <div className="pt-2 flex items-center justify-between">
+                    <Skeleton className="w-16 h-3 rounded" />
+                    <Skeleton className="w-3.5 h-3.5 rounded-full" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* Filter Bar Skeleton */}
-      <div className="py-3 border-y border-primary/5 mb-6 md:mb-8 bg-cream/95">
-        <div className="container mx-auto px-4 md:px-6 flex gap-2">
-          <Skeleton className="w-24 h-8 rounded-full" />
-          <Skeleton className="w-28 h-8 rounded-full" />
-          <Skeleton className="w-28 h-8 rounded-full" />
-          <Skeleton className="w-28 h-8 rounded-full" />
+      {/* 2. Budget Grid Skeleton */}
+      <section className="container mx-auto px-4 md:px-6 py-8 md:py-12 border-b border-primary/5">
+        <div className="flex items-center justify-between mb-5">
+          <div className="space-y-1.5">
+            <Skeleton className="w-44 h-6 rounded-lg" />
+            <Skeleton className="w-64 h-3.5 rounded" />
+          </div>
+          <Skeleton className="w-20 h-4 rounded" />
         </div>
-      </div>
-
-      {/* Product Grid Skeleton */}
-      <section className="container mx-auto px-4 md:px-6 pb-16">
-        <Skeleton className="w-48 h-8 rounded-lg mb-6" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="aspect-square rounded-xl md:rounded-2xl w-full" />
-              <div className="space-y-1 pt-1">
-                <Skeleton className="w-20 h-3 rounded" />
-                <Skeleton className="w-4/5 h-4 rounded" />
-                <Skeleton className="w-16 h-3.5 rounded" />
-              </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="p-4 rounded-2xl bg-white/70 border border-primary/10 space-y-2">
+              <Skeleton className="w-20 h-4 rounded-full" />
+              <Skeleton className="w-32 h-5 rounded-md" />
+              <Skeleton className="w-4/5 h-3.5 rounded" />
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. Occasions Strip Skeleton */}
+      <section className="container mx-auto px-4 md:px-6 py-6 md:py-8 border-b border-primary/5">
+        <Skeleton className="w-40 h-6 rounded-lg mb-4" />
+        <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="w-32 sm:w-40 h-10 rounded-full shrink-0" />
+          ))}
+        </div>
+      </section>
+
+      {/* 4. Trending Products Preview Skeleton */}
+      <section className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1.5">
+            <Skeleton className="w-52 h-7 rounded-lg" />
+            <Skeleton className="w-72 h-3.5 rounded" />
+          </div>
+          <Skeleton className="w-28 h-6 rounded-full" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
           ))}
         </div>
       </section>

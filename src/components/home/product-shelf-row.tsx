@@ -226,8 +226,18 @@ export function ProductShelfRow({
                   </h3>
 
                   {artisanName && (
-                    <p className="text-[11px] text-charcoal/50 truncate font-light">
-                      {isArabic ? `بواسطة ${artisanName}` : `by ${artisanName}`}
+                    <p className="text-[11px] text-charcoal/65 truncate font-medium flex items-center gap-1">
+                      <span className="text-charcoal/40 text-[10px]">{isArabic ? "صنع بواسطة" : "By"}</span>
+                      {product.artisan?.slug || product.artisan?.id ? (
+                        <Link 
+                          href={`/artisans/${product.artisan.slug || product.artisan.id}`}
+                          className="hover:text-primary hover:underline underline-offset-2 transition-colors font-semibold text-charcoal/80"
+                        >
+                          {artisanName}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold text-charcoal/80">{artisanName}</span>
+                      )}
                     </p>
                   )}
 

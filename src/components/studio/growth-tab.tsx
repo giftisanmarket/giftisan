@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -148,9 +149,17 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
 
 
   const handleDownloadQR = () => {
-    const svg = document.getElementById("growth-shop-qr-code");
-    if (!svg) return;
-    const svgData = new XMLSerializer().serializeToString(svg);
+    const svg = document.getElementById("packaging-card-qr-code") || document.getElementById("growth-shop-qr-code");
+    if (!svg) {
+      toast.error("QR code is not available to download yet.");
+      return;
+    }
+    const svgClone = svg.cloneNode(true) as SVGSVGElement;
+    svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svgClone.setAttribute("width", "1200");
+    svgClone.setAttribute("height", "1200");
+    const svgData = new XMLSerializer().serializeToString(svgClone);
+    const svgUrl = URL.createObjectURL(new Blob([svgData], { type: "image/svg+xml;charset=utf-8" }));
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new window.Image();
@@ -161,7 +170,9 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
       if (ctx) {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
         ctx.drawImage(img, 120, 120, 960, 960);
+        URL.revokeObjectURL(svgUrl);
         
         const pngFile = canvas.toDataURL("image/png");
         const downloadLink = document.createElement("a");
@@ -171,7 +182,11 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
         toast.success(isAr ? "تم تحميل رمز QR عالي الجودة للطباعة والتغليف" : "High-res QR Code downloaded for packaging & prints!");
       }
     };
-    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    img.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      toast.error("Could not create the image file.");
+    };
+    img.src = svgUrl;
   };
 
   const handlePrintPackagingCard = () => {
@@ -208,7 +223,9 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
         .map(node => node.outerHTML)
         .join("\n");
 
-      const cardHTML = cardEl.outerHTML;
+      const cardHTML = printLayout === "grid"
+        ? `<div class="packaging-card-grid">${Array.from({ length: 8 }, () => cardEl.outerHTML).join("")}</div>`
+        : cardEl.outerHTML;
 
       frameDoc.open();
       frameDoc.write(`
@@ -220,8 +237,8 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
             ${styles}
             <style>
               @page {
-                size: auto;
-                margin: 15mm;
+                size: A4 portrait;
+                margin: 0;
               }
               * {
                 -webkit-print-color-adjust: exact !important;
@@ -258,6 +275,20 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
+              }
+              .packaging-card-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 90mm) !important;
+                grid-template-rows: repeat(4, 52mm) !important;
+                gap: 6mm !important;
+              }
+              .packaging-card-grid #printable-packaging-card {
+                width: 90mm !important;
+                min-height: 52mm !important;
+                height: 52mm !important;
+                border-radius: 5mm !important;
+                padding: 5mm !important;
+                box-shadow: none !important;
               }
             </style>
           </head>
@@ -1862,9 +1893,10 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
       />
 
       {/* Packaging Thank-You Card Modal */}
-      <AnimatePresence>
-        {isPackagingModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-charcoal/60 backdrop-blur-xs">
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isPackagingModalOpen && (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-4 bg-charcoal/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1900,7 +1932,7 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
                   )}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>{isAr ? "٤ كروت في ورقة A4" : "4 Cards per A4 Sheet"}</span>
+                  <span>{isAr ? "٨ كروت في ورقة A4" : "8 Cards per A4 Sheet"}</span>
                 </button>
                 <button
                   type="button"
@@ -1989,6 +2021,7 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
 
                   <div className="p-2 sm:p-2.5 bg-white rounded-xl sm:rounded-2xl shadow-md shrink-0">
                     <QRCode
+                      id="packaging-card-qr-code"
                       value={shopUrl}
                       size={72}
                       bgColor="#FFFFFF"
@@ -2023,15 +2056,17 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
                   <Printer className="w-4 h-4 shrink-0" />
                   <span>
                     {printLayout === "grid"
-                      ? (isAr ? "طباعة ٤ كروت (A4)" : "Print 4 Cards (A4)")
+                      ? (isAr ? "طباعة ٨ كروت (A4)" : "Print 8 Cards (A4)")
                       : (isAr ? "طباعة كارت منفرد" : "Print Single Card")}
                   </span>
                 </button>
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

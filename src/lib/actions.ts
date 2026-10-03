@@ -2110,6 +2110,34 @@ export async function generateUniqueProductSlug(name: string, productId?: string
   }
 }
 
+export async function getProductForEdit(productId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) return null;
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { variants: true },
+    });
+
+    if (!product) return null;
+
+    // Artisans can only edit their own products; admins can edit any
+    if (session.user.role !== "ADMIN") {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      if (!artisan || artisan.id !== product.artisanId) return null;
+    }
+
+    return product;
+  } catch (error) {
+    console.error("getProductForEdit error:", error);
+    return null;
+  }
+}
+
 export async function createProduct(artisanId: string, formData: FormData) {
   try {
     const session = await auth();

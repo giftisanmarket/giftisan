@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { EtsyCategoryPicker } from "@/components/studio/etsy-category-picker";
 import {
   ArrowLeft,
@@ -24,13 +24,41 @@ import {
   Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createProduct } from "@/lib/actions";
+import { createProduct, updateProduct } from "@/lib/actions";
 import { cn, stripEmojis } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+
+interface ProductVariantData {
+  id?: string;
+  name: string;
+  price: number | string;
+  stock: number | string;
+  sku?: string | null;
+  image?: string | null;
+  options?: any;
+}
+
+interface ProductInitialData {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  images: string[];
+  canPersonalize: boolean;
+  personalizationPrompt?: string | null;
+  requiresClientImage: boolean;
+  clientImagePrompt?: string | null;
+  stock: number;
+  variants: ProductVariantData[];
+}
 
 interface NewProductClientProps {
   artisanId: string;
   dict: any;
+  lang?: string;
+  /** When provided, the form operates in edit mode */
+  initialData?: ProductInitialData;
 }
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -176,12 +204,12 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
           type="button"
           onClick={() => {
             setVariants(variants.filter((_: any, idx: number) => idx !== i));
-            toast.success("Variant removed");
+            toast.success(dict.edit_product?.removed_option || (dict?.common?.home === "الرئيسية" ? "تم حذف التشكيلة" : "Variant removed"));
           }}
           className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all flex items-center gap-1 active:scale-95 mt-1"
         >
           <Trash2 className="w-3.5 h-3.5" />
-          <span>{dict.common?.remove || "Delete Variant"}</span>
+          <span>{dict.edit_product?.delete_option || dict.common?.remove || (dict?.common?.home === "الرئيسية" ? "حذف التشكيلة" : "Delete Variant")}</span>
         </button>
       </div>
     </div>
@@ -290,6 +318,8 @@ const OptionValueInput = memo(({ optIdx, onAddValue, dict }: { optIdx: number; o
 OptionValueInput.displayName = "OptionValueInput";
 
 const VariationsSection = memo(({ dict, options, setOptions, variants, setVariants, basePrice }: any) => {
+  const isAr = dict?.common?.home === "الرئيسية" || dict?.new_product?.the_essentials === "الأساسيات";
+  const [hasVariations, setHasVariations] = useState(options.length > 0 || variants.length > 0);
   const [newOptionName, setNewOptionName] = useState("");
   const [showBulkStockModal, setShowBulkStockModal] = useState(false);
   const [bulkStockVal, setBulkStockVal] = useState("5");
@@ -346,24 +376,72 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
   };
 
   return (
-    <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-8">
-      <div className="flex items-center gap-3 pb-6 border-b border-primary/5">
-        <Tag className="w-6 h-6 text-accent" />
-        <h2 className="text-2xl font-heading font-bold text-primary">{dict.edit_product.variations}</h2>
+    <section className="bg-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 md:p-10 shadow-2xl shadow-primary/5 border border-primary/5 transition-all">
+      <div 
+        onClick={() => {
+          const next = !hasVariations;
+          setHasVariations(next);
+          if (!next) {
+            setOptions([]);
+            setVariants([]);
+          }
+        }}
+        className="flex items-center justify-between cursor-pointer select-none group"
+      >
+        <div className="flex items-center gap-3.5 sm:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shrink-0 group-hover:scale-105 transition-transform">
+            <Tag className="w-5 h-5 md:w-6 md:h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">
+                {dict.edit_product?.variations || (isAr ? "خيارات المنتج" : "Product Variations")}
+              </h2>
+              {hasVariations && variants.length > 0 && (
+                <span className="text-[10px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
+                  {variants.length} {isAr ? "خيارات" : (dict.edit_product?.variants || "Variants")}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-charcoal/50 mt-0.5">
+              {dict.edit_product?.has_variations_desc || (isAr ? "هل تتوفر هذه القطعة بخيارات متعددة مثل المقاس، اللون، أو الخامة؟" : "Does this piece come in multiple options (like size, color, or material)?")}
+            </p>
+          </div>
+        </div>
+
+        {/* Toggle Switch */}
+        <div className={cn(
+          "w-12 h-7 rounded-full p-1 transition-colors duration-200 ease-in-out shrink-0",
+          hasVariations ? "bg-accent" : "bg-primary/10 group-hover:bg-primary/20"
+        )}>
+          <div className={cn(
+            "w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out",
+            hasVariations ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"
+          )} />
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <AnimatePresence>
+        {hasVariations && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden pt-6 mt-6 border-t border-primary/5 space-y-6"
+          >
+            <div className="space-y-6">
         {/* Quick Option Preset Chips */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[10px] font-black uppercase tracking-widest text-primary/40 me-1">
-            {dict.edit_product?.quick_presets || "Quick Presets:"}
+            {dict.edit_product?.quick_presets || (isAr ? "خيارات سريعة:" : "Quick Presets:")}
           </span>
           {[
-            { id: "color", label: dict.edit_product?.preset_color || "Color" },
-            { id: "size", label: dict.edit_product?.preset_size || "Size" },
-            { id: "material", label: dict.edit_product?.preset_material || "Material" },
-            { id: "finish", label: dict.edit_product?.preset_finish || "Finish" },
-            { id: "style", label: dict.edit_product?.preset_style || "Style" },
+            { id: "color", label: dict.edit_product?.preset_color || (isAr ? "اللون" : "Color") },
+            { id: "size", label: dict.edit_product?.preset_size || (isAr ? "المقاس" : "Size") },
+            { id: "material", label: dict.edit_product?.preset_material || (isAr ? "الخامة" : "Material") },
+            { id: "finish", label: dict.edit_product?.preset_finish || (isAr ? "التشطيب" : "Finish") },
+            { id: "style", label: dict.edit_product?.preset_style || (isAr ? "النمط" : "Style") },
           ].map((preset) => (
             <button
               key={preset.id}
@@ -371,7 +449,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
               onClick={() => {
                 if (!options.some((o: any) => o.name.toLowerCase() === preset.label.toLowerCase())) {
                   setOptions([...options, { name: preset.label, values: [] }]);
-                  toast.success(`${dict.edit_product?.added_option || "Added option"}: ${preset.label}`);
+                  toast.success(`${dict.edit_product?.added_option || (isAr ? "تمت إضافة الخيار" : "Added option")}: ${preset.label}`);
                 }
               }}
               className="px-3 py-1 bg-primary/5 hover:bg-accent/10 hover:text-accent border border-primary/10 rounded-full text-xs font-bold text-primary transition-all active:scale-95 flex items-center gap-1"
@@ -385,7 +463,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <input 
             type="text" 
-            placeholder={dict.edit_product.option_name_placeholder}
+            placeholder={dict.edit_product?.option_name_placeholder || (isAr ? "مثال: اللون، المقاس" : "e.g. Color, Size")}
             value={newOptionName}
             onChange={(e) => setNewOptionName(e.target.value)}
             className="flex-1 py-4 px-8 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:border-accent font-bold shadow-sm"
@@ -398,15 +476,17 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
             }}
           />
           <button 
-            type="button"
+            type="button" 
             onClick={addOption}
             className="h-14 px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-lg active:scale-95 whitespace-nowrap flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4 text-accent" />
-            {dict.edit_product.add_option}
+            {dict.edit_product?.add_option || (isAr ? "إضافة خيار" : "Add Option")}
           </button>
         </div>
-        <p className="text-[10px] font-bold text-accent/60 uppercase tracking-widest px-2">{dict.edit_product.enter_to_add}</p>
+        <p className="text-[10px] font-bold text-accent/60 uppercase tracking-widest px-2">
+          {dict.edit_product?.enter_to_add || (isAr ? "اضغط Enter للإضافة" : "PRESS ENTER TO ADD")}
+        </p>
 
         <div className="space-y-4">
           {options.map((opt: any, optIdx: number) => (
@@ -476,7 +556,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                   className="px-6 py-4 bg-primary/5 text-primary border border-primary/10 font-bold rounded-2xl hover:bg-primary/10 transition-all flex items-center justify-center gap-2 text-xs md:text-sm"
                 >
                   <Tag className="w-4 h-4 text-accent" />
-                  {dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}
+                  {dict.edit_product?.set_bulk_stock || (isAr ? "تحديد المخزون للكل" : "Set Bulk Stock")}
                 </button>
               </div>
             )}
@@ -532,10 +612,10 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                     </div>
                     <div>
                       <h3 className="font-heading font-bold text-lg text-primary">
-                        {dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}
+                        {dict.edit_product?.set_bulk_stock || (isAr ? "تحديد المخزون للكل" : "Set Bulk Stock")}
                       </h3>
                       <p className="text-xs text-primary/50 font-medium">
-                        {dict.edit_product?.bulk_stock_desc || "Enter stock quantity for all variants"}
+                        {dict.edit_product?.bulk_stock_desc || (isAr ? "أدخل الكمية المتاحة لجميع الخيارات" : "Enter stock quantity for all variants")}
                       </p>
                     </div>
                   </div>
@@ -551,7 +631,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-primary/60 uppercase tracking-wider">
-                      {dict.new_product?.initial_stock_label || "Quantity"}
+                      {dict.new_product?.initial_stock_label || (isAr ? "الكمية" : "Quantity")}
                     </label>
                     <input
                       type="number"
@@ -568,13 +648,13 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                             toast.success(
                               dict.edit_product?.stock_set_success
                                 ? dict.edit_product.stock_set_success.replace("{count}", bulkStockVal)
-                                : `Set stock to ${bulkStockVal} for all variants`
+                                : (isAr ? `تم تحديد المخزون إلى ${bulkStockVal} لجميع الخيارات` : `Set stock to ${bulkStockVal} for all variants`)
                             );
                             setShowBulkStockModal(false);
                           }
                         }
                       }}
-                      placeholder={dict.edit_product?.bulk_stock_placeholder || "e.g. 5"}
+                      placeholder={dict.edit_product?.bulk_stock_placeholder || (isAr ? "مثال: 5" : "e.g. 5")}
                       className="w-full h-12 px-4 bg-cream/30 border border-primary/10 rounded-2xl font-bold text-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
                     />
                   </div>
@@ -585,7 +665,7 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                       onClick={() => setShowBulkStockModal(false)}
                       className="flex-1 py-3.5 px-4 bg-cream hover:bg-cream/70 text-primary font-bold rounded-2xl transition-all text-sm"
                     >
-                      {dict.common?.cancel || "Cancel"}
+                      {dict.common?.cancel || (isAr ? "إلغاء" : "Cancel")}
                     </button>
                     <button
                       type="button"
@@ -596,14 +676,14 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
                           toast.success(
                             dict.edit_product?.stock_set_success
                               ? dict.edit_product.stock_set_success.replace("{count}", bulkStockVal)
-                              : `Set stock to ${bulkStockVal} for all variants`
+                              : (isAr ? `تم تحديد المخزون إلى ${bulkStockVal} لجميع الخيارات` : `Set stock to ${bulkStockVal} for all variants`)
                           );
                           setShowBulkStockModal(false);
                         }
                       }}
                       className="flex-1 py-3.5 px-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl transition-all shadow-md shadow-accent/20 active:scale-95 text-sm"
                     >
-                      {dict.edit_product?.apply_stock || dict.common?.apply || "Apply Stock"}
+                      {dict.edit_product?.apply_stock || dict.common?.apply || (isAr ? "تطبيق الكمية" : "Apply Stock")}
                     </button>
                   </div>
                 </div>
@@ -611,32 +691,58 @@ const VariationsSection = memo(({ dict, options, setOptions, variants, setVarian
             </div>
           )}
         </AnimatePresence>
-      </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 });
 
 VariationsSection.displayName = "VariationsSection";
 
-export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
+export function NewProductClient({ artisanId, dict, lang: propLang, initialData }: NewProductClientProps) {
   const router = useRouter();
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "en";
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية" || dict?.new_product?.the_essentials === "الأساسيات";
+  const isEditMode = Boolean(initialData);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Pad images array to always have 10 slots
+  const padImages = (imgs: string[]) => {
+    const padded = [...imgs];
+    while (padded.length < 10) padded.push("");
+    return padded;
+  };
+
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "ceramics",
-    images: ["", "", "", "", "", "", "", "", "", ""],
-    canPersonalize: false,
-    personalizationPrompt: "",
-    requiresClientImage: false,
-    clientImagePrompt: "",
+    name: initialData?.name ?? "",
+    description: initialData?.description ?? "",
+    price: initialData ? String(initialData.price) : "",
+    category: initialData?.category ?? "ceramics",
+    images: initialData ? padImages(initialData.images) : ["", "", "", "", "", "", "", "", "", ""],
+    canPersonalize: initialData?.canPersonalize ?? false,
+    personalizationPrompt: initialData?.personalizationPrompt ?? "",
+    requiresClientImage: initialData?.requiresClientImage ?? false,
+    clientImagePrompt: initialData?.clientImagePrompt ?? "",
     badge: "",
-    stock: "1"
+    stock: initialData ? String(initialData.stock) : "1"
   });
 
   const [options, setOptions] = useState<any[]>([]);
-  const [variants, setVariants] = useState<any[]>([]);
+  const [variants, setVariants] = useState<any[]>(
+    initialData?.variants
+      ? initialData.variants.map((v) => ({
+          name: v.name,
+          price: String(v.price),
+          stock: String(v.stock),
+          sku: v.sku ?? "",
+          image: v.image ?? "",
+          options: v.options ?? {}
+        }))
+      : []
+  );
   const [isCompressing, setIsCompressing] = useState<Record<number, boolean>>({});
   const [resolutions, setResolutions] = useState<Record<number, string>>({});
 
@@ -669,9 +775,12 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
 
   const handleImageChange = useCallback((index: number, value: string) => {
-    const newImages = [...formData.images];
-    newImages[index] = value;
-    setFormData((prev: any) => ({ ...prev, images: newImages }));
+    // Functional update: batch uploads finish asynchronously, so always merge into the latest state
+    setFormData((prev: any) => {
+      const newImages = [...prev.images];
+      newImages[index] = value;
+      return { ...prev, images: newImages };
+    });
     if (!value) {
       setResolutions(prev => {
         const next = { ...prev };
@@ -679,7 +788,28 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
         return next;
       });
     }
-  }, [formData.images]);
+  }, []);
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setFormData((prev: any) => {
+      const nextImages = prev.images.filter((_: string, i: number) => i !== index);
+      while (nextImages.length < 10) nextImages.push("");
+      return { ...prev, images: nextImages };
+    });
+
+    setResolutions(prev => {
+      const next: Record<number, string> = {};
+      const keys = Object.keys(prev).map(Number).sort((a, b) => a - b);
+      let newIdx = 0;
+      keys.forEach((k) => {
+        if (k !== index && prev[k]) {
+          next[newIdx] = prev[k];
+          newIdx++;
+        }
+      });
+      return next;
+    });
+  }, []);
 
   // Media Gallery Best Practice Helpers
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -849,18 +979,28 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
     form.append("variants", JSON.stringify(variants));
 
     try {
-      const res = await createProduct(artisanId, form);
+      let res: { success?: boolean; error?: string };
+
+      if (isEditMode && initialData) {
+        res = await updateProduct(initialData.id, form);
+      } else {
+        res = await createProduct(artisanId, form);
+      }
 
       if (res.success) {
-        toast.success(dict.new_product.success_message || "Product listed successfully!");
-        window.location.href = "/studio";
+        if (isEditMode) {
+          toast.success(isAr ? "تم حفظ التغييرات بنجاح! سيُعاد مراجعة منتجك." : "Changes saved! Your product will be re-reviewed before going live.");
+        } else {
+          toast.success(dict.new_product?.success_message || (isAr ? "تم إرسال منتجك بنجاح! سيتم مراجعته والموافقة عليه قريباً." : "Your product has been submitted for review and will be published once approved!"));
+        }
+        window.location.href = `/${lang}/studio`;
       } else {
-        toast.error(res.error || "Failed to create product.");
+        toast.error(res.error || (isAr ? "فشلت العملية. يرجى المحاولة مجدداً." : "Operation failed. Please try again."));
         setIsLoading(false);
       }
     } catch (err: any) {
       console.error("Submission error:", err);
-      toast.error(dict.common?.error || "A connection error occurred. Please check your signal.");
+      toast.error(dict.common?.error || (isAr ? "حدث خطأ في الاتصال. يرجى التحقق من الشبكة." : "A connection error occurred. Please check your signal."));
       setIsLoading(false);
     }
   };
@@ -868,20 +1008,34 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
   return (
     <main className="container mx-auto px-4 py-6 sm:py-8 md:py-12 max-w-4xl text-start">
         <Link
-          href="/studio"
+          href={`/${lang}/studio`}
           className="inline-flex items-center gap-2 text-primary/40 hover:text-primary text-sm font-bold uppercase tracking-widest mb-6 md:mb-8 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
-          <span>{dict.studio_profile.back_to_studio}</span>
+          <span>{dict.studio_profile?.back_to_studio || (isAr ? "العودة للمتجر" : "Back to Shop")}</span>
         </Link>
 
         <div className="flex flex-col md:flex-row justify-between items-start mb-8 md:mb-12 gap-4 md:gap-6 text-start">
           <div className="text-start">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-primary leading-tight text-start">
-              {dict.new_product.list_new_treasure}{" "}
-              <span className="serif italic font-normal text-accent">{dict.new_product.treasure_accent}</span>
-            </h1>
-            <p className="text-charcoal/40 mt-1.5 text-sm md:text-base text-start">{dict.new_product.share_craftsmanship}</p>
+            {isEditMode ? (
+              <>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-primary leading-tight text-start">
+                  {isAr ? "تعديل " : "Edit "}
+                  <span className="serif italic font-normal text-accent">{isAr ? "المنتج" : "Product"}</span>
+                </h1>
+                <p className="text-charcoal/40 mt-1.5 text-sm md:text-base text-start">
+                  {isAr ? "قم بتحديث تفاصيل منتجك — سيُعاد إرساله للمراجعة بعد الحفظ." : "Update your product details — it will be re-submitted for review after saving."}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-primary leading-tight text-start">
+                  {dict.new_product.list_new_treasure}{" "}
+                  <span className="serif italic font-normal text-accent">{dict.new_product.treasure_accent}</span>
+                </h1>
+                <p className="text-charcoal/40 mt-1.5 text-sm md:text-base text-start">{dict.new_product.share_craftsmanship}</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -913,7 +1067,20 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              {/* Category Picker */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <Tag className="w-3 h-3" /> {dict.new_product.category_label}
+                </label>
+                <EtsyCategoryPicker
+                  value={formData.category}
+                  onChange={(cat) => setFormData({ ...formData, category: cat })}
+                  dict={dict}
+                />
+              </div>
+
+              {/* Pricing & Initial Stock (Twin Inventory Fields) */}
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
                     <DollarSign className="w-3 h-3" /> {dict.new_product.price_label}
@@ -930,19 +1097,30 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       className="w-full py-3.5 sm:py-4 px-4 sm:px-6 pe-16 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-start"
                     />
                     <div className="absolute end-4 px-3 py-1 bg-cream/60 border border-primary/10 rounded-xl text-xs font-black text-primary/60 pointer-events-none">
-                      EGP
+                      {isAr ? "ج.م" : "EGP"}
                     </div>
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
-                    <Tag className="w-3 h-3" /> {dict.new_product.category_label}
+                    <CheckCircle2 className="w-3 h-3" /> {dict.new_product.initial_stock_label} *
                   </label>
-                  <EtsyCategoryPicker
-                    value={formData.category}
-                    onChange={(cat) => setFormData({ ...formData, category: cat })}
-                    dict={dict}
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="1"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    placeholder={dict.new_product.initial_stock_placeholder || "1"}
+                    className="w-full py-3.5 sm:py-4 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-start"
                   />
+                  <p className="text-[10px] text-charcoal/40 font-medium">
+                    {variants.length > 0
+                      ? (dict.new_product?.variant_managed_stock_hint || (isAr ? "الكمية الافتراضية (مُدارة بواسطة الخيارات بالأسفل)" : "Default quantity (managed by variants below)"))
+                      : (dict.new_product?.available_units_hint || (isAr ? "عدد القطع الجاهزة للشحن فوراً" : "Available units ready to ship"))}
+                  </p>
                 </div>
               </div>
 
@@ -978,31 +1156,30 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
           >
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 md:pb-6 border-b border-primary/5">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-accent/10 rounded-2xl text-accent">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="p-3 bg-accent/10 rounded-2xl text-accent shrink-0 mt-0.5 sm:mt-0">
                   <ImageIcon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-heading font-bold text-primary flex items-center gap-2">
-                    {dict.new_product.media_gallery}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">
+                      {dict.new_product.media_gallery}
+                    </h2>
                     <span className="text-xs font-bold text-primary/40 font-mono">
                       ({formData.images.filter(Boolean).length}/10)
                     </span>
-                  </h2>
-                  <p className="text-xs text-charcoal/50 italic mt-0.5">{dict.new_product.media_desc}</p>
+                  </div>
+                  <p className="text-xs text-charcoal/50 italic">{dict.new_product.media_desc}</p>
+                  <div className="pt-0.5 flex items-center gap-1.5 text-[11px] font-bold text-accent">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>{dict.new_product.optimal_size}</span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-accent/5 border border-accent/10 rounded-full">
-                  <Sparkles className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">
-                    {dict.new_product.optimal_size}
-                  </span>
-                </div>
-
                 {/* Batch Upload Button */}
-                <label className="cursor-pointer px-4 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-light transition-all flex items-center gap-2 shadow-md active:scale-95">
+                <label className="cursor-pointer px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-light transition-all flex items-center gap-2 shadow-md active:scale-95">
                   <Upload className="w-4 h-4" />
                   <span>{dict.new_product?.add_media || "Add Media"}</span>
                   <input
@@ -1014,6 +1191,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                       if (e.target.files && e.target.files.length > 0) {
                         handleBatchFilesUpload(e.target.files);
                       }
+                      e.target.value = "";
                     }}
                   />
                 </label>
@@ -1044,7 +1222,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               </div>
             )}
 
-            {/* Media Gallery Grid */}
+            {/* Media Gallery 10-Slot Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
               {formData.images.map((img, idx) => {
                 const isCover = idx === 0;
@@ -1059,6 +1237,8 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                           ? "border-2 border-accent shadow-lg shadow-accent/10"
                           : isFilled
                           ? "border-primary/10 bg-white shadow-sm hover:shadow-md"
+                          : isCover
+                          ? "border-2 border-dashed border-accent/40 bg-accent/5 hover:border-accent hover:bg-accent/10"
                           : "border-dashed border-primary/20 bg-cream/30 hover:border-accent/40 hover:bg-accent/5"
                       )}
                     >
@@ -1076,7 +1256,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                 onMouseOut={(e) => e.currentTarget.pause()}
                               />
                               <div className="absolute bottom-2 end-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase flex items-center gap-1">
-                                <Video className="w-2.5 h-2.5" /> Video
+                                <Video className="w-2.5 h-2.5" /> {dict.new_product?.video_label || (isAr ? "فيديو" : "Video")}
                               </div>
                             </div>
                           ) : (
@@ -1103,7 +1283,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleImageChange(idx, "");
+                              handleRemoveImage(idx);
                             }}
                             className="absolute top-2 end-2 z-40 p-1.5 sm:p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg border border-white/20 transition-all active:scale-90 cursor-pointer flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                             title={dict.new_product.remove}
@@ -1114,7 +1294,6 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
 
                           {/* BOTTOM GRADIENT OVERLAY & CONTROLS */}
                           <div className="absolute inset-0 z-30 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 flex flex-col justify-end p-2 sm:p-2.5 gap-1.5 rounded-2xl overflow-hidden">
-                            {/* Make Main Cover Button (if not already cover) */}
                             {!isCover && (
                               <button
                                 type="button"
@@ -1122,7 +1301,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                                 className="w-full py-1 px-2 bg-amber-500/90 hover:bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95 border border-amber-300/30"
                               >
                                 <Star className="w-2.5 h-2.5 fill-white" />
-                                <span>{dict.new_product?.set_as_cover || "Set Cover"}</span>
+                                <span>{dict.new_product?.set_as_cover || (isAr ? "تعيين كغلاف" : "Set Cover")}</span>
                               </button>
                             )}
 
@@ -1130,7 +1309,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                               {/* Change File Button */}
                               <label className="w-full py-1.5 px-2 bg-white hover:bg-cream text-primary font-extrabold text-[10px] sm:text-xs rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95 border border-white/40">
                                 <Upload className="w-3.5 h-3.5 text-accent shrink-0" />
-                                <span className="font-bold">{dict.new_product.change}</span>
+                                <span className="font-bold">{dict.new_product?.change || (isAr ? "تغيير" : "Change")}</span>
                                 <input
                                   type="file"
                                   accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
@@ -1153,7 +1332,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                         </>
                       ) : (
                         /* EMPTY SLOT CONTENT */
-                        <label className="w-full h-full flex flex-col items-center justify-center p-3 cursor-pointer group/upload rounded-2xl">
+                        <label className="w-full h-full flex flex-col items-center justify-center p-3 cursor-pointer group/upload rounded-2xl text-center">
                           <input
                             type="file"
                             multiple
@@ -1163,22 +1342,40 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                               if (e.target.files && e.target.files.length > 0) {
                                 handleBatchFilesUpload(e.target.files, idx);
                               }
+                              e.target.value = "";
                             }}
                           />
-                          <div className="w-10 h-10 rounded-2xl bg-primary/5 group-hover/upload:bg-accent/10 group-hover/upload:scale-110 transition-all flex items-center justify-center mb-2">
+                          <div className={cn(
+                            "w-10 h-10 rounded-2xl transition-all flex items-center justify-center mb-2 group-hover/upload:scale-110",
+                            isCover ? "bg-accent/15 text-accent" : "bg-primary/5 text-primary/30 group-hover/upload:text-accent group-hover/upload:bg-accent/10"
+                          )}>
                             {isCover ? (
-                              <Star className="w-5 h-5 text-accent/60 group-hover/upload:text-accent" />
+                              <Star className="w-5 h-5 fill-accent/30 text-accent" />
                             ) : (
-                              <Plus className="w-5 h-5 text-primary/30 group-hover/upload:text-accent" />
+                              <Plus className="w-5 h-5" />
                             )}
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 group-hover/upload:text-accent text-center">
-                            {isCover
-                              ? dict.new_product.main_cover
-                              : typeof dict.new_product.angle === "string" && dict.new_product.angle.includes("{count}")
-                              ? dict.new_product.angle.replace("{count}", (idx + 1).toString())
-                              : `Angle ${idx + 1}`}
+                          <span className={cn(
+                            "text-[10px] font-black uppercase tracking-wider text-center",
+                            isCover ? "text-accent" : "text-primary/40 group-hover/upload:text-accent"
+                          )}>
+                            {idx === 0
+                              ? `${dict.new_product.main_cover} *`
+                              : idx === 1
+                              ? (dict.new_product?.angle ? dict.new_product.angle.replace("{count}", "2") : (isAr ? "زاوية 2" : "Angle 2"))
+                              : idx === 2
+                              ? (dict.new_product?.detail_scale || (isAr ? "تفاصيل / أبعاد" : "Detail / Scale"))
+                              : idx === 3
+                              ? (isAr ? "أثناء الاستخدام" : "In Use")
+                              : idx === 4
+                              ? (isAr ? "التغليف" : "Packaging")
+                              : (dict.new_product?.angle ? dict.new_product.angle.replace("{count}", String(idx + 1)) : (isAr ? `زاوية ${idx + 1}` : `Angle ${idx + 1}`))}
                           </span>
+                          {isCover && (
+                            <span className="text-[8px] font-bold text-accent/70 uppercase tracking-tight mt-0.5">
+                              {dict.new_product?.required || (isAr ? "مطلوب" : "Required")}
+                            </span>
+                          )}
                         </label>
                       )}
                     </div>
@@ -1203,112 +1400,137 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
               <h2 className="text-xl md:text-2xl font-heading font-bold text-primary">{dict.new_product.special_details}</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 md:gap-10">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
               {/* Interactive Personalization Toggle Card */}
               <div
-                onClick={() => setFormData((prev: any) => ({ ...prev, canPersonalize: !prev.canPersonalize }))}
                 className={cn(
-                  "flex items-start gap-4 p-6 rounded-2xl md:rounded-[2rem] border transition-all cursor-pointer select-none",
+                  "p-5 sm:p-6 rounded-2xl md:rounded-[2rem] border transition-all space-y-4",
                   formData.canPersonalize
                     ? "bg-accent/5 border-accent/40 shadow-md ring-2 ring-accent/10"
                     : "bg-cream/20 border-primary/5 hover:border-primary/20"
                 )}
               >
-                <div className="pt-0.5">
-                  <input
-                    type="checkbox"
-                    id="personalize"
-                    checked={formData.canPersonalize}
-                    onChange={(e) => setFormData({ ...formData, canPersonalize: e.target.checked })}
-                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer"
-                  />
+                <div
+                  onClick={() => setFormData((prev: any) => ({ ...prev, canPersonalize: !prev.canPersonalize }))}
+                  className="flex items-start gap-4 cursor-pointer select-none"
+                >
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      id="personalize"
+                      checked={formData.canPersonalize}
+                      onChange={() => {}}
+                      className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer pointer-events-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
+                      <span>{dict.new_product.allow_personalization}</span>
+                      {formData.canPersonalize && (
+                        <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
+                          {dict.new_product?.active_status || (isAr ? "مُفعّل" : "Active")}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">{dict.new_product.personalization_desc}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
-                    <span>{dict.new_product.allow_personalization}</span>
-                    {formData.canPersonalize && (
-                      <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">Active</span>
-                    )}
-                  </p>
-                  <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">{dict.new_product.personalization_desc}</p>
-                </div>
+
+                <AnimatePresence>
+                  {formData.canPersonalize && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="pt-3 border-t border-accent/15 space-y-2 overflow-hidden"
+                    >
+                      <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest block">
+                        {dict.new_product.personalization_prompt_label}
+                      </label>
+                      <textarea
+                        value={formData.personalizationPrompt}
+                        onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })}
+                        placeholder={dict.new_product.personalization_prompt_placeholder}
+                        className="w-full h-24 p-4 bg-white border border-accent/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm text-start"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-
-              <AnimatePresence>
-                {formData.canPersonalize && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-3 overflow-hidden">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.personalization_prompt_label}</label>
-                    <textarea value={formData.personalizationPrompt} onChange={(e) => setFormData({ ...formData, personalizationPrompt: e.target.value })} placeholder={dict.new_product.personalization_prompt_placeholder} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
-                    
-
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Interactive Client Image Toggle Card */}
               <div
-                onClick={() => setFormData((prev: any) => ({ ...prev, requiresClientImage: !prev.requiresClientImage }))}
                 className={cn(
-                  "flex items-start gap-4 p-6 rounded-2xl md:rounded-[2rem] border transition-all cursor-pointer select-none",
+                  "p-5 sm:p-6 rounded-2xl md:rounded-[2rem] border transition-all space-y-4",
                   formData.requiresClientImage
                     ? "bg-accent/5 border-accent/40 shadow-md ring-2 ring-accent/10"
                     : "bg-cream/20 border-primary/5 hover:border-primary/20"
                 )}
               >
-                <div className="pt-0.5">
-                  <input
-                    type="checkbox"
-                    id="requireClientImage"
-                    checked={formData.requiresClientImage}
-                    onChange={(e) => setFormData({ ...formData, requiresClientImage: e.target.checked })}
-                    className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer"
-                  />
+                <div
+                  onClick={() => setFormData((prev: any) => ({ ...prev, requiresClientImage: !prev.requiresClientImage }))}
+                  className="flex items-start gap-4 cursor-pointer select-none"
+                >
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      id="requireClientImage"
+                      checked={formData.requiresClientImage}
+                      onChange={() => {}}
+                      className="w-5 h-5 rounded border-primary/20 text-accent focus:ring-accent cursor-pointer pointer-events-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
+                      <span>{dict.new_product.require_client_image || (isAr ? "يتطلب رفع صورة من العميل" : "Require Customer Image Upload")}</span>
+                      {formData.requiresClientImage && (
+                        <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
+                          {dict.new_product?.active_status || (isAr ? "مُفعّل" : "Active")}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">
+                      {dict.new_product.client_image_desc || (isAr ? "إلزام المشتري برفع صورة قبل الشراء." : "Require buyers to upload an image/photo before purchasing.")}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold text-primary text-sm md:text-base flex items-center justify-between">
-                    <span>{dict.new_product.require_client_image || "Require Customer Image Upload"}</span>
-                    {formData.requiresClientImage && (
-                      <span className="text-[9px] font-black uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">Active</span>
-                    )}
-                  </p>
-                  <p className="text-[10px] md:text-xs text-charcoal/50 mt-1">{dict.new_product.client_image_desc || "Require buyers to upload an image/photo before purchasing."}</p>
-                </div>
-              </div>
 
-              <AnimatePresence>
-                {formData.requiresClientImage && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="col-span-full space-y-3 overflow-hidden">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.client_image_prompt_label || "Image Upload Instructions"}</label>
-                    <textarea value={formData.clientImagePrompt} onChange={(e) => setFormData({ ...formData, clientImagePrompt: e.target.value })} placeholder={dict.new_product.client_image_prompt_placeholder || "What photo should the buyer upload?"} className="w-full h-24 p-5 bg-accent/5 border border-accent/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-
-
-              {/* Initial Stock Input (for non-variant products) */}
-              <div className="space-y-3 col-span-full md:col-span-1">
-                <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest">{dict.new_product.initial_stock_label}</label>
-                <input type="number" min="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} placeholder={dict.new_product.initial_stock_placeholder} className="w-full py-3.5 sm:py-4 px-4 sm:px-6 bg-white border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/50 text-primary font-bold shadow-sm text-sm text-start" />
+                <AnimatePresence>
+                  {formData.requiresClientImage && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="pt-3 border-t border-accent/15 space-y-2 overflow-hidden"
+                    >
+                      <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest block">
+                        {dict.new_product.client_image_prompt_label || (isAr ? "تعليمات رفع الصورة" : "Image Upload Instructions")}
+                      </label>
+                      <textarea
+                        value={formData.clientImagePrompt}
+                        onChange={(e) => setFormData({ ...formData, clientImagePrompt: e.target.value })}
+                        placeholder={dict.new_product.client_image_prompt_placeholder || (isAr ? "ما هي الصورة المطلوبة من المشتري؟ (مثال: ارفع صورة شخصية واضحة للطباعة)" : "What photo should the buyer upload?")}
+                        className="w-full h-24 p-4 bg-white border border-accent/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none text-sm text-start"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </section>
 
-          {/* Form Bottom Submit Button */}
-          <div className="flex justify-end pt-8 pb-20">
-            <button type="submit" disabled={isLoading} className="py-5 w-full md:w-auto md:px-16 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95 duration-200 text-base">
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin text-accent" />
-                  <span>{dict.new_product.listing_treasure}</span>
-                </>
-              ) : (
-                <>
-                  <span>{dict.new_product.list_product_btn}</span>
-                  <Sparkles className="w-5 h-5 text-accent" />
-                </>
-              )}
-            </button>
+          {/* Form Bottom Spacing & Publishing Note */}
+          <div className="pt-2 pb-24 text-center">
+            <p className="text-xs text-charcoal/40 font-medium max-w-md mx-auto">
+              {isEditMode
+                ? (isAr
+                    ? "بعد حفظ التعديلات، سيُعاد إرسال منتجك للمراجعة من فريق جيفتيزان قبل أن يظهر مجدداً في المتجر."
+                    : "After saving changes, your product will be re-submitted for Giftisan team review before going live again.")
+                : (dict.new_product?.publish_note || (isAr ? "ستخضع قطعتك لمراجعة سريعة من فريق جيفتيزان لضمان الجودة، وبمجرد الموافقة عليها ستظهر فوراً في متجرك وتصبح متاحة للشراء عبر المنصة." : "Your piece will undergo a quick review by the Giftisan curation team. Once approved, it will immediately appear in your shop and become discoverable across the marketplace."))
+              }
+            </p>
           </div>
         </form>
 
@@ -1317,10 +1539,10 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
           <div className="container mx-auto max-w-4xl flex items-center justify-between gap-3 sm:gap-4">
             <div className="min-w-0 hidden sm:block text-start">
               <p className="text-xs font-bold text-primary truncate max-w-xs">
-                {formData.name || "Untitled Product"}
+                {formData.name || dict.new_product?.untitled_product || (isAr ? "قطعة جديدة بدون عنوان" : "Untitled Product")}
               </p>
               <p className="text-[10px] font-medium text-primary/40 font-mono">
-                {formData.price ? `${formData.price} EGP` : "Set Price"} • {formData.images.filter(Boolean).length}/10 Photos
+                {formData.price ? `${formData.price} ${isAr ? "ج.م" : "EGP"}` : (dict.new_product?.set_price || (isAr ? "حدد السعر" : "Set Price"))} • {formData.images.filter(Boolean).length}/10 {dict.new_product?.photos_count || (isAr ? "صور" : "Photos")}
               </p>
             </div>
 
@@ -1330,7 +1552,7 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 className="px-4 py-2.5 text-xs font-bold text-primary/60 hover:text-primary transition-colors hidden md:block"
               >
-                ↑ Top
+                {dict.new_product?.scroll_to_top || (isAr ? "للأعلى ↑" : "Top ↑")}
               </button>
 
               <button
@@ -1344,7 +1566,11 @@ export function NewProductClient({ artisanId, dict }: NewProductClientProps) {
                 ) : (
                   <Sparkles className="w-4 h-4 text-accent" />
                 )}
-                <span>{dict.new_product.list_product_btn}</span>
+                <span>
+                  {isEditMode
+                    ? (isAr ? "حفظ التغييرات" : "Save Changes")
+                    : dict.new_product.list_product_btn}
+                </span>
               </button>
             </div>
           </div>

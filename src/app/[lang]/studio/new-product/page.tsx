@@ -39,5 +39,5 @@ export default async function NewProductPage({ params }: { params: Promise<{ lan
   const { getDictionary } = await import("@/app/[lang]/dictionaries");
   const dict = await getDictionary(lang as any);
 
-  return <NewProductClient artisanId={artisan.id} dict={dict} />;
+  return <NewProductClient artisanId={artisan.id} dict={dict} lang={lang} />;
 }

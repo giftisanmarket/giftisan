@@ -277,18 +277,30 @@ export function InventoryTab({
 
                     {/* Action Buttons */}
                     <div className="absolute bottom-3 end-3 flex items-center gap-1.5 z-20 transition-all duration-300 xl:opacity-0 xl:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProductForEdit(p);
-                          setIsEditModalOpen(true);
-                        }}
-                        title={isAdminPreview ? "View" : "Edit"}
-                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
-                      >
-                        {isAdminPreview ? <Eye className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-                      </button>
+                      {!isAdminPreview ? (
+                        <Link
+                          href={`/${lang}/studio/products/${p.id}/edit`}
+                          title={isAr ? "تعديل المنتج" : "Edit Product"}
+                          className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProductForEdit(p);
+                            setIsEditModalOpen(true);
+                          }}
+                          title="View"
+                          className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-md text-primary flex items-center justify-center shadow-lg hover:bg-accent hover:text-white transition-all active:scale-90 border border-primary/10 cursor-pointer"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={(e) => {

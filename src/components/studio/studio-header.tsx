@@ -176,15 +176,17 @@ export function StudioHeader({ lang, dict, artisan, user }: StudioHeaderProps) {
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
           
-          {/* Primary CTA: Add Product (Compact circular on mobile, full pill on desktop) */}
-          <Link
-            href={`/${lang}/studio/new-product`}
-            className="w-8 h-8 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full text-xs font-bold text-white bg-accent hover:bg-accent-light transition-all shadow-sm shadow-accent/20 active:scale-95 flex items-center justify-center gap-1.5 shrink-0 group"
-            title={dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}
-          >
-            <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5 transition-transform group-hover:rotate-90 duration-300" />
-            <span className="hidden sm:inline">{dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}</span>
-          </Link>
+          {/* Primary CTA: Add Product (hidden if already on new-product page) */}
+          {!pathname?.includes("/studio/new-product") && (
+            <Link
+              href={`/${lang}/studio/new-product`}
+              className="w-8 h-8 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full text-xs font-bold text-white bg-accent hover:bg-accent-light transition-all shadow-sm shadow-accent/20 active:scale-95 flex items-center justify-center gap-1.5 shrink-0 group"
+              title={dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}
+            >
+              <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5 transition-transform group-hover:rotate-90 duration-300" />
+              <span className="hidden sm:inline">{dict?.studio?.add_treasure || (isAr ? "إضافة قطعة" : "Add Product")}</span>
+            </Link>
+          )}
 
           {/* View Live Shop (Artisan Storefront Preview - Desktop / Tablet) */}
           {publicShopUrl && (

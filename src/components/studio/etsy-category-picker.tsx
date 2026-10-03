@@ -1075,13 +1075,34 @@ export function EtsyCategoryPicker({ value, onChange, dict, disabled = false }: 
         };
       }
     }
+
+    // Check dictionary translation for category slug (e.g. ceramics -> سيراميك)
+    const localizedSubcategory = (dict as any)?.common?.categories_list?.[value] 
+      || (dict as any)?.home?.categories_list?.[value]
+      || (dict as any)?.common?.[value]
+      || value;
+
+    let deptLabel = isAr ? "الفئة" : (dict?.new_product?.category_label?.replace(/[*:]/g, "").trim() || "Category");
+    let Icon = FolderTree;
+
+    if (["ceramics", "woodwork", "home-decor", "lighting", "furniture", "kitchen-dining"].includes(target)) {
+      deptLabel = (dict as any)?.common?.categories_list?.["home-and-living"] || (dict as any)?.home?.categories_list?.["home-and-living"] || (isAr ? "المنزل والديكور" : "Home & Living");
+      Icon = Home;
+    } else if (["jewelry", "earrings", "necklaces", "rings", "bracelets", "watches"].includes(target)) {
+      deptLabel = (dict as any)?.common?.categories_list?.["jewelry"] || (dict as any)?.home?.categories_list?.["jewelry"] || (isAr ? "مجوهرات" : "Jewelry");
+      Icon = Gem;
+    } else if (["art", "prints", "painting", "sculpture", "fine-art-ceramics"].includes(target)) {
+      deptLabel = (dict as any)?.common?.categories_list?.["art-and-collectibles"] || (dict as any)?.home?.categories_list?.["art-and-collectibles"] || (isAr ? "فن ومقتنيات" : "Art & Collectibles");
+      Icon = Brush;
+    }
+
     return {
-      department: "Category",
-      subcategory: value,
+      department: deptLabel,
+      subcategory: localizedSubcategory,
       id: value,
-      icon: FolderTree
+      icon: Icon
     };
-  }, [value, departments]);
+  }, [value, departments, dict, isAr]);
 
   // Search Results across all departments and craft subcategories
   const searchResults = useMemo(() => {

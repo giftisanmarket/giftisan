@@ -14,9 +14,10 @@ import { useRouter } from "next/navigation";
 interface ReviewsTabProps {
   reviews: any[];
   dict: any;
+  lang: string;
 }
 
-export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
+export function ReviewsTab({ reviews, dict, lang }: ReviewsTabProps) {
   const router = useRouter();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -72,7 +73,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                     <div>
                       <p className="font-black text-sm md:text-base text-primary uppercase tracking-tight">{review.user.name}</p>
                       <p className="text-[10px] md:text-xs text-charcoal/30 font-black uppercase tracking-widest mt-1">
-                        {new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(review.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
@@ -106,10 +107,10 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                     <div className="bg-primary/5 p-6 rounded-3xl border border-primary/5 relative">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle2 className="w-4 h-4 text-accent" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">Your Response</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.review_your_response}</span>
                       </div>
                       <p className="text-sm text-primary/70 font-medium italic">
-                        "{review.artisanReply}"
+                        &ldquo;{review.artisanReply}&rdquo;
                       </p>
                       <button 
                         onClick={() => {
@@ -118,7 +119,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                         }}
                         className="absolute top-4 end-4 text-[8px] font-black uppercase tracking-widest text-primary/20 hover:text-accent transition-colors"
                       >
-                        Edit
+                        {dict.studio.review_edit}
                       </button>
                     </div>
                   ) : (
@@ -128,7 +129,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                         className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-accent hover:text-primary transition-colors group/r"
                       >
                         <MessageCircle className="w-4 h-4 group-hover/r:scale-110 transition-transform" />
-                        Reply to this Collector
+                        {dict.studio.review_reply_to_collector}
                       </button>
                     )
                   )}
@@ -143,7 +144,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                         autoFocus
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Write your response..."
+                        placeholder={dict.studio.review_write_placeholder}
                         className="w-full bg-white border border-primary/5 rounded-2xl p-4 text-sm font-medium focus:border-accent focus:ring-1 focus:ring-accent outline-none min-h-[100px] resize-none"
                       />
                       <div className="flex justify-end gap-3">
@@ -151,14 +152,14 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                           onClick={() => setReplyingTo(null)}
                           className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary transition-colors"
                         >
-                          Cancel
+                          {dict.studio.review_cancel}
                         </button>
                         <button
                           disabled={isSubmitting || !replyText.trim()}
                           onClick={() => handleReply(review.id)}
                           className="px-6 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-light transition-all disabled:opacity-50 flex items-center gap-2"
                         >
-                          {isSubmitting ? "Posting..." : "Post Response"}
+                          {isSubmitting ? dict.studio.review_posting : dict.studio.review_post_response}
                           <Send className="w-3 h-3" />
                         </button>
                       </div>
@@ -175,7 +176,7 @@ export function ReviewsTab({ reviews, dict }: ReviewsTabProps) {
                   <BespokeImage src={review.product.images[0]} alt="" fill className="object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-[11px] text-primary/30 font-black uppercase tracking-widest mb-1 group-hover/p:text-accent transition-colors">Purchased Product</p>
+                  <p className="text-[10px] md:text-[11px] text-primary/30 font-black uppercase tracking-widest mb-1 group-hover/p:text-accent transition-colors">{dict.studio.review_purchased_product}</p>
                   <p className="font-bold text-sm md:text-base text-primary group-hover/p:text-accent transition-colors truncate">{review.product.name}</p>
                   <p className="text-xs font-black text-accent mt-1">{dict.product.currency} {review.product.price}</p>
                 </div>

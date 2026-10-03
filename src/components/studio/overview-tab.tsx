@@ -1,24 +1,20 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { 
   MousePointer2, 
   Heart, 
   Percent, 
   BarChart3, 
   Info, 
-  Sparkles, 
-  CheckCircle2, 
   ShoppingBag, 
   Star, 
   Clock, 
   X,
-  ArrowUpRight,
-  ArrowRight
+  CheckCircle2,
+  ArrowUpRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BespokeImage } from "@/components/bespoke-image";
 import { SalesChart } from "@/components/sales-chart";
 
 interface OverviewTabProps {
@@ -28,9 +24,7 @@ interface OverviewTabProps {
   totalFavorites: number;
   conversionRate: string;
   totalRevenue: number;
-  products: any[];
   sales: any[];
-  topVariants: any[];
   activities: any[];
   onNavigateToInventory?: () => void;
 }
@@ -42,13 +36,9 @@ export function OverviewTab({
   totalFavorites,
   conversionRate,
   totalRevenue,
-  products,
   sales,
-  topVariants,
   activities,
-  onNavigateToInventory
 }: OverviewTabProps) {
-  const isAr = lang === "ar";
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
 
   useEffect(() => {
@@ -68,7 +58,7 @@ export function OverviewTab({
   }, [activeTooltip]);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 md:space-y-10">
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
@@ -156,102 +146,6 @@ export function OverviewTab({
         ))}
       </div>
 
-      {/* Pro Insights */}
-      <div className="grid md:grid-cols-2 gap-6 md:gap-10">
-        <div className="bg-primary text-white p-6 md:p-10 lg:p-12 rounded-3xl md:rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col items-center md:items-start text-center md:text-start">
-          <div className="relative z-10 w-full flex flex-col items-center md:items-start">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
-              <Sparkles className="w-3.5 h-3.5" />
-              {dict.studio.most_desired_treasure}
-            </div>
-            {(() => {
-              const topViewed = [...products].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
-              if (!topViewed) return <p className="text-white/40 italic">{dict.studio.gallery_empty}</p>;
-              return (
-                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                  <div className="relative w-24 h-24 md:w-20 lg:w-28 aspect-square rounded-3xl overflow-hidden border-2 border-white/10 shrink-0 shadow-2xl">
-                    <BespokeImage src={topViewed.images[0]} alt="" fill className="object-cover" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold tracking-tight">{topViewed.name}</h4>
-                    <p className="text-white/40 text-sm md:text-lg font-medium">{dict.studio.visits_count.replace('{count}', (topViewed.views || 0).toString())}</p>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-          <div className="absolute top-0 end-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
-        </div>
-
-        <div className="bg-white p-6 md:p-10 lg:p-12 rounded-3xl md:rounded-[3.5rem] border border-primary/5 shadow-xl shadow-primary/5 flex flex-col items-center md:items-start text-center md:text-start">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest mb-8 md:mb-10">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            {dict.studio.best_selling_piece}
-          </div>
-          {(() => {
-            const topSold = [...products].sort((a, b) => {
-              const aSales = sales.filter(s => s.productId === a.id).length;
-              const bSales = sales.filter(s => s.productId === b.id).length;
-              return bSales - aSales;
-            })[0];
-            if (!topSold) return <p className="text-charcoal/30 italic">{dict.studio.waiting_first_sale}</p>;
-            const soldCount = sales.filter(s => s.productId === topSold.id).length;
-            return (
-              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                <div className="relative w-24 h-24 md:w-20 lg:w-28 aspect-square rounded-3xl overflow-hidden border border-primary/5 shrink-0 shadow-xl">
-                  <BespokeImage src={topSold.images[0]} alt="" fill className="object-cover" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-primary tracking-tight">{topSold.name}</h4>
-                  <p className="text-charcoal/40 text-sm md:text-lg font-medium">{dict.studio.units_traveling.replace('{count}', soldCount.toString())}</p>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      </div>
-
-      {/* Variant Performance */}
-      {topVariants.length > 0 && (
-        <div className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[3rem] border border-primary/5 shadow-xl shadow-primary/5">
-          <div className="flex items-center justify-between mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest">
-              <BarChart3 className="w-3 h-3" />
-              {dict.edit_product.variant_performance}
-            </div>
-            <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">{dict.studio.top_5_favorites}</span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-            {topVariants.map((v: any, i: number) => (
-              <div key={i} className="flex flex-col gap-4 group cursor-default">
-                <div className="relative aspect-square rounded-2xl overflow-hidden border border-primary/5 shrink-0 transition-transform group-hover:scale-105">
-                  <BespokeImage src={v.image} alt="" fill className="object-cover" />
-                  <div className="absolute top-2 start-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[9px] font-black text-indigo-600 shadow-sm">
-                    #{i + 1}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <h5 className="text-xs font-bold text-primary truncate">{v.productName}</h5>
-                  <p className="text-[10px] font-medium text-charcoal/40 uppercase tracking-widest truncate">
-                    {v.name}
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-[10px] font-black text-indigo-600">
-                      {dict.edit_product.sold_count.replace('{count}', v.quantity.toString())}
-                    </span>
-                    <span className="text-[10px] text-charcoal/20">•</span>
-                    <span className="text-[10px] font-bold text-primary/40">
-                      {dict.product.currency} {v.revenue.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Sales Performance Chart */}
       <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
         <div className="flex flex-wrap justify-between items-start gap-3 mb-6 md:mb-10">
@@ -264,15 +158,15 @@ export function OverviewTab({
             {dict.studio.live_data}
           </div>
         </div>
-        <SalesChart sales={sales} tickFormatter={(value) => `EGP ${value}`} />
+        <SalesChart sales={sales} tickFormatter={(value) => `${dict.product.currency} ${value}`} />
       </div>
 
       {/* Recent Activity Feed */}
       <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-10 lg:p-12 border border-primary/5 shadow-2xl shadow-primary/5">
         <div className="flex justify-between items-center mb-6 md:mb-10">
           <div>
-            <h2 className="text-xl md:text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent || "Flow"}</span></h2>
-            <p className="text-charcoal/40 text-xs md:text-sm mt-1">{dict.studio.no_activity_desc || "Insights from your workshop's pulse."}</p>
+            <h2 className="text-xl md:text-3xl font-heading font-bold text-primary">{dict.studio.recent_activity} <span className="serif italic font-normal text-accent">{dict.studio.recent_activity_accent}</span></h2>
+            <p className="text-charcoal/40 text-xs md:text-sm mt-1">{dict.studio.no_activity_desc}</p>
           </div>
         </div>
 
@@ -317,7 +211,7 @@ export function OverviewTab({
                               {dict.studio.activity_product_rejected_desc.replace('{name}', activity.name)}
                               {activity.reason && (
                                 <span className="block mt-1 font-bold text-red-500 italic">
-                                  "{activity.reason}"
+                                  &ldquo;{activity.reason}&rdquo;
                                 </span>
                               )}
                             </>
@@ -338,3 +232,4 @@ export function OverviewTab({
     </div>
   );
 }
+

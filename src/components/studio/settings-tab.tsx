@@ -10,21 +10,13 @@ import {
   AlertCircle, 
   Loader2,
   Globe,
-  Mail,
   Phone,
   MapPin,
   Sparkles,
-  Lock,
   Navigation,
   Package,
   Award
 } from "lucide-react";
-import { 
-  FaInstagram, 
-  FaTiktok, 
-  FaPinterestP, 
-  FaFacebook 
-} from "react-icons/fa6";
 import { updateArtisanProfile, updateProfileAvatar, checkSlugAvailability } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -48,11 +40,6 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const [yearsOfExperience, setYearsOfExperience] = useState<number>(artisan.yearsOfExperience ?? 1);
   const [avatar, setAvatar] = useState(artisan.avatar || "");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [instagram, setInstagram] = useState(artisan.instagram || "");
-  const [website, setWebsite] = useState(artisan.website || "");
-  const [pinterest, setPinterest] = useState(artisan.pinterest || "");
-  const [tiktok, setTiktok] = useState(artisan.tiktok || "");
-  const [facebook, setFacebook] = useState(artisan.facebook || "");
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
@@ -224,11 +211,6 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
       yearsOfExperience: Number(yearsOfExperience) || 1,
       avatar,
       slug,
-      instagram,
-      website,
-      pinterest,
-      tiktok,
-      facebook,
       brandColor,
       bannerImage,
       phoneNumber,

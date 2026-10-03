@@ -1262,7 +1262,22 @@
     "internal_notes": "ملاحظات المتجر الداخلية (خاصة)",
     "internal_notes_placeholder": "أضف ملاحظات خاصة بمتجرك (مثال: تعليمات التغليف، حالة الإنتاج)...",
     "notes_updated": "تم تحديث الملاحظات الداخلية",
-    "notes_update_failed": "فشل تحديث الملاحظات"
+    "notes_update_failed": "فشل تحديث الملاحظات",
+    "review_your_response": "ردّك",
+    "review_edit": "تعديل",
+    "review_reply_to_collector": "الرد على هذا المقتني",
+    "review_cancel": "إلغاء",
+    "review_post_response": "نشر الرد",
+    "review_posting": "جاري النشر...",
+    "review_write_placeholder": "اكتب ردّك هنا...",
+    "review_purchased_product": "المنتج المشتري",
+    "next_milestone": "المرحلة التالية",
+    "tier_in_sight": "في الأفق",
+    "level_up_text": "مبيعة للوصول للمستوى التالي!",
+    "coupon_created": "تم إنشاء الكوبون بنجاح!",
+    "coupon_deleted": "تم حذف الكوبون",
+    "status_ready": "جاهز للشحن",
+    "your_net_label": "أرباحك:"
   },
   "artisan_detail": {
     "verified_artisan": "حرفي موثق",

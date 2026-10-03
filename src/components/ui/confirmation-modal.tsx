@@ -54,7 +54,7 @@ export function ConfirmationModal({
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-cream rounded-[2.5rem] shadow-2xl overflow-hidden p-8 border border-white/50"
+            className="relative w-full max-w-md bg-cream rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden p-5 sm:p-8 border border-white/50 max-h-[92vh] overflow-y-auto"
           >
             <div className="flex flex-col items-center text-center space-y-6">
               <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isDestructive ? 'bg-red-50 text-red-500' : 'bg-primary/5 text-primary'}`}>

@@ -1240,7 +1240,22 @@
     "internal_notes": "Shop Internal Notes (Private)",
     "internal_notes_placeholder": "Add private notes for your shop (e.g., wrapping instructions, production status)...",
     "notes_updated": "Internal notes updated",
-    "notes_update_failed": "Failed to update notes"
+    "notes_update_failed": "Failed to update notes",
+    "review_your_response": "Your Response",
+    "review_edit": "Edit",
+    "review_reply_to_collector": "Reply to this Collector",
+    "review_cancel": "Cancel",
+    "review_post_response": "Post Response",
+    "review_posting": "Posting...",
+    "review_write_placeholder": "Write your response...",
+    "review_purchased_product": "Purchased Product",
+    "next_milestone": "Next Milestone",
+    "tier_in_sight": "In Sight",
+    "level_up_text": "more sales to level up!",
+    "coupon_created": "Coupon created successfully!",
+    "coupon_deleted": "Coupon deleted",
+    "status_ready": "Ready to Ship",
+    "your_net_label": "Your Net:"
   },
   "artisan_detail": {
     "verified_artisan": "Verified Artisan",

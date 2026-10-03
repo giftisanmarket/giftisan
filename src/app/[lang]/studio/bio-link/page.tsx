@@ -6,6 +6,6 @@ interface Props {
 
 export default async function StudioBioLinkPage({ params }: Props) {
   const { lang } = await params;
-  redirect(`/${lang}/studio?tab=bio-link`);
+  redirect(`/${lang}/studio?tab=growth`);
 }
 

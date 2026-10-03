@@ -65,7 +65,6 @@ import { GrowthTab } from "./studio/growth-tab";
 import { PaymentTab } from "./studio/payment-tab";
 import { ReviewsTab } from "./studio/reviews-tab";
 import { SettingsTab } from "./studio/settings-tab";
-import { BioLinkTab } from "./studio/bio-link-tab";
 
 
 interface StudioClientProps {
@@ -82,12 +81,17 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showMask, setShowMask] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "reviews" | "settings" | "bio-link">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings">("overview");
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["overview", "inventory", "sales", "reviews", "growth", "logistics", "settings", "bio-link"].includes(tabParam)) {
+    if (tabParam === "bio-link") {
+      setActiveTab("growth");
+      setTimeout(() => {
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else if (tabParam && ["overview", "inventory", "sales", "reviews", "growth", "logistics", "settings"].includes(tabParam)) {
       setActiveTab(tabParam as any);
       setTimeout(() => {
         contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -480,9 +484,8 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     { id: "growth", label: dict.studio.growth, icon: TrendingUp },
                     { id: "logistics", label: dict.studio.logistics, icon: CreditCard },
                     { id: "reviews", label: dict.studio.community, icon: Star },
-                    { id: "bio-link", label: lang === "ar" ? "رابط البايو & QR" : "Bio Link & QR", icon: Link2 },
                     { id: "settings", label: dict.studio.studio_settings, icon: Settings },
-                  ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings" | "bio-link"; label: string; icon: any; badge?: number }[]
+                  ] as { id: "overview" | "inventory" | "sales" | "reviews" | "growth" | "logistics" | "settings"; label: string; icon: any; badge?: number }[]
                 ).map((tab) => (
                   <button
                     key={tab.id}
@@ -535,9 +538,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     totalFavorites={totalFavorites}
                     conversionRate={conversionRate}
                     totalRevenue={totalRevenue}
-                    products={products}
                     sales={sales}
-                    topVariants={topVariants}
                     activities={activities}
                     onNavigateToInventory={() => setActiveTab("inventory")}
                   />
@@ -574,7 +575,16 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   />
                 )}
 
-                {activeTab === "growth" && <GrowthTab dict={dict} coupons={coupons} sales={sales} />}
+                {activeTab === "growth" && (
+                  <GrowthTab
+                    dict={dict}
+                    coupons={coupons}
+                    sales={sales}
+                    lang={lang}
+                    artisanId={artisan.id}
+                    artisan={artisan}
+                  />
+                )}
 
                 {activeTab === "logistics" && (
                   <PaymentTab
@@ -584,8 +594,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   />
                 )}
 
-                {activeTab === "reviews" && <ReviewsTab reviews={reviews} dict={dict} />}
-                {activeTab === "bio-link" && <BioLinkTab artisan={artisan} lang={lang} />}
+                {activeTab === "reviews" && <ReviewsTab reviews={reviews} dict={dict} lang={lang} />}
                 {activeTab === "settings" && <SettingsTab artisan={artisan} dict={dict} lang={lang} />}
 
               </motion.div>

@@ -1977,16 +1977,16 @@ export async function updateArtisanProfile(userId: string, data: any) {
         location: data.location || null,
         yearsOfExperience: typeof data.yearsOfExperience === 'number' ? data.yearsOfExperience : parseInt(data.yearsOfExperience) || 1,
         avatar: avatarUrl || null,
-        instagram: data.instagram || null,
-        website: data.website || null,
-        pinterest: data.pinterest || null,
-        tiktok: data.tiktok || null,
-        facebook: data.facebook || null,
+        ...(data.instagram !== undefined && { instagram: data.instagram || null }),
+        ...(data.website !== undefined && { website: data.website || null }),
+        ...(data.pinterest !== undefined && { pinterest: data.pinterest || null }),
+        ...(data.tiktok !== undefined && { tiktok: data.tiktok || null }),
+        ...(data.facebook !== undefined && { facebook: data.facebook || null }),
         brandColor: data.brandColor || "#da7b5a",
         bannerImage: bannerUrl || null,
         phoneNumber: data.phoneNumber || null,
-        payoutAddress: data.payoutAddress || null,
-        payoutName: data.payoutName || null,
+        ...(data.payoutAddress !== undefined && { payoutAddress: data.payoutAddress || null }),
+        ...(data.payoutName !== undefined && { payoutName: data.payoutName || null }),
         pickupAddress: data.pickupAddress || null,
         pickupCity: data.pickupCity || null,
         pickupDistrict: data.pickupDistrict || null,
@@ -4375,8 +4375,28 @@ export async function getCouponsAdminAction() {
 export async function toggleCouponStatusAction(couponId: string, isActive: boolean) {
   try {
     const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
+    if (!session?.user) return { error: "Unauthorized" };
+
+    const isAdmin = session.user.role === "ADMIN";
+    const isArtisan = session.user.role === "ARTISAN";
+
+    if (!isAdmin && !isArtisan) {
       return { error: "Unauthorized" };
+    }
+
+    const coupon = await prisma.coupon.findUnique({
+      where: { id: couponId }
+    });
+
+    if (!coupon) return { error: "Coupon not found" };
+
+    if (!isAdmin) {
+      const artisan = await prisma.artisanProfile.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (!artisan || coupon.artisanId !== artisan.id) {
+        return { error: "Unauthorized" };
+      }
     }
 
     const updated = await prisma.coupon.update({
@@ -4384,6 +4404,8 @@ export async function toggleCouponStatusAction(couponId: string, isActive: boole
       data: { isActive }
     });
 
+    revalidatePath("/studio");
+    revalidatePath("/admin/coupons");
     return { success: true, coupon: updated };
   } catch (error: any) {
     console.error("Toggle coupon error:", error);
@@ -4398,6 +4420,7 @@ export async function createCouponAction(data: {
   minOrderAmount?: number;
   maxDiscount?: number;
   maxUses?: number;
+  expiresAt?: string | null;
   artisanId?: string;
 }) {
   try {
@@ -4415,8 +4438,9 @@ export async function createCouponAction(data: {
       return { error: "Coupon code is required" };
     }
 
+    const cleanCode = data.code.toUpperCase().trim();
     const exists = await prisma.coupon.findUnique({
-      where: { code: data.code.toUpperCase().trim() }
+      where: { code: cleanCode }
     });
 
     if (exists) {
@@ -4433,18 +4457,21 @@ export async function createCouponAction(data: {
 
     const newCoupon = await prisma.coupon.create({
       data: {
-        code: data.code.toUpperCase().trim(),
+        code: cleanCode,
         discountType: data.discountType,
         discountValue: Number(data.discountValue),
         minOrderAmount: data.minOrderAmount ? Number(data.minOrderAmount) : null,
         maxDiscount: data.maxDiscount ? Number(data.maxDiscount) : null,
         maxUses: data.maxUses ? Number(data.maxUses) : null,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
         isActive: true,
         usedCount: 0,
         artisanId: artisanId || null
       }
     });
 
+    revalidatePath("/studio");
+    revalidatePath("/admin/coupons");
     return { success: true, coupon: newCoupon };
   } catch (error: any) {
     console.error("Create coupon error:", error);

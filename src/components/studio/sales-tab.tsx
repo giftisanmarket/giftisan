@@ -15,10 +15,7 @@ import {
   CheckCircle2,
   X,
   Clock,
-  Coins,
-  Printer,
-  Camera,
-  Lock
+  Coins
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BespokeImage } from "@/components/bespoke-image";
@@ -52,7 +49,6 @@ export function SalesTab({
   commissionRate
 }: SalesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewingImage, setViewingImage] = useState<string | null>(null);
 
@@ -89,24 +85,6 @@ export function SalesTab({
     
     return result;
   }, [sales, statusFilter, searchQuery]);
-
-  const toggleSelectOrder = (id: string) => {
-    setSelectedOrderIds(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleBulkStatusUpdate = async (status: string) => {
-    if (selectedOrderIds.length === 0) return;
-    
-    setIsUpdating("BULK");
-    for (const id of selectedOrderIds) {
-      await updateOrderItemStatus(id, status);
-    }
-    setIsUpdating(null);
-    setSelectedOrderIds([]);
-    router.refresh();
-  };
 
   const exportToCSV = () => {
     if (sales.length === 0) return;
@@ -265,7 +243,7 @@ export function SalesTab({
                 const label =
                   status === "ALL" ? dict.studio.all_orders :
                   status === "PENDING" ? dict.studio.status_pending :
-                  status === "PROCESSING" ? (lang === "ar" ? "جاهز للشحن" : "Ready to Ship") :
+                  status === "PROCESSING" ? dict.studio.status_ready :
                   status === "SHIPPED" ? dict.studio.status_shipped :
                   dict.studio.status_delivered;
                 const isActive = statusFilter === status;
@@ -341,7 +319,7 @@ export function SalesTab({
                           )}>
                             <span className="w-1.5 h-1.5 rounded-full bg-white/60 shrink-0" />
                             {item.status === "PENDING"    ? dict.studio.status_pending :
-                             item.status === "PROCESSING" ? (lang === "ar" ? "جاهز للشحن" : "Ready to Ship") :
+                             item.status === "PROCESSING" ? dict.studio.status_ready :
                              item.status === "SHIPPED"    ? dict.studio.status_shipped :
                              dict.studio.status_delivered}
                           </span>
@@ -426,7 +404,7 @@ export function SalesTab({
                       <div className="flex items-center justify-center gap-2 bg-primary/5 px-4 py-2 rounded-xl border border-primary/5 max-w-full">
                         <Coins className="w-4 h-4 text-accent shrink-0" />
                         <p className="text-[10px] md:text-xs font-black text-primary/60 uppercase tracking-widest whitespace-nowrap truncate">
-                          {lang === "ar" ? "أرباحك:" : "Your Net:"} <span className="text-accent font-bold ms-1">{dict.product.currency} {(item.price * item.quantity * (1 - commissionRate)).toFixed(2)}</span>
+                          {dict.studio.your_net_label} <span className="text-accent font-bold ms-1">{dict.product.currency} {(item.price * item.quantity * (1 - commissionRate)).toFixed(2)}</span>
                         </p>
                       </div>
 
@@ -441,16 +419,6 @@ export function SalesTab({
 
                   <div className="mt-8 pt-8 border-t border-primary/5 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
-                      <div
-                        title={lang === "ar" ? "مُدار بواسطة جيفتيزان 🔒" : "Managed by Giftisan 🔒"}
-                        className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-primary/5 border border-primary/5 text-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 cursor-not-allowed select-none opacity-60"
-                      >
-                        <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
-                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{dict.studio.print_slip}</span>
-                        <Lock className="w-3 h-3 shrink-0" />
-                      </div>
-
-
 
                       <button
                         onClick={(e) => {

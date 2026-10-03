@@ -36,6 +36,11 @@
 key.properties
 scratch/
 
+# offline generated marketing & promo assets
+public/marketing/cards/
+public/marketing/instagram-carousel/
+public/marketing/card-preview.html
+
 # debug
 npm-debug.log*
 yarn-debug.log*

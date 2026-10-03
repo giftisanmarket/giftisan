@@ -1,0 +1,36 @@
+# ==============================================================================
+# Vercel Deployment Ignore (.vercelignore)
+# Excludes heavy non-web files, mobile code, dev scripts, and offline assets
+# to keep deployment payloads small and builds fast.
+# ==============================================================================
+
+# Native Mobile Apps (Capacitor) — not needed for web deployments
+android/
+ios/
+capacitor.config.ts
+
+# Internal maintenance, migration, test & utility scripts
+scripts/
+scratch/
+
+# Offline Marketing Graphics & Social Media Carousels (Not displayed on website)
+public/marketing/cards/
+public/marketing/instagram-carousel/
+public/marketing/card-preview.html
+public/marketing/google-play-feature-graphic.png
+public/marketing/google-play-icon-512.png
+
+# Capacitor offline fallback page (website runs via Next.js App Router)
+public/index.html
+
+# Agent customizations & workspace configs
+.agents/
+AGENTS.md
+
+# IDE & Editor files
+.vscode/
+.idea/
+
+# Local build info & temporary logs
+*.tsbuildinfo
+*.log

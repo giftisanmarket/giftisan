@@ -638,7 +638,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         <div className="flex items-center gap-3 shrink-0">
                           <div
                             className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/20 cursor-not-allowed select-none opacity-40"
-                            title={lang === "ar" ? "الطباعة مُدارة من قِبَل جيفتيسان" : "Printing is managed by Giftisan"}
+                            title={lang === "ar" ? "الطباعة مُدارة من قِبَل جيفتيزان" : "Printing is managed by Giftisan"}
                           >
                             <Printer className="w-5 h-5 md:w-6 md:h-6" />
                           </div>

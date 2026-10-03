@@ -442,7 +442,7 @@ export function SalesTab({
                   <div className="mt-8 pt-8 border-t border-primary/5 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
                       <div
-                        title={lang === "ar" ? "مُدار بواسطة جيفتيسان 🔒" : "Managed by Giftisan 🔒"}
+                        title={lang === "ar" ? "مُدار بواسطة جيفتيزان 🔒" : "Managed by Giftisan 🔒"}
                         className="flex shrink-0 h-10 md:h-12 px-3 md:px-4 bg-primary/5 border border-primary/5 text-primary/20 rounded-2xl items-center justify-center gap-1.5 md:gap-2 cursor-not-allowed select-none opacity-60"
                       >
                         <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />

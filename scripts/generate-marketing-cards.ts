@@ -1042,6 +1042,7 @@ async function run() {
     </svg>
   `;
 
+  await safeWriteFile(path.join(outputDir, "giftisan-cards-duo-showcase.svg"), realisticMockupSvg.trim());
   const duoMockupPath = path.join(outputDir, "giftisan-cards-duo-showcase.png");
   const duoMockupBuf = await sharp(Buffer.from(realisticMockupSvg))
     .png({ quality: 100 })
@@ -1143,6 +1144,7 @@ async function run() {
     </svg>
   `;
 
+  await safeWriteFile(path.join(outputDir, "giftisan-cards-duo-showcase-ar.svg"), realisticMockupArSvg.trim());
   const duoMockupArPath = path.join(outputDir, "giftisan-cards-duo-showcase-ar.png");
   const duoMockupArBuf = await sharp(Buffer.from(realisticMockupArSvg))
     .png({ quality: 100 })

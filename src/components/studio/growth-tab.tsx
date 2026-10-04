@@ -567,21 +567,21 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
             </div>
 
             {/* Quick Share Links Toolbar */}
-            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full lg:w-auto shrink-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full lg:w-auto shrink-0">
               <button
                 type="button"
                 onClick={() => handleCopyLink(shopUrl, "shop")}
-                className="h-9 sm:h-10 px-2 sm:px-3.5 rounded-xl bg-cream hover:bg-cream/80 text-primary font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer w-full sm:w-auto"
+                className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-xl bg-cream hover:bg-cream/80 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
                 title={isAr ? "نسخ رابط المتجر" : "Copy Shop Link"}
               >
                 {copiedLinkType === "shop" ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-accent shrink-0" />
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="truncate">{isAr ? "تم النسخ" : "Copied"}</span>
                   </>
                 ) : (
                   <>
-                    <Store className="w-3.5 h-3.5 text-accent shrink-0" />
+                    <Store className="w-4 h-4 text-accent shrink-0" />
                     <span className="truncate">{isAr ? "رابط المتجر" : "Shop Link"}</span>
                   </>
                 )}
@@ -590,18 +590,18 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
               <button
                 type="button"
                 onClick={() => handleCopyLink(bioUrl, "bio")}
-                className="h-9 sm:h-10 px-2 sm:px-3.5 rounded-xl bg-cream hover:bg-cream/80 text-primary font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer w-full sm:w-auto"
-                title={isAr ? "نسخ رابط البايو" : "Copy Bio Link"}
+                className="flex-1 sm:flex-initial h-10 px-3 sm:px-4 rounded-xl bg-cream hover:bg-cream/80 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title={isAr ? "نسخ رابط اللينكتري" : "Copy Linktree Link"}
               >
                 {copiedLinkType === "bio" ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-accent shrink-0" />
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="truncate">{isAr ? "تم النسخ" : "Copied"}</span>
                   </>
                 ) : (
                   <>
-                    <Link2 className="w-3.5 h-3.5 text-accent shrink-0" />
-                    <span className="truncate">{isAr ? "رابط البايو" : "Bio Link"}</span>
+                    <Link2 className="w-4 h-4 text-accent shrink-0" />
+                    <span className="truncate">{isAr ? "رابط اللينكتري" : "Linktree"}</span>
                   </>
                 )}
               </button>
@@ -609,10 +609,10 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
               <button
                 type="button"
                 onClick={() => setIsPackagingModalOpen(true)}
-                className="h-9 sm:h-10 px-2 sm:px-3.5 rounded-xl bg-white border border-primary/15 hover:border-primary/30 text-primary font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer w-full sm:w-auto"
+                className="w-full sm:w-auto h-10 px-3 sm:px-4 rounded-xl bg-white border border-primary/15 hover:border-primary/30 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
                 title={isAr ? "معاينة كارت التغليف" : "Preview Packaging Card"}
               >
-                <Printer className="w-3.5 h-3.5 text-accent shrink-0" />
+                <Printer className="w-4 h-4 text-accent shrink-0" />
                 <span className="truncate">{isAr ? "كارت التغليف" : "Packaging Card"}</span>
               </button>
             </div>
@@ -684,224 +684,247 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
               transition={{ duration: 0.25 }}
               className="space-y-5 sm:space-y-6"
             >
-              {/* Top 2 Cards: Storefront & Bio Link */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Card 1: Official Storefront Link */}
-                <div className="bg-cream/20 hover:bg-cream/30 border border-primary/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-5 transition-all shadow-xs">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                      <Store className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </div>
-                    <h4 className="text-base font-bold text-primary">
-                      {isAr ? "رابط المتجر الرسمي" : "Official Shop Storefront"}
+              {/* Unified Shop Links Hub */}
+              <div className="bg-cream/30 border border-primary/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-4 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-primary/10 pb-4">
+                  <div>
+                    <h4 className="text-base font-bold text-primary flex items-center gap-2">
+                      <Store className="w-5 h-5 text-accent" />
+                      <span>{isAr ? "روابط المتجر والمشاركة" : "Shop & Sharing Links"}</span>
                     </h4>
-                    <p className="text-xs text-charcoal/60 leading-relaxed font-medium">
-                      {isAr 
-                        ? "رابط مباشر لمعرض متجرك الكامل يضم جميع منتجاتك وتقييمات المشترين وقصة علامتك الحِرفية."
-                        : "Direct link to your full artisan storefront featuring products, stories, and verified collector reviews."}
+                    <p className="text-xs text-charcoal/60 mt-0.5 font-medium">
+                      {isAr
+                        ? "روابط مباشرة وسريعة للمشاركة على منصات التواصل الاجتماعي وفي محادثات العملاء."
+                        : "Ready-to-share links for social bio, customer messaging, and online campaigns."}
                     </p>
-
-                    <div className="bg-white rounded-2xl p-2.5 sm:p-3 border border-primary/10 flex items-center justify-between gap-2 shadow-2xs">
-                      <span className="font-mono text-xs text-primary/80 truncate select-all min-w-0 flex-1">
-                        {shopUrl.replace(/^https?:\/\//, "")}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyLink(shopUrl, "shop")}
-                        className="p-1.5 rounded-xl bg-cream hover:bg-primary/10 text-primary transition-colors shrink-0 cursor-pointer"
-                        title={isAr ? "نسخ الرابط" : "Copy Link"}
-                      >
-                        {copiedLinkType === "shop" ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => handleCopyLink(shopUrl, "shop")}
-                      className="flex-1 h-11 px-3 sm:px-4 rounded-xl bg-primary text-white hover:bg-primary-light font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer truncate"
-                    >
-                      {copiedLinkType === "shop" ? (
-                        <>
-                          <Check className="w-4 h-4 text-accent" />
-                          <span>{isAr ? "تم النسخ!" : "Copied!"}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          <span>{isAr ? "نسخ رابط المتجر" : "Copy Shop Link"}</span>
-                        </>
-                      )}
-                    </button>
-
-                    <a
-                      href={shopUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="h-11 w-11 sm:w-auto sm:px-3.5 rounded-xl bg-white border border-primary/10 hover:border-primary/30 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
-                      title={isAr ? "معاينة المتجر" : "Preview Shop"}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
                   </div>
                 </div>
 
-                {/* Card 2: Link-in-Bio Landing Page */}
-                <div className="bg-cream/20 hover:bg-cream/30 border border-primary/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-5 transition-all shadow-xs">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
-                      <Link2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                  {/* Link 1: Official Storefront */}
+                  <div className="bg-white rounded-2xl p-4 border border-primary/10 hover:border-primary/25 transition shadow-2xs flex flex-col justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <Store className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-primary">
+                              {isAr ? "المتجر الرسمي" : "Official Storefront"}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                              {isAr ? "الكتالوج الكامل" : "Full Catalog"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-charcoal/50 line-clamp-1 mt-0.5">
+                            {isAr ? "عرض المنتجات والقصة والتقييمات" : "Full showcase, craft stories & collector reviews"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <h4 className="text-base font-bold text-primary">
-                      {isAr ? "صفحة البايو المخصصة للجوال" : "Mobile Link-in-Bio Page"}
-                    </h4>
-                    <p className="text-xs text-charcoal/60 leading-relaxed font-medium">
-                      {isAr
-                        ? "صفحة سريعة مصممة خصيصاً لوضعها في بايو إنستجرام وتيك توك، تجمع حساباتك وروابط الشراء الفورية."
-                        : "Fast, mobile-optimized landing page designed for Instagram & TikTok bios with social handles and direct shop links."}
-                    </p>
 
-                    <div className="bg-white rounded-2xl p-2.5 sm:p-3 border border-primary/10 flex items-center justify-between gap-2 shadow-2xs">
-                      <span className="font-mono text-xs text-primary/80 truncate select-all min-w-0 flex-1">
-                        {bioUrl.replace(/^https?:\/\//, "")}
+                    <div className="flex items-center gap-2 bg-cream/30 rounded-xl p-1.5 ps-3 border border-primary/10">
+                      <span className="font-mono text-xs text-primary/80 truncate flex-1 select-all min-w-0" dir="ltr">
+                        {shopUrl.replace(/^https?:\/\//, "")}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyLink(bioUrl, "bio")}
-                        className="p-1.5 rounded-xl bg-cream hover:bg-primary/10 text-primary transition-colors shrink-0 cursor-pointer"
-                        title={isAr ? "نسخ الرابط" : "Copy Link"}
-                      >
-                        {copiedLinkType === "bio" ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(shopUrl, "shop")}
+                          className={cn(
+                            "h-8 px-3 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer",
+                            copiedLinkType === "shop"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-primary text-white hover:bg-primary-light"
+                          )}
+                        >
+                          {copiedLinkType === "shop" ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-accent" />
+                              <span>{isAr ? "تم النسخ" : "Copied"}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{isAr ? "نسخ" : "Copy"}</span>
+                            </>
+                          )}
+                        </button>
+                        <a
+                          href={shopUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-white border border-primary/10 hover:border-primary/30 text-primary/70 hover:text-primary flex items-center justify-center transition-all shadow-2xs active:scale-95 cursor-pointer"
+                          title={isAr ? "معاينة المتجر" : "Preview Store"}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => handleCopyLink(bioUrl, "bio")}
-                      className="flex-1 h-11 px-3 sm:px-4 rounded-xl bg-accent hover:bg-accent/90 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer truncate"
-                    >
-                      {copiedLinkType === "bio" ? (
-                        <>
-                          <Check className="w-4 h-4 text-white" />
-                          <span>{isAr ? "تم النسخ!" : "Copied!"}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          <span>{isAr ? "نسخ رابط البايو" : "Copy Bio Link"}</span>
-                        </>
-                      )}
-                    </button>
+                  {/* Link 2: Link-in-Bio */}
+                  <div className="bg-white rounded-2xl p-4 border border-primary/10 hover:border-primary/25 transition shadow-2xs flex flex-col justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                          <Link2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-primary">
+                              {isAr ? "صفحة اللينكتري (Linktree)" : "Linktree Social Page"}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
+                              Instagram / TikTok
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-charcoal/50 line-clamp-1 mt-0.5">
+                            {isAr ? "صفحة روابط سريعة لإنستجرام وتيك توك" : "Fast mobile landing page with all your links & socials"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                    <a
-                      href={bioUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="h-11 w-11 sm:w-auto sm:px-3.5 rounded-xl bg-white border border-primary/10 hover:border-primary/30 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
-                      title={isAr ? "معاينة صفحة البايو" : "Preview Bio Page"}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+                    <div className="flex items-center gap-2 bg-cream/30 rounded-xl p-1.5 ps-3 border border-primary/10">
+                      <span className="font-mono text-xs text-primary/80 truncate flex-1 select-all min-w-0" dir="ltr">
+                        {bioUrl.replace(/^https?:\/\//, "")}
+                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(bioUrl, "bio")}
+                          className={cn(
+                            "h-8 px-3 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer",
+                            copiedLinkType === "bio"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-accent hover:bg-accent/90 text-white"
+                          )}
+                        >
+                          {copiedLinkType === "bio" ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-white" />
+                              <span>{isAr ? "تم النسخ" : "Copied"}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{isAr ? "نسخ" : "Copy"}</span>
+                            </>
+                          )}
+                        </button>
+                        <a
+                          href={bioUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-white border border-primary/10 hover:border-primary/30 text-primary/70 hover:text-primary flex items-center justify-center transition-all shadow-2xs active:scale-95 cursor-pointer"
+                          title={isAr ? "معاينة اللينكتري" : "Preview Linktree"}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Packaging QR Code & Print Cards */}
-              <div className="bg-cream/20 hover:bg-cream/30 border border-primary/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 transition-all shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-primary/10 pb-4">
+              {/* Packaging & QR Hub */}
+              <div className="bg-cream/30 border border-primary/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-5 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-primary/10 pb-4">
                   <div>
-                    <h4 className="text-sm sm:text-base font-bold text-primary flex items-center gap-2">
-                      <QrCode className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
-                      <span>{isAr ? "رمز QR لبطاقات التغليف وبطاقات العمل" : "Packaging & Display QR Code"}</span>
+                    <h4 className="text-base font-bold text-primary flex items-center gap-2">
+                      <QrCode className="w-5 h-5 text-accent shrink-0" />
+                      <span>{isAr ? "باركود التغليف والطباعة (QR Code)" : "Packaging & Display QR Code"}</span>
                     </h4>
-                    <p className="text-xs text-charcoal/60 mt-1 font-medium leading-relaxed">
+                    <p className="text-xs text-charcoal/60 mt-0.5 font-medium leading-relaxed">
                       {isAr 
-                        ? "اطبع هذا الرمز على كروت الشكر داخل علب الشحن أو اعرضه في معارض الحِرف لتسهيل إعادة الشراء ومتابعة متجرك."
-                        : "Print this high-resolution QR on thank-you packaging cards or display at bazaars for seamless re-orders."}
+                        ? "اطبع الباركود على بطاقات الشكر داخل الشحنات أو اعرضه في البازارات والمعارض."
+                        : "Print on packaging inserts or tabletop displays for instant reorders & followers."}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex items-center gap-2 w-full sm:w-auto shrink-0">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
                     <button
                       type="button"
                       onClick={handleDownloadQR}
-                      className="h-10 px-4 rounded-xl bg-accent hover:bg-accent/90 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer w-full sm:w-auto"
+                      className="h-10 sm:h-9 px-3.5 rounded-xl bg-white border border-primary/15 hover:border-primary/30 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
                     >
-                      <Download className="w-4 h-4 shrink-0" />
-                      <span>{isAr ? "تحميل QR (PNG)" : "Download HD (1200px)"}</span>
+                      <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-accent shrink-0" />
+                      <span>{isAr ? "تحميل QR (PNG)" : "Download QR (PNG)"}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setIsPackagingModalOpen(true)}
-                      className="h-10 px-4 rounded-xl bg-primary hover:bg-primary-light text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer w-full sm:w-auto"
+                      className="h-10 sm:h-9 px-3.5 rounded-xl bg-primary hover:bg-primary-light text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
                     >
-                      <Printer className="w-4 h-4 shrink-0" />
-                      <span>{isAr ? "كارت التغليف" : "Print Packaging Card"}</span>
+                      <Printer className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
+                      <span>{isAr ? "تصميم وطباعة كارت التغليف" : "Print Packaging Card"}</span>
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start justify-between gap-5 sm:gap-6 bg-white rounded-2xl p-4 sm:p-5 border border-primary/10 shadow-2xs">
-                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full sm:w-auto">
-                    <div className="p-3 bg-white rounded-2xl border border-primary/10 shadow-2xs shrink-0">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-5 bg-white rounded-2xl p-4 sm:p-5 border border-primary/10 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full md:w-auto">
+                    <div className="p-2.5 bg-white rounded-xl border border-primary/10 shadow-2xs shrink-0">
                       <QRCode
                         id="growth-shop-qr-code"
                         value={activeUrlTab === "shop" ? shopUrl : bioUrl}
-                        size={88}
+                        size={84}
                         bgColor="#FFFFFF"
                         fgColor="#064E3B"
                         level="H"
                       />
                     </div>
-                    <div className="space-y-1.5 min-w-0">
+                    <div className="space-y-1.5 text-center sm:text-start min-w-0">
                       <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                        <span className="font-bold text-primary text-sm truncate">{artisanName}</span>
+                        <span className="font-bold text-primary text-sm">{artisanName}</span>
                         {/* QR Target Switcher */}
-                        <div className="flex items-center p-0.5 bg-cream rounded-lg border border-primary/10 shrink-0">
+                        <div className="inline-flex p-0.5 bg-cream rounded-lg border border-primary/10 shrink-0">
                           <button
                             type="button"
                             onClick={() => setActiveUrlTab("shop")}
                             className={cn(
-                              "px-2 py-0.5 rounded-md text-[10px] font-bold transition",
-                              activeUrlTab === "shop" ? "bg-primary text-white" : "text-charcoal/60"
+                              "px-2.5 py-1 rounded-md text-[10px] font-bold transition cursor-pointer",
+                              activeUrlTab === "shop" ? "bg-primary text-white shadow-2xs" : "text-charcoal/60 hover:text-primary"
                             )}
                           >
-                            {isAr ? "المتجر" : "Store"}
+                            {isAr ? "المتجر" : "Storefront"}
                           </button>
                           <button
                             type="button"
                             onClick={() => setActiveUrlTab("bio")}
                             className={cn(
-                              "px-2 py-0.5 rounded-md text-[10px] font-bold transition",
-                              activeUrlTab === "bio" ? "bg-primary text-white" : "text-charcoal/60"
+                              "px-2.5 py-1 rounded-md text-[10px] font-bold transition cursor-pointer",
+                              activeUrlTab === "bio" ? "bg-primary text-white shadow-2xs" : "text-charcoal/60 hover:text-primary"
                             )}
                           >
-                            {isAr ? "البايو" : "Bio"}
+                            {isAr ? "لينكتري" : "Linktree"}
                           </button>
                         </div>
                       </div>
                       <p className="text-xs text-charcoal/60 font-medium">
                         {activeUrlTab === "shop" 
-                          ? (isAr ? "يوجه المشترين لمعرض المنتجات الكامل" : "Points collectors to your full catalog")
-                          : (isAr ? "يوجه المشترين لصفحة البايو المخصصة للهواتف" : "Points collectors to your mobile bio landing page")}
+                          ? (isAr ? "الرمز يوجه الزائر لكتالوج المنتجات الكامل" : "Points scanners directly to your shop catalog")
+                          : (isAr ? "الرمز يوجه الزائر لصفحة اللينكتري الخاصة بك" : "Points scanners directly to your Linktree page")}
                       </p>
-                      <p className="text-[10px] text-accent font-mono font-bold truncate">
+                      <p className="text-[11px] text-accent font-mono font-bold truncate max-w-xs sm:max-w-md" dir="ltr">
                         {activeUrlTab === "shop" ? shopUrl : bioUrl}
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-xs text-charcoal/50 max-w-xs space-y-1 border-s border-primary/10 ps-5 hidden lg:block">
-                    <p className="font-bold text-primary/70">{isAr ? "نصيحة للتغليف:" : "Packaging Tip:"}</p>
-                    <p className="leading-relaxed">
-                      {isAr 
-                        ? "أرفق بطاقة الشكر داخل كل شحنة مع كود خصم للطلب القادم لرفع نسبة المشترين المتكررين بأكثر من 35%." 
-                        : "Include this thank-you insert in every delivery box with a repeat discount code to boost repeat orders by over 35%."}
-                    </p>
+                  <div className="text-xs text-charcoal/60 bg-cream/40 rounded-xl p-3 border border-primary/10 max-w-sm w-full md:w-auto shrink-0 flex items-start gap-2.5">
+                    <span className="text-base leading-none">💡</span>
+                    <div className="space-y-0.5">
+                      <p className="font-bold text-primary text-[11px]">{isAr ? "نصيحة لزيادة المبيعات:" : "Packaging Tip:"}</p>
+                      <p className="text-[11px] leading-relaxed">
+                        {isAr 
+                          ? "إرفاق كارت الشكر داخل كرتونة التغليف يرفع من معدل تكرار الشراء بنسبة تصل إلى 35%." 
+                          : "Placing a thank-you insert inside delivery boxes boosts repeat orders by over 35%."}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -928,7 +951,7 @@ export function GrowthTab({ dict, coupons = [], sales = [], lang = "en", artisan
                     className="h-10 px-4 rounded-xl bg-white border border-primary/15 hover:border-primary/30 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer w-full sm:w-auto shrink-0"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>{isAr ? "معاينة صفحة البايو" : "Preview Bio"}</span>
+                    <span>{isAr ? "معاينة اللينكتري" : "Preview Linktree"}</span>
                   </a>
                 </div>
 

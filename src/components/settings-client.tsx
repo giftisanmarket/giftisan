@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { User, Camera, Save, ArrowLeft, Check, X, AlertTriangle, Trash2, Mail, Edit3, Eye, EyeOff, Loader2 } from "lucide-react";
 import { updateUser, updateProfileAvatar, deleteAccountAction, changeEmailAction } from "@/lib/actions";
+import { uploadMediaToCloudinary } from "@/lib/client-upload";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -71,34 +72,45 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
           ctx?.drawImage(img, 0, 0, width, height);
           
           // Export as optimized image
-          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          const compressedDataUrl = canvas.toDataURL(outType, 0.9);
-          setImage(compressedDataUrl);
+          const outType = 'image/jpeg';
+          const localPreview = canvas.toDataURL(outType, 0.85);
+          setImage(localPreview);
 
-          try {
-            // Auto-save immediately to server without needing "Save Changes"
-            const res = await updateProfileAvatar(compressedDataUrl, user.id);
-            if (res.success && res.avatar) {
-              setImage(res.avatar);
-              await update({ image: res.avatar });
-              toast.success(
-                lang === "ar"
-                  ? (dict.profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
-                  : (dict.profile?.avatar_updated || "Profile photo updated successfully!"),
-                { icon: <Check className="w-5 h-5 text-green-500" /> }
-              );
-              router.refresh();
-            } else {
+          canvas.toBlob(async (blob) => {
+            try {
+              const uploadTarget = blob || file;
+              const cloudUrl = await uploadMediaToCloudinary(uploadTarget, localPreview);
+              if (!cloudUrl) {
+                setImage(user.image || "");
+                toast.error(lang === "ar" ? "فشل رفع الصورة، يرجى المحاولة مجدداً" : "Failed to upload avatar, please try again");
+                setIsCompressing(false);
+                return;
+              }
+
+              // Auto-save immediately to server without needing "Save Changes"
+              const res = await updateProfileAvatar(cloudUrl, user.id);
+              if (res.success && res.avatar) {
+                setImage(res.avatar);
+                await update({ image: res.avatar });
+                toast.success(
+                  lang === "ar"
+                    ? (dict.profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
+                    : (dict.profile?.avatar_updated || "Profile photo updated successfully!"),
+                  { icon: <Check className="w-5 h-5 text-green-500" /> }
+                );
+                router.refresh();
+              } else {
+                setImage(user.image || "");
+                toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update profile photo"));
+              }
+            } catch (err: any) {
+              console.error("Auto-save avatar error:", err);
               setImage(user.image || "");
-              toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update profile photo"));
+              toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
+            } finally {
+              setIsCompressing(false);
             }
-          } catch (err: any) {
-            console.error("Auto-save avatar error:", err);
-            setImage(user.image || "");
-            toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
-          } finally {
-            setIsCompressing(false);
-          }
+          }, outType, 0.85);
         };
         img.src = reader.result as string;
       };

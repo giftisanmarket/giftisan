@@ -18,6 +18,7 @@ import {
   Award
 } from "lucide-react";
 import { updateArtisanProfile, updateProfileAvatar, checkSlugAvailability, uploadImage } from "@/lib/actions";
+import { uploadMediaToCloudinary } from "@/lib/client-upload";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -157,33 +158,51 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
           const ctx = canvas.getContext('2d');
           if (ctx) ctx.imageSmoothingQuality = 'high';
           ctx?.drawImage(img, 0, 0, width, height);
-          const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          const compressedDataUrl = canvas.toDataURL(outType, 0.9);
+          const outType = 'image/jpeg';
+          const localPreview = canvas.toDataURL(outType, 0.85);
 
-          // Optimistically show the avatar
-          setAvatar(compressedDataUrl);
+          // Optimistically show the avatar preview immediately
+          setAvatar(localPreview);
 
-          // Auto-save immediately to server without needing "Save Profile"
-          const res = await updateProfileAvatar(compressedDataUrl, artisan.userId);
-          if (res.success && res.avatar) {
-            setAvatar(res.avatar);
-            await update({ image: res.avatar });
-            toast.success(
-              lang === "ar"
-                ? (dict.studio_profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
-                : (dict.studio_profile?.avatar_updated || "Profile avatar updated successfully!"),
-              { icon: <Check className="w-5 h-5 text-green-500" /> }
-            );
-            router.refresh();
-          } else {
-            setAvatar(artisan.avatar || "");
-            toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update avatar"));
-          }
+          canvas.toBlob(async (blob) => {
+            try {
+              const uploadTarget = blob || file;
+              const cloudUrl = await uploadMediaToCloudinary(uploadTarget, localPreview);
+              if (!cloudUrl) {
+                setAvatar(artisan.avatar || "");
+                toast.error(lang === "ar" ? "فشل رفع الصورة، يرجى المحاولة مجدداً" : "Failed to upload avatar, please try again");
+                setIsUploadingAvatar(false);
+                return;
+              }
+
+              // Auto-save Cloudinary URL immediately to server
+              const res = await updateProfileAvatar(cloudUrl, artisan.userId);
+              if (res.success && res.avatar) {
+                setAvatar(res.avatar);
+                await update({ image: res.avatar });
+                toast.success(
+                  lang === "ar"
+                    ? (dict.studio_profile?.avatar_updated || "تم حفظ وتحديث الصورة بنجاح!")
+                    : (dict.studio_profile?.avatar_updated || "Profile avatar updated successfully!"),
+                  { icon: <Check className="w-5 h-5 text-green-500" /> }
+                );
+                router.refresh();
+              } else {
+                setAvatar(artisan.avatar || "");
+                toast.error(res.error || (lang === "ar" ? "فشل حفظ الصورة" : "Failed to update avatar"));
+              }
+            } catch (err: any) {
+              console.error("Avatar auto-save error:", err);
+              setAvatar(artisan.avatar || "");
+              toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
+            } finally {
+              setIsUploadingAvatar(false);
+            }
+          }, outType, 0.85);
         } catch (err: any) {
-          console.error("Avatar auto-save error:", err);
+          console.error("Avatar processing error:", err);
           setAvatar(artisan.avatar || "");
-          toast.error(lang === "ar" ? "حدث خطأ أثناء حفظ الصورة" : "Error saving avatar");
-        } finally {
+          toast.error(lang === "ar" ? "حدث خطأ أثناء معالجة الصورة" : "Error processing image");
           setIsUploadingAvatar(false);
         }
       };
@@ -670,24 +689,35 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                                 const ctx = canvas.getContext('2d');
                                 if (ctx) ctx.imageSmoothingQuality = 'high';
                                 ctx?.drawImage(img, 0, 0, width, height);
-                                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                const outType = 'image/jpeg';
                                 const compressedDataUrl = canvas.toDataURL(outType, 0.85);
                                 // Show preview immediately
                                 setBannerImage(compressedDataUrl);
-                                // Upload to Cloudinary right away so Save doesn't send raw base64
-                                const res = await uploadImage(compressedDataUrl);
-                                if (res.success && res.url) {
-                                  setBannerImage(res.url);
-                                  toast.success(
-                                    lang === "ar"
-                                      ? "تم رفع الصورة بنجاح! اضغط حفظ لتأكيد التغييرات."
-                                      : "Banner uploaded! Click Save to apply.",
-                                    { icon: <Check className="w-5 h-5 text-green-500" /> }
-                                  );
-                                } else {
-                                  toast.error(lang === "ar" ? "فشل رفع الصورة" : "Failed to upload banner image");
-                                  setBannerImage(artisan.bannerImage || "");
-                                }
+
+                                canvas.toBlob(async (blob) => {
+                                  try {
+                                    const uploadTarget = blob || file;
+                                    const cloudUrl = await uploadMediaToCloudinary(uploadTarget, compressedDataUrl);
+                                    if (cloudUrl) {
+                                      setBannerImage(cloudUrl);
+                                      toast.success(
+                                        lang === "ar"
+                                          ? "تم رفع الصورة بنجاح! اضغط حفظ لتأكيد التغييرات."
+                                          : "Banner uploaded! Click Save to apply.",
+                                        { icon: <Check className="w-5 h-5 text-green-500" /> }
+                                      );
+                                    } else {
+                                      toast.error(lang === "ar" ? "فشل رفع الصورة" : "Failed to upload banner image");
+                                      setBannerImage(artisan.bannerImage || "");
+                                    }
+                                  } catch (err) {
+                                    console.error("Banner upload error:", err);
+                                    toast.error(lang === "ar" ? "حدث خطأ أثناء رفع الصورة" : "Error uploading banner");
+                                    setBannerImage(artisan.bannerImage || "");
+                                  } finally {
+                                    setIsUploadingBanner(false);
+                                  }
+                                }, outType, 0.85);
                               } catch (err) {
                                 console.error("Banner upload error:", err);
                                 toast.error(lang === "ar" ? "حدث خطأ أثناء رفع الصورة" : "Error uploading banner");

@@ -24,9 +24,62 @@ import {
   Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createProduct, updateProduct } from "@/lib/actions";
+import { createProduct, updateProduct, uploadImage, getCloudinaryUploadSignature } from "@/lib/actions";
 import { cn, stripEmojis } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+
+/**
+ * Uploads media directly to Cloudinary using signed direct upload.
+ * Bypasses Vercel 4.5MB request body limit and avoids function timeouts.
+ * Falls back to uploadImage server action if needed.
+ */
+async function uploadMediaToCloudinary(
+  fileOrBlob: File | Blob,
+  fallbackBase64?: string
+): Promise<string | null> {
+  try {
+    const sig = await getCloudinaryUploadSignature();
+    if (sig?.success && sig.signature && sig.apiKey && sig.cloudName) {
+      const fd = new FormData();
+      fd.append("file", fileOrBlob);
+      fd.append("api_key", sig.apiKey);
+      fd.append("timestamp", String(sig.timestamp));
+      fd.append("folder", sig.folder || "giftisan");
+      fd.append("signature", sig.signature);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`,
+        {
+          method: "POST",
+          body: fd,
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.secure_url) {
+          return data.secure_url;
+        }
+      }
+    }
+  } catch (directErr) {
+    console.warn("Direct Cloudinary upload failed, attempting fallback:", directErr);
+  }
+
+  // Fallback: use server action uploadImage if base64 data is provided
+  if (fallbackBase64 && fallbackBase64.startsWith("data:")) {
+    try {
+      const res = await uploadImage(fallbackBase64);
+      if (res?.success && res.url) {
+        return res.url;
+      }
+    } catch (fallbackErr) {
+      console.error("Server action uploadImage failed:", fallbackErr);
+    }
+  }
+
+  return null;
+}
 
 interface ProductVariantData {
   id?: string;
@@ -95,9 +148,23 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
                   const ctx = canvas.getContext('2d');
                   if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
                   
-                  const newVariants = [...variants];
-                  newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
-                  setVariants(newVariants);
+                  const previewUrl = canvas.toDataURL('image/webp', 0.8);
+                  setVariants((prev: any[]) => {
+                    const next = [...prev];
+                    if (next[i]) next[i] = { ...next[i], image: previewUrl };
+                    return next;
+                  });
+
+                  canvas.toBlob(async (blob) => {
+                    const cloudUrl = await uploadMediaToCloudinary(blob || file, previewUrl);
+                    if (cloudUrl) {
+                      setVariants((prev: any[]) => {
+                        const next = [...prev];
+                        if (next[i]) next[i] = { ...next[i], image: cloudUrl };
+                        return next;
+                      });
+                    }
+                  }, 'image/webp', 0.8);
                 };
                 img.src = reader.result as string;
               };
@@ -187,9 +254,23 @@ const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
                   const ctx = canvas.getContext('2d');
                   if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
                   
-                  const newVariants = [...variants];
-                  newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
-                  setVariants(newVariants);
+                  const previewUrl = canvas.toDataURL('image/webp', 0.8);
+                  setVariants((prev: any[]) => {
+                    const next = [...prev];
+                    if (next[i]) next[i] = { ...next[i], image: previewUrl };
+                    return next;
+                  });
+
+                  canvas.toBlob(async (blob) => {
+                    const cloudUrl = await uploadMediaToCloudinary(blob || file, previewUrl);
+                    if (cloudUrl) {
+                      setVariants((prev: any[]) => {
+                        const next = [...prev];
+                        if (next[i]) next[i] = { ...next[i], image: cloudUrl };
+                        return next;
+                      });
+                    }
+                  }, 'image/webp', 0.8);
                 };
                 img.src = reader.result as string;
               };
@@ -864,13 +945,24 @@ export function NewProductClient({ artisanId, dict, lang: propLang, initialData 
           return;
         }
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          handleImageChange(idx, reader.result as string);
-          setResolutions(prev => ({ ...prev, [idx]: `${videoElement.videoWidth}×${videoElement.videoHeight}` }));
+        const objectUrl = URL.createObjectURL(file);
+        handleImageChange(idx, objectUrl);
+        setResolutions(prev => ({ ...prev, [idx]: `${videoElement.videoWidth}×${videoElement.videoHeight}` }));
+
+        uploadMediaToCloudinary(file).then(cloudUrl => {
+          if (cloudUrl) {
+            handleImageChange(idx, cloudUrl);
+          } else {
+            toast.error(isAr ? "فشل رفع الفيديو، يرجى المحاولة مجدداً" : "Failed to upload video, please try again");
+            handleRemoveImage(idx);
+          }
           setIsCompressing(prev => ({ ...prev, [idx]: false }));
-        };
-        reader.readAsDataURL(file);
+        }).catch(err => {
+          console.error("Video upload error:", err);
+          toast.error(isAr ? "فشل رفع الفيديو" : "Failed to upload video");
+          handleRemoveImage(idx);
+          setIsCompressing(prev => ({ ...prev, [idx]: false }));
+        });
       };
       videoElement.src = URL.createObjectURL(file);
     } else {
@@ -881,22 +973,42 @@ export function NewProductClient({ artisanId, dict, lang: propLang, initialData 
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const MAX_RES = 1280;
+          const MAX_RES = 1600;
           if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
           else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
           canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
           const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          handleImageChange(idx, canvas.toDataURL(outType, 0.85));
-          setResolutions(prev => ({ ...prev, [idx]: `${width}×${height}` }));
-          setIsCompressing(prev => ({ ...prev, [idx]: false }));
+          const localDataUrl = canvas.toDataURL(outType, 0.85);
+
+          handleImageChange(idx, localDataUrl);
+          setResolutions(prev => ({ ...prev, [idx]: `${Math.round(width)}×${Math.round(height)}` }));
+
+          canvas.toBlob(async (blob) => {
+            try {
+              const uploadTarget = blob || file;
+              const cloudUrl = await uploadMediaToCloudinary(uploadTarget, localDataUrl);
+              if (cloudUrl) {
+                handleImageChange(idx, cloudUrl);
+              } else {
+                toast.error(isAr ? "فشل رفع الصورة، يرجى المحاولة مجدداً" : "Failed to upload image, please try again");
+                handleRemoveImage(idx);
+              }
+            } catch (uploadErr) {
+              console.error("Image upload error:", uploadErr);
+              toast.error(isAr ? "حدث خطأ أثناء رفع الصورة" : "Error uploading image");
+              handleRemoveImage(idx);
+            } finally {
+              setIsCompressing(prev => ({ ...prev, [idx]: false }));
+            }
+          }, outType, 0.85);
         };
         img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
-  }, [dict, handleImageChange]);
+  }, [dict, handleImageChange, handleRemoveImage, isAr]);
 
   const handleBatchFilesUpload = useCallback((files: FileList | File[], targetStartIdx?: number) => {
     const fileArray = Array.from(files);
@@ -940,6 +1052,26 @@ export function NewProductClient({ artisanId, dict, lang: propLang, initialData 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (Object.values(isCompressing).some(Boolean)) {
+      toast.error(
+        isAr
+          ? "يرجى الانتظار حتى يكتمل رفع الصور والفيديو..."
+          : "Please wait while media finishes uploading..."
+      );
+      return;
+    }
+
+    const hasPendingBlob = formData.images.some((img: string) => img && img.startsWith("blob:"));
+    if (hasPendingBlob) {
+      toast.error(
+        isAr
+          ? "يرجى الانتظار حتى يكتمل رفع الوسائط..."
+          : "Media is still uploading, please wait a few seconds..."
+      );
+      return;
+    }
+
     setIsLoading(true);
 
     if (!formData.name || !formData.price || !formData.images[0]) {
@@ -1325,8 +1457,11 @@ export function NewProductClient({ artisanId, dict, lang: propLang, initialData 
 
                           {/* Compression Spinner */}
                           {isCompressing[idx] && (
-                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-40 flex items-center justify-center rounded-2xl">
+                            <div className="absolute inset-0 bg-white/85 backdrop-blur-sm z-40 flex flex-col items-center justify-center rounded-2xl gap-1.5">
                               <Loader2 className="w-6 h-6 text-accent animate-spin" />
+                              <span className="text-[9px] font-bold text-primary/70 uppercase tracking-tight">
+                                {isAr ? "جاري الرفع..." : "Uploading..."}
+                              </span>
                             </div>
                           )}
                         </>
@@ -1558,16 +1693,18 @@ export function NewProductClient({ artisanId, dict, lang: propLang, initialData 
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isLoading}
+                disabled={isLoading || Object.values(isCompressing).some(Boolean)}
                 className="w-full sm:w-auto py-3 px-6 sm:px-8 bg-primary text-white font-bold text-sm rounded-xl hover:bg-primary-light transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {isLoading ? (
+                {isLoading || Object.values(isCompressing).some(Boolean) ? (
                   <Loader2 className="w-4 h-4 animate-spin text-accent" />
                 ) : (
                   <Sparkles className="w-4 h-4 text-accent" />
                 )}
                 <span>
-                  {isEditMode
+                  {Object.values(isCompressing).some(Boolean)
+                    ? (isAr ? "جاري رفع الوسائط..." : "Uploading media...")
+                    : isEditMode
                     ? (isAr ? "حفظ التغييرات" : "Save Changes")
                     : dict.new_product.list_product_btn}
                 </span>

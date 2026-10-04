@@ -78,6 +78,41 @@ export async function uploadImage(base64Data: string, skipWebPConversion = true)
   }
 }
 
+export async function getCloudinaryUploadSignature() {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: "Unauthorized" };
+    }
+    const timestamp = Math.round(Date.now() / 1000);
+    const folder = "giftisan";
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+    if (!apiSecret || !apiKey || !cloudName) {
+      return { success: false, error: "Cloudinary credentials not configured" };
+    }
+
+    const signature = cloudinary.utils.api_sign_request(
+      { folder, timestamp },
+      apiSecret
+    );
+
+    return {
+      success: true,
+      signature,
+      timestamp,
+      apiKey,
+      cloudName,
+      folder,
+    };
+  } catch (error: any) {
+    console.error("Error generating Cloudinary upload signature:", error);
+    return { success: false, error: error?.message || "Failed to generate signature" };
+  }
+}
+
 async function processImage(imageSource: string | null | undefined, skipWebPConversion = true): Promise<string | null> {
   if (!imageSource) return null;
   // Upload any data URL (image, video, etc.)

@@ -17,7 +17,7 @@ import {
   Package,
   Award
 } from "lucide-react";
-import { updateArtisanProfile, updateProfileAvatar, checkSlugAvailability } from "@/lib/actions";
+import { updateArtisanProfile, updateProfileAvatar, checkSlugAvailability, uploadImage } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -42,6 +42,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [brandColor, setBrandColor] = useState(artisan.brandColor || "#da7b5a");
   const [bannerImage, setBannerImage] = useState(artisan.bannerImage || "");
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState(artisan.phoneNumber || "");
   const parseGpsFromAddress = (raw: string) => {
     const match = raw.match(/\[GPS Pin: (https:\/\/[^\]]+)\]/);
@@ -638,14 +639,17 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                       <input
                         type="file"
                         accept="image/*"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        disabled={isUploadingBanner}
+                        className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const img = new (window as any).Image();
-                              img.onload = () => {
+                          if (!file) return;
+                          setIsUploadingBanner(true);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const img = new (window as any).Image();
+                            img.onload = async () => {
+                              try {
                                 const canvas = document.createElement('canvas');
                                 const MAX_SIZE = 2500;
                                 let width = img.width;
@@ -661,20 +665,50 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                                     height = MAX_SIZE;
                                   }
                                 }
-                                 canvas.width = width;
-                                 canvas.height = height;
-                                 const ctx = canvas.getContext('2d');
-                                 if (ctx) ctx.imageSmoothingQuality = 'high';
-                                 ctx?.drawImage(img, 0, 0, width, height);
-                                 const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                                 setBannerImage(canvas.toDataURL(outType, 0.9));
-                               };
-                              img.src = reader.result as string;
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) ctx.imageSmoothingQuality = 'high';
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                                const compressedDataUrl = canvas.toDataURL(outType, 0.85);
+                                // Show preview immediately
+                                setBannerImage(compressedDataUrl);
+                                // Upload to Cloudinary right away so Save doesn't send raw base64
+                                const res = await uploadImage(compressedDataUrl);
+                                if (res.success && res.url) {
+                                  setBannerImage(res.url);
+                                  toast.success(
+                                    lang === "ar"
+                                      ? "تم رفع الصورة بنجاح! اضغط حفظ لتأكيد التغييرات."
+                                      : "Banner uploaded! Click Save to apply.",
+                                    { icon: <Check className="w-5 h-5 text-green-500" /> }
+                                  );
+                                } else {
+                                  toast.error(lang === "ar" ? "فشل رفع الصورة" : "Failed to upload banner image");
+                                  setBannerImage(artisan.bannerImage || "");
+                                }
+                              } catch (err) {
+                                console.error("Banner upload error:", err);
+                                toast.error(lang === "ar" ? "حدث خطأ أثناء رفع الصورة" : "Error uploading banner");
+                                setBannerImage(artisan.bannerImage || "");
+                              } finally {
+                                setIsUploadingBanner(false);
+                              }
                             };
-                            reader.readAsDataURL(file);
-                          }
+                            img.src = reader.result as string;
+                          };
+                          reader.readAsDataURL(file);
                         }}
                       />
+                      {isUploadingBanner && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/40 backdrop-blur-sm rounded-[2.5rem] z-10">
+                          <div className="flex flex-col items-center gap-3 text-white">
+                            <Loader2 className="w-10 h-10 animate-spin" />
+                            <p className="text-xs font-bold uppercase tracking-widest">{lang === "ar" ? "جاري الرفع..." : "Uploading..."}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -722,11 +756,11 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                   <div className="pt-8 flex justify-end">
                     <button
                       type="submit"
-                      disabled={isSaving}
+                      disabled={isSaving || isUploadingBanner}
                       className="h-16 px-12 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50 active:scale-95"
                     >
-                      {isSaving ? dict.studio_profile.syncing : dict.studio_profile.save_branding}
-                      <Save className="w-5 h-5" />
+                      {isUploadingBanner ? (lang === "ar" ? "جاري رفع الصورة..." : "Uploading banner...") : isSaving ? dict.studio_profile.syncing : dict.studio_profile.save_branding}
+                      {isUploadingBanner ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     </button>
                   </div>
                 </motion.form>

@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 import { slugify } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
-import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail, sendRefundRequestSubmittedEmail, sendRefundResolvedEmail } from "@/lib/mail";
+import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail, sendRefundRequestSubmittedEmail, sendRefundResolvedEmail, sendAbandonedCheckoutNotification, sendBuyerOrderReceiptEmail } from "@/lib/mail";
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
@@ -982,133 +982,182 @@ export async function createOrder(userId: string | null, totalAmount: number, it
       processedCustomImage: item.customImage ? await processImage(item.customImage) : null
     })));
 
-    const order = await prisma.$transaction(async (tx) => {
-      // 🛡️ Final Inventory Guard: Verify stock for all items before processing
-      for (const item of processedItems) {
-        if (item.variantId) {
-          const variant = await tx.productVariant.findUnique({
-            where: { id: item.variantId },
-            select: { stock: true, name: true }
-          });
-          if (!variant || variant.stock < item.quantity) {
-            throw new Error(`The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
-          }
-        } else {
-          const product = await tx.product.findUnique({
-            where: { id: item.id },
-            select: { stock: true, name: true }
-          });
-
-          if (!product || product.stock < item.quantity) {
-            throw new Error(`The product "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
-          }
+    // 🛡️ Final Inventory Guard: Verify stock for all items before processing (read-only check)
+    for (const item of processedItems) {
+      if (item.variantId) {
+        const variant = await prisma.productVariant.findUnique({
+          where: { id: item.variantId },
+          select: { stock: true, name: true }
+        });
+        if (!variant || variant.stock < item.quantity) {
+          throw new Error(`The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
+        }
+      } else {
+        const product = await prisma.product.findUnique({
+          where: { id: item.id },
+          select: { stock: true, name: true }
+        });
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`The product "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
         }
       }
+    }
 
-      // If userId is missing, try to resolve by clientEmail if user is already registered
+    const paymentMethod = shippingData?.paymentMethod as "paymob" | "cod" | undefined;
+
+    // ─── COD: Create order immediately (customer is committing) ───────────────
+    if (paymentMethod === "cod") {
+      // Resolve userId by email if guest
       let effectiveUserId = userId;
       if (!effectiveUserId && shippingData?.email) {
-        const existingUser = await tx.user.findUnique({
+        const existingUser = await prisma.user.findUnique({
           where: { email: shippingData.email.toLowerCase().trim() },
           select: { id: true }
         });
-        if (existingUser) {
-          effectiveUserId = existingUser.id;
-        }
+        if (existingUser) effectiveUserId = existingUser.id;
       }
 
-      // Create the order
-      const newOrder = await tx.order.create({
-        data: {
-          userId: effectiveUserId,
-          totalAmount,
-          status: "PENDING",
-          shippingAddress: shippingData?.address,
-          shippingCity: shippingData?.city,
-          shippingZip: shippingData?.zip,
-          shippingCountry: shippingData?.country,
-          clientPhone: shippingData?.phone,
-          clientEmail: shippingData?.email,
-          orderNotes: shippingData?.orderNotes,
-          isGift: shippingData?.isGift || false,
-          giftMessage: shippingData?.giftMessage || null,
+      const codOrder = await prisma.$transaction(async (tx) => {
+        const newOrder = await tx.order.create({
+          data: {
+            userId: effectiveUserId,
+            totalAmount,
+            status: "PROCESSING",
+            shippingAddress: shippingData?.address,
+            shippingCity: shippingData?.city,
+            shippingZip: shippingData?.zip,
+            shippingCountry: shippingData?.country,
+            clientPhone: shippingData?.phone,
+            clientEmail: shippingData?.email,
+            orderNotes: shippingData?.orderNotes,
+            isGift: shippingData?.isGift || false,
+            giftMessage: shippingData?.giftMessage || null,
+            couponId: shippingData?.couponId || null,
+            discountApplied: shippingData?.discountApplied || 0,
+            shippingMethodId: shippingData?.shippingMethodId || null,
+            shippingCost: shippingData?.shippingCost || 0,
+            items: {
+              create: processedItems.map(item => ({
+                productId: item.id,
+                variantId: item.variantId || null,
+                quantity: item.quantity,
+                price: item.price,
+                personalization: item.personalization,
+                customImage: item.processedCustomImage
+              }))
+            }
+          }
+        });
+
+        // Validate & increment coupon usage
+        if (shippingData?.couponId) {
+          const coupon = await tx.coupon.findUnique({ where: { id: shippingData.couponId } });
+          if (!coupon) throw new Error("The coupon code used for this order is invalid.");
+          if (!coupon.isActive) throw new Error("The coupon code used for this order is no longer active.");
+          if (coupon.expiresAt && new Date() > coupon.expiresAt) throw new Error("The coupon code used for this order has expired.");
+          if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) throw new Error("This coupon has just reached its maximum usage limit!");
+          await tx.coupon.update({ where: { id: shippingData.couponId }, data: { usedCount: { increment: 1 } } });
+        }
+
+        // Decrement stock
+        for (const item of items) {
+          if (item.variantId) {
+            await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { decrement: item.quantity } } });
+          } else {
+            await tx.product.update({ where: { id: item.id }, data: { stock: { decrement: item.quantity } } });
+          }
+        }
+
+        return newOrder;
+      });
+
+      return { success: true, orderId: codOrder.id, paymentUrl: null };
+    }
+
+    // ─── PAYMOB: Save lead to AbandonedCheckout ONLY — no Order, no stock decrement ─
+    const firstName = shippingData?.firstName || "";
+    const lastName = shippingData?.lastName || "";
+    const customerName = `${firstName} ${lastName}`.trim() || shippingData?.email || "Customer";
+
+    // Validate coupon upfront (read-only check) before creating abandoned checkout
+    if (shippingData?.couponId) {
+      const coupon = await prisma.coupon.findUnique({ where: { id: shippingData.couponId } });
+      if (!coupon) throw new Error("The coupon code used for this order is invalid.");
+      if (!coupon.isActive) throw new Error("The coupon code used for this order is no longer active.");
+      if (coupon.expiresAt && new Date() > coupon.expiresAt) throw new Error("The coupon code used for this order has expired.");
+      if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) throw new Error("This coupon has just reached its maximum usage limit!");
+    }
+
+    const abandonedCheckout = await prisma.$executeRawUnsafe(
+      `INSERT INTO "AbandonedCheckout" (id, "customerName", "customerEmail", "customerPhone", "shippingAddress", "shippingCity", "totalAmount", items, "orderNotes", "couponCode", "discountApplied", "shippingCost", status, "updatedAt")
+       VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, 'ABANDONED', NOW())
+       RETURNING id`,
+      customerName,
+      shippingData?.email || "",
+      shippingData?.phone || "",
+      shippingData?.address || null,
+      shippingData?.city || null,
+      totalAmount,
+      JSON.stringify(items.map(item => ({
+        id: item.id,
+        variantId: item.variantId || null,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        personalization: item.personalization || null,
+        customImage: item.processedCustomImage || null,
+        shippingData: {
+          userId,
           couponId: shippingData?.couponId || null,
           discountApplied: shippingData?.discountApplied || 0,
           shippingMethodId: shippingData?.shippingMethodId || null,
           shippingCost: shippingData?.shippingCost || 0,
-          items: {
-            create: processedItems.map(item => ({
-              productId: item.id,
-              variantId: item.variantId || null,
-              quantity: item.quantity,
-              price: item.price,
-              personalization: item.personalization,
-              customImage: item.processedCustomImage
-            }))
-          }
+          address: shippingData?.address,
+          city: shippingData?.city,
+          zip: shippingData?.zip,
+          country: shippingData?.country,
+          phone: shippingData?.phone,
+          email: shippingData?.email,
+          orderNotes: shippingData?.orderNotes,
+          isGift: shippingData?.isGift || false,
+          giftMessage: shippingData?.giftMessage || null
         }
-      });
+      }))),
+      shippingData?.orderNotes || null,
+      shippingData?.couponCode || null,
+      shippingData?.discountApplied || 0,
+      shippingData?.shippingCost || 0
+    );
 
-      // Update coupon usage count if used
-      if (shippingData?.couponId) {
-        const coupon = await tx.coupon.findUnique({
-          where: { id: shippingData.couponId }
-        });
+    // Use a lookup to get the inserted ID (executeRawUnsafe returns row count not the row)
+    const acRow = await prisma.$queryRawUnsafe<{id: string}[]>(
+      `SELECT id FROM "AbandonedCheckout" WHERE "customerEmail" = $1 AND "totalAmount" = $2 ORDER BY "createdAt" DESC LIMIT 1`,
+      shippingData?.email || "",
+      totalAmount
+    );
+    const abandonedCheckoutId = acRow?.[0]?.id;
 
-        if (!coupon) {
-          throw new Error("The coupon code used for this order is invalid.");
-        }
-        if (!coupon.isActive) {
-          throw new Error("The coupon code used for this order is no longer active.");
-        }
-        if (coupon.expiresAt && new Date() > coupon.expiresAt) {
-          throw new Error("The coupon code used for this order has expired.");
-        }
-        if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-          throw new Error("This coupon has just reached its maximum usage limit!");
-        }
-
-        await tx.coupon.update({
-          where: { id: shippingData.couponId },
-          data: {
-            usedCount: {
-              increment: 1
-            }
-          }
-        });
-      }
-
-      // Decrement stock for each item
-      for (const item of items) {
-        if (item.variantId) {
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              stock: {
-                decrement: item.quantity
-              }
-            }
-          });
-        } else {
-          await tx.product.update({
-            where: { id: item.id },
-            data: {
-              stock: {
-                decrement: item.quantity
-              }
-            }
-          });
-        }
-      }
-
-      return newOrder;
-    });
+    // Fire-and-forget: send admin notification email with customer lead data
+    sendAbandonedCheckoutNotification({
+      customerName,
+      customerEmail: shippingData?.email || "",
+      customerPhone: shippingData?.phone || "",
+      shippingCity: shippingData?.city,
+      shippingAddress: shippingData?.address,
+      totalAmount,
+      items: items.map(item => ({
+        name: item.name || "Item",
+        quantity: item.quantity,
+        price: item.price,
+        personalization: item.personalization
+      }))
+    }).catch(err => console.error("Failed to send abandoned checkout notification:", err));
 
     // Generate Paymob Payment Link
     let paymentUrl = null;
     try {
       const amountCents = Math.round(totalAmount * 100);
-      
+
       const headersList = await headers();
       const host = headersList.get("host") || "localhost:3000";
       const proto = headersList.get("x-forwarded-proto") || "http";
@@ -1129,28 +1178,18 @@ export async function createOrder(userId: string | null, totalAmount: number, it
       });
 
       if (shippingData?.discountApplied && shippingData.discountApplied > 0) {
-        itemsForPaymob.push({
-          name: "Promo Discount",
-          price: -shippingData.discountApplied,
-          description: "Applied coupon discount",
-          quantity: 1,
-          image: ""
-        });
+        itemsForPaymob.push({ name: "Promo Discount", price: -shippingData.discountApplied, description: "Applied coupon discount", quantity: 1, image: "" });
+      }
+      if (shippingData?.shippingCost && shippingData.shippingCost > 0) {
+        itemsForPaymob.push({ name: "Shipping", price: shippingData.shippingCost, description: "Shipping Cost", quantity: 1, image: "" });
       }
 
-      if (shippingData?.shippingCost && shippingData.shippingCost > 0) {
-        itemsForPaymob.push({
-          name: "Shipping",
-          price: shippingData.shippingCost,
-          description: "Shipping Cost",
-          quantity: 1,
-          image: ""
-        });
-      }
+      // Use abandonedCheckoutId as the paymob special_reference so we can recover it in the webhook
+      const reference = abandonedCheckoutId ? `AC-${abandonedCheckoutId}-${Date.now()}` : `GUEST-${Date.now()}`;
 
       const clientSecret = await createPaymobIntention(
         amountCents,
-        `${order.id}-${Date.now()}`, // using unique suffixed order ID as special_reference to avoid duplicate reference collisions
+        reference,
         shippingData || {},
         itemsForPaymob
       );
@@ -1160,14 +1199,143 @@ export async function createOrder(userId: string | null, totalAmount: number, it
       }
     } catch (paymobError) {
       console.error("Paymob initialization error:", paymobError);
-      // We don't fail the order creation if Paymob fails to init, we just return the orderId
     }
 
-    return { success: true, orderId: order.id, paymentUrl };
+    // Return a fake orderId-like reference so the client flow still works (for future COD success page)
+    return { success: true, orderId: null, paymentUrl, abandonedCheckoutId };
   } catch (error: any) {
     console.error("Create order error:", error);
     return { error: error.message || "Failed to complete your pre-launch order." };
   }
+}
+
+/**
+ * Called internally from the Paymob webhook on a successful payment.
+ * Creates the real Order, decrements stock, processes financials.
+ */
+export async function createOrderFromAbandonedCheckout(abandonedCheckoutId: string, paymobReference: string) {
+  // Fetch the abandoned checkout row
+  const rows = await prisma.$queryRawUnsafe<any[]>(
+    `SELECT * FROM "AbandonedCheckout" WHERE id = $1 LIMIT 1`,
+    abandonedCheckoutId
+  );
+  const ac = rows?.[0];
+  if (!ac) {
+    console.error(`AbandonedCheckout not found for id: ${abandonedCheckoutId}`);
+    return null;
+  }
+
+  // Prevent double-processing
+  if (ac.status === "CONVERTED") {
+    console.log(`AbandonedCheckout ${abandonedCheckoutId} already converted to order.`);
+    // Return the linked order if available
+    if (ac.orderId) {
+      return await prisma.order.findUnique({
+        where: { id: ac.orderId },
+        include: {
+          user: true,
+          items: { include: { product: { include: { artisan: { include: { user: true } } } } } }
+        }
+      });
+    }
+    return null;
+  }
+
+  // The item data was stored in the first item's shippingData field (shared)
+  const storedItems: any[] = ac.items || [];
+  const shippingData = storedItems?.[0]?.shippingData || {};
+  const userId = shippingData.userId || null;
+
+  // Resolve userId by email if guest
+  let effectiveUserId = userId;
+  if (!effectiveUserId && ac.customerEmail) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: ac.customerEmail.toLowerCase().trim() },
+      select: { id: true }
+    });
+    if (existingUser) effectiveUserId = existingUser.id;
+  }
+
+  const order = await prisma.$transaction(async (tx) => {
+    // Re-check stock before decrementing
+    for (const item of storedItems) {
+      if (item.variantId) {
+        const variant = await tx.productVariant.findUnique({ where: { id: item.variantId }, select: { stock: true, name: true } });
+        if (!variant || variant.stock < item.quantity) {
+          throw new Error(`Stock unavailable for variant "${variant?.name || item.name}". Cannot fulfil order.`);
+        }
+      } else {
+        const product = await tx.product.findUnique({ where: { id: item.id }, select: { stock: true, name: true } });
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`Stock unavailable for "${product?.name || item.name}". Cannot fulfil order.`);
+        }
+      }
+    }
+
+    // Create the real Order
+    const newOrder = await tx.order.create({
+      data: {
+        userId: effectiveUserId,
+        totalAmount: ac.totalAmount,
+        status: "PROCESSING",
+        shippingAddress: shippingData.address || ac.shippingAddress,
+        shippingCity: shippingData.city || ac.shippingCity,
+        shippingZip: shippingData.zip || null,
+        shippingCountry: shippingData.country || "Egypt",
+        clientPhone: shippingData.phone || ac.customerPhone,
+        clientEmail: shippingData.email || ac.customerEmail,
+        orderNotes: shippingData.orderNotes || ac.orderNotes,
+        isGift: shippingData.isGift || false,
+        giftMessage: shippingData.giftMessage || null,
+        couponId: shippingData.couponId || null,
+        discountApplied: shippingData.discountApplied || 0,
+        shippingMethodId: shippingData.shippingMethodId || null,
+        shippingCost: shippingData.shippingCost || 0,
+        items: {
+          create: storedItems.map((item: any) => ({
+            productId: item.id,
+            variantId: item.variantId || null,
+            quantity: item.quantity,
+            price: item.price,
+            personalization: item.personalization || null,
+            customImage: item.customImage || null
+          }))
+        }
+      },
+      include: {
+        user: true,
+        items: { include: { product: { include: { artisan: { include: { user: true } } } } } }
+      }
+    });
+
+    // Validate & increment coupon usage
+    if (shippingData.couponId) {
+      const coupon = await tx.coupon.findUnique({ where: { id: shippingData.couponId } });
+      if (coupon && coupon.isActive) {
+        await tx.coupon.update({ where: { id: shippingData.couponId }, data: { usedCount: { increment: 1 } } });
+      }
+    }
+
+    // Decrement stock
+    for (const item of storedItems) {
+      if (item.variantId) {
+        await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { decrement: item.quantity } } });
+      } else {
+        await tx.product.update({ where: { id: item.id }, data: { stock: { decrement: item.quantity } } });
+      }
+    }
+
+    // Mark abandoned checkout as CONVERTED
+    await tx.$executeRawUnsafe(
+      `UPDATE "AbandonedCheckout" SET status = 'CONVERTED', "orderId" = $1, "updatedAt" = NOW() WHERE id = $2`,
+      newOrder.id,
+      abandonedCheckoutId
+    );
+
+    return newOrder;
+  });
+
+  return order;
 }
 
 export async function retryPaymentAction(orderId: string) {

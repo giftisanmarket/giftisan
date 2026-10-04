@@ -1523,3 +1523,83 @@ export const sendRefundResolvedEmail = async ({
   });
 };
 
+export const sendAbandonedCheckoutNotification = async (data: {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingCity?: string;
+  shippingAddress?: string;
+  totalAmount: number;
+  items: Array<{ name: string; quantity: number; price: number; personalization?: string }>;
+}) => {
+  const subject = `[Lead / سلة متروكة] New checkout: ${data.customerName} (${data.customerPhone})`;
+
+  const itemsHtml = data.items.map(item => `
+    <li style="margin-bottom: 8px; font-size: 13px; color: #334155;">
+      <strong>${item.name}</strong> x ${item.quantity} — ${item.price * item.quantity} EGP
+      ${item.personalization ? `<br/><span style="font-size: 11px; color: #64748b;">Note: ${item.personalization}</span>` : ''}
+    </li>
+  `).join('');
+
+  const cleanPhone = data.customerPhone.replace(/[^0-9]/g, '');
+  const waPhone = cleanPhone.startsWith('0') ? `2${cleanPhone}` : cleanPhone;
+
+  const content = `
+    <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 8px 0; color: #92400e; font-size: 16px;">⚠️ بيانات عميل لم يكتمل دفعه (Abandoned Checkout Lead)</h3>
+      <p style="margin: 0; color: #b45309; font-size: 13px;">قام عميل ببدء إجراءات الدفع ولكن لم يتم تأكيد السداد بعد. يمكنك التواصل معه هاتفياً أو عبر واتساب لمساعدته في إتمام الطلب.</p>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+      <tr>
+        <td style="padding: 8px 0; color: #64748b; width: 140px;">الاسم / Name:</td>
+        <td style="padding: 8px 0; font-weight: bold; color: #0f172a;">${data.customerName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #64748b;">الهاتف / Phone:</td>
+        <td style="padding: 8px 0; font-weight: bold; color: #0f172a;">
+          <a href="tel:${data.customerPhone}" style="color: #047857; text-decoration: none; margin-inline-end: 12px;">📞 ${data.customerPhone}</a>
+          <a href="https://wa.me/${waPhone}" style="color: #059669; text-decoration: none; font-weight: bold;">💬 WhatsApp</a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #64748b;">البريد / Email:</td>
+        <td style="padding: 8px 0; color: #0f172a;"><a href="mailto:${data.customerEmail}" style="color: #0284c7; text-decoration: none;">${data.customerEmail}</a></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #64748b;">المحافظة / City:</td>
+        <td style="padding: 8px 0; color: #0f172a;">${data.shippingCity || 'N/A'}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #64748b;">العنوان / Address:</td>
+        <td style="padding: 8px 0; color: #0f172a;">${data.shippingAddress || 'N/A'}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #64748b;">إجمالي السلة / Total:</td>
+        <td style="padding: 8px 0; font-weight: 800; color: #064e3b; font-size: 16px;">${data.totalAmount} EGP</td>
+      </tr>
+    </table>
+
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">المنتجات المطلوبة / Items in Cart:</h4>
+      <ul style="margin: 0; padding-inline-start: 20px;">
+        ${itemsHtml}
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${BASE_URL}/admin/orders" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 13px; display: inline-block;">
+        عرض السلات المتروكة في لوحة الإدارة / View in Admin
+      </a>
+    </div>
+  `;
+
+  return sendOperationalEmail({
+    from: SENDER_SUPPORT,
+    replyTo: data.customerEmail || SUPPORT_INBOX,
+    to: SUPPORT_INBOX,
+    subject,
+    html: wrapEmail(content, 'ar'),
+  });
+};
+

@@ -528,3 +528,29 @@ model PlatformExpense {
   @@index([createdById])
 }
 
+model AbandonedCheckout {
+  id              String   @id @default(cuid())
+  orderId         String?  @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String?  @db.Text
+  shippingCity    String?
+  totalAmount     Float
+  items           Json
+  orderNotes      String?  @db.Text
+  couponCode      String?
+  discountApplied Float?   @default(0)
+  shippingCost    Float?   @default(0)
+  status          String   @default("ABANDONED") // "ABANDONED", "FAILED_PAYMENT", "CONVERTED"
+  isContacted     Boolean  @default(false)
+  adminNotes      String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([customerEmail])
+  @@index([customerPhone])
+  @@index([createdAt])
+  @@index([status])
+}
+

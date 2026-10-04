@@ -277,9 +277,11 @@ export function CheckoutClient({ dict }: { dict: any }) {
       address: fullAddressForOrder,
       orderNotes: notesWithPayment,
       couponId: ENABLE_COUPONS && APPLY_COUPON_DISCOUNTS && appliedCoupon ? appliedCoupon.id : null,
+      couponCode: ENABLE_COUPONS && appliedCoupon ? appliedCoupon.code : null,
       discountApplied: discountValue,
       shippingMethodId: selectedMethod?.id,
-      shippingCost: shippingCost
+      shippingCost: shippingCost,
+      paymentMethod // ← pass payment method so server knows which flow to use
     });
 
     if (res.success) {
@@ -302,9 +304,14 @@ export function CheckoutClient({ dict }: { dict: any }) {
       setIsRedirecting(true);
       clearCart();
       if (res.paymentUrl && paymentMethod === 'paymob') {
+        // Paymob: redirect to payment gateway (no order yet — webhook will create it on success)
         window.location.href = res.paymentUrl;
-      } else {
+      } else if (res.orderId) {
+        // COD: order already created, go to success page
         router.push(`/${lang}/checkout/success?orderId=${res.orderId}`);
+      } else {
+        // Fallback: go to success page without orderId
+        router.push(`/${lang}/checkout/success`);
       }
     } else {
       setError(res.error || (isAr ? "حدث خطأ أثناء معالجة الطلب." : "An error occurred during checkout."));

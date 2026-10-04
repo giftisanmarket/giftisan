@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { PAYMOB_HMAC } from "@/lib/paymob";
 import { sendOrderNotification, sendBuyerOrderReceiptEmail } from "@/lib/mail";
+import { createOrderFromAbandonedCheckout } from "@/lib/actions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const hmacReceived = req.nextUrl.searchParams.get("hmac");
     const isProd = process.env.NODE_ENV === "production";
-    
+
     if (PAYMOB_HMAC) {
       if (!hmacReceived) {
         console.error("Paymob Webhook HMAC missing");
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
       if (!obj) {
         return NextResponse.json({ error: "Invalid payload: Missing obj" }, { status: 400 });
       }
-      
+
       const fieldsToHash = [
         obj.amount_cents,
         obj.created_at,
@@ -61,90 +62,83 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const rawOrderId = obj.order.merchant_order_id;
-    const orderId = typeof rawOrderId === "string" && rawOrderId.includes("-") 
-      ? rawOrderId.split("-")[0] 
-      : rawOrderId;
+    const rawReference = obj.order.merchant_order_id as string;
     const isSuccess = obj.success === true && obj.pending === false;
 
+    // ── Parse the reference to determine if this is an AbandonedCheckout-based payment ──
+    // New format:  AC-<abandonedCheckoutId>-<timestamp>
+    // Legacy format: <orderId>-<timestamp>  (from older PENDING order flow)
+    const isAbandonedCheckoutRef = rawReference.startsWith("AC-");
+
     if (isSuccess) {
-      // Success flow: mark as PROCESSING and notify artisans
-      const order = await prisma.order.findUnique({
-        where: { id: orderId },
-        include: {
-          user: true,
-          items: {
-            include: {
-              product: {
-                include: {
-                  artisan: {
-                    include: {
-                      user: true
-                    }
-                  }
-                }
-              }
-            }
-          }
+      if (isAbandonedCheckoutRef) {
+        // ── New flow: create real Order from AbandonedCheckout ──
+        const abandonedCheckoutId = rawReference.replace(/^AC-/, "").split("-").slice(0, -1).join("-");
+
+        console.log(`Paymob success webhook: Creating order from AbandonedCheckout ${abandonedCheckoutId}`);
+
+        let order: any = null;
+        try {
+          order = await createOrderFromAbandonedCheckout(abandonedCheckoutId, rawReference);
+        } catch (err: any) {
+          console.error(`Failed to create order from AbandonedCheckout ${abandonedCheckoutId}:`, err?.message);
+          // Mark as FAILED_PAYMENT even though payment succeeded — this is a rare edge case (stock ran out)
+          await prisma.$executeRawUnsafe(
+            `UPDATE "AbandonedCheckout" SET status = 'FAILED_PAYMENT', "updatedAt" = NOW() WHERE id = $1`,
+            abandonedCheckoutId
+          );
+          // Still return 200 so Paymob doesn't retry
+          return NextResponse.json({ success: true, warning: "Order creation failed after payment — manual review required." });
         }
-      });
 
-      if (order && order.status === "PENDING") {
-        await prisma.$transaction(async (tx) => {
-          // Update Order Status
-          await tx.order.update({
-            where: { id: orderId },
-            data: { status: "PROCESSING" }
-          });
+        if (!order) {
+          console.warn(`createOrderFromAbandonedCheckout returned null for ${abandonedCheckoutId}`);
+          return NextResponse.json({ success: true });
+        }
 
-          // Process ledger transactions and balances for each order item
-          for (const item of order.items) {
-            const product = item.product;
-            const artisan = product.artisan;
-            if (!artisan) continue;
+        console.log(`Order ${order.id} created from AbandonedCheckout ${abandonedCheckoutId}.`);
 
-            const itemTotal = item.price * item.quantity;
-            const commission = artisan.commissionRate ?? 0.0; // e.g. 0.15 (15%)
-            const adminShare = itemTotal * commission;
-            const artisanShare = itemTotal - adminShare;
+        // Process artisan ledger
+        try {
+          await prisma.$transaction(async (tx) => {
+            for (const item of order.items) {
+              const product = item.product;
+              const artisan = product.artisan;
+              if (!artisan) continue;
 
-            // Log the sale transaction
-            await tx.artisanTransaction.create({
-              data: {
-                artisanId: artisan.id,
-                orderId: order.id,
-                amount: artisanShare,
-                type: "SALE",
-                status: "PENDING",
-                description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
-              }
-            });
+              const itemTotal = item.price * item.quantity;
+              const commission = artisan.commissionRate ?? 0.0;
+              const adminShare = itemTotal * commission;
+              const artisanShare = itemTotal - adminShare;
 
-            // Update the artisan's balance
-            await tx.artisanBalance.upsert({
-              where: { artisanId: artisan.id },
-              update: {
-                pending: {
-                  increment: artisanShare
+              await tx.artisanTransaction.create({
+                data: {
+                  artisanId: artisan.id,
+                  orderId: order.id,
+                  amount: artisanShare,
+                  type: "SALE",
+                  status: "PENDING",
+                  description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
                 }
-              },
-              create: {
-                artisanId: artisan.id,
-                pending: artisanShare,
-                withdrawable: 0.0,
-                withdrawn: 0.0
-              }
-            });
-          }
-        });
-        console.log(`Order ${orderId} marked as PROCESSING and financial ledger updated via Paymob webhook.`);
+              });
 
-        // Send confirmation receipt to the buyer
+              await tx.artisanBalance.upsert({
+                where: { artisanId: artisan.id },
+                update: { pending: { increment: artisanShare } },
+                create: { artisanId: artisan.id, pending: artisanShare, withdrawable: 0.0, withdrawn: 0.0 }
+              });
+            }
+          });
+        } catch (ledgerErr) {
+          console.error(`Failed to update artisan ledger for order ${order.id}:`, ledgerErr);
+        }
+
+        // Send buyer receipt email
         try {
           const buyerEmail = order.clientEmail || order.user?.email;
           const buyerName = order.user?.name || "Customer";
           if (buyerEmail) {
-            const receiptItems = order.items.map(i => ({
+            const receiptItems = order.items.map((i: any) => ({
               name: i.product.name,
               quantity: i.quantity,
               price: i.price
@@ -153,17 +147,17 @@ export async function POST(req: NextRequest) {
               .catch(err => console.error(`Failed to send buyer receipt email to ${buyerEmail}:`, err));
           }
         } catch (err) {
-          console.error("Failed to process buyer receipt email inside webhook:", err);
+          console.error("Failed to send buyer receipt email:", err);
         }
 
-        // Send email notifications to artisans
+        // Send artisan notifications
         try {
-          const artisanEarnings = new Map();
-          order.items.forEach(item => {
+          const artisanEarnings = new Map<string, { name: string; email: string; total: number }>();
+          order.items.forEach((item: any) => {
             const artisan = item.product.artisan;
-            if (artisan.user.email) {
+            if (artisan?.user?.email) {
               const current = artisanEarnings.get(artisan.user.email) || {
-                name: artisan.user.name || artisan.studioName,
+                name: artisan.user.name || artisan.studioName || "Artisan",
                 email: artisan.user.email,
                 total: 0
               };
@@ -172,58 +166,155 @@ export async function POST(req: NextRequest) {
             }
           });
 
-          // Send emails
           artisanEarnings.forEach(data => {
             sendOrderNotification(data.email, data.name, order.id, data.total)
               .catch(err => console.error(`Failed to send order notification to ${data.email}:`, err));
           });
         } catch (err) {
-          console.error("Failed to process order notification emails inside webhook:", err);
+          console.error("Failed to send artisan notification emails:", err);
         }
-      } else if (order) {
-        console.log(`Order ${orderId} has status: ${order.status} (Skipped email/status update)`);
-      }
-    } else {
-      // Failure flow: payment failed or cancelled
-      const order = await prisma.order.findUnique({
-        where: { id: orderId },
-        include: { items: true }
-      });
 
-      if (order && order.status === "PENDING") {
-        await prisma.$transaction(async (tx) => {
-          // Mark order as FAILED
-          await tx.order.update({
-            where: { id: orderId },
-            data: { status: "FAILED" }
-          });
+      } else {
+        // ── Legacy flow: order already exists with PENDING status ──
+        const orderId = rawReference.includes("-") ? rawReference.split("-")[0] : rawReference;
 
-          // Restore stock
-          for (const item of order.items) {
-            if (item.variantId) {
-              await tx.productVariant.update({
-                where: { id: item.variantId },
-                data: {
-                  stock: {
-                    increment: item.quantity
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: true,
+            items: {
+              include: {
+                product: {
+                  include: {
+                    artisan: {
+                      include: { user: true }
+                    }
                   }
                 }
-              });
-            } else {
-              await tx.product.update({
-                where: { id: item.productId },
-                data: {
-                  stock: {
-                    increment: item.quantity
-                  }
-                }
-              });
+              }
             }
           }
         });
-        console.log(`Order ${orderId} payment failed. Marked as FAILED and restored stock.`);
-      } else if (order) {
-        console.log(`Order ${orderId} has status: ${order.status} (No stock restoration needed)`);
+
+        if (order && order.status === "PENDING") {
+          await prisma.$transaction(async (tx) => {
+            await tx.order.update({ where: { id: orderId }, data: { status: "PROCESSING" } });
+
+            for (const item of order.items) {
+              const product = item.product;
+              const artisan = product.artisan;
+              if (!artisan) continue;
+
+              const itemTotal = item.price * item.quantity;
+              const commission = artisan.commissionRate ?? 0.0;
+              const adminShare = itemTotal * commission;
+              const artisanShare = itemTotal - adminShare;
+
+              await tx.artisanTransaction.create({
+                data: {
+                  artisanId: artisan.id,
+                  orderId: order.id,
+                  amount: artisanShare,
+                  type: "SALE",
+                  status: "PENDING",
+                  description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
+                }
+              });
+
+              await tx.artisanBalance.upsert({
+                where: { artisanId: artisan.id },
+                update: { pending: { increment: artisanShare } },
+                create: { artisanId: artisan.id, pending: artisanShare, withdrawable: 0.0, withdrawn: 0.0 }
+              });
+            }
+          });
+
+          console.log(`[Legacy] Order ${orderId} marked as PROCESSING via Paymob webhook.`);
+
+          try {
+            const buyerEmail = order.clientEmail || order.user?.email;
+            const buyerName = order.user?.name || "Customer";
+            if (buyerEmail) {
+              const receiptItems = order.items.map(i => ({
+                name: i.product.name,
+                quantity: i.quantity,
+                price: i.price
+              }));
+              sendBuyerOrderReceiptEmail(buyerEmail, buyerName, order.id, order.totalAmount, receiptItems, order.shippingCity || undefined)
+                .catch(err => console.error(`Failed to send buyer receipt email to ${buyerEmail}:`, err));
+            }
+          } catch (err) {
+            console.error("Failed to send buyer receipt email:", err);
+          }
+
+          try {
+            const artisanEarnings = new Map<string, { name: string; email: string; total: number }>();
+            order.items.forEach(item => {
+              const artisan = item.product.artisan;
+              if (artisan.user.email) {
+                const current = artisanEarnings.get(artisan.user.email) || {
+                  name: artisan.user.name || artisan.studioName || "Artisan",
+                  email: artisan.user.email,
+                  total: 0
+                };
+                current.total += item.price * item.quantity;
+                artisanEarnings.set(artisan.user.email, current);
+              }
+            });
+
+            artisanEarnings.forEach(data => {
+              sendOrderNotification(data.email, data.name, order.id, data.total)
+                .catch(err => console.error(`Failed to send order notification to ${data.email}:`, err));
+            });
+          } catch (err) {
+            console.error("Failed to process order notification emails inside webhook:", err);
+          }
+        } else if (order) {
+          console.log(`[Legacy] Order ${orderId} has status: ${order.status} (Skipped update)`);
+        }
+      }
+
+    } else {
+      // ── Payment failed or cancelled ──
+      if (isAbandonedCheckoutRef) {
+        // New flow: just mark AbandonedCheckout as FAILED_PAYMENT — nothing to restore
+        const abandonedCheckoutId = rawReference.replace(/^AC-/, "").split("-").slice(0, -1).join("-");
+        await prisma.$executeRawUnsafe(
+          `UPDATE "AbandonedCheckout" SET status = 'FAILED_PAYMENT', "updatedAt" = NOW() WHERE id = $1 AND status = 'ABANDONED'`,
+          abandonedCheckoutId
+        );
+        console.log(`AbandonedCheckout ${abandonedCheckoutId} marked as FAILED_PAYMENT. No stock to restore.`);
+      } else {
+        // Legacy flow: restore stock for old PENDING orders
+        const orderId = rawReference.includes("-") ? rawReference.split("-")[0] : rawReference;
+
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: { items: true }
+        });
+
+        if (order && order.status === "PENDING") {
+          await prisma.$transaction(async (tx) => {
+            await tx.order.update({ where: { id: orderId }, data: { status: "FAILED" } });
+
+            for (const item of order.items) {
+              if (item.variantId) {
+                await tx.productVariant.update({
+                  where: { id: item.variantId },
+                  data: { stock: { increment: item.quantity } }
+                });
+              } else {
+                await tx.product.update({
+                  where: { id: item.productId },
+                  data: { stock: { increment: item.quantity } }
+                });
+              }
+            }
+          });
+          console.log(`[Legacy] Order ${orderId} payment failed. Marked as FAILED and restored stock.`);
+        } else if (order) {
+          console.log(`[Legacy] Order ${orderId} has status: ${order.status} (No stock restoration needed)`);
+        }
       }
     }
 
@@ -233,4 +324,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

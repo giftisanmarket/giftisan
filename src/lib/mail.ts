@@ -1588,7 +1588,7 @@ export const sendAbandonedCheckoutNotification = async (data: {
     </div>
 
     <div style="text-align: center; margin-top: 25px;">
-      <a href="${BASE_URL}/admin/orders" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 13px; display: inline-block;">
+      <a href="${BASE_URL}/admin/leads" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 13px; display: inline-block;">
         عرض السلات المتروكة في لوحة الإدارة / View in Admin
       </a>
     </div>

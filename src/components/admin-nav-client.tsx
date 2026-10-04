@@ -17,7 +17,8 @@ import {
   DollarSign,
   Truck,
   RotateCcw,
-  ReceiptText
+  ReceiptText,
+  UserRound
 } from "lucide-react";
 
 import Image from "next/image";
@@ -29,6 +30,7 @@ const getNavItems = (dict: any) => {
     { label: dict.admin.artisans_users, href: "/admin/users", icon: Users },
     { label: dict.admin.global_products, href: "/admin/products", icon: ShoppingBag },
     { label: dict.admin.site_orders, href: "/admin/orders", icon: Package },
+    { label: isAr ? "العملاء المحتملون" : "Leads", href: "/admin/leads", icon: UserRound },
     { label: dict.admin.shipping_management || (isAr ? "إدارة الشحن" : "Shipping"), href: "/admin/shipping", icon: Truck },
     { label: isAr ? "الاسترجاع والنزاعات" : "Refunds & Claims", href: "/admin/refunds", icon: RotateCcw },
     { label: isAr ? "مصاريف المنصة" : "Platform Expenses", href: "/admin/expenses", icon: ReceiptText },

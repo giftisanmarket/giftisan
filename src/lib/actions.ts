@@ -5803,6 +5803,59 @@ export async function updateProductStockAction(productId: string, newStock: numb
   }
 }
 
+// ─── ADMIN: Get Abandoned Checkouts (Leads) ──────────────────────────────────
+export async function getAbandonedCheckouts(options?: {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { leads: [], total: 0 };
+  }
 
+  const page = options?.page ?? 1;
+  const pageSize = options?.pageSize ?? 50;
+  const skip = (page - 1) * pageSize;
+  const statusFilter = options?.status;
 
+  const where = statusFilter ? { status: statusFilter } : {};
+
+  const [leads, total] = await Promise.all([
+    prisma.abandonedCheckout.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.abandonedCheckout.count({ where }),
+  ]);
+
+  return { leads, total };
+}
+
+// ─── ADMIN: Update Abandoned Checkout Lead ───────────────────────────────────
+export async function updateAbandonedCheckoutLead(
+  id: string,
+  data: { isContacted?: boolean; adminNotes?: string }
+) {
+  "use server";
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.abandonedCheckout.update({
+      where: { id },
+      data: {
+        ...(data.isContacted !== undefined && { isContacted: data.isContacted }),
+        ...(data.adminNotes !== undefined && { adminNotes: data.adminNotes }),
+      },
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update lead" };
+  }
+}
 

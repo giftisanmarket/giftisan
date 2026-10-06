@@ -141,9 +141,9 @@ export default async function RootLayout({
               ],
               "sameAs": [
                 "https://instagram.com/giftisan_eg",
-                "https://tiktok.com/@giftisan.eg",
+                "https://tiktok.com/@giftisan_eg",
                 "https://facebook.com/giftisan.eg",
-                "https://pinterest.com/giftisaneg"
+                "https://pinterest.com/giftisan_eg"
               ],
               "contactPoint": {
                 "@type": "ContactPoint",

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giftisan Merchandise Design Showcase — Enamel Pin & Artisan Notebook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #064E3B;
+      --primary-light: #0D9488;
+      --primary-dark: #032b21;
+      --accent: #D97706;
+      --accent-gold: #D4AF37;
+      --accent-brass: #C5A059;
+      --cream: #FDFCF0;
+      --cream-dark: #F3EED9;
+      --charcoal: #1F2937;
+      --muted: #6B7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #103B2F 0%, #031E17 100%);
+      color: var(--cream);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.6;
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 50px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(217, 119, 6, 0.15);
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      color: #FBBF24;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'EB Garamond', serif;
+      font-size: 3rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+      color: #FFFDF5;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    p.subtitle {
+      font-size: 1.15rem;
+      color: rgba(253, 252, 240, 0.75);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 40px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .card-header {
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: 'EB Garamond', serif;
+      font-size: 1.85rem;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-tag {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(217, 119, 6, 0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(217, 119, 6, 0.3);
+    }
+
+    .visual-stage {
+      background: #F4EFEA;
+      border-radius: 18px;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.1), 0 10px 25px rgba(0,0,0,0.3);
+      margin-bottom: 24px;
+      background-image: 
+        radial-gradient(#e0d6cb 1px, transparent 1px),
+        radial-gradient(#e0d6cb 1px, #F4EFEA 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10 10;
+    }
+
+    /* --- PIN GRAPHIC --- */
+    .pin-backing-card {
+      width: 220px;
+      height: 290px;
+      background: #FAF8F2;
+      border-radius: 8px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.08);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 16px 20px;
+      border: 1px solid #E5DFD3;
+      transform: rotate(-3deg);
+      transition: transform 0.4s ease;
+    }
+
+    .pin-backing-card:hover {
+      transform: rotate(0deg) scale(1.03);
+    }
+
+    .card-brand {
+      text-align: center;
+    }
+
+    .card-brand-logo {
+      font-family: 'EB Garamond', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.15em;
+      color: #064E3B;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .card-brand-sub {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #B45309;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .enamel-pin-unit {
+      position: relative;
+      filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.35));
+      cursor: pointer;
+    }
+
+    .pin-body {
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle at 35% 30%, #065e47, #033729);
+      border-radius: 50%;
+      border: 4px solid #C5A059;
+      box-shadow: 
+        inset 0 0 0 2px rgba(255, 235, 170, 0.4),
+        inset 0 4px 12px rgba(0,0,0,0.6),
+        0 4px 8px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .pin-rim-notch {
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(197, 160, 89, 0.7);
+      pointer-events: none;
+    }
+
+    .pin-icon {
+      width: 58px;
+      height: 58px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    .pin-bottom-card-text {
+      text-align: center;
+      border-top: 1px solid #ECE4D4;
+      padding-top: 10px;
+      width: 85%;
+    }
+
+    .pin-bottom-card-text span {
+      display: block;
+      font-size: 0.6rem;
+      color: #78716C;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+
+    /* --- NOTEBOOK GRAPHIC --- */
+    .notebook-wrap {
+      position: relative;
+      width: 230px;
+      height: 310px;
+      transform: rotate(3deg);
+      transition: transform 0.4s ease;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.25));
+    }
+
+    .notebook-wrap:hover {
+      transform: rotate(0deg) scale(1.03);
+    }
+
+    .notebook-cover {
+      width: 100%;
+      height: 100%;
+      background: #064E3B;
+      border-radius: 12px 18px 18px 12px;
+      position: relative;
+      box-shadow: 
+        inset 4px 0 8px rgba(0,0,0,0.4),
+        inset -2px 0 6px rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-left: 8px solid #043628;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 8px 8px;
+    }
+
+    .notebook-pages-edge {
+      position: absolute;
+      right: -8px;
+      top: 6px;
+      bottom: 6px;
+      width: 8px;
+      background: repeating-linear-gradient(
+        to bottom,
+        #FDFCF0,
+        #FDFCF0 2px,
+        #EAE5D2 2px,
+        #EAE5D2 4px
+      );
+      border-radius: 0 4px 4px 0;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .notebook-ribbon {
+      position: absolute;
+      bottom: -22px;
+      left: 60px;
+      width: 14px;
+      height: 50px;
+      background: linear-gradient(135deg, #D97706, #B45309);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+      box-shadow: 2px 6px 10px rgba(0,0,0,0.4);
+      z-index: 5;
+    }
+
+    .notebook-band {
+      position: absolute;
+      right: 24px;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+      background: #043b2c;
+      box-shadow: inset 1px 0 2px rgba(255,255,255,0.1), 2px 0 5px rgba(0,0,0,0.3);
+      border-radius: 2px;
+    }
+
+    .notebook-deboss-mark {
+      width: 90px;
+      height: 90px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .notebook-deboss-mark img {
+      width: 50px;
+      height: 50px;
+      opacity: 0.9;
+      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
+    }
+
+    .notebook-title {
+      font-family: 'EB Garamond', serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.25em;
+      color: #E6CA65;
+      text-transform: uppercase;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .notebook-subtitle {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(253, 252, 240, 0.6);
+      margin-top: 4px;
+    }
+
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: auto;
+    }
+
+    .specs-table tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .specs-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .specs-table td {
+      padding: 10px 0;
+      font-size: 0.88rem;
+    }
+
+    .specs-table td.label {
+      color: rgba(253, 252, 240, 0.55);
+      width: 38%;
+    }
+
+    .specs-table td.val {
+      color: #FFFDF5;
+      font-weight: 500;
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.4);
+      display: inline-block;
+    }
+
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: rgba(253, 252, 240, 0.45);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Giftisan Brand Merch Specification</div>
+    <h1>The Artisan Collection</h1>
+    <p class="subtitle">Custom enamel collector pin and smyth-sewn linen notebook created exclusively with Giftisan’s heritage Egyptian identity.</p>
+  </header>
+
+  <div class="showcase-grid">
+
+    <!-- CARD 1: ENAMEL PIN -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-tag">Collector Accessory</span>
+        <h2 class="card-title">Artisan Enamel Pin</h2>
+      </div>
+
+      <div class="visual-stage">
+        <div class="pin-backing-card">
+          <div class="card-brand">
+            <div class="card-brand-logo">Giftisan</div>
+            <div class="card-brand-sub">Handcrafted Heritage</div>
+          </div>
+
+          <div class="enamel-pin-unit">
+            <div class="pin-body">
+              <div class="pin-rim-notch"></div>
+              <img src="/logo-transparent.svg" alt="Giftisan Artisan Icon" class="pin-icon" />
+            </div>
+          </div>
+
+          <div class="pin-bottom-card-text">
+            <span>LIMITED EDITION • 100% HANDMADE SUPPORT</span>
+            <span style="margin-top: 2px; color: #064E3B; font-weight: 600;">GIFTISAN.COM</span>
+          </div>
+        </div>
+      </div>
+
+      <table class="specs-table">
+        <tr>
+          <td class="label">Dimensions</td>
+          <td class="val">32 mm × 32 mm (1.8 mm thick)</td>
+        </tr>
+        <tr>
+          <td class="label">Craft & Metal</td>
+          <td class="val">Hard Enamel (Cloisonné) with Antique Brushed Brass (#C5A059)</td>
+        </tr>
+        <tr>
+          <td class="label">Enamel Colors</td>
+          <td class="val">
+            <div class="color-swatches">
+              <span class="swatch" style="background:#064E3B;" title="Forest Green #064E3B"></span>
+              <span class="swatch" style="background:#FDFCF0;" title="Cream #FDFCF0"></span>
+              <span class="swatch" style="background:#D97706;" title="Warm Amber #D97706"></span>
+              Forest Green, Cream & Amber Gold
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Clutch & Back</td>
+          <td class="val">Dual green rubber clutches; embossed "Giftisan • Egypt" stamp</td>
+        </tr>
+        <tr>
+          <td class="label">Backing Card</td>
+          <td class="val">400gsm Cotton-Linen textured cream card with gold foil accent</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- CARD 2: NOTEBOOK -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-tag">Artisan Stationery</span>
+        <h2 class="card-title">The Maker's Notebook</h2>
+      </div>
+
+      <div class="visual-stage">
+        <div class="notebook-wrap">
+          <div class="notebook-cover">
+            <div class="notebook-band"></div>
+            <div class="notebook-ribbon"></div>
+            <div class="notebook-pages-edge"></div>
+
+            <div class="notebook-deboss-mark">
+              <img src="/logo-transparent.svg" alt="Giftisan Icon" />
+            </div>
+            <div class="notebook-title">Giftisan</div>
+            <div class="notebook-subtitle">The Artisan Journal</div>
+          </div>
+        </div>
+      </div>
+
+      <table class="specs-table">
+        <tr>
+          <td class="label">Format & Size</td>
+          <td class="val">A5 (148 × 210 mm) Hardcover</td>
+        </tr>
+        <tr>
+          <td class="label">Cover Material</td>
+          <td class="val">Forest Green (#064E3B) Buckram bookcloth linen finish</td>
+        </tr>
+        <tr>
+          <td class="label">Foil & Stamping</td>
+          <td class="val">Deep blind debossed insignia + Matte Gold foil typography</td>
+        </tr>
+        <tr>
+          <td class="label">Interior Paper</td>
+          <td class="val">192 pages (100gsm) warm cream woodfree, 5mm subtle dot grid</td>
+        </tr>
+        <tr>
+          <td class="label">Accents</td>
+          <td class="val">Amber Gold grosgrain ribbon marker + Expandable inner back pocket</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <footer>
+    Giftisan Identity System • Exclusively Egyptian Handmade • 2026 Production Spec
+  </footer>
+
+</body>
+</html>

@@ -213,10 +213,10 @@ export function Footer({ dict }: FooterProps) {
 
               {/* TikTok */}
               <a
-                href="https://tiktok.com/@giftisan.eg"
+                href="https://tiktok.com/@giftisan_eg"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="TikTok @giftisan.eg"
+                aria-label="TikTok @giftisan_eg"
                 className="text-charcoal/70 hover:text-accent transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -239,10 +239,10 @@ export function Footer({ dict }: FooterProps) {
 
               {/* Pinterest */}
               <a
-                href="https://pinterest.com/giftisaneg"
+                href="https://pinterest.com/giftisan_eg"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Pinterest giftisaneg"
+                aria-label="Pinterest @giftisan_eg"
                 className="text-charcoal/70 hover:text-accent transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

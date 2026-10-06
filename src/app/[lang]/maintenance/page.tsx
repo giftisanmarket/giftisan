@@ -280,8 +280,8 @@ export default function MaintenancePage() {
               {[
                 { icon: FaInstagram, href: "https://www.instagram.com/giftisan_eg/" },
                 { icon: FaFacebook, href: "https://www.facebook.com/giftisan.eg" },
-                { icon: FaTiktok, href: "https://www.tiktok.com/@giftisan.eg" },
-                { icon: FaPinterest, href: "https://www.pinterest.com/giftisaneg" },
+                { icon: FaTiktok, href: "https://www.tiktok.com/@giftisan_eg" },
+                { icon: FaPinterest, href: "https://www.pinterest.com/giftisan_eg" },
               ].map((social, i) => (
                 <a
                   key={i}

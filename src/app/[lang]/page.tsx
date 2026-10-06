@@ -21,6 +21,13 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
+const CURATED_FEATURED_ARTISAN_SLUGS = [
+  "ur-own-flower",
+  "gl-crochet-m4of",
+  "-ev9y",
+  "charm-threads-0e2u"
+];
+
 const productSelect = {
   id: true,
   name: true,
@@ -209,16 +216,37 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       ]
     }),
 
-    // 7. Featured Master Artisans (top 4 approved)
+    // 7. Featured Master Artisans (curated top Egyptian makers, including Charm Threads)
     prisma.artisanProfile.findMany({
       where: {
-        status: "APPROVED"
+        status: "APPROVED",
+        slug: { in: CURATED_FEATURED_ARTISAN_SLUGS }
       },
       select: artisanSelect,
-      take: 4,
-      orderBy: {
-        createdAt: "desc"
+    }).then(async (curated) => {
+      // Sort according to curated list order
+      curated.sort((a, b) => {
+        const idxA = CURATED_FEATURED_ARTISAN_SLUGS.indexOf(a.slug || "");
+        const idxB = CURATED_FEATURED_ARTISAN_SLUGS.indexOf(b.slug || "");
+        return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+      });
+
+      // If less than 4 curated are available, backfill with other approved artisans (excluding moon-by-alila)
+      if (curated.length < 4) {
+        const existingIds = curated.map((c) => c.id);
+        const additional = await prisma.artisanProfile.findMany({
+          where: {
+            status: "APPROVED",
+            id: { notIn: existingIds },
+            slug: { not: "moon-by-alila-wmp4" }
+          },
+          select: artisanSelect,
+          take: 4 - curated.length,
+          orderBy: { createdAt: "desc" }
+        });
+        return [...curated, ...additional];
       }
+      return curated;
     }),
 
     // 8. Artisan Count

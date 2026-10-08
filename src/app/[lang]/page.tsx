@@ -48,6 +48,7 @@ const productSelect = {
       studioName: true,
       slug: true,
       avatar: true,
+      status: true,
       user: {
         select: {
           name: true
@@ -136,7 +137,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     // 1. Top Trending & Best Finds (10 items)
     prisma.product.findMany({
       where: {
-        status: "APPROVED"
+        status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        }
       },
       select: productSelect,
       take: 10,
@@ -150,6 +154,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     prisma.product.findMany({
       where: {
         status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
         category: { in: ["bags-and-purses", "accessories"], mode: "insensitive" }
       },
       select: productSelect,
@@ -164,6 +171,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     prisma.product.findMany({
       where: {
         status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
         category: { in: ["home-and-living", "woodwork", "ceramics"], mode: "insensitive" }
       },
       select: productSelect,
@@ -178,6 +188,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     prisma.product.findMany({
       where: {
         status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
         category: { in: ["jewelry", "accessories"], mode: "insensitive" }
       },
       select: productSelect,
@@ -192,6 +205,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     prisma.product.findMany({
       where: {
         status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
         category: { in: ["clothing", "fashion", "textiles", "wearables"], mode: "insensitive" }
       },
       select: productSelect,
@@ -206,6 +222,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     prisma.product.findMany({
       where: {
         status: "APPROVED",
+        artisan: {
+          status: "APPROVED"
+        },
         category: { in: ["gifts-sets", "gifts", "toys-and-games", "weddings"], mode: "insensitive" }
       },
       select: productSelect,

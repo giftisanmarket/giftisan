@@ -33,6 +33,7 @@ interface InventoryTabProps {
   products: any[];
   dict: any;
   isAdminPreview: boolean;
+  isShopApproved?: boolean;
   setSelectedProductForEdit: (product: any) => void;
   setIsEditModalOpen: (isOpen: boolean) => void;
   setProductToDelete: (productId: string) => void;
@@ -46,6 +47,7 @@ export function InventoryTab({
   products,
   dict,
   isAdminPreview,
+  isShopApproved = true,
   setSelectedProductForEdit,
   setIsEditModalOpen,
   setProductToDelete,
@@ -149,6 +151,18 @@ export function InventoryTab({
             </div>
           )}
         </div>
+
+        {/* Notice for unapproved shops */}
+        {!isShopApproved && (
+          <div className="mb-6 p-4 md:p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-800 text-xs md:text-sm font-bold shadow-sm">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <span>
+              {isAr
+                ? "تنبيه: متجرك قيد المراجعة حالياً. حتى لو تمت الموافقة على منتجاتك، فلن تظهر للعملاء في الموقع أو في نتائج البحث حتى تتم الموافقة على المتجر من قبل الإدارة."
+                : "Notice: Your shop is currently under review. Even though products may be approved, they will not be visible to clients on the website or indexed by search engines until your shop is approved by admin."}
+            </span>
+          </div>
+        )}
 
         {/* Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">

@@ -74,17 +74,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, lang } = await params;
   const product = await getProduct(slug);
 
-  if (!product) return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
+  if (!product) return { 
+    title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found",
+    robots: { index: false, follow: false }
+  };
 
-  const isVisible = (product.status === "APPROVED" || product.status === "PENDING") && 
-                    (product.artisan.status === "APPROVED" || product.artisan.status === "PENDING");
+  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
   
-  if (!isVisible) {
+  if (!isApproved) {
     const session = await auth();
     const isAdmin = session?.user?.role === "ADMIN";
     const isOwner = session?.user?.id === product.artisan.userId;
     if (!isAdmin && !isOwner) {
-      return { title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found" };
+      return { 
+        title: lang === 'ar' ? "المنتج غير موجود" : "Product Not Found",
+        robots: { index: false, follow: false }
+      };
     }
   }
 
@@ -101,6 +106,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: product.name,
     description: description,
     keywords: [product.name, product.category, lang === 'ar' ? "صنع يدوياً" : "Handcrafted", SITE_NAME, lang === 'ar' ? "مصر" : "Egypt"],
+    robots: isApproved ? { index: true, follow: true } : { index: false, follow: false },
     alternates: {
       canonical: `${SITE_URL}/${lang}/products/${product.slug || product.id}`,
       languages: {
@@ -141,10 +147,9 @@ export default async function ProductPage({ params }: Props) {
   const session = await auth();
   const isAdmin = session?.user?.role === "ADMIN";
   const isOwner = session?.user?.id === product.artisan.userId;
-  const isVisible = (product.status === "APPROVED" || product.status === "PENDING") && 
-                    (product.artisan.status === "APPROVED" || product.artisan.status === "PENDING");
+  const isApproved = product.status === "APPROVED" && product.artisan.status === "APPROVED";
   
-  if (!isVisible && !isAdmin && !isOwner) {
+  if (!isApproved && !isAdmin && !isOwner) {
     notFound();
   }
 
@@ -272,14 +277,18 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+      {isApproved && (
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        </>
+      )}
       <ProductClient 
         product={sanitizedProduct as any} 
         relatedProducts={sanitizedRelated} 

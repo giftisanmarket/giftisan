@@ -200,6 +200,14 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
   };
 
   const executeAddToCart = (skipOpen = false) => {
+    if (product.status !== "APPROVED" || product.artisan?.status !== "APPROVED") {
+      toast.error(
+        lang === "ar"
+          ? "هذا المنتج في وضع المعاينة فقط ولا يمكن شراؤه حتى تتم الموافقة عليه وعلى المتجر."
+          : "This product is in preview mode only and cannot be ordered until both product and shop are approved."
+      );
+      return false;
+    }
     if (product.canPersonalize && !personalization.trim()) {
       setPersonalizationError(true);
       personalizationRef.current?.focus();
@@ -235,8 +243,44 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
       <Navbar dict={dict} />
 
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-12">
-        {/* Status Banner for Owner/Admin */}
-        {product.status !== "APPROVED" && (isAdmin || isOwner) && (
+        {/* Status Banner for Shop Not Approved */}
+        {product.artisan?.status !== "APPROVED" && (isAdmin || isOwner) && (
+          <div className={cn(
+            "mb-8 md:mb-12 p-6 md:p-8 rounded-[2rem] border-2 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-8",
+            product.artisan?.status === "REJECTED" ? "bg-red-50 border-red-100" : "bg-amber-50 border-amber-100"
+          )}>
+            <div className={cn(
+              "w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shrink-0 shadow-lg",
+              product.artisan?.status === "REJECTED" ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+            )}>
+              {product.artisan?.status === "REJECTED" ? <XCircle className="w-6 h-6 md:w-8 md:h-8" /> : <Clock className="w-6 h-6 md:w-8 md:h-8" />}
+            </div>
+            <div className="flex-1 text-center md:text-start">
+              <h3 className={cn(
+                "text-xl md:text-2xl font-heading font-black mb-2 tracking-tight",
+                product.artisan?.status === "REJECTED" ? "text-red-700" : "text-amber-700"
+              )}>
+                {product.artisan?.status === "REJECTED" 
+                  ? (lang === 'ar' ? "متجر الحرفي غير مقبول" : "Shop Not Approved") 
+                  : (lang === 'ar' ? "متجر الحرفي قيد المراجعة" : "Shop Under Review")}
+              </h3>
+              <p className="text-sm md:text-base text-charcoal/60 leading-relaxed font-bold">
+                {product.artisan?.status === "REJECTED" 
+                  ? (lang === 'ar' ? "تم رفض متجر الحرفي. لن يظهر هذا المنتج للعملاء في الموقع أو محركات البحث حتى تتم الموافقة على المتجر." : "The artisan shop has been rejected. This product will not be visible to clients or indexed by search engines until the shop is approved.")
+                  : (lang === 'ar' ? "متجر الحرفي قيد المراجعة حالياً. لن يظهر هذا المنتج للعملاء في الموقع أو محركات البحث حتى تتم الموافقة على المتجر." : "The artisan shop is currently under review. This product will remain hidden from clients and search engines until the shop is approved.")
+                }
+              </p>
+            </div>
+            {isAdmin && (
+               <Link href="/admin/users" className="px-8 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl hover:bg-primary-light transition-all">
+                 {dict.admin.overview}
+               </Link>
+            )}
+          </div>
+        )}
+
+        {/* Status Banner for Product Status (when shop is approved but product is pending/rejected) */}
+        {product.status !== "APPROVED" && product.artisan?.status === "APPROVED" && (isAdmin || isOwner) && (
           <div className={cn(
             "mb-8 md:mb-12 p-6 md:p-8 rounded-[2rem] border-2 shadow-sm flex flex-col md:flex-row items-center gap-6 md:gap-8",
             product.status === "REJECTED" ? "bg-red-50 border-red-100" : "bg-amber-50 border-amber-100"

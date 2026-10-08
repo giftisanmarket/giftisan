@@ -550,6 +550,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     dict={dict}
                     lang={lang}
                     isAdminPreview={isAdminPreview}
+                    isShopApproved={artisan.status === "APPROVED"}
                     setSelectedProductForEdit={setSelectedProductForEdit}
                     setIsEditModalOpen={setIsEditModalOpen}
                     setProductToDelete={setProductToDelete}

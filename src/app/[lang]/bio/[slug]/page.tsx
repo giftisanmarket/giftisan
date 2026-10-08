@@ -102,6 +102,7 @@ interface Props {
 }
 
 import { SITE_URL, SITE_NAME } from "@/lib/constants";
+import { auth } from "@/auth";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, lang } = await params;
@@ -110,7 +111,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!artisan) {
     return {
       title: "Artisan Not Found | Giftisan Bio",
+      robots: { index: false, follow: false },
     };
+  }
+
+  const isApproved = artisan.status === "APPROVED";
+  if (!isApproved) {
+    const session = await auth();
+    const isAdmin = session?.user?.role === "ADMIN";
+    const isOwner = session?.user?.id === artisan.userId;
+    if (!isAdmin && !isOwner) {
+      return {
+        title: "Artisan Not Found | Giftisan Bio",
+        robots: { index: false, follow: false },
+      };
+    }
   }
 
   const name = artisan.studioName || artisan.user.name || "Artisan";
@@ -127,6 +142,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} | Giftisan Bio`,
     description: bioDesc.slice(0, 160),
+    robots: isApproved ? { index: true, follow: true } : { index: false, follow: false },
     alternates: {
       canonical: `${SITE_URL}/${lang}/bio/${slug}`,
     },
@@ -158,6 +174,15 @@ export default async function BioPage({ params }: Props) {
 
   if (!artisan) {
     notFound();
+  }
+
+  if (artisan.status !== "APPROVED") {
+    const session = await auth();
+    const isAdmin = session?.user?.role === "ADMIN";
+    const isOwner = session?.user?.id === artisan.userId;
+    if (!isAdmin && !isOwner) {
+      notFound();
+    }
   }
 
   return <ArtisanBioView artisan={artisan as any} lang={lang} />;

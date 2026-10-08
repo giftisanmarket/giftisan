@@ -887,8 +887,8 @@ export async function getProductBySlug(slug: string) {
     // Check if product exists
     if (!product) return null;
 
-    const isPublic = product.status === "APPROVED" || product.status === "PENDING";
-    const isArtisanPublic = product.artisan.status === "APPROVED" || product.artisan.status === "PENDING";
+    const isPublic = product.status === "APPROVED";
+    const isArtisanPublic = product.artisan.status === "APPROVED";
 
     if (!isPublic || !isArtisanPublic) {
       const session = await auth();
@@ -959,7 +959,7 @@ export async function getUserFavorites(userId: string) {
       }
     });
     return favorites
-      .filter(f => f.product && f.product.status === "APPROVED")
+      .filter(f => f.product && f.product.status === "APPROVED" && f.product.artisan?.status === "APPROVED")
       .map(f => ({
         ...f.product,
         images: Array.isArray(f.product.images) ? f.product.images.map((img: string) => (img?.length || 0) > 300000 ? "" : img) : [],
@@ -1017,23 +1017,47 @@ export async function createOrder(userId: string | null, totalAmount: number, it
       processedCustomImage: item.customImage ? await processImage(item.customImage) : null
     })));
 
-    // 🛡️ Final Inventory Guard: Verify stock for all items before processing (read-only check)
+    // 🛡️ Final Inventory Guard: Verify stock and shop approval for all items before processing (read-only check)
     for (const item of processedItems) {
       if (item.variantId) {
         const variant = await prisma.productVariant.findUnique({
           where: { id: item.variantId },
-          select: { stock: true, name: true }
+          select: { 
+            stock: true, 
+            name: true,
+            product: {
+              select: {
+                status: true,
+                artisan: {
+                  select: { status: true }
+                }
+              }
+            }
+          }
         });
         if (!variant || variant.stock < item.quantity) {
           throw new Error(`The variation "${variant?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
         }
+        if (variant.product.status !== "APPROVED" || variant.product.artisan?.status !== "APPROVED") {
+          throw new Error(`The item "${variant.name || 'One of your items'}" is currently unavailable.`);
+        }
       } else {
         const product = await prisma.product.findUnique({
           where: { id: item.id },
-          select: { stock: true, name: true }
+          select: { 
+            stock: true, 
+            name: true,
+            status: true,
+            artisan: {
+              select: { status: true }
+            }
+          }
         });
         if (!product || product.stock < item.quantity) {
           throw new Error(`The product "${product?.name || 'One of your items'}" just sold out! Please remove it from your cart to proceed.`);
+        }
+        if (product.status !== "APPROVED" || product.artisan?.status !== "APPROVED") {
+          throw new Error(`The product "${product.name || 'One of your items'}" is currently unavailable.`);
         }
       }
     }
@@ -3508,6 +3532,8 @@ export async function updateArtisanStatus(artisanId: string, status: "PENDING" |
     revalidatePath("/admin/users");
     revalidatePath("/");
     revalidatePath("/artisans");
+    revalidatePath("/categories");
+    revalidatePath("/search");
     return { success: true };
   } catch (error) {
     console.error("Update status error:", error);

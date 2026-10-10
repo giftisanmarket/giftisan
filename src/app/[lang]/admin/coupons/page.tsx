@@ -25,8 +25,19 @@ export default async function AdminCouponsPage({ params }: { params: Promise<{ l
 
   const dict = (await getDictionary(lang as any)) as any;
 
-  // Fetch all coupons from the database
+  // Fetch all coupons from the database with sponsorship relation
   const coupons = await prisma.coupon.findMany({
+    include: {
+      artisan: {
+        select: {
+          id: true,
+          studioName: true,
+          user: {
+            select: { name: true }
+          }
+        }
+      }
+    },
     orderBy: { createdAt: "desc" }
   });
 
@@ -40,6 +51,10 @@ export default async function AdminCouponsPage({ params }: { params: Promise<{ l
   // Convert Date fields to ISO strings safely for Client Component serialization
   const serializedCoupons = coupons.map(c => ({
     ...c,
+    artisan: c.artisan ? {
+      id: c.artisan.id,
+      studioName: c.artisan.studioName || c.artisan.user?.name || "Artisan Shop",
+    } : null,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     expiresAt: c.expiresAt ? c.expiresAt.toISOString() : null

@@ -282,7 +282,18 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
                           <Tag className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="font-mono text-xs md:text-sm font-black text-primary uppercase tracking-wide leading-none">{coupon.code}</p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-mono text-xs md:text-sm font-black text-primary uppercase tracking-wide leading-none">{coupon.code}</p>
+                            {coupon.artisan ? (
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                                {isAr ? `متجر: ${coupon.artisan.studioName}` : `Shop: ${coupon.artisan.studioName}`}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                                {isAr ? "تمويل المنصة" : "Platform Promo"}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[8px] md:text-[9px] text-charcoal/30 font-bold uppercase tracking-widest mt-1">
                             {new Date(coupon.createdAt).toLocaleDateString()}
                           </p>

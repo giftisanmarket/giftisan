@@ -12,7 +12,7 @@ import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendV
 import { generateVerificationToken, generatePasswordResetToken } from "@/lib/tokens";
 import { cookies, headers } from "next/headers";
 import { createPaymobIntention, PAYMOB_PUBLIC_KEY } from "@/lib/paymob";
-import { IS_CHAT_LOCKED } from "@/lib/constants";
+import { IS_CHAT_LOCKED, MIN_PAYOUT_AMOUNT } from "@/lib/constants";
 import { sendDiscordInquiryNotification } from "@/lib/discord";
 import { createBostaDelivery, getBostaAWB, getBostaTracking } from "@/lib/bosta";
 import { matchEgyptGovernorate } from "@/lib/egypt-governorates";
@@ -1010,6 +1010,117 @@ export async function getProductsByIds(ids: string[]) {
   }
 }
 
+interface OrderLedgerItem {
+  productId: string;
+  name?: string;
+  price: number;
+  quantity: number;
+}
+
+/**
+ * Centrally records artisan sales transactions and increments pending escrow balances.
+ * Fully coupon-aware:
+ * - If coupon is artisan-specific (artisanId !== null), the discount is deducted from the artisan's share.
+ * - If coupon is platform-wide (artisanId === null), the discount is absorbed by Giftisan; the artisan receives 100% of their item price.
+ */
+export async function recordArtisanOrderLedgerInTx(
+  tx: any,
+  params: {
+    orderId: string;
+    couponId?: string | null;
+    discountApplied?: number | null;
+    items: OrderLedgerItem[];
+  }
+) {
+  const { orderId, couponId, discountApplied = 0, items } = params;
+  if (!items || items.length === 0) return { productMap: new Map<string, any>() };
+
+  // 1. Fetch coupon details if attached to order
+  const coupon = couponId
+    ? await tx.coupon.findUnique({
+        where: { id: couponId },
+        select: { id: true, code: true, artisanId: true, discountType: true, discountValue: true }
+      })
+    : null;
+
+  // 2. Fetch products and their artisan details
+  const productIds = Array.from(new Set(items.map(i => i.productId)));
+  const products = await tx.product.findMany({
+    where: { id: { in: productIds } },
+    select: {
+      id: true,
+      name: true,
+      artisanId: true,
+      artisan: {
+        select: {
+          id: true,
+          commissionRate: true,
+          studioName: true,
+          user: { select: { name: true, email: true } }
+        }
+      }
+    }
+  });
+
+  const productMap = new Map<string, any>(products.map((p: any) => [p.id, p]));
+
+  // 3. If coupon is artisan-specific (artisanId !== null), calculate the subtotal of that artisan's items
+  // to distribute the coupon discount accurately across their items.
+  const artisanSponsoredTotal = (coupon?.artisanId)
+    ? items
+        .filter(item => {
+          const prod = productMap.get(item.productId);
+          return prod?.artisanId === coupon.artisanId;
+        })
+        .reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    : 0;
+
+  // 4. Record transactions and balance updates
+  for (const item of items) {
+    const product: any = productMap.get(item.productId);
+    const artisan: any = product?.artisan;
+    if (!artisan) continue;
+
+    const itemTotal = item.price * item.quantity;
+    let netItemTotal = itemTotal;
+    let discountNote = "";
+
+    // A. Artisan-specific coupon: artisan offered the discount, so it deducts from their earnings
+    if (coupon?.artisanId && coupon.artisanId === artisan.id && artisanSponsoredTotal > 0) {
+      const itemDiscountShare = (itemTotal / artisanSponsoredTotal) * (discountApplied || 0);
+      netItemTotal = Math.max(0, itemTotal - itemDiscountShare);
+      discountNote = ` (Shop coupon "${coupon.code}": -${itemDiscountShare.toFixed(2)} EGP)`;
+    } 
+    // B. Platform-wide promo: Giftisan platform funds the promo, artisan receives 100% full item price
+    else if (coupon && !coupon.artisanId && (discountApplied || 0) > 0) {
+      discountNote = ` (Platform promo "${coupon.code}" absorbed by Giftisan)`;
+    }
+
+    const commissionRate = artisan.commissionRate ?? 0.0;
+    const adminShare = netItemTotal * commissionRate;
+    const artisanShare = netItemTotal - adminShare;
+
+    await tx.artisanTransaction.create({
+      data: {
+        artisanId: artisan.id,
+        orderId,
+        amount: artisanShare,
+        type: "SALE",
+        status: "PENDING",
+        description: `Earnings from "${product.name || item.name || "Item"}" (Qty: ${item.quantity}). Total: ${itemTotal.toFixed(2)} EGP${discountNote}${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
+      }
+    });
+
+    await tx.artisanBalance.upsert({
+      where: { artisanId: artisan.id },
+      update: { pending: { increment: artisanShare } },
+      create: { artisanId: artisan.id, pending: artisanShare, withdrawable: 0.0, withdrawn: 0.0 }
+    });
+  }
+
+  return { productMap };
+}
+
 export async function createOrder(userId: string | null, totalAmount: number, items: any[], shippingData?: any) {
   try {
     const processedItems = await Promise.all(items.map(async item => ({
@@ -1076,7 +1187,7 @@ export async function createOrder(userId: string | null, totalAmount: number, it
         if (existingUser) effectiveUserId = existingUser.id;
       }
 
-      const codOrder = await prisma.$transaction(async (tx) => {
+      const codOrderResult = await prisma.$transaction(async (tx) => {
         const newOrder = await tx.order.create({
           data: {
             userId: effectiveUserId,
@@ -1127,8 +1238,65 @@ export async function createOrder(userId: string | null, totalAmount: number, it
           }
         }
 
-        return newOrder;
+        // Process artisan ledger for COD order
+        const { productMap } = (await recordArtisanOrderLedgerInTx(tx, {
+          orderId: newOrder.id,
+          couponId: shippingData?.couponId || null,
+          discountApplied: shippingData?.discountApplied || 0,
+          items: processedItems.map(item => ({
+            productId: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        })) || { productMap: new Map() };
+
+        return { newOrder, productMap };
       });
+
+      const codOrder = codOrderResult.newOrder;
+
+      // Send buyer receipt email non-blockingly
+      try {
+        const buyerEmail = shippingData?.email;
+        const buyerName = `${shippingData?.firstName || ""} ${shippingData?.lastName || ""}`.trim() || "Customer";
+        if (buyerEmail) {
+          const receiptItems = processedItems.map((i: any) => ({
+            name: codOrderResult.productMap?.get(i.id)?.name || i.name || "Product",
+            quantity: i.quantity,
+            price: i.price
+          }));
+          sendBuyerOrderReceiptEmail(buyerEmail, buyerName, codOrder.id, totalAmount, receiptItems, shippingData?.city || undefined)
+            .catch(err => console.error(`Failed to send buyer COD receipt email to ${buyerEmail}:`, err));
+        }
+      } catch (err) {
+        console.error("Failed to send buyer receipt email for COD order:", err);
+      }
+
+      // Send artisan order notification emails non-blockingly
+      try {
+        const artisanEarnings = new Map<string, { name: string; email: string; total: number }>();
+        processedItems.forEach((item: any) => {
+          const product = codOrderResult.productMap?.get(item.id);
+          const artisan = product?.artisan;
+          if (artisan?.user?.email) {
+            const current = artisanEarnings.get(artisan.user.email) || {
+              name: artisan.user.name || artisan.studioName || "Artisan",
+              email: artisan.user.email,
+              total: 0
+            };
+            current.total += item.price * item.quantity;
+            artisanEarnings.set(artisan.user.email, current);
+          }
+        });
+
+        artisanEarnings.forEach((data) => {
+          sendOrderNotification(data.email, data.name, codOrder.id, data.total)
+            .catch(err => console.error(`Failed to send artisan order notification to ${data.email}:`, err));
+        });
+      } catch (err) {
+        console.error("Failed to send artisan order notifications for COD order:", err);
+      }
 
       return { success: true, orderId: codOrder.id, paymentUrl: null };
     }
@@ -1617,6 +1785,24 @@ export async function processOrderCancellationInTx(tx: any, orderId: string) {
       data: { status: "FAILED" }
     });
   }
+
+  // 4. Restore coupon quota if a coupon was used
+  const order = await tx.order.findUnique({
+    where: { id: orderId },
+    select: { couponId: true }
+  });
+  if (order?.couponId) {
+    const coupon = await tx.coupon.findUnique({
+      where: { id: order.couponId },
+      select: { usedCount: true }
+    });
+    if (coupon && coupon.usedCount > 0) {
+      await tx.coupon.update({
+        where: { id: order.couponId },
+        data: { usedCount: { decrement: 1 } }
+      });
+    }
+  }
 }
 
 export async function processOrderRefundInTx(tx: any, orderId: string) {
@@ -1688,6 +1874,24 @@ export async function processOrderRefundInTx(tx: any, orderId: string) {
       where: { id: t.id },
       data: { status: "FAILED" }
     });
+  }
+
+  // 4. Restore coupon quota if a coupon was used
+  const refundOrder = await tx.order.findUnique({
+    where: { id: orderId },
+    select: { couponId: true }
+  });
+  if (refundOrder?.couponId) {
+    const coupon = await tx.coupon.findUnique({
+      where: { id: refundOrder.couponId },
+      select: { usedCount: true }
+    });
+    if (coupon && coupon.usedCount > 0) {
+      await tx.coupon.update({
+        where: { id: refundOrder.couponId },
+        data: { usedCount: { decrement: 1 } }
+      });
+    }
   }
 }
 
@@ -1836,8 +2040,8 @@ export async function requestPayoutAction(
     }
 
     const balance = artisan.balances[0] || { withdrawable: 0 };
-    if (amount <= 0) {
-      return { error: "Withdrawal amount must be greater than zero." };
+    if (isNaN(amount) || amount < MIN_PAYOUT_AMOUNT) {
+      return { error: `Minimum withdrawal amount is ${MIN_PAYOUT_AMOUNT} EGP.` };
     }
     if (amount > balance.withdrawable) {
       return { error: "Insufficient withdrawable balance." };
@@ -1851,6 +2055,9 @@ export async function requestPayoutAction(
 
       if (!liveBalance || liveBalance.withdrawable < amount) {
         throw new Error("Insufficient withdrawable balance due to a concurrent pending transaction.");
+      }
+      if (amount < MIN_PAYOUT_AMOUNT) {
+        throw new Error(`Minimum withdrawal amount is ${MIN_PAYOUT_AMOUNT} EGP.`);
       }
 
       // 1. Log transaction as a negative payout

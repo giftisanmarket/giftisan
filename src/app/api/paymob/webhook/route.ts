@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { PAYMOB_HMAC } from "@/lib/paymob";
 import { sendOrderNotification, sendBuyerOrderReceiptEmail } from "@/lib/mail";
-import { createOrderFromAbandonedCheckout } from "@/lib/actions";
+import { createOrderFromAbandonedCheckout, recordArtisanOrderLedgerInTx } from "@/lib/actions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -101,33 +101,17 @@ export async function POST(req: NextRequest) {
         // Process artisan ledger
         try {
           await prisma.$transaction(async (tx) => {
-            for (const item of order.items) {
-              const product = item.product;
-              const artisan = product.artisan;
-              if (!artisan) continue;
-
-              const itemTotal = item.price * item.quantity;
-              const commission = artisan.commissionRate ?? 0.0;
-              const adminShare = itemTotal * commission;
-              const artisanShare = itemTotal - adminShare;
-
-              await tx.artisanTransaction.create({
-                data: {
-                  artisanId: artisan.id,
-                  orderId: order.id,
-                  amount: artisanShare,
-                  type: "SALE",
-                  status: "PENDING",
-                  description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
-                }
-              });
-
-              await tx.artisanBalance.upsert({
-                where: { artisanId: artisan.id },
-                update: { pending: { increment: artisanShare } },
-                create: { artisanId: artisan.id, pending: artisanShare, withdrawable: 0.0, withdrawn: 0.0 }
-              });
-            }
+            await recordArtisanOrderLedgerInTx(tx, {
+              orderId: order.id,
+              couponId: order.couponId,
+              discountApplied: order.discountApplied,
+              items: order.items.map((i: any) => ({
+                productId: i.productId || i.product?.id,
+                name: i.product?.name,
+                price: i.price,
+                quantity: i.quantity
+              }))
+            });
           });
         } catch (ledgerErr) {
           console.error(`Failed to update artisan ledger for order ${order.id}:`, ledgerErr);
@@ -200,33 +184,17 @@ export async function POST(req: NextRequest) {
           await prisma.$transaction(async (tx) => {
             await tx.order.update({ where: { id: orderId }, data: { status: "PROCESSING" } });
 
-            for (const item of order.items) {
-              const product = item.product;
-              const artisan = product.artisan;
-              if (!artisan) continue;
-
-              const itemTotal = item.price * item.quantity;
-              const commission = artisan.commissionRate ?? 0.0;
-              const adminShare = itemTotal * commission;
-              const artisanShare = itemTotal - adminShare;
-
-              await tx.artisanTransaction.create({
-                data: {
-                  artisanId: artisan.id,
-                  orderId: order.id,
-                  amount: artisanShare,
-                  type: "SALE",
-                  status: "PENDING",
-                  description: `Earnings from "${product.name}" (Qty: ${item.quantity}). Total: ${itemTotal} EGP${adminShare > 0 ? ` (Commission: ${adminShare.toFixed(2)} EGP)` : ""}`
-                }
-              });
-
-              await tx.artisanBalance.upsert({
-                where: { artisanId: artisan.id },
-                update: { pending: { increment: artisanShare } },
-                create: { artisanId: artisan.id, pending: artisanShare, withdrawable: 0.0, withdrawn: 0.0 }
-              });
-            }
+            await recordArtisanOrderLedgerInTx(tx, {
+              orderId: order.id,
+              couponId: order.couponId,
+              discountApplied: order.discountApplied,
+              items: order.items.map((i: any) => ({
+                productId: i.productId || i.product?.id,
+                name: i.product?.name,
+                price: i.price,
+                quantity: i.quantity
+              }))
+            });
           });
 
           console.log(`[Legacy] Order ${orderId} marked as PROCESSING via Paymob webhook.`);

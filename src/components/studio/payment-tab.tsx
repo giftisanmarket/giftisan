@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requestPayoutAction } from "@/lib/actions";
+import { MIN_PAYOUT_AMOUNT } from "@/lib/constants";
 import { toast } from "react-hot-toast";
 
 interface PaymentTabProps {
@@ -43,6 +44,7 @@ export function PaymentTab({
   // Extract balance details
   const balance = artisan.balances?.[0] || { pending: 0.0, withdrawable: 0.0, withdrawn: 0.0 };
   const transactions = artisan.transactions || [];
+  const canWithdraw = balance.withdrawable >= MIN_PAYOUT_AMOUNT;
 
   // Payout request form states
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
@@ -180,10 +182,15 @@ export function PaymentTab({
     e.preventDefault();
     const withdrawAmount = parseFloat(amount);
 
-    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-      toast.error(isRTL ? "الرجاء إدخال مبلغ صحيح أكبر من الصفر." : "Please enter a valid amount greater than zero.", {
-        style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
-      });
+    if (isNaN(withdrawAmount) || withdrawAmount < MIN_PAYOUT_AMOUNT) {
+      toast.error(
+        isRTL 
+          ? `الحد الأدنى لطلب السحب هو ${MIN_PAYOUT_AMOUNT} ج.م.` 
+          : `Minimum withdrawal amount is ${MIN_PAYOUT_AMOUNT} EGP.`, 
+        {
+          style: { borderRadius: "20px", background: "#1a1a1a", color: "#fff" }
+        }
+      );
       return;
     }
 
@@ -242,26 +249,30 @@ export function PaymentTab({
           {!showWithdrawForm && (
             <div className="flex flex-col items-center md:items-end gap-1.5 self-stretch md:self-auto">
               <motion.button
-                whileHover={balance.withdrawable > 0 ? { scale: 1.02 } : undefined}
-                whileTap={balance.withdrawable > 0 ? { scale: 0.98 } : undefined}
-                disabled={balance.withdrawable <= 0}
+                whileHover={canWithdraw ? { scale: 1.02 } : undefined}
+                whileTap={canWithdraw ? { scale: 0.98 } : undefined}
+                disabled={!canWithdraw}
                 onClick={() => {
-                  if (balance.withdrawable > 0) {
+                  if (canWithdraw) {
                     setShowWithdrawForm(true);
                   }
                 }}
                 className={cn(
                   "px-8 h-14 font-bold rounded-2xl flex items-center gap-2 transition-all text-sm md:text-base w-full md:w-auto justify-center",
-                  balance.withdrawable > 0 
+                  canWithdraw 
                     ? "bg-accent hover:bg-accent-dark text-white shadow-xl shadow-accent/20 cursor-pointer" 
                     : "bg-charcoal/10 text-charcoal/40 border border-primary/5 cursor-not-allowed shadow-none"
                 )}
               >
                 <Send className="w-4 h-4 rotate-45" /> {isRTL ? "طلب سحب الأرباح" : "Request Withdrawal"}
               </motion.button>
-              {balance.withdrawable <= 0 && (
+              {!canWithdraw && (
                 <span className="text-[10px] font-medium text-charcoal/40">
-                  {isRTL ? "متاح عند وجود رصيد قابل للسحب" : "Available when withdrawable balance > 0 EGP"}
+                  {balance.withdrawable <= 0
+                    ? (isRTL ? `متاح عند وصول الرصيد إلى ${MIN_PAYOUT_AMOUNT} ج.م` : `Available when withdrawable balance reaches ${MIN_PAYOUT_AMOUNT} EGP`)
+                    : (isRTL 
+                        ? `الحد الأدنى للسحب هو ${MIN_PAYOUT_AMOUNT} ج.م (المتاح حاليًا: ${balance.withdrawable.toFixed(2)} ج.م)` 
+                        : `Minimum withdrawal is ${MIN_PAYOUT_AMOUNT} EGP (Available: ${balance.withdrawable.toFixed(2)} EGP)`)}
                 </span>
               )}
             </div>
@@ -307,8 +318,8 @@ export function PaymentTab({
             <p className="text-[11px] text-emerald-800/60 font-medium mt-6 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               {isRTL 
-                ? "الأموال الجاهزة للسحب الفوري إلى محفظتك أو حسابك" 
-                : "Cleared funds ready for immediate transfer"}
+                ? `الأموال الجاهزة للسحب (الحد الأدنى للسحب ${MIN_PAYOUT_AMOUNT} ج.م)` 
+                : `Cleared funds ready for payout (Min. ${MIN_PAYOUT_AMOUNT} EGP)`}
             </p>
           </div>
 
@@ -359,20 +370,30 @@ export function PaymentTab({
                 <form onSubmit={handleRequestPayout} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Amount */}
                   <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-wider text-primary/60">
-                      {isRTL ? "المبلغ المراد سحبه (EGP)" : "Amount to Withdraw (EGP)"}
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black uppercase tracking-wider text-primary/60">
+                        {isRTL ? "المبلغ المراد سحبه (EGP)" : "Amount to Withdraw (EGP)"}
+                      </label>
+                      <span className="text-[10px] font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
+                        {isRTL ? `الحد الأدنى: ${MIN_PAYOUT_AMOUNT} ج.م` : `Min: ${MIN_PAYOUT_AMOUNT} EGP`}
+                      </span>
+                    </div>
                     <input
                       type="number"
                       step="0.01"
                       required
-                      min="1"
+                      min={MIN_PAYOUT_AMOUNT}
                       max={balance.withdrawable}
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      placeholder={`Max: ${balance.withdrawable.toFixed(2)}`}
+                      placeholder={isRTL ? `الحد الأدنى ${MIN_PAYOUT_AMOUNT} ج.م - الأقصى ${balance.withdrawable.toFixed(2)}` : `Min ${MIN_PAYOUT_AMOUNT} EGP - Max ${balance.withdrawable.toFixed(2)}`}
                       className="w-full h-12 px-4 rounded-xl border border-primary/10 bg-white focus:outline-none focus:border-accent text-sm font-bold text-primary"
                     />
+                    <p className="text-[10px] text-charcoal/50 font-medium">
+                      {isRTL 
+                        ? `الحد الأدنى لكل عملية سحب هو ${MIN_PAYOUT_AMOUNT} ج.م. الرصيد القابل للسحب: ${balance.withdrawable.toFixed(2)} ج.م.` 
+                        : `Minimum withdrawal threshold is ${MIN_PAYOUT_AMOUNT} EGP. Available to withdraw: ${balance.withdrawable.toFixed(2)} EGP.`}
+                    </p>
                   </div>
 
                   {/* Method */}

@@ -29,7 +29,7 @@ export async function GET(
         where: { id },
         select: { avatar: true, studioName: true, userId: true }
       });
-      imageData = artisan?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${artisan?.studioName || artisan?.userId || id}`;
+      imageData = artisan?.avatar || `https://api.dicebear.com/10.x/glyphs/svg?seed=${artisan?.studioName || artisan?.userId || id}`;
     } else if (type === "review") {
       const review = await prisma.review.findUnique({
         where: { id },

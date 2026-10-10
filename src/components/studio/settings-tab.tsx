@@ -213,16 +213,16 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studioName.trim() || !bio.trim() || !location.trim() || !phoneNumber.trim() || !slug.trim() || !pickupAddress.trim() || !pickupCity.trim()) {
-      toast.error(lang === "ar" ? "جميع البيانات الأساسية وعنوان الاستلام التفصيلي مطلوبة." : "Shop Name, Handle, Bio, Location, Phone Number, and Pickup Address are all required.");
+    if (!studioName.trim() || !phoneNumber.trim() || !slug.trim()) {
+      toast.error(lang === "ar" ? "اسم المتجر، الرابط، ورقم الهاتف مطلوبة." : "Shop Name, Handle, and Phone Number are required.");
       return;
     }
     setIsSaving(true);
 
-    const cleanPickupAddress = pickupAddress.replace(/\[GPS Pin: https:\/\/[^\]]+\]/, '').trim();
-    const finalPickupAddress = gpsPinUrl && !cleanPickupAddress.includes("[GPS Pin:")
+    const cleanPickupAddress = pickupAddress ? pickupAddress.replace(/\[GPS Pin: https:\/\/[^\]]+\]/, '').trim() : '';
+    const finalPickupAddress = gpsPinUrl && cleanPickupAddress && !cleanPickupAddress.includes("[GPS Pin:")
       ? `${cleanPickupAddress} [GPS Pin: ${gpsPinUrl}]`
-      : pickupAddress;
+      : (pickupAddress.trim() || null);
 
     const res = await updateArtisanProfile(artisan.userId, {
       studioName,
@@ -307,7 +307,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                       <div className="relative group mx-auto lg:mx-0 w-36 h-36 xl:w-40 xl:h-40">
                         <div className="relative w-36 h-36 xl:w-40 xl:h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl">
                           <Image
-                            src={avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioName}`}
+                            src={avatar || `https://api.dicebear.com/10.x/glyphs/svg?seed=${studioName}`}
                             alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
@@ -476,7 +476,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
-                        {dict.artisan_detail?.yrs_mastery || "Years of Mastery / Experience"} *
+                        {dict.artisan_detail?.yrs_mastery || "Years of Mastery / Experience"}
                       </label>
                       <div className="relative">
                         <Award className="absolute start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/20" />
@@ -484,7 +484,6 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                           type="number"
                           min="1"
                           max="80"
-                          required
                           value={yearsOfExperience}
                           onChange={(e) => setYearsOfExperience(Math.max(1, parseInt(e.target.value) || 1))}
                           className="w-full h-14 ps-14 pe-6 rounded-2xl bg-cream/20 border border-primary/5 focus:border-accent focus:bg-white transition-all font-bold text-primary"
@@ -546,11 +545,10 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
-                          {lang === "ar" ? "اسم الشارع والرقم" : "Street Address & Number"} *
+                          {lang === "ar" ? "اسم الشارع والرقم" : "Street Address & Number"}
                         </label>
                         <input
                           type="text"
-                          required
                           value={pickupAddress}
                           onChange={(e) => setPickupAddress(e.target.value)}
                           className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"
@@ -573,11 +571,10 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
 
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ms-4">
-                          {lang === "ar" ? "المحافظة / المدينة" : "City / Governorate"} *
+                          {lang === "ar" ? "المحافظة / المدينة" : "City / Governorate"}
                         </label>
                         <input
                           type="text"
-                          required
                           value={pickupCity}
                           onChange={(e) => setPickupCity(e.target.value)}
                           className="w-full h-14 px-6 rounded-2xl bg-white border border-primary/10 focus:border-accent font-medium text-primary text-sm"

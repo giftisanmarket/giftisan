@@ -11,17 +11,29 @@ interface GovernorateSelectProps {
   onChange: (govId: string) => void;
   isAr: boolean;
   hasError?: boolean;
+  className?: string;
+  buttonClassName?: string;
+  placeholder?: string;
 }
 
-export function GovernorateSelect({ value, onChange, isAr, hasError }: GovernorateSelectProps) {
+export function GovernorateSelect({
+  value,
+  onChange,
+  isAr,
+  hasError,
+  className,
+  buttonClassName,
+  placeholder,
+}: GovernorateSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedGov = EGYPT_GOVERNORATES.find(g => g.id === value);
+  const selectedGov = EGYPT_GOVERNORATES.find((g) => g.id === value);
 
   // Filter governorates by search query
-  const filteredGovs = EGYPT_GOVERNORATES.filter(g => {
+  const filteredGovs = EGYPT_GOVERNORATES.filter((g) => {
     const q = search.toLowerCase().trim();
     if (!q) return true;
     return (
@@ -29,6 +41,20 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
       g.nameAr.includes(q)
     );
   });
+
+  // Check available viewport space to prevent overlapping or clipping
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < 280 && spaceAbove > 280) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    }
+  }, [isOpen]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -42,16 +68,17 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={cn("relative w-full", isOpen ? "z-50" : "z-10", className)}>
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={() => setIsOpen(prev => !prev)}
+        onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
           "w-full h-12 px-3.5 bg-white border rounded-xl transition-all flex items-center justify-between text-start cursor-pointer shadow-2xs hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15",
           hasError 
             ? "border-red-500 ring-2 ring-red-100" 
-            : "border-primary/20"
+            : "border-primary/20",
+          buttonClassName
         )}
       >
         <div className="flex items-center gap-2 min-w-0 me-2">
@@ -59,7 +86,7 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
           <span className={cn("text-sm font-medium truncate", selectedGov ? "text-[#222222]" : "text-charcoal/40")}>
             {selectedGov 
               ? (isAr ? selectedGov.nameAr : selectedGov.nameEn)
-              : (isAr ? "-- اختر المحافظة --" : "-- Select Governorate --")}
+              : placeholder || (isAr ? "-- اختر المحافظة --" : "-- Select Governorate --")}
           </span>
         </div>
 
@@ -70,11 +97,14 @@ export function GovernorateSelect({ value, onChange, isAr, hasError }: Governora
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 4, scale: 0.99 }}
+            initial={{ opacity: 0, y: openUpward ? -4 : 4, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.99 }}
+            exit={{ opacity: 0, y: openUpward ? -4 : 4, scale: 0.99 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl border border-primary/15 shadow-xl z-50 overflow-hidden p-1.5"
+            className={cn(
+              "absolute left-0 right-0 bg-white rounded-xl border border-primary/20 shadow-2xl z-50 overflow-hidden p-1.5",
+              openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
+            )}
           >
             {/* Quick Search Bar */}
             <div className="relative mb-1.5 px-0.5 pt-0.5">

@@ -63,7 +63,7 @@ export function ReviewsTab({ reviews, dict, lang }: ReviewsTabProps) {
                   <div className="flex items-center gap-4 text-center sm:text-start">
                     <div className="w-14 h-14 rounded-2xl overflow-hidden bg-cream shrink-0 border-2 border-white shadow-lg">
                       <BespokeImage
-                        src={review.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user.name}`}
+                        src={review.user.image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${review.user.name}`}
                         alt={review.user.name}
                         width={56}
                         height={56}

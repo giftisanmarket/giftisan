@@ -1,182 +1,368 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { promoteToArtisan } from "@/lib/actions";
+import { promoteToArtisan, resendVerificationEmailAction } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Store, MapPin, AlignLeft, ArrowRight, ShieldCheck, Loader2, Camera, Rocket, BadgeCheck, Users, Phone } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa6";
-import { cn } from "@/lib/utils";
+import {
+  Sparkles,
+  Store,
+  MapPin,
+  AlignLeft,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Loader2,
+  Rocket,
+  BadgeCheck,
+  Phone,
+  Check,
+  Copy,
+  AlertTriangle,
+  Mail,
+  ChevronDown,
+  Layers,
+  Palette,
+  Truck,
+  Wallet,
+  Coins,
+  Percent,
+  Clock,
+  Heart,
+  Quote,
+  CheckCircle2,
+  HelpCircle,
+  Gem,
+  ShoppingBag,
+  Globe,
+  Tag,
+  Shapes,
+  Headphones,
+} from "lucide-react";
+import { FaInstagram } from "react-icons/fa6";
+import { cn, slugify, stripEmojis } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+import { GovernorateSelect } from "@/components/ui/governorate-select";
+import { EGYPT_GOVERNORATES } from "@/lib/egypt-governorates";
+import Link from "next/link";
 
-export default function BecomeArtisanClient({ dict }: { dict: any }) {
-  const { data: session, update, status } = useSession();
+interface BecomeArtisanClientProps {
+  dict: any;
+  initialUser?: any;
+}
+
+const ARTISAN_STORIES = [
+  {
+    nameEn: "Salma Karim",
+    nameAr: "سلمى كريم",
+    studioEn: "Cairo Clay Shop",
+    studioAr: "متجر الفخار الأصيل",
+    locationEn: "Fustat, Cairo",
+    locationAr: "الفسطاط، القاهرة",
+    quoteEn: "Giftisan made selling my pottery effortless. Orders get picked up right from my workshop, and payments land instantly in my InstaPay account.",
+    quoteAr: "جيفتيزان جعلت بيع أعمالي الفخارية ممتعاً وبلا أي تعقيد. مندوب الشحن يستلم من باب ورشتي، وأرباحي تصل فوراً إلى حساب إنستاباي.",
+    icon: Shapes,
+  },
+  {
+    nameEn: "Youssef Nabil",
+    nameAr: "يوسف نبيل",
+    studioEn: "Heritage Leatherworks",
+    studioAr: "مشغولات النيل للجلود",
+    locationEn: "Alexandria, Egypt",
+    locationAr: "الإسكندرية، مصر",
+    quoteEn: "With 0% commission, I keep every pound I earn. It helped me invest in better tools and expand my workshop without high advertising costs.",
+    quoteAr: "مع عمولة 0%، أحتفظ بكل جنيه أكسبه من تعبي. ساعدني ذلك على شراء أدوات أفضل وتطوير ورشتي بدون تكاليف إعلانات باهظة.",
+    icon: ShoppingBag,
+  },
+  {
+    nameEn: "Mariam El-Sayed",
+    nameAr: "مريم السيد",
+    studioEn: "Lapis & Silver Jewelry",
+    studioAr: "حلي الفضة واللازورد",
+    locationEn: "Maadi, Cairo",
+    locationAr: "المعادي، القاهرة",
+    quoteEn: "The platform feels designed for artists, not mass factories. Buyers truly appreciate handcrafted details and custom bespoke requests.",
+    quoteAr: "المنصة صممت خصيصاً للفنانين وليس المصانع. المقتنون هنا يقدرون فعلاً تفاصيل الصناعة اليدوية والقطع المنفذة بالطلب.",
+    icon: Gem,
+  },
+];
+
+export default function BecomeArtisanClient({ dict, initialUser }: BecomeArtisanClientProps) {
+  const { data: session, update } = useSession();
   const router = useRouter();
   const params = useParams();
-  const lang = params?.lang as string || "en";
+  const lang = (params?.lang as string) || "en";
+  const isAr = lang === "ar";
+  const currentUser = session?.user || initialUser;
+
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
+  const [emailSentSuccess, setEmailSentSuccess] = useState(false);
+
+  const wizardRef = useRef<HTMLDivElement>(null);
+  const shopNameInputRef = useRef<HTMLInputElement>(null);
+
+  // Form State
   const [formData, setFormData] = useState({
     studioName: "",
-    bio: "",
-    location: "",
+    governorate: "cairo",
+    district: "",
     phoneNumber: "",
+    bio: "",
+    brandColor: "#DA7B5A",
+    instagram: "",
   });
 
+  // Restore draft from localStorage
   useEffect(() => {
-    if (session?.user?.role === "ARTISAN") {
+    try {
+      const saved = localStorage.getItem("giftisan_artisan_wizard_draft");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({
+          ...prev,
+          ...parsed,
+          phoneNumber: parsed.phoneNumber || (currentUser as any)?.phoneNumber || prev.phoneNumber,
+        }));
+        if (parsed.savedStep && parsed.savedStep >= 1 && parsed.savedStep <= 3) {
+          setCurrentStep(parsed.savedStep);
+        }
+      } else if (currentUser) {
+        if ((currentUser as any)?.phoneNumber) {
+          setFormData((prev) => ({ ...prev, phoneNumber: (currentUser as any).phoneNumber }));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to restore wizard draft:", e);
+    }
+  }, [currentUser]);
+
+  // Persist draft to localStorage
+  useEffect(() => {
+    try {
+      if (formData.studioName || formData.district || formData.phoneNumber || formData.bio) {
+        localStorage.setItem(
+          "giftisan_artisan_wizard_draft",
+          JSON.stringify({ ...formData, savedStep: currentStep })
+        );
+      }
+    } catch (e) {
+      console.warn("Failed to persist wizard draft:", e);
+    }
+  }, [formData, currentStep]);
+
+  // Sync session on tab focus (for email verification)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (currentUser && !(currentUser as any)?.emailVerified && !(currentUser as any)?.isOAuth) {
+        update();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [currentUser, update]);
+
+  // Redirect if already an artisan
+  useEffect(() => {
+    if (currentUser?.role === "ARTISAN") {
       router.push(`/${lang}/studio`);
     }
-  }, [session, router, lang]);
+  }, [currentUser, router, lang]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Computed Values
+  const currentSlug = formData.studioName.trim()
+    ? slugify(formData.studioName)
+    : "your-shop";
+
+  const selectedGov = EGYPT_GOVERNORATES.find((g) => g.id === formData.governorate) || EGYPT_GOVERNORATES[0];
+  const locationDisplay = formData.district.trim()
+    ? `${formData.district.trim()}, ${isAr ? selectedGov.nameAr : selectedGov.nameEn}`
+    : isAr ? selectedGov.nameAr : selectedGov.nameEn;
+
+  const isUnverified = Boolean(
+    currentUser &&
+    !(currentUser as any)?.emailVerified &&
+    !(currentUser as any)?.isOAuth
+  );
+
+  const scrollToWizard = () => {
+    wizardRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCopyLink = () => {
+    const url = `https://giftisan.com/${lang}/artisan/${currentSlug}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    toast.success(isAr ? "تم نسخ رابط متجرك المستقبلي!" : "Future shop link copied!");
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleResendVerification = async () => {
+    if (!currentUser?.email) return;
+    setIsResendingEmail(true);
+    try {
+      const res = await resendVerificationEmailAction(currentUser.email);
+      if (res?.error) {
+        toast.error(res.error);
+      } else {
+        setEmailSentSuccess(true);
+        toast.success(isAr ? "تم إرسال رابط التفعيل إلى بريدك" : "Verification link sent to your email!");
+        setTimeout(() => setEmailSentSuccess(false), 8000);
+      }
+    } catch {
+      toast.error(isAr ? "فشل إرسال الرابط. يرجى المحاولة لاحقاً." : "Failed to send link.");
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
+  // Step Validation
+  const canProceedStep1 = Boolean(formData.studioName.trim().length >= 2);
+  const canProceedStep2 = Boolean(
+    formData.governorate &&
+    formData.district.trim().length >= 2 &&
+    formData.phoneNumber.trim().length >= 8
+  );
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (!formData.studioName.trim()) {
+        toast.error(isAr ? "يرجى كتابة اسم لمتجرك أولاً" : "Please enter a name for your shop");
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      if (!formData.district.trim()) {
+        toast.error(isAr ? "يرجى كتابة منطقتك أو حيك" : "Please enter your district or area");
+        return;
+      }
+      if (!formData.phoneNumber.trim()) {
+        toast.error(isAr ? "يرجى كتابة رقم الهاتف أو الواتساب للتواصل والشحن" : "Please enter your contact phone number");
+        return;
+      }
+      setCurrentStep(3);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!currentUser) {
+      toast(isAr ? "يرجى تسجيل الدخول أو إنشاء حسابك لإطلاق متجرك" : "Please sign in or create an account to launch your shop");
+      router.push(`/${lang}/login?callbackUrl=/${lang}/become-artisan`);
+      return;
+    }
+
+    if (isUnverified) {
+      toast.error(
+        isAr
+          ? "يرجى تأكيد بريدك الإلكتروني أولاً قبل إطلاق المتجر."
+          : "Please verify your email address before launching your shop."
+      );
+      return;
+    }
+
+    if (!formData.studioName.trim() || !formData.district.trim() || !formData.phoneNumber.trim()) {
+      toast.error(isAr ? "يرجى إكمال بيانات المتجر المطلوبة." : "Please fill in all required shop details.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (!(session?.user as any)?.emailVerified && !(session?.user as any)?.isOAuth) {
-        toast.error(dict.home.verify_email_error);
-        setIsLoading(false);
-        return;
-      }
+      const cleanStudioName = stripEmojis(formData.studioName.trim());
+      const cleanBio = stripEmojis(formData.bio.trim()) || (isAr ? "متجر إبداعي للأعمال اليدوية الأصيلة." : "Handmade artisan workshop.");
+      const cleanDistrict = stripEmojis(formData.district.trim());
+      const cleanPhone = stripEmojis(formData.phoneNumber.trim());
+      const cleanInsta = stripEmojis(formData.instagram.trim());
+      const cleanLocation = cleanDistrict
+        ? `${cleanDistrict}, ${isAr ? selectedGov.nameAr : selectedGov.nameEn}`
+        : isAr ? selectedGov.nameAr : selectedGov.nameEn;
 
-      if (!formData.studioName.trim() || !formData.bio.trim() || !formData.location.trim() || !formData.phoneNumber.trim()) {
-        toast.error(lang === 'ar' ? 'جميع الحقول (اسم المتجر، الموقع، رقم الهاتف، والنبذة) مطلوبة.' : 'Shop name, location, phone number, and bio are all required.');
-        setIsLoading(false);
-        return;
-      }
-
-      const res = await promoteToArtisan(session?.user?.id as string, formData);
+      const res = await promoteToArtisan(currentUser.id as string, {
+        studioName: cleanStudioName,
+        bio: cleanBio,
+        location: cleanLocation,
+        pickupCity: selectedGov.nameEn,
+        phoneNumber: cleanPhone,
+        instagram: cleanInsta,
+        brandColor: formData.brandColor,
+      });
 
       if (res.success) {
-        toast.success(dict.home.onboarding_success || "Welcome to the circle!");
-        // Force session update so the role reflects in the UI
+        localStorage.removeItem("giftisan_artisan_wizard_draft");
+        toast.success(
+          isAr
+            ? "تهانينا! متجرك جاهز الآن. أهلاً بك في عائلة صناع جيفتيزان!"
+            : "Congratulations! Your shop is ready. Welcome to the Giftisan Circle!"
+        );
         await update({
           ...session,
           user: {
             ...session?.user,
-            role: "ARTISAN"
-          }
+            role: "ARTISAN",
+          },
         });
         router.push(`/${lang}/studio`);
         router.refresh();
       } else {
-        toast.error(res.error || "Something went wrong.");
+        toast.error(res.error || (isAr ? "حدث خطأ أثناء الإنشاء." : "Failed to create shop."));
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Promote artisan submit error:", error);
-      toast.error(lang === 'ar' ? 'حدث خطأ أثناء الإنشاء. يرجى المحاولة لاحقاً.' : 'An error occurred during creation. Please try again.');
+      toast.error(isAr ? "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً." : "An unexpected error occurred.");
       setIsLoading(false);
     }
   };
 
-  if (status === "loading") {
-    return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-      </main>
-    );
-  }
-
-  const benefits = [
-    {
-      title: dict.home.artisan_onboarding?.benefits?.commission_title || "0% Commission",
-      desc: dict.home.artisan_onboarding?.benefits?.commission_desc || "Keep 100% of your earnings. No hidden charges. Enjoy 0% platform commission throughout the 2026 season.",
-      icon: <Rocket className="w-6 h-6 text-accent" />,
-    },
-    {
-      title: dict.home.artisan_onboarding?.benefits?.marketing_title || "Priority Spotlight",
-      desc: dict.home.artisan_onboarding?.benefits?.marketing_desc || "Founding artisans get permanent priority in search results and homepage features.",
-      icon: <Sparkles className="w-6 h-6 text-accent" />,
-    },
-    {
-      title: dict.home.artisan_onboarding?.benefits?.badge_title || "Founding Badge",
-      desc: dict.home.artisan_onboarding?.benefits?.badge_desc || "A permanent mark of excellence on your studio profile.",
-      icon: <BadgeCheck className="w-6 h-6 text-accent" />,
-    },
-    {
-      title: lang === 'ar' ? "دعم ومساعدة مباشرة" : "Dedicated Team Support",
-      desc: lang === 'ar' 
-        ? "خط واتساب مباشر مع إدارة جيفتيزان لمساعدتك في كل خطوة، الإجابة عن استفساراتك، وحل أي مشكلة تقنية فوراً." 
-        : "A direct WhatsApp support channel with the Giftisan team to assist you with onboarding, questions, and instant help.",
-      icon: <FaWhatsapp className="w-6 h-6 text-accent" />,
-    },
+  // Step Meta with Lucide Icons (3 Steps)
+  const stepTitles = [
+    { num: 1, titleEn: "Shop Name", shortEn: "Name", titleAr: "اسم المتجر", shortAr: "الاسم", icon: Tag },
+    { num: 2, titleEn: "Location & Contact", shortEn: "Location", titleAr: "الموقع والتواصل", shortAr: "الموقع", icon: MapPin },
+    { num: 3, titleEn: "Your Story", shortEn: "Story", titleAr: "قصتك وإطلاق المتجر", shortAr: "القصة", icon: Sparkles },
   ];
-
-  const steps = [
-    {
-      title: dict.home.artisan_onboarding?.steps?.step_1_title || "Apply",
-      desc: dict.home.artisan_onboarding?.steps?.step_1_desc || "Tell us your story.",
-      icon: <Users className="w-5 h-5" />,
-    },
-    {
-      title: dict.home.artisan_onboarding?.steps?.step_2_title || "Curate",
-      desc: dict.home.artisan_onboarding?.steps?.step_2_desc || "Upload your products.",
-      icon: <Store className="w-5 h-5" />,
-    },
-    {
-      title: dict.home.artisan_onboarding?.steps?.step_3_title || "Sell",
-      desc: dict.home.artisan_onboarding?.steps?.step_3_desc || "Connect with collectors.",
-      icon: <Rocket className="w-5 h-5" />,
-    },
-  ];
-
-  if (!session) {
-    return (
-      <main className="min-h-screen bg-cream">
-        <Navbar dict={dict} />
-        <div className="container mx-auto px-4 py-32 text-center">
-          <h1 className="text-4xl font-heading font-bold text-primary mb-6">{dict.home.join_circle_title}</h1>
-          <p className="text-charcoal/60 mb-8 max-w-md mx-auto">{dict.home.join_circle_desc}</p>
-          <button
-            onClick={() => router.push(`/${lang}/login?callbackUrl=/${lang}/become-artisan`)}
-            className="px-10 h-14 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20"
-          >
-            {dict.home.sign_in_continue}
-          </button>
-        </div>
-      </main>
-    );
-  }
 
   return (
-    <main className="min-h-screen bg-cream overflow-x-hidden">
-      <AnimatePresence mode="wait">
-        {(isLoading || session?.user?.role === "ARTISAN") && (
+    <main className="min-h-screen bg-cream text-charcoal selection:bg-accent/20 selection:text-primary">
+      {/* Launching Overlay */}
+      <AnimatePresence>
+        {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-cream/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-6"
+            className="fixed inset-0 z-[100] bg-cream/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
           >
             <motion.div
-              animate={{
-                scale: [1, 1.05, 1],
-                rotate: [0, 2, -2, 0]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center shadow-2xl shadow-primary/20 mb-8"
+              animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="w-24 h-24 rounded-3xl flex items-center justify-center shadow-xl mb-6 text-white"
+              style={{ backgroundColor: formData.brandColor || "#064E3B" }}
             >
-              <Store className="w-12 h-12 text-white" />
+              <Store className="w-12 h-12" />
             </motion.div>
-
-            <h2 className="text-3xl font-heading font-bold text-primary mb-4">
-              {session?.user?.role === "ARTISAN" ? dict.home.redirecting_studio : dict.home.curating_studio}
+            <h2 className="text-2xl md:text-3xl font-heading font-bold text-primary mb-2">
+              {isAr ? "نجهز مساحة متجرك الإبداعي..." : "Opening your shop space..."}
             </h2>
-            <div className="flex items-center gap-2 text-charcoal/40 font-bold uppercase tracking-[0.3em] text-[10px]">
-              <motion.div
-                animate={{ opacity: [0.2, 1, 0.2] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-2 h-2 bg-accent rounded-full"
-              />
-              {dict.home.preparing_workspace}
+            <p className="text-sm text-charcoal/60 max-w-sm mb-6">
+              {isAr
+                ? "جاري تجهيز لوحة تحكم متجرك وربط خدمات الشحن."
+                : "Setting up your shop dashboard and shipping features."}
+            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-primary/70">
+              <Loader2 className="w-4 h-4 animate-spin text-accent" />
+              <span>{isAr ? "لحظات وستكون في لوحة تحكم متجرك!" : "Redirecting you to your shop dashboard..."}</span>
             </div>
           </motion.div>
         )}
@@ -184,202 +370,651 @@ export default function BecomeArtisanClient({ dict }: { dict: any }) {
 
       <Navbar dict={dict} />
 
-      <div className="container mx-auto px-4 pt-16 md:pt-32 pb-16 md:pb-24 max-w-6xl">
+      {/* Warm & Welcoming Hero (Etsy Style) */}
+      <section className="pt-20 sm:pt-28 md:pt-36 pb-10 sm:pb-12 md:pb-16 px-4">
+        <div className="container mx-auto max-w-4xl text-center">
+          {/* Friendly Greeting Tag */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 bg-accent/10 border border-accent/20 text-accent rounded-full text-[11px] sm:text-xs font-bold mb-4 sm:mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
+            <span>{isAr ? "برنامج الحرفيين لعام 2026 • انضمام مجاني وعمولة 0%" : "2026 Artisan Program • Free to join & 0% commission"}</span>
+          </div>
 
-        {/* Hero Header */}
-        <div className="text-center mb-6 md:mb-16">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-[10px] font-black uppercase tracking-widest mb-3 md:mb-6"
-          >
-            <BadgeCheck className="w-3 h-3" />
-            {dict.home.artisan_onboarding?.founding_member_badge || "Founding Member Program"}
-          </motion.div>
-          <h1 className="text-3xl md:text-6xl font-heading font-bold text-primary mb-2 md:mb-6 leading-[1.1]">
-            {(dict.home.become_artisan_title_base || dict.home.become_artisan_title?.split(' ')[0])}{" "}
-            <span className="serif italic font-normal text-accent">
-              {(dict.home.become_artisan_title_accent || dict.home.become_artisan_title?.split(' ').slice(1).join(' '))}
-            </span>
+          {/* Emotional, Welcoming Headline */}
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary leading-tight mb-3 sm:mb-4 tracking-tight">
+            {isAr ? (
+              <>
+                حول شغفك بالصناعة اليدوية <br className="hidden sm:inline" />
+                <span className="serif italic font-normal text-accent">إلى متجر حقيقي وناجح</span>
+              </>
+            ) : (
+              <>
+                Turn your handmade passion <br className="hidden sm:inline" />
+                <span className="serif italic font-normal text-accent">into a thriving business</span>
+              </>
+            )}
           </h1>
-          <p className="text-charcoal/40 max-w-xl mx-auto text-sm md:text-lg leading-relaxed">
-            {dict.home.become_artisan_desc}
+
+          <p className="text-sm sm:text-base md:text-lg text-charcoal/70 max-w-2xl mx-auto leading-relaxed mb-6 sm:mb-8">
+            {isAr
+              ? "ملايين الباحثين عن الهدايا الأصيلة في مصر بانتظار إبداعك. نحن نتكفل باستلام الطرود من باب ورشتك وتحصيل أموالك، وأنت تتفرغ لمتعة الابتكار."
+              : "Collectors across Egypt can't wait to discover what you create. We handle doorstep courier pickup and direct InstaPay payouts so you can focus on making art."}
           </p>
-        </div>
 
-        {/* Benefits — compact horizontal rows on mobile, cards on desktop */}
-        <div className="mb-6 md:mb-20 max-w-5xl mx-auto">
-          {/* Mobile: compact list */}
-          <div className="flex flex-col gap-2 md:hidden">
-            {benefits.map((benefit, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-primary/5 shadow-sm">
-                <div className="w-9 h-9 bg-accent/5 rounded-xl flex items-center justify-center shrink-0">
-                  {benefit.icon}
-                </div>
+          {/* 3 Friendly Highlights */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto mb-8 sm:mb-10 text-start">
+            <div className="flex items-center gap-3 p-3 sm:p-3.5 bg-white rounded-2xl border border-primary/10 shadow-xs">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                <Percent className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-primary">{isAr ? "0% عمولة للمؤسسين" : "0% Platform Commission"}</p>
+                <p className="text-[11px] text-charcoal/50">{isAr ? "أرباحك كاملة لك طوال 2026" : "Keep 100% of your earnings"}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 sm:p-3.5 bg-white rounded-2xl border border-primary/10 shadow-xs">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-primary">{isAr ? "استلام من بابك" : "Doorstep Courier Pickup"}</p>
+                <p className="text-[11px] text-charcoal/50">{isAr ? "لجميع المحافظات الـ 27" : "Across all 27 governorates"}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 sm:p-3.5 bg-white rounded-2xl border border-primary/10 shadow-xs">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-primary">{isAr ? "أرباح فورية بإنستاباي" : "Fast InstaPay Payouts"}</p>
+                <p className="text-[11px] text-charcoal/50">{isAr ? "تحويل مباشر بدون تأخير" : "Direct to your bank or wallet"}</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={scrollToWizard}
+            className="w-full sm:w-auto px-6 sm:px-8 h-13 sm:h-14 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 inline-flex items-center justify-center gap-2.5 sm:gap-3 active:scale-95 text-sm sm:text-base group cursor-pointer"
+          >
+            <span>{isAr ? "افتح متجرك في 3 خطوات سهلة" : "Open Your Shop in 3 Simple Steps"}</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+          </button>
+        </div>
+      </section>
+
+      {/* THE 3-STEP GUIDED WIZARD */}
+      <section ref={wizardRef} id="wizard" className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 scroll-mt-6">
+        <div className="container mx-auto max-w-3xl">
+          {/* Friendly Wizard Container */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-primary/10 shadow-xl shadow-primary/5">
+            {/* Wizard Header & Progress Bar */}
+            <div className="p-4 sm:p-6 md:p-8 bg-cream/50 border-b border-primary/10 space-y-3 sm:space-y-4 rounded-t-2xl sm:rounded-t-3xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-bold text-primary leading-none mb-0.5">{benefit.title}</p>
-                  <p className="text-xs text-charcoal/40 leading-snug">{benefit.desc}</p>
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-accent block">
+                    {isAr ? `الخطوة ${currentStep} من 3` : `Step ${currentStep} of 3`}
+                  </span>
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-primary">
+                    {currentStep === 1 && (isAr ? "اختر اسماً مميزاً لمتجرك" : "Name your shop")}
+                    {currentStep === 2 && (isAr ? "أين يقع متجرك ومعلومات التواصل؟" : "Where is your shop based?")}
+                    {currentStep === 3 && (isAr ? "أخبر المقتنين قصتك الجميلة" : "Tell collectors your story")}
+                  </h2>
+                </div>
+
+                {/* Logged in status chip */}
+                {currentUser ? (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 bg-white border border-primary/10 rounded-full text-[11px] sm:text-xs font-medium text-charcoal/70 self-start sm:self-auto">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="truncate max-w-[130px] sm:max-w-[140px]">{currentUser.name || currentUser.email}</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] sm:text-[11px] text-charcoal/50 self-start sm:self-auto">
+                    {isAr ? "بدون تسجيل مسبق • الحفظ تلقائي" : "Draft auto-saved"}
+                  </span>
+                )}
+              </div>
+
+              {/* Progress Bar & Step Dots */}
+              <div className="space-y-2 pt-1 sm:pt-2">
+                <div className="w-full h-1.5 sm:h-2 bg-primary/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-accent rounded-full"
+                    initial={{ width: "33%" }}
+                    animate={{ width: `${(currentStep / 3) * 100}%` }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 text-center gap-1">
+                  {stepTitles.map((s) => {
+                    const StepIcon = s.icon;
+                    return (
+                      <button
+                        key={s.num}
+                        type="button"
+                        disabled={s.num > currentStep}
+                        onClick={() => setCurrentStep(s.num as any)}
+                        className={cn(
+                          "text-[10px] sm:text-[11px] font-bold py-1.5 px-1 sm:px-2 rounded-lg transition-colors flex items-center justify-center gap-1 sm:gap-1.5",
+                          currentStep === s.num
+                            ? "text-primary font-black bg-primary/5"
+                            : currentStep > s.num
+                            ? "text-accent hover:bg-accent/5 cursor-pointer"
+                            : "text-charcoal/30 cursor-not-allowed"
+                        )}
+                      >
+                        <StepIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                        <span className="hidden sm:inline">{isAr ? s.titleAr : s.titleEn}</span>
+                        <span className="sm:hidden">{isAr ? s.shortAr : s.shortEn}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
-          </div>
-          {/* Desktop: cards grid */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {benefits.map((benefit, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white p-8 rounded-[2rem] border border-primary/5 shadow-xl shadow-primary/5 group hover:border-accent/30 transition-all"
-              >
-                <div className="w-14 h-14 bg-accent/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  {benefit.icon}
-                </div>
-                <h3 className="text-xl font-heading font-bold text-primary mb-3">{benefit.title}</h3>
-                <p className="text-charcoal/40 text-sm leading-relaxed">{benefit.desc}</p>
-              </motion.div>
-            ))}
+            </div>
+
+            {/* Step Body */}
+            <div className="p-4 sm:p-6 md:p-10 rounded-b-2xl sm:rounded-b-3xl">
+              <AnimatePresence mode="wait">
+                {/* STEP 1: SHOP NAME */}
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step-1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-6"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm text-charcoal/70">
+                        {isAr
+                          ? "اختر اسماً بسيطاً يعبر عن شغفك ويسهل تذكره. تذكر: لا داعي للقلق، يمكنك تغييره بأي وقت لاحقاً من إعدادات متجرك."
+                          : "Choose a memorable name that represents your work. Don't stress — you can always change it later in your shop settings!"}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                        <Store className="w-3.5 h-3.5 text-accent" />
+                        <span>{isAr ? "اسم متجرك أو علامتك الحرفية *" : "Shop Name *"}</span>
+                      </label>
+                      <input
+                        ref={shopNameInputRef}
+                        type="text"
+                        required
+                        maxLength={40}
+                        value={formData.studioName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const clean = stripEmojis(val);
+                          if (clean !== val) {
+                            toast.error(isAr ? "الرموز التعبيرية غير مسموح بها" : "Emojis are not allowed", { id: "no-emoji" });
+                          }
+                          setFormData({ ...formData, studioName: clean });
+                        }}
+                        placeholder={isAr ? "مثال: متجر الفخار الأصيل" : "e.g., Cairo Clay Shop"}
+                        className="w-full h-14 px-5 bg-cream/40 border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-base font-bold text-primary placeholder:text-primary/30 transition-all"
+                      />
+
+                      {/* Live Slug Preview */}
+                      <div className="p-2.5 sm:p-3 bg-cream/60 rounded-xl border border-primary/5 flex items-center justify-between gap-2 text-xs font-mono text-primary/80">
+                        <div className="flex items-center gap-1.5 sm:gap-2 truncate min-w-0">
+                          <Globe className="w-3.5 h-3.5 text-accent shrink-0" />
+                          <span className="text-[11px] sm:text-xs truncate">giftisan.com/{lang}/artisan/</span>
+                          <span className="text-accent font-bold text-[11px] sm:text-xs truncate">{currentSlug}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="text-primary hover:text-accent p-1 transition-colors cursor-pointer shrink-0"
+                          title={isAr ? "نسخ الرابط" : "Copy link"}
+                        >
+                          {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Friendly Naming Tips */}
+                    <div className="p-3.5 sm:p-4 bg-primary/5 rounded-2xl space-y-1.5 border border-primary/10">
+                      <p className="text-xs font-bold text-primary flex items-center gap-1.5">
+                        <HelpCircle className="w-3.5 h-3.5 text-accent" />
+                        <span>{isAr ? "أفكار ذكية لاختيار اسم رائع:" : "Tips for a great shop name:"}</span>
+                      </p>
+                      <ul className="text-xs text-charcoal/60 space-y-1 list-disc list-inside">
+                        <li>{isAr ? "استخدم كلمتين أو ثلاث سهلة النطق والحفظ" : "Keep it short, memorable, and easy to spell"}</li>
+                        <li>{isAr ? "يمكنك استخدام اسمك مع حرفتك (مثل: جلود كريم، فخار نادين)" : "Combine your name with your craft (e.g., Karim Leather, Nadine Pottery)"}</li>
+                        <li>{isAr ? "الاسم يعكس روح الصناعة اليدوية واللمسة الشخصية" : "Reflect the handcrafted, personal nature of your work"}</li>
+                      </ul>
+                    </div>
+
+                    {/* Step 1 Actions */}
+                    <div className="pt-4 flex flex-col sm:flex-row justify-end">
+                      <button
+                        type="button"
+                        onClick={handleNextStep}
+                        disabled={!canProceedStep1}
+                        className="h-12 sm:h-13 px-6 sm:px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer shadow-md shadow-primary/10 text-sm sm:text-base w-full sm:w-auto"
+                      >
+                        <span>{isAr ? "التالي: الموقع والتواصل" : "Next: Location & Contact"}</span>
+                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* STEP 2: LOCATION & PHONE (COURIER PICKUP) */}
+                {currentStep === 2 && (
+                  <motion.div
+                    key="step-2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-6"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm text-charcoal/70">
+                        {isAr
+                          ? "حدد المحافظة والمنطقة التي يعمل منها متجرك ورقم هاتفك للتواصل ومتابعة الطلبات."
+                          : "Tell us where your shop is located and your phone number for order updates."}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 relative z-30">
+                      {/* Governorate with Custom Dropdown */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-accent" />
+                          <span>{isAr ? "المحافظة *" : "Governorate *"}</span>
+                        </label>
+                        <GovernorateSelect
+                          value={formData.governorate}
+                          onChange={(govId) => setFormData({ ...formData, governorate: govId })}
+                          isAr={isAr}
+                          buttonClassName="h-13 px-4 bg-cream/40 border-primary/20 rounded-2xl focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold text-primary shadow-none"
+                        />
+                      </div>
+
+                      {/* District / Area */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-accent" />
+                          <span>{isAr ? "المنطقة / الحي *" : "District / Area *"}</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.district}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const clean = stripEmojis(val);
+                            if (clean !== val) {
+                              toast.error(isAr ? "الرموز التعبيرية غير مسموح بها" : "Emojis are not allowed", { id: "no-emoji" });
+                            }
+                            setFormData({ ...formData, district: clean });
+                          }}
+                          placeholder={isAr ? "مثال: المعادي، دجلة" : "e.g., Maadi / Degla"}
+                          className="w-full h-13 px-4 bg-cream/40 border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold text-primary placeholder:text-primary/30 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-2 relative z-10">
+                      <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-accent" />
+                        <span>{isAr ? "رقم الهاتف / الواتساب للتواصل *" : "Phone / WhatsApp Contact *"}</span>
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phoneNumber}
+                        onChange={(e) => {
+                          const clean = stripEmojis(e.target.value);
+                          setFormData({ ...formData, phoneNumber: clean });
+                        }}
+                        placeholder="+20 100 000 0000"
+                        className="w-full h-13 px-4 bg-cream/40 border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold text-primary placeholder:text-primary/30 transition-all"
+                      />
+                      <p className="text-[11px] text-charcoal/50">
+                        {isAr
+                          ? "يستخدم لإشعارات الطلبات والتواصل بخصوص متجرك."
+                          : "Used strictly for order updates and shop notifications."}
+                      </p>
+                    </div>
+
+                    {/* Step 2 Actions */}
+                    <div className="pt-4 flex items-center justify-between gap-2 sm:gap-4 relative z-0">
+                      <button
+                        type="button"
+                        onClick={handlePrevStep}
+                        className="h-12 sm:h-13 px-3 sm:px-6 text-charcoal/60 hover:text-primary font-bold rounded-2xl transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs sm:text-sm shrink-0"
+                      >
+                        <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                        <span>{isAr ? "رجوع" : "Back"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleNextStep}
+                        disabled={!canProceedStep2}
+                        className="h-12 sm:h-13 px-4 sm:px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 disabled:opacity-50 cursor-pointer shadow-md shadow-primary/10 text-xs sm:text-base font-bold"
+                      >
+                        <span className="hidden sm:inline">{isAr ? "التالي: قصتك وإطلاق المتجر" : "Next: Your Story & Launch"}</span>
+                        <span className="sm:hidden">{isAr ? "التالي: قصتك" : "Next: Your Story"}</span>
+                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* STEP 3: STORY, BRAND COLOR & LAUNCH REVIEW */}
+                {currentStep === 3 && (
+                  <motion.div
+                    key="step-3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-6"
+                  >
+                    {/* Unverified Email Warning if applicable */}
+                    {isUnverified && (
+                      <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-900">
+                        <div className="flex items-start gap-2.5">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold">{isAr ? "تأكيد البريد الإلكتروني مطلوب" : "Email Verification Required"}</p>
+                            <p className="text-[11px] text-amber-800">
+                              {isAr
+                                ? `يرجى تفعيل بريدك (${currentUser?.email}) لإطلاق المتجر فوراً.`
+                                : `Please verify your email (${currentUser?.email}) to launch.`}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          disabled={isResendingEmail || emailSentSuccess}
+                          className="w-full sm:w-auto justify-center shrink-0 px-3 py-2 sm:py-1.5 bg-amber-700 text-white rounded-xl text-xs font-bold hover:bg-amber-800 transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          {isResendingEmail ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                          <span>{emailSentSuccess ? (isAr ? "تم الإرسال!" : "Sent!") : (isAr ? "إعادة إرسال الرابط" : "Resend Link")}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Bio / Story Input (Optional) */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                          <AlignLeft className="w-3.5 h-3.5 text-accent" />
+                          <span>{isAr ? "قصتك ونبذة عن شغفك (اختياري)" : "Your Story (Optional)"}</span>
+                        </label>
+                        <span className="text-[11px] text-charcoal/40 font-mono">{formData.bio.length}/500</span>
+                      </div>
+                      <textarea
+                        rows={3}
+                        maxLength={500}
+                        value={formData.bio}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const clean = stripEmojis(val);
+                          if (clean !== val) {
+                            toast.error(isAr ? "الرموز التعبيرية غير مسموح بها" : "Emojis are not allowed", { id: "no-emoji" });
+                          }
+                          setFormData({ ...formData, bio: clean });
+                        }}
+                        placeholder={
+                          isAr
+                            ? "أخبر المقتنين بسطر بسيط عن شغفك، أو يمكنك إضافتها لاحقاً من إعدادات متجرك..."
+                            : "A short sentence about what inspires your craft, or feel free to skip and add this later..."
+                        }
+                        className="w-full h-24 p-3.5 bg-cream/40 border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm text-primary placeholder:text-primary/30 transition-all resize-none leading-relaxed"
+                      />
+                    </div>
+
+                    {/* Instagram Handle */}
+                    <div className="space-y-2 pt-0.5">
+                      <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                        <FaInstagram className="w-3.5 h-3.5 text-accent" />
+                        <span>{isAr ? "حساب إنستجرام (اختياري)" : "Instagram Handle (Optional)"}</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute start-4 top-1/2 -translate-y-1/2 text-charcoal/40 text-sm font-bold">@</span>
+                        <input
+                          type="text"
+                          value={formData.instagram}
+                          onChange={(e) => {
+                            const clean = stripEmojis(e.target.value.replace(/^@/, ''));
+                            setFormData({ ...formData, instagram: clean });
+                          }}
+                          placeholder="your_brand"
+                          className="w-full h-13 ps-9 pe-4 bg-cream/40 border border-primary/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold text-primary transition-all placeholder:text-primary/30"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Launch Reassurance Badge */}
+                    <div className="p-3 sm:p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200/60 flex items-start sm:items-center gap-2.5 sm:gap-3 text-emerald-950">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                      </div>
+                      <div className="text-xs">
+                        <p className="font-bold text-emerald-900 leading-snug">
+                          {isAr ? "متجرك جاهز للانطلاق!" : "Ready to launch your shop!"}
+                        </p>
+                        <p className="text-[11px] text-emerald-800/80 leading-snug">
+                          {isAr
+                            ? "يمكنك إضافة منتجاتك وتعديل كافة التفاصيل فوراً بعد تفعيل المتجر."
+                            : "You can add your handcrafted products and edit all shop details anytime from your dashboard."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Step 3 Final Launch Actions */}
+                    <div className="pt-2 flex items-center justify-between gap-2 sm:gap-4">
+                      <button
+                        type="button"
+                        onClick={handlePrevStep}
+                        className="h-12 sm:h-14 px-3 sm:px-6 text-charcoal/60 hover:text-primary font-bold rounded-2xl transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer text-xs sm:text-sm shrink-0"
+                      >
+                        <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                        <span>{isAr ? "رجوع" : "Back"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleFinalSubmit}
+                        disabled={isLoading}
+                        className="flex-1 h-12 sm:h-14 px-4 sm:px-8 bg-primary text-white font-bold rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer text-xs sm:text-base md:text-lg group"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                            <span>{isAr ? "جاري الإطلاق..." : "Launching..."}</span>
+                          </div>
+                        ) : (
+                          <>
+                            {currentUser ? (
+                              <span>{isAr ? "إطلاق متجري الآن" : "Launch My Shop"}</span>
+                            ) : (
+                              <>
+                                <span className="hidden sm:inline">{isAr ? "حفظ ومتابعة الحساب لإطلاق المتجر" : "Save & Launch My Shop"}</span>
+                                <span className="sm:hidden">{isAr ? "حفظ وإطلاق المتجر" : "Save & Launch"}</span>
+                              </>
+                            )}
+                            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-center text-xs text-charcoal/50">
+                      {isAr
+                        ? "0% عمولة للمؤسسين طوال عام 2026 • لا توجد رسوم إدراج • تحكم كامل بمتجرك"
+                        : "0% commission for 2026 founding artisans • No listing fees • Full creative freedom"}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid lg:grid-cols-12 gap-8 md:gap-16 items-start">
-          {/* How it Works — horizontal pill strip on mobile, vertical on desktop */}
-          <div className="lg:col-span-5 space-y-6 md:space-y-12">
-            <div>
-              <h2 className="text-lg md:text-3xl font-heading font-bold text-primary mb-4 md:mb-8">
-                {dict.home.artisan_onboarding?.how_it_works_title || "How it Works"}
-              </h2>
-              {/* Mobile: horizontal step strip */}
-              <div className="flex gap-2 md:hidden">
-                {steps.map((step, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl p-3 border border-primary/5 text-center">
-                    <div className="w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0">
-                      {i + 1}
-                    </div>
-                    <p className="text-xs font-bold text-primary leading-tight">{step.title}</p>
-                    <p className="text-[10px] text-charcoal/40 leading-tight">{step.desc}</p>
-                  </div>
-                ))}
-              </div>
-              {/* Desktop: vertical list */}
-              <div className="hidden md:block space-y-8">
-                {steps.map((step, i) => (
-                  <div key={i} className="flex gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm">
-                      {i + 1}
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-primary mb-1">{step.title}</h4>
-                      <p className="text-charcoal/40 text-sm">{step.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Need Help — hidden on mobile to save space */}
-            <div className="hidden md:block p-8 bg-primary rounded-[2rem] text-white space-y-4">
-              <h4 className="font-heading font-bold text-xl">Need Help?</h4>
-              <p className="text-white/60 text-sm">
-                Our curation team is here to help you set up your shop and showcase your unique products.
-              </p>
-              <a href="mailto:support@giftisan.com" className="inline-flex items-center gap-2 text-accent font-bold hover:gap-3 transition-all">
-                Contact Curation <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
+      {/* Real Artisan Stories (Inspiration & Trust) */}
+      <section className="py-12 sm:py-16 md:py-24 bg-white/50 border-y border-primary/5">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12">
+            <span className="text-xs font-black uppercase tracking-widest text-accent mb-2 block">
+              {isAr ? "قصص من مجتمع الحرفيين" : "Stories from the Maker Circle"}
+            </span>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-primary">
+              {isAr ? "حرفيون مصريون يصنعون أثرهم كل يوم" : "Egyptian makers building their creative legacy"}
+            </h2>
           </div>
 
-          {/* Form */}
-          <div className="lg:col-span-7">
-            <motion.form
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onSubmit={handleSubmit}
-              className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-primary/5 border border-primary/5 space-y-4 md:space-y-8"
-            >
-              <div className="space-y-4 md:space-y-6">
-                <div className="space-y-1.5 md:space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    <Store className="w-3 h-3" /> {dict.home.studio_name_label} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.studioName}
-                    onChange={(e) => setFormData({ ...formData, studioName: e.target.value })}
-                    placeholder={dict.home.studio_name_placeholder}
-                    className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 md:block md:space-y-6">
-                  <div className="space-y-1.5 md:space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                      <MapPin className="w-3 h-3" /> {dict.home.location_label} *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      placeholder={dict.home.location_placeholder}
-                      className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 md:space-y-2">
-                    <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                      <Phone className="w-3 h-3" /> {dict.checkout?.phone_number || (lang === 'ar' ? 'رقم الهاتف' : 'Phone')} *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      name="phone"
-                      autoComplete="tel"
-                      value={formData.phoneNumber}
-                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                      placeholder="+20 100 000 0000"
-                      className="w-full h-12 md:h-14 px-4 md:px-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-bold shadow-sm text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 md:space-y-2">
-                  <label className="text-[10px] md:text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2 ml-1">
-                    <AlignLeft className="w-3 h-3" /> {dict.home.bio_label} *
-                  </label>
-                  <textarea
-                    required
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    placeholder={dict.home.bio_placeholder}
-                    className="w-full h-24 md:h-40 p-4 md:p-6 bg-white border border-primary/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-primary/30 text-primary font-medium resize-none shadow-sm text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2 md:pt-8 flex flex-col items-center gap-3 md:gap-6">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-13 md:h-16 bg-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-primary-light transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50 text-sm md:text-lg active:scale-95 group"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {ARTISAN_STORIES.map((story, i) => {
+              const StoryIcon = story.icon;
+              return (
+                <div
+                  key={i}
+                  className="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-3xl border border-primary/10 shadow-sm flex flex-col justify-between space-y-4"
                 >
-                  {isLoading ? dict.home.launch_loading : (dict.home.launch_button || "Open Your Shop")}
-                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
-                </button>
-                <div className="flex items-center gap-2 text-[10px] md:text-xs text-charcoal/40 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
-                  {dict.home.no_fees}
+                  <div className="space-y-3">
+                    <span className="p-2.5 sm:p-3 bg-cream rounded-2xl inline-block border border-primary/5 shadow-xs">
+                      <StoryIcon className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
+                    </span>
+                    <p className="text-xs sm:text-sm text-charcoal/70 leading-relaxed italic">
+                      "{isAr ? story.quoteAr : story.quoteEn}"
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-primary/5 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-primary">{isAr ? story.nameAr : story.nameEn}</h4>
+                      <p className="text-xs text-accent font-medium">{isAr ? story.studioAr : story.studioEn}</p>
+                    </div>
+                    <span className="text-[11px] text-charcoal/40">{isAr ? story.locationAr : story.locationEn}</span>
+                  </div>
                 </div>
-              </div>
-            </motion.form>
+              );
+            })}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Friendly FAQ Accordion */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12">
+            <span className="text-xs font-black uppercase tracking-widest text-accent mb-2 block">
+              {isAr ? "الأسئلة الشائعة" : "Got Questions?"}
+            </span>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-primary">
+              {isAr ? "كل ما يدور ببالك قبل البدء" : "Everything you need to know"}
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: isAr ? "هل أحتاج إلى سجل تجاري أو بطاقة ضريبية؟" : "Do I need a commercial register or business license?",
+                a: isAr
+                  ? "لا، على الإطلاق! منصة جيفتيزان مخصصة لدعم الحرفيين المستقلين، أصحاب المتاجر والمشاريع اليدوية. كل ما تحتاجه هو شغفك ومنتجات يدوية جميلة من صنع يديك."
+                  : "No, not at all! Giftisan is designed for independent creators, home shops, and handmade makers. You just need authentic handcrafted pieces made with love.",
+              },
+              {
+                q: isAr ? "كيف تعمل آلية الشحن والاستلام؟" : "How does courier pickup & shipping work?",
+                a: isAr
+                  ? "الأمر في غاية البساطة: بمجرد أن يطلب عميل قطعتك وتجهزها، يصل مندوب شركة الشحن مباشرة إلى عنوانك لاستلام الطرد وتوصيله للمشتري. تكلفة الشحن يتحملها المشتري."
+                  : "Very simple: when a customer orders and you pack your item, our courier arrives directly at your door to pick it up and deliver it. The buyer pays the delivery fee.",
+              },
+              {
+                q: isAr ? "متى وكيف أستلم أرباحي؟" : "When and how do I receive my earnings?",
+                a: isAr
+                  ? "تحصل على أرباحك مباشرة وبدون تأخير عبر تحويل إنستاباي (InstaPay) الفوري أو المحافظ الذكية (فودافون كاش، اتصالات، أورنج، وي) بمجرد تسليم الطلب للعميل."
+                  : "Your earnings are sent directly to your InstaPay handle or mobile wallet within 24–48 hours of confirmed order delivery.",
+              },
+              {
+                q: isAr ? "ماذا تعني عمولة 0% لبرنامج العضو المؤسس؟" : "What does 0% platform commission mean?",
+                a: isAr
+                  ? "الحرفيون الذين ينضمون في دفعة 2026 التأسيسية يتمتعون بعمولة 0% على مبيعاتهم، ولا توجد أي رسوم تسجيل أو اشتراك شهري أو رسوم إدراج، مما يعني أن كامل عائد بيع منتجك يصل لجيبك."
+                  : "Artisans joining our 2026 Founding Cohort enjoy a full 0% platform commission on their sales, with no monthly subscription or listing fees. You keep 100% of your earnings.",
+              },
+              {
+                q: isAr ? "هل يمكنني بيع منتجات مخصصة بالطلب؟" : "Can I sell custom or personalized items?",
+                a: isAr
+                  ? "نعم بالتأكيد! توفر جيفتيزان ميزة تحديد مدة التصنيع (مثلاً 3 إلى 7 أيام عمل)، بالإضافة إلى إمكانية استقبال تفاصيل الحفر، الصور، والأسماء المخصصة من المشتري مباشرة."
+                  : "Yes! You can specify custom crafting lead times (e.g. 3–7 days) and collect custom engraving text, custom dimensions, or reference photos directly from buyers.",
+              },
+            ].map((faq, index) => {
+              const isOpen = openFaq === index;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl border border-primary/10 shadow-xs overflow-hidden transition-all"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : index)}
+                    className="w-full p-4 sm:p-5 text-start flex items-center justify-between gap-3 sm:gap-4 font-bold text-primary text-xs sm:text-sm md:text-base hover:text-accent transition-colors cursor-pointer"
+                  >
+                    <span className="leading-snug">{faq.q}</span>
+                    <ChevronDown
+                      className={cn(
+                        "w-4 h-4 text-accent shrink-0 transition-transform duration-200",
+                        isOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-xs sm:text-sm text-charcoal/70 leading-relaxed border-t border-primary/5 pt-3">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Support Page Banner */}
+          <div className="mt-8 sm:mt-10 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-primary text-white flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-xl shadow-primary/10 text-center sm:text-start">
+            <div className="space-y-1">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold">
+                {isAr ? "تحب أن نساعدك في تجهيز متجرك خطوة بخطوة؟" : "Want personal help setting up your shop?"}
+              </h3>
+              <p className="text-white/70 text-xs sm:text-sm">
+                {isAr
+                  ? "فريق دعم جيفتيزان متاح للإجابة على استفساراتك وإرشادك خطوة بخطوة في إعداد متجرك."
+                  : "Our artisan support team is here to answer questions, guide your setup, and assist you every step of the way."}
+              </p>
+            </div>
+            <Link
+              href={`/${lang}/contact`}
+              className="w-full sm:w-auto shrink-0 px-6 h-12 bg-accent text-white font-bold rounded-2xl hover:bg-accent-dark transition-all flex items-center justify-center gap-2 text-xs md:text-sm shadow-md cursor-pointer"
+            >
+              <Headphones className="w-4 h-4" />
+              <span>{isAr ? "تواصل مع فريق الدعم" : "Contact Artisan Support"}</span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <Footer dict={dict} />
     </main>
   );
 }
-

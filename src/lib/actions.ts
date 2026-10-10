@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { signIn, auth } from "@/auth";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { AuthError } from "next-auth";
-import { slugify } from "@/lib/utils";
+import { slugify, stripEmojis } from "@/lib/utils";
 import cloudinary from "@/lib/cloudinary";
 import sharp from "sharp";
 import { sendWelcomeEmail, sendOrderNotification, sendMessageNotification, sendVerificationEmail, sendOrderStatusUpdateEmail, sendPasswordResetEmail, sendInquiryNotification, sendArtisanApprovalEmail, sendArtisanOutreachEmail, sendCustomEmail, sendProductStatusUpdateEmail, sendPayoutRequestEmail, sendPayoutApprovedEmail, sendPayoutDeclinedEmail, sendRefundRequestSubmittedEmail, sendRefundResolvedEmail, sendAbandonedCheckoutNotification, sendBuyerOrderReceiptEmail } from "@/lib/mail";
@@ -173,7 +173,7 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
           slug: artisanSlug,
           bio: "",
           location: "",
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+          avatar: `https://api.dicebear.com/10.x/glyphs/svg?seed=${name}`,
         },
       });
     }
@@ -1128,7 +1128,7 @@ export async function createOrder(userId: string | null, totalAmount: number, it
       processedCustomImage: item.customImage ? await processImage(item.customImage) : null
     })));
 
-    // 🛡️ Final Inventory Guard: Verify stock and shop approval for all items before processing (read-only check)
+    // Final Inventory Guard: Verify stock and shop approval for all items before processing (read-only check)
     for (const item of processedItems) {
       if (item.variantId) {
         const variant = await prisma.productVariant.findUnique({
@@ -2350,8 +2350,8 @@ export async function updateArtisanProfile(userId: string, data: any) {
       return { error: "You are not authorized to update this profile" };
     }
 
-    if (!data.studioName?.trim() || !data.slug?.trim() || !data.bio?.trim() || !data.location?.trim() || !data.phoneNumber?.trim() || !data.pickupAddress?.trim() || !data.pickupCity?.trim()) {
-      return { error: "Shop Name, Handle (Slug), Bio, Location, Phone Number, and Pickup Address are all required." };
+    if (!data.studioName?.trim() || !data.slug?.trim() || !data.phoneNumber?.trim() || (!data.location?.trim() && !data.pickupCity?.trim())) {
+      return { error: "Shop Name, Handle (Slug), Phone Number, and Location are required." };
     }
 
     // Only generate slug if it's not manually provided OR it's a new profile
@@ -3406,28 +3406,63 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       return { error: "You are not authorized to onboard this account" };
     }
 
+    const cleanStudioName = stripEmojis(studioData.studioName?.trim() || "");
+    const cleanBio = stripEmojis(studioData.bio?.trim() || "") || "Handmade artisan workshop.";
+    const cleanLocation = stripEmojis(studioData.location?.trim() || "");
+    const cleanPhoneNumber = stripEmojis(studioData.phoneNumber?.trim() || "");
+
+    if (!cleanStudioName || !cleanLocation || !cleanPhoneNumber) {
+      return { error: "Shop Name, Location, and Phone Number are required for artisan registration." };
+    }
+
     await prisma.user.update({
       where: { id: userId },
       data: { role: "ARTISAN" }
     });
 
-    if (!studioData.studioName?.trim() || !studioData.bio?.trim() || !studioData.location?.trim() || !studioData.phoneNumber?.trim()) {
-      return { error: "Shop Name, Bio, Location, and Phone Number are all required for artisan registration." };
+    const baseSlug = slugify(cleanStudioName);
+    let artisanSlug = baseSlug ? baseSlug : `artisan-${userId.slice(-4)}`;
+
+    // Verify slug uniqueness against other artisans
+    const existingArtisan = await prisma.artisanProfile.findFirst({
+      where: {
+        slug: artisanSlug,
+        userId: { not: userId }
+      }
+    });
+
+    if (existingArtisan) {
+      artisanSlug = `${artisanSlug}-${userId.slice(-4)}`;
     }
 
-    const baseSlug = slugify(studioData.studioName);
-    const artisanSlug = baseSlug ? baseSlug : `artisan-${userId.slice(-4)}`;
+    const cleanInstagram = studioData.instagram ? stripEmojis(studioData.instagram.replace(/^@/, '').trim()) : null;
+    const cleanBrandColor = studioData.brandColor?.trim() || "#da7b5a";
+    const cleanPickupCity = studioData.pickupCity ? stripEmojis(studioData.pickupCity.trim()) : null;
 
-    await prisma.artisanProfile.create({
-      data: {
+    const locationParts = cleanLocation.split(/[,،]/).map(s => s.trim()).filter(Boolean);
+    const derivedGov = cleanPickupCity || studioData.governorate || locationParts[0] || null;
+    const derivedDistrict = studioData.district || (locationParts.length > 1 ? locationParts[1] : null);
+
+    const profileData = {
+      studioName: cleanStudioName,
+      slug: artisanSlug,
+      bio: cleanBio,
+      location: cleanLocation,
+      phoneNumber: cleanPhoneNumber,
+      avatar: (session.user as any)?.image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${encodeURIComponent(cleanStudioName || userId)}`,
+      ...(cleanInstagram ? { instagram: cleanInstagram } : {}),
+      ...(cleanBrandColor ? { brandColor: cleanBrandColor } : {}),
+      ...(derivedGov ? { pickupCity: derivedGov } : {}),
+      ...(derivedDistrict ? { pickupDistrict: derivedDistrict } : {}),
+    };
+
+    await prisma.artisanProfile.upsert({
+      where: { userId },
+      create: {
         userId,
-        studioName: studioData.studioName,
-        slug: artisanSlug,
-        bio: studioData.bio || "",
-        location: studioData.location || "",
-        phoneNumber: studioData.phoneNumber.trim(),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${studioData.studioName || userId}`
-      }
+        ...profileData
+      },
+      update: profileData
     });
 
     revalidatePath("/studio");
@@ -3846,7 +3881,7 @@ export async function updateUserRole(userId: string, role: "CLIENT" | "ARTISAN" 
           userId,
           bio: "",
           location: "",
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name || userId}`
+          avatar: `https://api.dicebear.com/10.x/glyphs/svg?seed=${user.name || userId}`
         },
         update: {} // Do nothing if it already exists
       });

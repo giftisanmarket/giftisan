@@ -357,7 +357,7 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     {[
                       {
                         label: dict.studio.checklist_settings || "Fill required shop details in Settings",
-                        done: !!artisan.studioName?.trim() && !!artisan.slug?.trim() && !!artisan.bio?.trim() && !!artisan.location?.trim() && !!artisan.phoneNumber?.trim() && !!artisan.pickupAddress?.trim() && !!artisan.pickupCity?.trim(),
+                        done: !!artisan.studioName?.trim() && !!artisan.slug?.trim() && !!artisan.phoneNumber?.trim() && (!!artisan.location?.trim() || !!artisan.pickupCity?.trim()),
                         link: "#settings"
                       },
                       {
@@ -857,11 +857,13 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-4 border-b border-primary/5 pb-2">{dict.admin.ship_to || "Ship To"}</h3>
                     <div className="space-y-1">
                       <p className="text-lg font-black text-primary">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
-                      <p className="text-sm font-bold text-primary">
-                        📍 {lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}
+                      <p className="text-sm font-bold text-primary flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
+                        <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
                       </p>
-                      <p className="text-xs font-medium text-charcoal/40">
-                        🔒 {lang === "ar" ? "تتم التغطية بواسطة خدمة توصيل جيفتيزان" : "Fulfilled & Shipped by Giftisan Delivery"}
+                      <p className="text-xs font-medium text-charcoal/40 flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-primary/40 shrink-0" />
+                        <span>{lang === "ar" ? "تتم التغطية بواسطة خدمة توصيل جيفتيزان" : "Fulfilled & Shipped by Giftisan Delivery"}</span>
                       </p>
                     </div>
                   </div>

@@ -264,7 +264,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                   <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                   <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
                     <BespokeImage 
-                      src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                      src={user.image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${user.name}`} 
                       alt={user.name} 
                       fill 
                       className="object-cover"
@@ -457,7 +457,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                                     ? "bg-accent border-accent text-white"
                                     : "bg-white border-primary/20 text-primary/40"
                                 )}>
-                                  ✓
+                                  <Check className="w-4 h-4 text-white" />
                                 </div>
                                 <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
                                   {dict.admin?.approved || "Paid"}
@@ -471,7 +471,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                                     ? "bg-accent border-accent text-white"
                                     : "bg-white border-primary/20 text-primary/40"
                                 )}>
-                                  {order.status === "SHIPPED" || order.status === "DELIVERED" ? "✓" : "2"}
+                                  {order.status === "SHIPPED" || order.status === "DELIVERED" ? <Check className="w-4 h-4 text-white" /> : "2"}
                                 </div>
                                 <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
                                   {dict.profile?.shipped || "Shipped"}
@@ -485,7 +485,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                                     ? "bg-accent border-accent text-white"
                                     : "bg-white border-primary/20 text-primary/40"
                                 )}>
-                                  {order.status === "DELIVERED" ? "✓" : "3"}
+                                  {order.status === "DELIVERED" ? <Check className="w-4 h-4 text-white" /> : "3"}
                                 </div>
                                 <p className="text-[10px] md:text-xs font-black uppercase tracking-wider text-primary text-center">
                                   {dict.profile?.delivered || "Delivered"}

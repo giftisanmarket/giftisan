@@ -7,10 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 
 // Strips all emoji characters from a string (covers all Unicode emoji ranges)
 export function stripEmojis(str: string): string {
+  if (!str) return "";
   return str
     .replace(/\p{Extended_Pictographic}/gu, "")
     .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, "")  // flag sequences
-    .replace(/[\u200D\uFE0F]/gu, "");          // zero-width joiners & variation selectors
+    .replace(/[\u200D\uFE0F]/gu, "")          // zero-width joiners & variation selectors
+    .replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]/g, ""); // surrogate pairs
+}
+
+export function hasEmoji(str: string): boolean {
+  if (!str) return false;
+  return /\p{Extended_Pictographic}|[\u{1F1E0}-\u{1F1FF}]|[\uD83C-\uDBFF\uDC00-\uDFFF]/u.test(str);
 }
 
 export function slugify(text: string) {

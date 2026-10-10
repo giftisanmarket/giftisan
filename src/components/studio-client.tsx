@@ -698,16 +698,36 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                               <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
                               <span>{lang === "ar" ? "بيانات العميل محمية الخصوصية" : "Customer Details Protected"}</span>
                             </div>
-                            <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5 space-y-2">
-                              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio.shipping_to}</p>
-                              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary">
-                                <MapPin className="w-4 h-4 text-accent shrink-0" />
-                                <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
+                            <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5 space-y-3">
+                              <div className="space-y-1.5">
+                                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio.shipping_to}</p>
+                                <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary">
+                                  <MapPin className="w-4 h-4 text-accent shrink-0" />
+                                  <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
+                                </div>
+                                <p className="text-[10px] font-medium text-charcoal/40 flex items-center gap-1.5 pt-0.5">
+                                  <Lock className="w-3 h-3 text-accent shrink-0" />
+                                  <span>{lang === "ar" ? "تتم التغطية بواسطة توصيل جيفتيزان (العنوان التفصيلي محمي)" : "Fulfilled by Giftisan Delivery (Street Address Protected)"}</span>
+                                </p>
                               </div>
-                              <p className="text-[10px] font-medium text-charcoal/40 flex items-center gap-1.5 pt-0.5">
-                                <Lock className="w-3 h-3 text-accent shrink-0" />
-                                <span>{lang === "ar" ? "تتم التغطية بواسطة توصيل جيفتيزان (العنوان التفصيلي محمي)" : "Fulfilled by Giftisan Delivery (Street Address Protected)"}</span>
-                              </p>
+
+                              {/* Dedicated Payment Method Badge */}
+                              <div className="pt-2 border-t border-primary/5 space-y-1.5">
+                                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">
+                                  {lang === "ar" ? "طريقة الدفع" : "Payment Method"}
+                                </p>
+                                {selectedItem.order.orderNotes?.includes("[COD") ? (
+                                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-200/60 text-xs font-bold text-amber-900">
+                                    <Banknote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <span>{lang === "ar" ? "الدفع عند الاستلام (COD)" : "Cash on Delivery (COD)"}</span>
+                                  </div>
+                                ) : (
+                                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200/60 text-xs font-bold text-emerald-900">
+                                    <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <span>{lang === "ar" ? "بطاقة / محفظة إلكترونية (مدفوع)" : "Paid Online (Cards / Wallets)"}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -727,17 +747,28 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         </div>
                       )}
 
-                      {selectedItem.order.orderNotes && (
-                        <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
-                          <div className="flex items-center gap-2 mb-2 md:mb-3">
-                            <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                            <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.studio.order_notes_client}</h3>
+                      {/* Client Order Notes (Only displayed if client actually provided special instructions) */}
+                      {(() => {
+                        const rawNotes = selectedItem.order.orderNotes || "";
+                        const clientNote = rawNotes
+                          .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
+                          .replace(/\[Gift Note:[^\]]*\]/gi, "")
+                          .trim();
+
+                        if (!clientNote) return null;
+
+                        return (
+                          <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
+                            <div className="flex items-center gap-2 mb-2 md:mb-3">
+                              <div className="w-1.5 h-1.5 bg-accent rounded-full" />
+                              <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.studio.order_notes_client}</h3>
+                            </div>
+                            <p className="text-xs md:text-sm italic text-charcoal/70 leading-relaxed">
+                              "{clientNote}"
+                            </p>
                           </div>
-                          <p className="text-xs md:text-sm italic text-charcoal/60 leading-relaxed">
-                            "{selectedItem.order.orderNotes}"
-                          </p>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       {/* Artisan Internal Notes */}
                       <div className="p-4 md:p-6 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5">
@@ -839,25 +870,34 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   </table>
                 </div>
 
-                {(selectedItem.order.isGift || selectedItem.order.orderNotes) && (
-                  <div className="grid grid-cols-2 gap-8 mb-12">
-                    {selectedItem.order.isGift && (
-                      <div className="p-6 bg-accent/5 rounded-2xl border-2 border-dashed border-accent/20 relative overflow-hidden">
-                        <Sparkles className="absolute top-4 right-4 w-8 h-8 text-accent/10" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-2">Gift Message</p>
-                        <p className="text-xl font-heading font-bold text-primary italic leading-relaxed">
-                          "{selectedItem.order.giftMessage || "No message provided."}"
-                        </p>
-                      </div>
-                    )}
-                    {selectedItem.order.orderNotes && (
-                      <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Customer Instructions</p>
-                        <p className="text-sm font-medium text-primary/80">{selectedItem.order.orderNotes}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {(() => {
+                  const clientNote = (selectedItem.order.orderNotes || "")
+                    .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
+                    .replace(/\[Gift Note:[^\]]*\]/gi, "")
+                    .trim();
+
+                  if (!selectedItem.order.isGift && !clientNote) return null;
+
+                  return (
+                    <div className="grid grid-cols-2 gap-8 mb-12">
+                      {selectedItem.order.isGift && (
+                        <div className="p-6 bg-accent/5 rounded-2xl border-2 border-dashed border-accent/20 relative overflow-hidden">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-accent/10" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-2">Gift Message</p>
+                          <p className="text-xl font-heading font-bold text-primary italic leading-relaxed">
+                            "{selectedItem.order.giftMessage || "No message provided."}"
+                          </p>
+                        </div>
+                      )}
+                      {clientNote && (
+                        <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Customer Instructions</p>
+                          <p className="text-sm font-medium text-primary/80">{clientNote}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <div className="mt-auto text-center py-12 border-t border-primary/5">
                   <p className="font-heading font-bold text-primary text-xl mb-1">

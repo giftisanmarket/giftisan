@@ -91,7 +91,8 @@ export function CheckoutClient({ dict }: { dict: any }) {
     phone: "",
     email: session?.user?.email || "",
     isGift: false,
-    giftMessage: ""
+    giftMessage: "",
+    deliveryNotes: ""
   });
 
   // Auto-restore saved shipping address from localStorage
@@ -270,7 +271,11 @@ export function CheckoutClient({ dict }: { dict: any }) {
       ? `${addressDetailsParts} [GPS Pin: ${gpsPinUrl}]`
       : addressDetailsParts;
 
-    const notesWithPayment = `${paymentMethod === 'cod' ? '[COD - Cash on Delivery]' : '[Paymob Online]'} ${shippingData.isGift && shippingData.giftMessage ? `[Gift Note: ${shippingData.giftMessage}]` : ''}`.trim();
+    const paymentTag = paymentMethod === 'cod' ? '[COD - Cash on Delivery]' : '[Paymob Online]';
+    const giftTag = shippingData.isGift && shippingData.giftMessage ? `[Gift Note: ${shippingData.giftMessage}]` : '';
+    const userNotes = shippingData.deliveryNotes ? shippingData.deliveryNotes.trim() : '';
+
+    const notesWithPayment = [paymentTag, giftTag, userNotes].filter(Boolean).join(" ").trim();
 
     const res = await createOrder(session?.user?.id || null, finalPrice, cart, {
       ...shippingData,
@@ -743,6 +748,22 @@ export function CheckoutClient({ dict }: { dict: any }) {
                       className="w-full h-12 px-4 rounded-xl border border-primary/20 bg-white text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 placeholder:text-charcoal/30"
                     />
                   </div>
+                </div>
+
+                {/* Delivery Notes / Special Instructions */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-xs font-semibold text-charcoal/80 flex items-center justify-between">
+                    <span>{isAr ? "ملاحظات أو تعليمات خاصة بالتوصيل" : "Special Delivery Instructions"}</span>
+                    <span className="text-charcoal/40 font-normal text-[11px]">({dict.checkout?.optional || (isAr ? "اختياري" : "Optional")})</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    name="deliveryNotes"
+                    placeholder={isAr ? "مثال: يرجى الاتصال قبل الوصول بـ 15 دقيقة، أو ترك الشحنة مع الأمن..." : "e.g. Please call 15 minutes before arrival, leave with doorman..."}
+                    value={shippingData.deliveryNotes}
+                    onChange={(e) => updateShippingField("deliveryNotes", e.target.value)}
+                    className="w-full p-3 rounded-xl border border-primary/20 bg-white text-xs sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 placeholder:text-charcoal/30 resize-none"
+                  />
                 </div>
 
                 {/* Delivery Zone Confirmation Badge */}

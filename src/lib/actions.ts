@@ -1364,21 +1364,7 @@ export async function createOrder(userId: string | null, totalAmount: number, it
     );
     const abandonedCheckoutId = acRow?.[0]?.id;
 
-    // Fire-and-forget: send admin notification email with customer lead data
-    sendAbandonedCheckoutNotification({
-      customerName,
-      customerEmail: shippingData?.email || "",
-      customerPhone: shippingData?.phone || "",
-      shippingCity: shippingData?.city,
-      shippingAddress: shippingData?.address,
-      totalAmount,
-      items: items.map(item => ({
-        name: item.name || "Item",
-        quantity: item.quantity,
-        price: item.price,
-        personalization: item.personalization
-      }))
-    }).catch(err => console.error("Failed to send abandoned checkout notification:", err));
+    // Abandoned checkout is stored in DB for admin leads dashboard; email notification disabled per request
 
     // Generate Paymob Payment Link
     let paymentUrl = null;

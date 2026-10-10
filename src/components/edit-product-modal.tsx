@@ -467,95 +467,127 @@ const VariantRow = memo(({ v, i, variants, setVariants, dict }: any) => (
 
 VariantRow.displayName = "VariantRow";
 
-const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => (
-  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm space-y-5">
-    <div className="flex items-center gap-4">
-      <div className="relative w-14 h-14 bg-cream rounded-xl overflow-hidden border border-primary/5 flex items-center justify-center shrink-0">
-        {v.image ? (
-          <img src={v.image} className="w-full h-full object-cover" />
-        ) : (
-          <ImageIcon className="w-6 h-6 text-primary/10" />
-        )}
-        <input 
-          type="file" 
-          accept="image/*"
-          className="absolute inset-0 opacity-0"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const img = new (window as any).Image();
-                img.onload = () => {
-                  const canvas = document.createElement('canvas');
-                  let width = img.width;
-                  let height = img.height;
-                  const MAX_RES = 1080;
-                  if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
-                  else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
-                  canvas.width = width; canvas.height = height;
-                  const ctx = canvas.getContext('2d');
-                  if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
-                  
-                  const newVariants = [...variants];
-                  newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
-                  setVariants(newVariants);
-                };
-                img.src = reader.result as string;
-              };
-              reader.readAsDataURL(file);
-            }
-          }}
-        />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-primary truncate">{v.name}</p>
+const VariantCard = memo(({ v, i, variants, setVariants, dict }: any) => {
+  const isAr = dict?.common?.home === "الرئيسية" || dict?.new_product?.the_essentials === "الأساسيات";
+
+  return (
+    <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-primary/10 shadow-xs space-y-3.5 sm:space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 bg-cream rounded-xl overflow-hidden border border-primary/10 flex items-center justify-center shrink-0 group/img">
+            {v.image ? (
+              <img src={v.image} className="w-full h-full object-cover" alt={v.name} />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-primary/30 group-hover/img:text-accent transition-colors">
+                <ImageIcon className="w-5 h-5" />
+                <span className="text-[7px] font-bold uppercase mt-0.5 opacity-70">+ Photo</span>
+              </div>
+            )}
+            <input 
+              type="file" 
+              accept="image/*"
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              title={dict.edit_product?.upload_image || "Upload variant image"}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const img = new (window as any).Image();
+                    img.onload = () => {
+                      const canvas = document.createElement('canvas');
+                      let width = img.width;
+                      let height = img.height;
+                      const MAX_RES = 1080;
+                      if (width > height) { if (width > MAX_RES) { height *= MAX_RES / width; width = MAX_RES; } }
+                      else { if (height > MAX_RES) { width *= MAX_RES / height; height = MAX_RES; } }
+                      canvas.width = width; canvas.height = height;
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) { ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, width, height); }
+                      
+                      const newVariants = [...variants];
+                      newVariants[i] = { ...newVariants[i], image: canvas.toDataURL('image/webp', 0.75) };
+                      setVariants(newVariants);
+                    };
+                    img.src = reader.result as string;
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-sm sm:text-base text-primary truncate" title={v.name}>{v.name}</p>
+            <span className="text-[10px] font-semibold text-primary/40 uppercase tracking-wider block">
+              {dict.edit_product?.variant || (isAr ? "تشكيلة" : "Variant")} #{i + 1}
+            </span>
+          </div>
+        </div>
+
         <button 
           type="button"
-          onClick={() => setVariants(variants.filter((_: any, idx: number) => idx !== i))}
-          className="text-[10px] font-black uppercase text-red-400 mt-1"
+          onClick={() => {
+            setVariants(variants.filter((_: any, idx: number) => idx !== i));
+            toast.success(dict.edit_product?.removed_option || (isAr ? "تم حذف التشكيلة" : "Variant removed"));
+          }}
+          className="p-2 sm:px-2.5 sm:py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1 active:scale-95 shrink-0"
+          title={dict.common?.remove || (isAr ? "حذف التشكيلة" : "Delete Variant")}
         >
-          {dict.common.remove}
+          <Trash2 className="w-4 h-4" />
+          <span className="hidden sm:inline">{dict.common?.remove || (isAr ? "حذف" : "Delete")}</span>
         </button>
       </div>
-    </div>
 
-    <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.price_label}</label>
-        <input 
-          type="number" 
-          value={v.price}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], price: e.target.value };
-            setVariants(newVariants);
-          }}
-          className="w-full h-10 bg-cream/30 border border-primary/5 rounded-xl px-3 font-bold text-sm"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-black uppercase tracking-widest text-primary/30">{dict.new_product.initial_stock_label}</label>
-        <input 
-          type="number" 
-          min="1"
-          value={v.stock}
-          onChange={(e) => {
-            const newVariants = [...variants];
-            newVariants[i] = { ...newVariants[i], stock: e.target.value };
-            setVariants(newVariants);
-          }}
-          className={cn(
-            "w-full h-10 bg-cream/30 border rounded-xl px-3 font-bold text-sm",
-            parseInt(v.stock) <= 0 ? "border-orange-300" : "border-primary/5"
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-primary/60 flex items-center gap-1">
+            <DollarSign className="w-3 h-3 text-accent shrink-0" />
+            <span className="truncate">{dict.new_product.price_label}</span>
+          </label>
+          <input 
+            type="number" 
+            step="any"
+            min="0"
+            placeholder="0.00"
+            value={v.price ?? ""}
+            onChange={(e) => {
+              const newVariants = [...variants];
+              newVariants[i] = { ...newVariants[i], price: e.target.value };
+              setVariants(newVariants);
+            }}
+            className="w-full h-10 bg-cream/40 border border-primary/15 rounded-xl px-3 font-bold text-sm text-primary placeholder:text-primary/30 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none transition-all shadow-xs"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-primary/60 flex items-center gap-1">
+            <Tag className="w-3 h-3 text-accent shrink-0" />
+            <span className="truncate">{dict.new_product.initial_stock_label}</span>
+          </label>
+          <input 
+            type="number" 
+            min="0"
+            placeholder="1"
+            value={v.stock ?? ""}
+            onChange={(e) => {
+              const newVariants = [...variants];
+              newVariants[i] = { ...newVariants[i], stock: e.target.value };
+              setVariants(newVariants);
+            }}
+            className={cn(
+              "w-full h-10 bg-cream/40 border rounded-xl px-3 font-bold text-sm text-primary placeholder:text-primary/30 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none transition-all shadow-xs",
+              parseInt(v.stock) <= 0 ? "border-orange-300 focus:border-orange-500" : "border-primary/15"
+            )}
+          />
+          {parseInt(v.stock) <= 0 && (
+            <p className="text-[9px] font-bold text-orange-500 tracking-tight">
+              {dict.edit_product?.low_stock || (isAr ? "مخزون منخفض!" : "Low stock!")}
+            </p>
           )}
-        />
+        </div>
       </div>
-
-
     </div>
-  </div>
-));
+  );
+});
 
 VariantCard.displayName = "VariantCard";
 
@@ -571,7 +603,7 @@ const OptionValueInput = memo(({ optIdx, onAddValue, dict }: { optIdx: number; o
   }, [optIdx, onAddValue, val]);
 
   return (
-    <div className="flex items-center gap-1.5 bg-white border border-primary/15 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/10 rounded-full px-3 py-1 shadow-sm transition-all">
+    <div className="flex items-center gap-1.5 bg-white border border-primary/20 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/10 rounded-full px-3 py-1 shadow-xs transition-all">
       <input
         type="text"
         value={val}
@@ -599,7 +631,7 @@ const OptionValueInput = memo(({ optIdx, onAddValue, dict }: { optIdx: number; o
         onBlur={() => {
           handleCommit();
         }}
-        className="bg-transparent border-none focus:outline-none text-xs font-bold w-24 sm:w-32 text-primary placeholder:text-primary/30"
+        className="bg-transparent border-none focus:outline-none text-xs font-bold w-24 sm:w-28 text-primary placeholder:text-primary/40 min-w-0"
       />
       <button
         type="button"
@@ -611,7 +643,7 @@ const OptionValueInput = memo(({ optIdx, onAddValue, dict }: { optIdx: number; o
         }}
         className={cn(
           "w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 active:scale-95",
-          val.trim() ? "bg-accent text-white hover:bg-accent/90 cursor-pointer shadow-sm" : "bg-primary/10 text-primary/30 cursor-default"
+          val.trim() ? "bg-accent text-white hover:bg-accent/90 cursor-pointer shadow-xs" : "bg-primary/10 text-primary/30 cursor-default"
         )}
         title={dict.edit_product?.add_value || "Add value"}
       >
@@ -678,76 +710,92 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
   };
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/5">
-        <Tag className="w-5 h-5 text-accent" />
-        <h3 className="text-sm font-black uppercase tracking-widest text-primary/40">{dict.edit_product.variations}</h3>
+        <Tag className="w-5 h-5 text-accent shrink-0" />
+        <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-primary/40">{dict.edit_product.variations}</h3>
       </div>
 
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-          <input 
-            type="text" 
-            placeholder={dict.edit_product.option_name_placeholder}
-            value={newOptionName}
-            onChange={(e) => setNewOptionName(e.target.value)}
-            className="flex-1 py-3 px-8 bg-white border border-primary/10 rounded-xl focus:outline-none focus:border-accent font-bold text-sm md:text-base"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.keyCode === 13 || e.which === 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                addOption();
-              }
-            }}
-          />
-          <button 
-            type="button" 
-            onClick={addOption}
-            className="h-12 px-6 bg-primary text-white font-bold rounded-xl hover:bg-primary-light transition-all shadow-sm whitespace-nowrap text-sm md:text-base"
-          >
-            {dict.edit_product.add_option}
-          </button>
+      <div className="space-y-5 sm:space-y-6">
+        <div className="space-y-1.5">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4">
+            <input 
+              type="text" 
+              placeholder={dict.edit_product.option_name_placeholder}
+              value={newOptionName}
+              onChange={(e) => setNewOptionName(e.target.value)}
+              className="flex-1 py-3 sm:py-3.5 px-4 sm:px-6 bg-white border border-primary/20 rounded-xl sm:rounded-2xl focus:outline-none focus:border-accent font-bold text-sm sm:text-base shadow-xs"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.keyCode === 13 || e.which === 13) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addOption();
+                }
+              }}
+            />
+            <button 
+              type="button" 
+              onClick={addOption}
+              className="h-12 sm:h-auto py-3 px-6 sm:px-8 bg-primary text-white font-bold rounded-xl sm:rounded-2xl hover:bg-primary-light transition-all shadow-md active:scale-95 whitespace-nowrap flex items-center justify-center gap-2 text-sm sm:text-base shrink-0"
+            >
+              <Plus className="w-4 h-4 text-accent" />
+              <span>{dict.edit_product.add_option}</span>
+            </button>
+          </div>
+          <p className="text-[10px] font-bold text-accent/60 uppercase tracking-widest px-2">
+            {dict.edit_product.enter_to_add}
+          </p>
         </div>
-        <p className="text-[10px] font-bold text-accent/60 uppercase tracking-widest px-2 mt-1">{dict.edit_product.enter_to_add}</p>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {options.map((opt: any, optIdx: number) => (
-            <div key={optIdx} className="p-6 bg-cream/30 rounded-2xl border border-primary/5 space-y-4">
-              <div className="flex justify-between items-center">
-                <h4 className="text-xs font-black uppercase tracking-widest text-primary">{opt.name}</h4>
+            <div key={optIdx} className="p-3.5 sm:p-5 bg-cream/30 rounded-2xl border border-primary/5 space-y-3">
+              <div className="flex justify-between items-center gap-2">
+                <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-primary flex items-center gap-1.5 min-w-0">
+                  <Tag className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <span className="truncate">{opt.name}</span>
+                </h4>
                 <button 
                   type="button" 
                   onClick={() => setOptions(options.filter((_: any, i: number) => i !== optIdx))}
-                  className="text-[10px] font-bold text-red-500 uppercase hover:text-red-600"
+                  className="px-2.5 sm:px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1 active:scale-95 shadow-xs shrink-0"
                 >
-                  {dict.edit_product?.delete_option || dict.common?.remove || "Delete"}
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{dict.edit_product?.delete_option || dict.common?.remove || "Delete"}</span>
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {opt.values.map((val: string, valIdx: number) => (
-                  <span key={valIdx} className="px-3 py-1 bg-white border border-primary/10 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm">
-                    {val}
-                    <button type="button" onClick={() => removeValue(optIdx, valIdx)} className="text-red-400 hover:text-red-500 transition-colors"><X className="w-3 h-3" /></button>
-                  </span>
-                ))}
-                <OptionValueInput optIdx={optIdx} onAddValue={addValue} dict={dict} />
-                <span className="text-[9px] font-bold text-accent/40 uppercase tracking-tighter self-center">{dict.edit_product.enter_to_add}</span>
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  {opt.values.map((val: string, valIdx: number) => (
+                    <span key={valIdx} className="px-3 py-1 bg-white border border-primary/10 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xs max-w-[160px] truncate animate-in zoom-in-50">
+                      <span className="truncate">{val}</span>
+                      <button type="button" onClick={() => removeValue(optIdx, valIdx)} className="text-red-400 hover:text-red-500 transition-colors shrink-0">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                  <OptionValueInput optIdx={optIdx} onAddValue={addValue} dict={dict} />
+                </div>
+                <p className="text-[9px] sm:text-[10px] font-bold text-accent/50 uppercase tracking-wider px-1">
+                  {dict.edit_product.enter_to_add}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
         {options.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4">
             <button 
               type="button"
               onClick={generateVariants}
-              className="flex-1 py-3 border-2 border-dashed border-accent/20 text-accent font-black uppercase tracking-widest rounded-xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[10px] md:text-xs"
+              className="w-full sm:flex-1 py-3.5 sm:py-4 px-4 border-2 border-dashed border-accent/20 hover:border-accent text-accent font-black uppercase tracking-widest rounded-xl sm:rounded-2xl hover:bg-accent/5 transition-all active:scale-[0.99] text-[11px] sm:text-xs md:text-sm flex items-center justify-center gap-2"
             >
-              {dict.edit_product.generate_variants}
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>{dict.edit_product.generate_variants}</span>
             </button>
             {variants.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full sm:w-auto sm:flex sm:flex-wrap">
                 <button 
                   type="button"
                   onClick={() => {
@@ -759,18 +807,19 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                     setVariants(newVariants);
                     toast.success(dict.edit_product.prices_synced);
                   }}
-                  className="px-5 py-3 bg-cream text-primary border border-primary/10 font-bold rounded-xl hover:bg-cream/50 transition-all flex items-center gap-2 text-xs"
+                  className="w-full sm:w-auto px-3 sm:px-6 py-3 sm:py-4 bg-cream text-primary border border-primary/10 font-bold rounded-xl sm:rounded-2xl hover:bg-cream/60 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm active:scale-95"
                 >
-                  <DollarSign className="w-4 h-4 text-accent" />
-                  {dict.edit_product.apply_base_price}
+                  <DollarSign className="w-4 h-4 text-accent shrink-0" />
+                  <span className="truncate">{dict.edit_product.apply_base_price}</span>
                 </button>
+
                 <button 
                   type="button"
                   onClick={() => setShowBulkStockModal(true)}
-                  className="px-5 py-3 bg-primary/5 text-primary border border-primary/10 font-bold rounded-xl hover:bg-primary/10 transition-all flex items-center gap-2 text-xs"
+                  className="w-full sm:w-auto px-3 sm:px-6 py-3 sm:py-4 bg-primary/5 text-primary border border-primary/10 font-bold rounded-xl sm:rounded-2xl hover:bg-primary/10 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm active:scale-95"
                 >
-                  <Tag className="w-4 h-4 text-accent" />
-                  {dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}
+                  <Tag className="w-4 h-4 text-accent shrink-0" />
+                  <span className="truncate">{dict.edit_product?.set_bulk_stock || "Set Bulk Stock"}</span>
                 </button>
               </div>
             )}
@@ -780,7 +829,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
         {variants.length > 0 && (
           <div className="space-y-4">
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-2xl border border-primary/10 shadow-inner">
+            <div className="hidden md:block overflow-x-auto rounded-[2rem] border border-primary/10 shadow-inner">
               <table className="w-full text-start text-xs">
                 <thead className="bg-primary/5 text-primary/40 font-black uppercase tracking-tighter">
                   <tr>
@@ -788,9 +837,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                     <th className="px-4 py-3 text-start">{dict.edit_product.variant_name}</th>
                     <th className="px-4 py-3 text-start">{dict.new_product.price_label}</th>
                     <th className="px-4 py-3 text-start">{dict.new_product.initial_stock_label}</th>
-
-
-                    <th className="px-4 py-3"></th>
+                    <th className="px-4 py-3 text-end"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-primary/5">
@@ -802,13 +849,14 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-3 sm:space-y-4">
               {variants.map((v: any, i: number) => (
                 <VariantCard key={i} v={v} i={i} variants={variants} setVariants={setVariants} dict={dict} />
               ))}
             </div>
           </div>
         )}
+
         {/* Bulk Stock Modal */}
         <AnimatePresence>
           {showBulkStockModal && (
@@ -817,7 +865,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-primary/10 space-y-6"
+                className="w-full max-w-md bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl border border-primary/10 space-y-5 sm:space-y-6"
               >
                 <div className="flex items-center justify-between pb-4 border-b border-primary/5">
                   <div className="flex items-center gap-3">
@@ -842,7 +890,7 @@ const VariationsSection = memo(({ options, setOptions, variants, setVariants, ba
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-primary/60 uppercase tracking-wider">
                       {dict.new_product?.initial_stock_label || "Quantity"}

@@ -21,6 +21,7 @@ import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { BespokeImage } from "./bespoke-image";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface SearchClientProps {
   query: string;
@@ -43,6 +44,43 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
   const [selectedGovernorate, setSelectedGovernorate] = useState<string>("ALL");
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high" | "popular">("newest");
+
+  // Persist search filtering state across navigations until explicitly cleared
+  const { clearPersistedFilters } = useFilterPersistence({
+    key: `giftisan_filters_search_${(query || "").trim().toLowerCase() || "all"}`,
+    values: {
+      showVerifiedOnly,
+      showCustomizableOnly,
+      selectedCategory,
+      selectedGovernorate,
+      selectedPriceRange,
+      sortBy,
+    },
+    setters: {
+      showVerifiedOnly: setShowVerifiedOnly,
+      showCustomizableOnly: setShowCustomizableOnly,
+      selectedCategory: setSelectedCategory,
+      selectedGovernorate: setSelectedGovernorate,
+      selectedPriceRange: setSelectedPriceRange,
+      sortBy: setSortBy,
+    },
+    defaultValues: {
+      showVerifiedOnly: false,
+      showCustomizableOnly: false,
+      selectedCategory: "ALL",
+      selectedGovernorate: "ALL",
+      selectedPriceRange: "ALL",
+      sortBy: "newest" as const,
+    },
+    paramMapping: {
+      showVerifiedOnly: "verified",
+      showCustomizableOnly: "customizable",
+      selectedCategory: "category",
+      selectedGovernorate: "governorate",
+      selectedPriceRange: "price",
+      sortBy: "sort",
+    },
+  });
   
   // Single active dropdown controller
   const [openDropdown, setOpenDropdown] = useState<"sort" | "category" | "price" | "location" | null>(null);
@@ -217,6 +255,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
     setSelectedPriceRange("ALL");
     setSortBy("newest");
     setOpenDropdown(null);
+    clearPersistedFilters();
   };
 
   return (
@@ -732,7 +771,7 @@ export function SearchClient({ query, initialProducts, dict }: SearchClientProps
                     transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.25) }}
                   >
                     <Link
-                      href={`/products/${product.slug || product.id}`}
+                      href={`/${lang}/products/${product.slug || product.id}`}
                       className="group block"
                     >
                       <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2 bg-cream/20 border border-primary/5 shadow-xs hover:shadow-md transition-shadow">

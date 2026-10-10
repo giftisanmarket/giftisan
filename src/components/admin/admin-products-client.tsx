@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductModerationActions } from "@/components/admin/product-moderation-actions";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface AdminProductsClientProps {
   initialProducts: any[];
@@ -36,6 +37,39 @@ export function AdminProductsClient({ initialProducts, dict, lang }: AdminProduc
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<string>("NEWEST");
   const [isSortOpen, setIsSortOpen] = useState(false);
+
+  // Persist admin products filtering state across navigations
+  useFilterPersistence({
+    key: "giftisan_filters_admin_products",
+    values: {
+      searchQuery,
+      statusFilter,
+      stockFilter,
+      categoryFilter,
+      sortBy,
+    },
+    setters: {
+      searchQuery: setSearchQuery,
+      statusFilter: setStatusFilter,
+      stockFilter: setStockFilter,
+      categoryFilter: setCategoryFilter,
+      sortBy: setSortBy,
+    },
+    defaultValues: {
+      searchQuery: "",
+      statusFilter: "ALL",
+      stockFilter: "ALL",
+      categoryFilter: "ALL",
+      sortBy: "NEWEST",
+    },
+    paramMapping: {
+      searchQuery: "q",
+      statusFilter: "status",
+      stockFilter: "stock",
+      categoryFilter: "category",
+      sortBy: "sort",
+    },
+  });
 
   // Extract unique categories for filtering
   const categories = useMemo(() => {

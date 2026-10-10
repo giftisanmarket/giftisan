@@ -9,6 +9,7 @@ import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface ArtisansClientProps {
   artisans: any[];
@@ -24,6 +25,31 @@ export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("ALL");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  // Persist artisans filter state across navigations until explicitly cleared
+  const { clearPersistedFilters } = useFilterPersistence({
+    key: "giftisan_filters_artisans",
+    values: {
+      searchQuery,
+      selectedRegion,
+      verifiedOnly,
+    },
+    setters: {
+      searchQuery: setSearchQuery,
+      selectedRegion: setSelectedRegion,
+      verifiedOnly: setVerifiedOnly,
+    },
+    defaultValues: {
+      searchQuery: "",
+      selectedRegion: "ALL",
+      verifiedOnly: false,
+    },
+    paramMapping: {
+      searchQuery: "q",
+      selectedRegion: "region",
+      verifiedOnly: "verified",
+    },
+  });
 
   // Extract top locations dynamically from artisan profiles
   const topRegions = useMemo(() => {
@@ -75,6 +101,7 @@ export function ArtisansClient({ artisans, dict }: ArtisansClientProps) {
     setSearchQuery("");
     setSelectedRegion("ALL");
     setVerifiedOnly(false);
+    clearPersistedFilters();
   };
 
   return (

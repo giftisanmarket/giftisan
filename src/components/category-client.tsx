@@ -4,12 +4,14 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BespokeImage } from "./bespoke-image";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Heart, SlidersHorizontal, ArrowUpDown, CheckCircle2, ChevronDown, Sparkles, Star, RotateCcw, X } from "lucide-react";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { GiftsHubClient } from "@/components/gifts-hub-client";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface CategoryClientProps {
   slug: string;
@@ -23,8 +25,10 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
   }
 
   const { toggleFavorite, isFavorite } = useFavorites();
+  const params = useParams();
+  const lang = (params?.lang as string) || (dict?.common?.home === "الرئيسية" ? "ar" : "en");
   
-  const isAr = dict?.common?.home === "الرئيسية" || dict?.common?.search?.includes("ابحث");
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية" || dict?.common?.search?.includes("ابحث");
   const currency = dict?.product?.currency || "EGP";
 
   // Filter States
@@ -35,6 +39,35 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
   const [openDropdown, setOpenDropdown] = useState<"price" | "sort" | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
+
+  // Persist category filtering state across navigations until explicitly cleared
+  const { clearPersistedFilters } = useFilterPersistence({
+    key: `giftisan_filters_category_${slug}`,
+    values: {
+      showVerifiedOnly,
+      showCustomizableOnly,
+      selectedPriceRange,
+      sortBy,
+    },
+    setters: {
+      showVerifiedOnly: setShowVerifiedOnly,
+      showCustomizableOnly: setShowCustomizableOnly,
+      selectedPriceRange: setSelectedPriceRange,
+      sortBy: setSortBy,
+    },
+    defaultValues: {
+      showVerifiedOnly: false,
+      showCustomizableOnly: false,
+      selectedPriceRange: "ALL",
+      sortBy: "newest" as const,
+    },
+    paramMapping: {
+      showVerifiedOnly: "verified",
+      showCustomizableOnly: "customizable",
+      selectedPriceRange: "price",
+      sortBy: "sort",
+    },
+  });
   const dragControls = useDragControls();
 
   // Measure exact bottom of sticky navbar to ensure flawless alignment without overlap
@@ -121,6 +154,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
     setSelectedPriceRange("ALL");
     setSortBy("newest");
     setOpenDropdown(null);
+    clearPersistedFilters();
   };
 
   const filteredProducts = initialProducts
@@ -499,7 +533,7 @@ export function CategoryClient({ slug, initialProducts, dict }: CategoryClientPr
                     transition={{ duration: 0.3, delay: idx * 0.03 }}
                   >
                     <Link
-                      href={`/products/${product.slug || product.id}`}
+                      href={`/${lang}/products/${product.slug || product.id}`}
                       className="group block"
                     >
                       <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2 bg-cream/20 border border-primary/5 shadow-xs hover:shadow-md transition-shadow">

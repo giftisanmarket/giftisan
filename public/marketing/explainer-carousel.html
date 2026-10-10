@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giftisan — Instagram Carousel Studio (5 Slides)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700&family=Cairo:wght@400;600;700&family=EB+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --emerald: #064E3B;
+      --emerald-dark: #032B1F;
+      --emerald-accent: #0D9488;
+      --cream: #FAF8F2;
+      --ivory: #F4EFE6;
+      --gold: #D97706;
+      --charcoal: #1C1917;
+      --muted: #78716C;
+      --border: rgba(217, 119, 6, 0.2);
+      --bg: #0A1410;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: #FAF8F2;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(6, 78, 59, 0.25) 0%, transparent 60%);
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 40px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(217, 119, 6, 0.12);
+      border: 1px solid rgba(217, 119, 6, 0.35);
+      color: #FBBF24;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'EB Garamond', serif;
+      font-size: 42px;
+      font-weight: 600;
+      color: #FAF8F2;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    p.subtitle {
+      color: #A8A29E;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 14px;
+      margin: 25px 0 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(5, 150, 105, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #10B981, #059669);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FAF8F2;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #FFFFFF;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin {
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Grid of 5 Slides */
+    .slides-container {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .slide-card {
+      background: rgba(16, 32, 26, 0.85);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 500px 1fr;
+      gap: 35px;
+      align-items: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 960px) {
+      .slide-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-preview-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      background: #000;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .slide-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .slide-number {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #F59E0B;
+    }
+
+    .slide-title {
+      font-family: 'EB Garamond', serif;
+      font-size: 32px;
+      font-weight: 600;
+      color: #FAF8F2;
+      line-height: 1.2;
+    }
+
+    .slide-desc {
+      color: #A8A29E;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .specs-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 16px;
+      border-left: 3px solid #059669;
+      font-size: 13px;
+      color: #D6D3D1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Caption Section */
+    .caption-box {
+      background: rgba(16, 32, 26, 0.85);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      border-radius: 20px;
+      padding: 35px;
+      max-width: 1200px;
+      width: 100%;
+      margin-top: 50px;
+    }
+
+    .caption-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .caption-header h2 {
+      font-family: 'EB Garamond', serif;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    textarea.caption-text {
+      width: 100%;
+      min-height: 280px;
+      background: #06110D;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 20px;
+      color: #FAF8F2;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-badge">Official Brand Studio</div>
+    <h1>Giftisan Explainer Carousel (5 Slides)</h1>
+    <p class="subtitle">High-resolution 1080×1080 px Instagram slides designed for <strong>@giftisan_eg</strong>. Every slide is rendered in canvas for crystal-clear exports.</p>
+    
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="downloadAllSlides()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Download All 5 Slides (PNG)
+      </button>
+      <button class="btn btn-secondary" onclick="copyCaption()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        Copy Clean Editorial Caption
+      </button>
+    </div>
+  </header>
+
+  <div class="slides-container">
+
+    <!-- SLIDE 1 -->
+    <div class="slide-card">
+      <div class="canvas-preview-wrapper">
+        <canvas id="canvas1" width="1080" height="1080"></canvas>
+      </div>
+      <div class="slide-info">
+        <span class="slide-number">Slide 1 — The Hook (Cover)</span>
+        <h2 class="slide-title">What is Giftisan?</h2>
+        <p class="slide-desc">The primary hook introducing the marketplace. Clean ivory background with artisanal flatlays and refined serif typography.</p>
+        <div class="specs-box">
+          <div>• <strong>Format:</strong> 1080×1080 px Square</div>
+          <div>• <strong>Focus:</strong> Brand introduction & Curiosity</div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadSingle(1, 'giftisan-slide1-cover.png')">Download Slide 1 (PNG)</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide-card">
+      <div class="canvas-preview-wrapper">
+        <canvas id="canvas2" width="1080" height="1080"></canvas>
+      </div>
+      <div class="slide-info">
+        <span class="slide-number">Slide 2 — The Artisans & Craft</span>
+        <h2 class="slide-title">Crafted With Soul</h2>
+        <p class="slide-desc">Highlights local Egyptian craftsmanship, connecting customers directly with independent artisans, handmade pottery, resin, and custom gifts.</p>
+        <div class="specs-box">
+          <div>• <strong>Format:</strong> 1080×1080 px Square</div>
+          <div>• <strong>Focus:</strong> Soul, intentionality, and local makers</div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadSingle(2, 'giftisan-slide2-makers.png')">Download Slide 2 (PNG)</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide-card">
+      <div class="canvas-preview-wrapper">
+        <canvas id="canvas3" width="1080" height="1080"></canvas>
+      </div>
+      <div class="slide-info">
+        <span class="slide-number">Slide 3 — The Categories Showcase</span>
+        <h2 class="slide-title">One Curated Destination</h2>
+        <p class="slide-desc">Displays the diverse handmade categories: Botanical Resin, Hand-thrown Pottery, Heritage Textiles, and Bespoke Personalized Keepsakes.</p>
+        <div class="specs-box">
+          <div>• <strong>Format:</strong> 1080×1080 px Square</div>
+          <div>• <strong>Focus:</strong> Category variety & authentic shops</div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadSingle(3, 'giftisan-slide3-categories.png')">Download Slide 3 (PNG)</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide-card">
+      <div class="canvas-preview-wrapper">
+        <canvas id="canvas4" width="1080" height="1080"></canvas>
+      </div>
+      <div class="slide-info">
+        <span class="slide-number">Slide 4 — How Ordering Works</span>
+        <h2 class="slide-title">Simple & Seamless Gifting</h2>
+        <p class="slide-desc">Explains the 3 effortless buyer steps: 1. Explore curated shops, 2. Add personalization, 3. Doorstep delivery across all of Egypt.</p>
+        <div class="specs-box">
+          <div>• <strong>Format:</strong> 1080×1080 px Square</div>
+          <div>• <strong>Focus:</strong> Buyer confidence & easy ordering</div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadSingle(4, 'giftisan-slide4-how-it-works.png')">Download Slide 4 (PNG)</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide-card">
+      <div class="canvas-preview-wrapper">
+        <canvas id="canvas5" width="1080" height="1080"></canvas>
+      </div>
+      <div class="slide-info">
+        <span class="slide-number">Slide 5 — The Dual Call To Action</span>
+        <h2 class="slide-title">Find A Gift With Meaning</h2>
+        <p class="slide-desc">The closing slide in signature forest green, inviting customers to browse the marketplace and inviting makers to open their shop.</p>
+        <div class="specs-box">
+          <div>• <strong>Format:</strong> 1080×1080 px Square</div>
+          <div>• <strong>Focus:</strong> Actionable CTA for buyers & makers</div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadSingle(5, 'giftisan-slide5-closing-cta.png')">Download Slide 5 (PNG)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Caption Box -->
+  <div class="caption-box">
+    <div class="caption-header">
+      <h2>Instagram Caption (Editorial & Professional)</h2>
+      <button class="btn btn-primary" onclick="copyCaption()">Copy Caption Text</button>
+    </div>
+    <textarea id="captionText" class="caption-text" readonly>Every meaningful gift has a story behind it.
+
+Giftisan is a curated online marketplace connecting independent Egyptian artisans and local shops directly with people who value authentic, handmade craftsmanship.
+
+From botanical resin art and bespoke ceramic pieces to handcrafted textiles and tailored keepsakes, every order directly supports a local creator.
+
+Discover the collection at giftisan.com — Link in bio.
+
+For independent artisans & makers: Join our founding community and open your shop at giftisan.com.
+
+—
+منصة تجمع نخبة من الحرفيين والمتاجر المستقلة في مصر، لتقديم هدايا وقطع فنية يدوية صُنعت بعناية واهتمام بالتفاصيل.
+
+تصفح المجموعات عبر الرابط في البايو: giftisan.com
+
+#Giftisan #HandmadeInEgypt #EgyptianArtisans #Handcrafted #SupportLocalEgypt #CairoDesign #ContemporaryCraft</textarea>
+  </div>
+
+  <script>
+    function loadImage(src) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    async function initAllCanvases() {
+      await document.fonts.ready;
+
+      const [img1, img2, img3, img4, img5, decorImg, ceramicImg, jewelryImg, giftBoxImg] = await Promise.all([
+        loadImage('./explainer/slide1_cover.jpg'),
+        loadImage('./explainer/slide2_makers.jpg'),
+        loadImage('./explainer/slide3_categories.jpg'),
+        loadImage('./explainer/slide4_how_it_works.jpg'),
+        loadImage('./explainer/slide5_cta.jpg'),
+        loadImage('./home-decor.webp'),
+        loadImage('../muski-vase.webp'),
+        loadImage('./jewelry.webp'),
+        loadImage('./gift-box.webp')
+      ]);
+
+      renderSlide1(img1);
+      renderSlide2(img2);
+      renderSlide3(img3, decorImg, ceramicImg, jewelryImg, giftBoxImg);
+      renderSlide4(img4);
+      renderSlide5(img5);
+    }
+
+    // SLIDE 1
+    function renderSlide1(img) {
+      const c = document.getElementById('canvas1');
+      const ctx = c.getContext('2d');
+      if (img) {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+      }
+    }
+
+    // SLIDE 2
+    function renderSlide2(img) {
+      const c = document.getElementById('canvas2');
+      const ctx = c.getContext('2d');
+      if (img) {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+      }
+    }
+
+    // SLIDE 3: Categories Showcase
+    function renderSlide3(img, imgDecor, imgCeramic, imgJewelry, imgGift) {
+      const c = document.getElementById('canvas3');
+      const ctx = c.getContext('2d');
+      if (img) {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+        return;
+      }
+
+      // Warm Cream background
+      ctx.fillStyle = "#FAF8F2";
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // Frame
+      ctx.strokeStyle = "rgba(6, 78, 59, 0.15)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(50, 50, 980, 980);
+
+      // Tag
+      ctx.fillStyle = "#064E3B";
+      ctx.font = "600 20px 'Outfit', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("CURATED COLLECTIONS", 540, 130);
+
+      // Title
+      ctx.font = "600 52px 'EB Garamond', serif";
+      ctx.fillStyle = "#032B1F";
+      ctx.fillText("One Curated Destination", 540, 195);
+
+      // Subtitle
+      ctx.font = "400 24px 'Outfit', sans-serif";
+      ctx.fillStyle = "#57534E";
+      ctx.fillText("Discover authentic handmade crafts from independent shops", 540, 240);
+
+      // 4 Category Cards
+      const cards = [
+        { title: "Botanical & Resin Art", ar: "زهور مجففة وريزن", x: 90, y: 290, img: imgDecor },
+        { title: "Artisan Ceramics & Pottery", ar: "خزف وفخار يدوي", x: 550, y: 290, img: imgCeramic },
+        { title: "Handcrafted Jewelry & Wire", ar: "حلي ومجوهرات يدوية", x: 90, y: 620, img: imgJewelry },
+        { title: "Personalized Keepsakes", ar: "هدايا بالاسم مخصصة", x: 550, y: 620, img: imgGift }
+      ];
+
+      cards.forEach(card => {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.05)";
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        roundRect(ctx, card.x, card.y, 440, 290, 18);
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+
+        ctx.strokeStyle = "rgba(6, 78, 59, 0.1)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        roundRect(ctx, card.x, card.y, 440, 290, 18);
+        ctx.stroke();
+
+        if (card.img) {
+          ctx.save();
+          ctx.beginPath();
+          roundRect(ctx, card.x + 15, card.y + 15, 410, 190, 12);
+          ctx.clip();
+          ctx.drawImage(card.img, card.x + 15, card.y + 15, 410, 190);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = "rgba(6, 78, 59, 0.06)";
+          ctx.beginPath();
+          roundRect(ctx, card.x + 15, card.y + 15, 410, 190, 12);
+          ctx.fill();
+        }
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#064E3B";
+        ctx.font = "600 23px 'EB Garamond', serif";
+        ctx.fillText(card.title, card.x + 20, card.y + 242);
+
+        ctx.fillStyle = "#78716C";
+        ctx.font = "500 16px 'Cairo', sans-serif";
+        ctx.fillText(card.ar, card.x + 20, card.y + 270);
+      });
+
+      // Bottom URL
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#78716C";
+      ctx.font = "500 18px 'Outfit', sans-serif";
+      ctx.fillText("giftisan.com", 540, 975);
+    }
+
+    // SLIDE 4: How It Works
+    function renderSlide4(img) {
+      const c = document.getElementById('canvas4');
+      const ctx = c.getContext('2d');
+      if (img) {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+        return;
+      }
+
+      ctx.fillStyle = "#FAF8F2";
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      ctx.strokeStyle = "rgba(6, 78, 59, 0.15)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(50, 50, 980, 980);
+
+      ctx.fillStyle = "#064E3B";
+      ctx.font = "600 20px 'Outfit', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("THE EXPERIENCE", 540, 140);
+
+      ctx.font = "600 54px 'EB Garamond', serif";
+      ctx.fillStyle = "#032B1F";
+      ctx.fillText("How Giftisan Works", 540, 210);
+
+      ctx.font = "400 24px 'Outfit', sans-serif";
+      ctx.fillStyle = "#57534E";
+      ctx.fillText("Three simple steps to thoughtful, unforgettable gifts", 540, 260);
+
+      const steps = [
+        {
+          num: "01",
+          title: "Discover Independent Shops",
+          desc: "Explore verified local artisans, master crafters, and independent shops across Egypt.",
+          y: 330
+        },
+        {
+          num: "02",
+          title: "Tailor & Personalize",
+          desc: "Add personal engravings, choose custom colors, and include bespoke touches for your loved ones.",
+          y: 530
+        },
+        {
+          num: "03",
+          title: "Direct Doorstep Delivery",
+          desc: "Carefully wrapped with artisanal attention and delivered safely to any address in Egypt.",
+          y: 730
+        }
+      ];
+
+      steps.forEach(step => {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.05)";
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetY = 6;
+        ctx.beginPath();
+        roundRect(ctx, 110, step.y, 860, 160, 16);
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+
+        ctx.strokeStyle = "rgba(6, 78, 59, 0.1)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        roundRect(ctx, 110, step.y, 860, 160, 16);
+        ctx.stroke();
+
+        ctx.fillStyle = "#064E3B";
+        ctx.beginPath();
+        roundRect(ctx, 140, step.y + 40, 80, 80, 14);
+        ctx.fill();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 30px 'Outfit', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(step.num, 180, step.y + 90);
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#032B1F";
+        ctx.font = "600 28px 'EB Garamond', serif";
+        ctx.fillText(step.title, 250, step.y + 68);
+
+        ctx.fillStyle = "#57534E";
+        ctx.font = "400 20px 'Outfit', sans-serif";
+        wrapText(ctx, step.desc, 250, step.y + 110, 680, 28);
+      });
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#78716C";
+      ctx.font = "500 18px 'Outfit', sans-serif";
+      ctx.fillText("giftisan.com", 540, 975);
+    }
+
+    // SLIDE 5: Closing CTA
+    function renderSlide5(img) {
+      const c = document.getElementById('canvas5');
+      const ctx = c.getContext('2d');
+      if (img) {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+      }
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    function downloadCanvas(canvas, filename) {
+      if (canvas.toBlob) {
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            triggerDataUrlDownload(canvas, filename);
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }, 300);
+        }, 'image/png');
+      } else {
+        triggerDataUrlDownload(canvas, filename);
+      }
+    }
+
+    function triggerDataUrlDownload(canvas, filename) {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => document.body.removeChild(link), 300);
+    }
+
+    function downloadSingle(slideNum, filename) {
+      const canvas = document.getElementById(`canvas${slideNum}`);
+      downloadCanvas(canvas, filename);
+    }
+
+    async function downloadAllSlides() {
+      const btn = document.querySelector('.action-bar .btn-primary');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10"/>
+        </svg> Packaging ZIP...
+      `;
+
+      try {
+        if (typeof JSZip !== 'undefined') {
+          const zip = new JSZip();
+          for (let i = 1; i <= 5; i++) {
+            const canvas = document.getElementById(`canvas${i}`);
+            const dataUrl = canvas.toDataURL('image/png');
+            const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+            zip.file(`giftisan-slide-${i}.png`, base64Data, { base64: true });
+          }
+          const content = await zip.generateAsync({ type: 'blob' });
+          const url = URL.createObjectURL(content);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'giftisan-explainer-carousel-5slides.zip';
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }, 400);
+
+          btn.innerHTML = '✓ Downloaded ZIP!';
+          setTimeout(() => { btn.innerHTML = originalHtml; }, 2500);
+          return;
+        }
+      } catch (err) {
+        console.warn('ZIP bundling failed, falling back to sequential download:', err);
+      }
+
+      // Fallback: sequential download
+      for (let i = 1; i <= 5; i++) {
+        downloadSingle(i, `giftisan-slide-${i}.png`);
+        await new Promise(r => setTimeout(r, 600));
+      }
+      btn.innerHTML = '✓ Downloaded All!';
+      setTimeout(() => { btn.innerHTML = originalHtml; }, 2500);
+    }
+
+    function copyCaption() {
+      const copyText = document.getElementById("captionText");
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      alert("Caption copied to clipboard!");
+    }
+
+    window.addEventListener('DOMContentLoaded', initAllCanvases);
+  </script>
+</body>
+</html>

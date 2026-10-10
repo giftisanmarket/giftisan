@@ -22,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { toggleFollowAction, checkFollowStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface ArtisanClientProps {
   artisan: any;
@@ -34,6 +35,22 @@ export function ArtisanClient({ artisan, dict, lang = "en" }: ArtisanClientProps
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [filter, setFilter] = useState<'all' | 'available' | 'soldout'>('all');
+
+  useFilterPersistence({
+    key: `giftisan_filters_artisan_${artisan.slug || artisan.id}`,
+    values: {
+      filter,
+    },
+    setters: {
+      filter: setFilter,
+    },
+    defaultValues: {
+      filter: "all" as const,
+    },
+    paramMapping: {
+      filter: "tab",
+    },
+  });
   
   const isAr = lang === "ar" || dict?.common?.home === "الرئيسية";
   const products = artisan.products || [];

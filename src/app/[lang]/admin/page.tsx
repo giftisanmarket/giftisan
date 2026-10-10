@@ -46,14 +46,16 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
   const cards = [
     { 
       label: dict.admin.total_revenue, 
+      subtitle: isAr ? "إجمالي مدفوعات العملاء" : "Gross marketplace orders",
       value: `${dict.product.currency} ${(stats.revenue || 0).toLocaleString()}`, 
       icon: DollarSign, 
       color: "bg-emerald-500 shadow-emerald-500/10", 
-      trend: "+12%",
+      trend: "GMV",
       trendColor: "bg-emerald-50 text-emerald-600"
     },
     { 
       label: dict.admin.ready_to_ship, 
+      subtitle: isAr ? "بانتظار تسليم شركة الشحن" : "Awaiting courier pickup",
       value: (stats.readyToShipCount || 0).toString(), 
       icon: Truck, 
       color: "bg-purple-600 shadow-purple-600/10", 
@@ -62,6 +64,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
     },
     { 
       label: dict.admin.platform_earnings, 
+      subtitle: isAr ? "صافي أرباح المنصة (العمولة 0%)" : "Platform take (0% commission now)",
       value: `${dict.product.currency} ${(stats.platformEarnings || 0).toLocaleString()}`, 
       icon: TrendingUp, 
       color: "bg-accent shadow-accent/10", 
@@ -70,6 +73,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
     },
     { 
       label: dict.admin.pending_payouts, 
+      subtitle: isAr ? "مستحقات سحب الحرفيين" : "Artisan withdrawal requests",
       value: `${dict.product.currency} ${(stats.pendingPayouts || 0).toLocaleString()}`, 
       icon: Package, 
       color: "bg-amber-500 shadow-amber-500/10", 
@@ -172,7 +176,10 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
               <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300", card.color)}>
                 <card.icon className="w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1.5">{card.label}</p>
+              <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">{card.label}</p>
+              {card.subtitle && (
+                <p className="text-[11px] text-charcoal/50 font-medium leading-tight">{card.subtitle}</p>
+              )}
             </div>
             
             <div className="flex justify-between items-end mt-4">

@@ -104,7 +104,7 @@ export function AdminChartClient({ orders, dict, lang }: AdminChartClientProps) 
               )}
             >
               <DollarSign className="w-3 h-3" />
-              {lang === "ar" ? "المبيعات" : "Revenue"}
+              {lang === "ar" ? "المبيعات (GMV)" : "Sales (GMV)"}
             </button>
             <button
               onClick={() => setMetric("orders")}

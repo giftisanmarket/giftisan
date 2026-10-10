@@ -26,6 +26,7 @@ import { Footer } from "@/components/footer";
 import { BespokeImage } from "@/components/bespoke-image";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 export type RecipientSlug = "for-her" | "for-him" | "for-mom" | "for-couples" | "for-friends" | "for-kids" | "all";
 
@@ -69,15 +70,47 @@ export function RecipientGiftsClient({
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
   const [showPersonalizedOnly, setShowPersonalizedOnly] = useState(false);
   const [showSetsOnly, setShowSetsOnly] = useState(false);
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string>(
-    initialPrice && ["UNDER_250", "UNDER_500", "UNDER_1000", "OVER_1000"].includes(initialPrice)
-      ? initialPrice
-      : "ALL"
-  );
+  const defaultPriceRange = initialPrice && ["UNDER_250", "UNDER_500", "UNDER_1000", "OVER_1000"].includes(initialPrice)
+    ? initialPrice
+    : "ALL";
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>(defaultPriceRange);
   const [sortBy, setSortBy] = useState<"popular" | "newest" | "price-low" | "price-high">("popular");
   const [openDropdown, setOpenDropdown] = useState<"price" | "sort" | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
+
+  // Persist recipient gifts filtering state across navigations until explicitly cleared
+  const { clearPersistedFilters } = useFilterPersistence({
+    key: `giftisan_filters_gifts_${slug}`,
+    values: {
+      showVerifiedOnly,
+      showPersonalizedOnly,
+      showSetsOnly,
+      selectedPriceRange,
+      sortBy,
+    },
+    setters: {
+      showVerifiedOnly: setShowVerifiedOnly,
+      showPersonalizedOnly: setShowPersonalizedOnly,
+      showSetsOnly: setShowSetsOnly,
+      selectedPriceRange: setSelectedPriceRange,
+      sortBy: setSortBy,
+    },
+    defaultValues: {
+      showVerifiedOnly: false,
+      showPersonalizedOnly: false,
+      showSetsOnly: false,
+      selectedPriceRange: defaultPriceRange,
+      sortBy: "popular" as const,
+    },
+    paramMapping: {
+      showVerifiedOnly: "verified",
+      showPersonalizedOnly: "personalized",
+      showSetsOnly: "sets",
+      selectedPriceRange: "price",
+      sortBy: "sort",
+    },
+  });
   const dragControls = useDragControls();
 
   // Measure navbar height for sticky toolbar
@@ -157,9 +190,10 @@ export function RecipientGiftsClient({
     setShowVerifiedOnly(false);
     setShowPersonalizedOnly(false);
     setShowSetsOnly(false);
-    setSelectedPriceRange("ALL");
+    setSelectedPriceRange(defaultPriceRange);
     setSortBy("popular");
     setOpenDropdown(null);
+    clearPersistedFilters();
   };
 
   const activeFiltersCount =
@@ -711,7 +745,7 @@ export function RecipientGiftsClient({
                   : null;
                 const artisanName = product.artisan?.studioName || product.artisan?.user?.name;
                 const slugOrId = (product.slug || product.id).trim();
-                const productUrl = `/products/${encodeURI(slugOrId)}`;
+                const productUrl = `/${lang}/products/${encodeURI(slugOrId)}`;
 
                 return (
                   <motion.div

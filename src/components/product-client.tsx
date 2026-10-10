@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { useRouter } from "next/navigation";
-import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare, XCircle } from "lucide-react";
+import { Heart, Share2, Star, Truck, ShieldCheck, Clock, MapPin, ArrowRight, ArrowLeft, ChevronRight, CheckCircle2, Sparkles, Camera, ImagePlus, X, Video, Radio, MessageSquare, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { toast } from "react-hot-toast";
 
 export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, isOwner }: { product: any, relatedProducts: any[], dict: any, lang: string, isAdmin?: boolean, isOwner?: boolean }) {
   const router = useRouter();
+  const isAr = lang === "ar" || dict?.common?.home === "الرئيسية";
   const { addToCart } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { data: session } = useSession();
@@ -243,6 +244,49 @@ export function ProductClient({ product, relatedProducts, dict, lang, isAdmin, i
       <Navbar dict={dict} />
 
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-12">
+        {/* Navigation Breadcrumb & Back Action */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push(`/${lang}/products`);
+              }
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-charcoal/80 hover:text-primary hover:bg-white transition-all active:scale-95 border border-primary/10 bg-white/70 shadow-2xs group cursor-pointer"
+          >
+            <ArrowLeft className={cn("w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5", (lang === "ar" || isAr) && "rotate-180 group-hover:translate-x-0.5")} />
+            <span>{dict?.common?.back || (lang === "ar" || isAr ? "رجوع" : "Back")}</span>
+          </button>
+
+          <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs text-charcoal/60 truncate">
+            <Link href={`/${lang}`} className="hover:text-primary transition-colors">
+              {dict?.common?.home || (lang === "ar" || isAr ? "الرئيسية" : "Home")}
+            </Link>
+            <ChevronRight className={cn("w-3 h-3 text-charcoal/40 shrink-0", (lang === "ar" || isAr) && "rotate-180")} />
+            <Link href={`/${lang}/products`} className="hover:text-primary transition-colors">
+              {dict?.common?.explore || (lang === "ar" || isAr ? "المنتجات" : "Products")}
+            </Link>
+            {product.category && (
+              <>
+                <ChevronRight className={cn("w-3 h-3 text-charcoal/40 shrink-0", (lang === "ar" || isAr) && "rotate-180")} />
+                <Link
+                  href={`/${lang}/category/${product.category.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`}
+                  className="hover:text-primary transition-colors truncate"
+                >
+                  {product.category}
+                </Link>
+              </>
+            )}
+            <ChevronRight className={cn("w-3 h-3 text-charcoal/40 shrink-0", (lang === "ar" || isAr) && "rotate-180")} />
+            <span className="text-primary font-medium truncate max-w-[200px] md:max-w-[320px]">
+              {product.name}
+            </span>
+          </nav>
+        </div>
+
         {/* Status Banner for Shop Not Approved */}
         {product.artisan?.status !== "APPROVED" && (isAdmin || isOwner) && (
           <div className={cn(

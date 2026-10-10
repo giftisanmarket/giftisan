@@ -9,6 +9,7 @@ import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { useFavorites } from "@/context/favorites-context";
 import { cn } from "@/lib/utils";
 import { useState, useMemo, useRef, useEffect } from "react";
+import { useFilterPersistence } from "@/lib/use-filter-persistence";
 
 interface ProductsClientProps {
   initialProducts: any[];
@@ -31,6 +32,39 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
   const [openDropdown, setOpenDropdown] = useState<"category" | "price" | "sort" | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
+
+  // Persist filtering state across navigations until explicitly cleared
+  const { clearPersistedFilters } = useFilterPersistence({
+    key: "giftisan_filters_products",
+    values: {
+      showVerifiedOnly,
+      showCustomizableOnly,
+      selectedCategory,
+      selectedPriceRange,
+      sortBy,
+    },
+    setters: {
+      showVerifiedOnly: setShowVerifiedOnly,
+      showCustomizableOnly: setShowCustomizableOnly,
+      selectedCategory: setSelectedCategory,
+      selectedPriceRange: setSelectedPriceRange,
+      sortBy: setSortBy,
+    },
+    defaultValues: {
+      showVerifiedOnly: false,
+      showCustomizableOnly: false,
+      selectedCategory: "all",
+      selectedPriceRange: "ALL",
+      sortBy: "newest" as const,
+    },
+    paramMapping: {
+      showVerifiedOnly: "verified",
+      showCustomizableOnly: "customizable",
+      selectedCategory: "category",
+      selectedPriceRange: "price",
+      sortBy: "sort",
+    },
+  });
 
   const toolbarRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
@@ -142,6 +176,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
     setSelectedPriceRange("ALL");
     setSortBy("newest");
     setOpenDropdown(null);
+    clearPersistedFilters();
   };
 
   // High fidelity filtering and sorting logic
@@ -594,7 +629,7 @@ export function ProductsClient({ initialProducts, dict, lang }: ProductsClientPr
                     transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.25) }}
                   >
                     <Link
-                      href={`/products/${product.slug || product.id}`}
+                      href={`/${lang}/products/${product.slug || product.id}`}
                       className="group block"
                     >
                       <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2 bg-cream/20 border border-primary/5 shadow-xs hover:shadow-md transition-shadow">

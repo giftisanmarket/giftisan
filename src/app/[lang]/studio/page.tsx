@@ -90,7 +90,7 @@ export default async function StudioPage({
           userId: targetUserId as string,
           bio: "A master artisan in the Giftisan community.",
           location: "Artisan Member",
-          avatar: `https://api.dicebear.com/10.x/glyphs/svg?seed=${session.user.name || targetUserId}`
+          avatar: `https://api.dicebear.com/10.x/gaze/svg?seed=${session.user.name || targetUserId}`
         },
         update: {}, // Don't overwrite anything if it exists
         include: {

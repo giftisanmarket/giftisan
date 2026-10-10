@@ -264,7 +264,7 @@ export function ProfileClient({ user, orders, dict }: ProfileClientProps) {
                   <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl group-hover:blur-3xl transition-all" />
                   <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
                     <BespokeImage 
-                      src={user.image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${user.name}`} 
+                      src={user.image || `https://api.dicebear.com/10.x/gaze/svg?seed=${user.name}`} 
                       alt={user.name} 
                       fill 
                       className="object-cover"

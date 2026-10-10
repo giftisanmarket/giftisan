@@ -239,7 +239,7 @@ export function SettingsClient({ user, dict, lang = "en" }: { user: any; dict: a
                <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all" />
                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
                  <Image 
-                   src={image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${name || 'user'}`} 
+                   src={image || `https://api.dicebear.com/10.x/gaze/svg?seed=${name || 'user'}`} 
                    alt={name} 
                    fill 
                    className="object-cover"

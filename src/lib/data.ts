@@ -36,7 +36,7 @@ export const MOCK_PRODUCTS: Product[] = [
     artisan: {
       name: "Elena Ross",
       location: "Cotswolds, UK",
-      avatar: "https://api.dicebear.com/10.x/glyphs/svg?seed=Elena",
+      avatar: "https://api.dicebear.com/10.x/gaze/svg?seed=Elena",
       bio: "Working from my garden studio, I focus on minimalist forms and organic textures. Every piece I make carries the rhythm of the wheel."
     },
     images: ["/hero.webp"],
@@ -60,7 +60,7 @@ export const MOCK_PRODUCTS: Product[] = [
     artisan: {
       name: "Marcus Thorne",
       location: "Vancouver, CA",
-      avatar: "https://api.dicebear.com/10.x/glyphs/svg?seed=Marcus",
+      avatar: "https://api.dicebear.com/10.x/gaze/svg?seed=Marcus",
       bio: "Master bookbinder with a passion for traditional techniques and sustainable materials."
     },
     images: ["/journal.webp"],
@@ -77,7 +77,7 @@ export const MOCK_PRODUCTS: Product[] = [
     artisan: {
       name: "Sia Jewelry",
       location: "Milan, IT",
-      avatar: "https://api.dicebear.com/10.x/glyphs/svg?seed=Sia",
+      avatar: "https://api.dicebear.com/10.x/gaze/svg?seed=Sia",
       bio: "Third-generation jeweler focused on geometric simplicity and ethical gold sourcing."
     },
     images: ["/earrings.webp"],
@@ -93,7 +93,7 @@ export const MOCK_PRODUCTS: Product[] = [
     artisan: {
       name: "Arthur Wells",
       location: "Bristol, UK",
-      avatar: "https://api.dicebear.com/10.x/glyphs/svg?seed=Arthur",
+      avatar: "https://api.dicebear.com/10.x/gaze/svg?seed=Arthur",
       bio: "Restorer of antique instruments and maker of historical scientific replicas."
     },
     images: ["/hero.webp"],
@@ -109,7 +109,7 @@ export const MOCK_PRODUCTS: Product[] = [
     artisan: {
       name: "Ingrid Sol",
       location: "Oslo, NO",
-      avatar: "https://api.dicebear.com/10.x/glyphs/svg?seed=Ingrid",
+      avatar: "https://api.dicebear.com/10.x/gaze/svg?seed=Ingrid",
       bio: "Keeping the Nordic weaving tradition alive through sustainable, farm-to-loom textiles."
     },
     images: ["/hero.webp"],

@@ -55,8 +55,14 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
 
   const [gpsPinUrl, setGpsPinUrl] = useState(parseGpsFromAddress(artisan.pickupAddress || ""));
   const [pickupAddress, setPickupAddress] = useState(getCleanAddress(artisan.pickupAddress || ""));
-  const [pickupCity, setPickupCity] = useState(artisan.pickupCity || "");
-  const [pickupDistrict, setPickupDistrict] = useState(artisan.pickupDistrict || "");
+  const locationParts = (artisan.location || "").split(/[,،]/).map((s: string) => s.trim()).filter(Boolean);
+  const inferredDistrict = locationParts.length > 1 ? locationParts[0] : "";
+  const initialDistrict = (artisan.pickupDistrict && artisan.pickupDistrict !== artisan.pickupCity)
+    ? artisan.pickupDistrict
+    : (inferredDistrict || artisan.pickupDistrict || "");
+
+  const [pickupCity, setPickupCity] = useState(artisan.pickupCity || (locationParts.length > 1 ? locationParts[1] : locationParts[0]) || "");
+  const [pickupDistrict, setPickupDistrict] = useState(initialDistrict);
   const [pickupBuilding, setPickupBuilding] = useState(artisan.pickupBuilding || "");
   const [pickupNotes, setPickupNotes] = useState(artisan.pickupNotes || "");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -307,7 +313,7 @@ export function SettingsTab({ artisan, dict, lang = "en" }: SettingsTabProps) {
                       <div className="relative group mx-auto lg:mx-0 w-36 h-36 xl:w-40 xl:h-40">
                         <div className="relative w-36 h-36 xl:w-40 xl:h-40 rounded-full overflow-hidden border-4 border-white shadow-2xl">
                           <Image
-                            src={avatar || `https://api.dicebear.com/10.x/glyphs/svg?seed=${studioName}`}
+                            src={avatar || `https://api.dicebear.com/10.x/gaze/svg?seed=${studioName}`}
                             alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>

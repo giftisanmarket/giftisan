@@ -173,7 +173,7 @@ export async function signUp(formData: any, role: "CLIENT" | "ARTISAN") {
           slug: artisanSlug,
           bio: "",
           location: "",
-          avatar: `https://api.dicebear.com/10.x/glyphs/svg?seed=${name}`,
+          avatar: `https://api.dicebear.com/10.x/gaze/svg?seed=${name}`,
         },
       });
     }
@@ -3438,10 +3438,13 @@ export async function promoteToArtisan(userId: string, studioData: any) {
     const cleanInstagram = studioData.instagram ? stripEmojis(studioData.instagram.replace(/^@/, '').trim()) : null;
     const cleanBrandColor = studioData.brandColor?.trim() || "#da7b5a";
     const cleanPickupCity = studioData.pickupCity ? stripEmojis(studioData.pickupCity.trim()) : null;
+    const cleanPickupDistrict = (studioData.pickupDistrict || studioData.district)
+      ? stripEmojis((studioData.pickupDistrict || studioData.district).trim())
+      : null;
 
     const locationParts = cleanLocation.split(/[,،]/).map(s => s.trim()).filter(Boolean);
-    const derivedGov = cleanPickupCity || studioData.governorate || locationParts[0] || null;
-    const derivedDistrict = studioData.district || (locationParts.length > 1 ? locationParts[1] : null);
+    const derivedDistrict = cleanPickupDistrict || (locationParts.length > 1 ? locationParts[0] : null);
+    const derivedGov = cleanPickupCity || studioData.governorate || (locationParts.length > 1 ? locationParts[1] : locationParts[0]) || null;
 
     const profileData = {
       studioName: cleanStudioName,
@@ -3449,7 +3452,7 @@ export async function promoteToArtisan(userId: string, studioData: any) {
       bio: cleanBio,
       location: cleanLocation,
       phoneNumber: cleanPhoneNumber,
-      avatar: (session.user as any)?.image || `https://api.dicebear.com/10.x/glyphs/svg?seed=${encodeURIComponent(cleanStudioName || userId)}`,
+      avatar: (session.user as any)?.image || `https://api.dicebear.com/10.x/gaze/svg?seed=${encodeURIComponent(cleanStudioName || userId)}`,
       ...(cleanInstagram ? { instagram: cleanInstagram } : {}),
       ...(cleanBrandColor ? { brandColor: cleanBrandColor } : {}),
       ...(derivedGov ? { pickupCity: derivedGov } : {}),
@@ -3881,7 +3884,7 @@ export async function updateUserRole(userId: string, role: "CLIENT" | "ARTISAN" 
           userId,
           bio: "",
           location: "",
-          avatar: `https://api.dicebear.com/10.x/glyphs/svg?seed=${user.name || userId}`
+          avatar: `https://api.dicebear.com/10.x/gaze/svg?seed=${user.name || userId}`
         },
         update: {} // Do nothing if it already exists
       });

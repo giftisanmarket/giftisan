@@ -747,28 +747,6 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                         </div>
                       )}
 
-                      {/* Client Order Notes (Only displayed if client actually provided special instructions) */}
-                      {(() => {
-                        const rawNotes = selectedItem.order.orderNotes || "";
-                        const clientNote = rawNotes
-                          .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
-                          .replace(/\[Gift Note:[^\]]*\]/gi, "")
-                          .trim();
-
-                        if (!clientNote) return null;
-
-                        return (
-                          <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
-                            <div className="flex items-center gap-2 mb-2 md:mb-3">
-                              <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                              <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.studio.order_notes_client}</h3>
-                            </div>
-                            <p className="text-xs md:text-sm italic text-charcoal/70 leading-relaxed">
-                              "{clientNote}"
-                            </p>
-                          </div>
-                        );
-                      })()}
 
                       {/* Artisan Internal Notes */}
                       <div className="p-4 md:p-6 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5">
@@ -870,34 +848,17 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
                   </table>
                 </div>
 
-                {(() => {
-                  const clientNote = (selectedItem.order.orderNotes || "")
-                    .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
-                    .replace(/\[Gift Note:[^\]]*\]/gi, "")
-                    .trim();
-
-                  if (!selectedItem.order.isGift && !clientNote) return null;
-
-                  return (
-                    <div className="grid grid-cols-2 gap-8 mb-12">
-                      {selectedItem.order.isGift && (
-                        <div className="p-6 bg-accent/5 rounded-2xl border-2 border-dashed border-accent/20 relative overflow-hidden">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-accent/10" />
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-2">Gift Message</p>
-                          <p className="text-xl font-heading font-bold text-primary italic leading-relaxed">
-                            "{selectedItem.order.giftMessage || "No message provided."}"
-                          </p>
-                        </div>
-                      )}
-                      {clientNote && (
-                        <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/40 mb-2">Customer Instructions</p>
-                          <p className="text-sm font-medium text-primary/80">{clientNote}</p>
-                        </div>
-                      )}
+                {selectedItem.order.isGift && (
+                  <div className="mb-12">
+                    <div className="p-6 bg-accent/5 rounded-2xl border-2 border-dashed border-accent/20 relative overflow-hidden">
+                      <Sparkles className="absolute top-4 right-4 w-8 h-8 text-accent/10" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-2">Gift Message</p>
+                      <p className="text-xl font-heading font-bold text-primary italic leading-relaxed">
+                        "{selectedItem.order.giftMessage || "No message provided."}"
+                      </p>
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
 
                 <div className="mt-auto text-center py-12 border-t border-primary/5">
                   <p className="font-heading font-bold text-primary text-xl mb-1">

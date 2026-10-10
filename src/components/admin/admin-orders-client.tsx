@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin, RotateCcw, AlertTriangle } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, User, ArrowRight, Sparkles, X, Search, Edit, RefreshCw, ChevronDown, Check, MoreVertical, Mail, BarChart3, Printer, ExternalLink, Store, Phone, MapPin, RotateCcw, AlertTriangle, CreditCard, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateOrderStatus, shipOrderWithBosta, getBostaAWBAction } from "@/lib/actions";
 import toast from "react-hot-toast";
@@ -764,6 +764,46 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                             lang={lang}
                           />
                         </div>
+
+                        {/* Payment Method Badge */}
+                        <div className="pt-3 border-t border-primary/10 space-y-1.5">
+                          <p className="text-[8px] font-black text-primary/40 uppercase tracking-widest">{isAr ? "طريقة الدفع" : "Payment Method"}</p>
+                          {selectedOrderDetails.orderNotes?.includes("[COD") ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-xl text-amber-900 text-xs font-bold border border-amber-200/80">
+                              <Banknote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                              <span>{isAr ? "الدفع عند الاستلام (COD)" : "Cash on Delivery (COD)"}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-xl text-emerald-900 text-xs font-bold border border-emerald-200/80">
+                              <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{isAr ? "دفع إلكتروني (بطاقة / محفظة)" : "Paid Online (Cards / Wallets)"}</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Client Delivery Instructions (Courier) */}
+                        {(() => {
+                          const deliveryNote = (selectedOrderDetails.orderNotes || "")
+                            .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
+                            .replace(/\[Gift Note:[^\]]*\]/gi, "")
+                            .trim();
+
+                          if (!deliveryNote) return null;
+
+                          return (
+                            <div className="pt-3 border-t border-primary/10 space-y-1.5">
+                              <p className="text-[8px] font-black text-accent uppercase tracking-widest flex items-center gap-1.5">
+                                <Truck className="w-3 h-3 text-accent" />
+                                <span>{isAr ? "تعليمات التوصيل من العميل (المندوب)" : "Delivery Instructions (Courier)"}</span>
+                              </p>
+                              <div className="p-3.5 bg-accent/5 rounded-2xl border border-accent/20">
+                                <p className="text-xs font-medium text-primary italic leading-relaxed">
+                                  "{deliveryNote}"
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 
@@ -941,6 +981,25 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
               </tbody>
             </table>
           </div>
+
+          {/* Customer / Courier Delivery Instructions on Admin Packing Slip */}
+          {(() => {
+            const deliveryNote = (orderToPrint.orderNotes || "")
+              .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
+              .replace(/\[Gift Note:[^\]]*\]/gi, "")
+              .trim();
+
+            if (!deliveryNote) return null;
+
+            return (
+              <div className="mb-8 p-6 bg-cream/40 rounded-2xl border border-primary/10">
+                <p className="text-[9px] font-black uppercase tracking-widest text-primary/50 mb-1">
+                  {lang === "ar" ? "تعليمات التوصيل لمندوب الشحن" : "Courier Delivery Instructions"}
+                </p>
+                <p className="text-sm font-bold text-primary italic">"{deliveryNote}"</p>
+              </div>
+            );
+          })()}
 
           {orderToPrint.isGift && (
             <div className="mt-auto p-10 bg-accent/5 rounded-[3rem] border-2 border-dashed border-accent/20 relative overflow-hidden">

@@ -3104,7 +3104,13 @@ export async function shipOrderWithBosta(orderId: string) {
         },
         pickupAddress: pickupPayload,
         notes: [
-          order.orderNotes,
+          (() => {
+            const cleanNotes = (order.orderNotes || "")
+              .replace(/\[(COD - Cash on Delivery|Paymob Online)\]/gi, "")
+              .replace(/\[Gift Note:[^\]]*\]/gi, "")
+              .trim();
+            return cleanNotes ? `Customer Instructions: ${cleanNotes}` : "";
+          })(),
           order.isGift ? `Gift Message: ${order.giftMessage}` : "",
           artisan?.pickupNotes ? `Pickup note: ${artisan.pickupNotes}` : ""
         ].filter(Boolean).join(" | "),

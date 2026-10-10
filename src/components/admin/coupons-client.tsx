@@ -218,16 +218,16 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-primary tracking-tighter mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-primary tracking-tighter mb-1.5 sm:mb-2">
             {labels.title} <span className="serif italic text-accent font-normal">{labels.accentTitle}</span>
           </h1>
-          <p className="text-charcoal/40 text-sm font-medium leading-relaxed max-w-xl">{labels.desc}</p>
+          <p className="text-charcoal/40 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">{labels.desc}</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 h-12 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-accent/90 active:scale-95 shadow-md shadow-accent/20 transition-all shrink-0 w-full md:w-auto justify-center"
+          className="flex items-center gap-2 px-6 h-11 sm:h-12 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-accent/90 active:scale-95 shadow-md shadow-accent/20 transition-all shrink-0 w-full sm:w-auto justify-center"
         >
           <Plus className="w-4 h-4" />
           <span>{labels.createBtn}</span>
@@ -235,9 +235,9 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
       </div>
 
       {/* Stats Summary Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {statCards.map((card, i) => (
-          <div key={i} className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all flex items-center justify-between">
+          <div key={i} className="bg-white p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-1">{card.label}</p>
               <p className="text-2xl md:text-3xl font-black text-primary font-heading leading-none">{card.value}</p>
@@ -249,136 +249,249 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
         ))}
       </div>
 
-      {/* Coupon List Table */}
-      <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className={cn("w-full min-w-[800px] lg:min-w-full text-start", isAr ? "text-right" : "text-left" )}>
-            <thead>
-              <tr className="bg-primary/5 border-b border-primary/5">
-                <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.codeCol}</th>
-                <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.typeCol}</th>
-                <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.rulesCol}</th>
-                <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.usedCol}</th>
-                <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.statusCol}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-primary/5">
-              {coupons.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-charcoal/40 font-bold text-sm">
-                    {labels.noCoupons}
-                  </td>
-                </tr>
-              ) : (
-                coupons.map((coupon) => (
-                  <tr key={coupon.id} className="hover:bg-cream/30 transition-colors">
-                    {/* Code */}
-                    <td className="px-6 md:px-8 py-4 md:py-6">
-                      <div className="flex items-center gap-2.5">
-                        <div className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0",
-                          coupon.isActive ? "bg-emerald-50 text-emerald-600" : "bg-primary/5 text-primary/30"
-                        )}>
-                          <Tag className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <p className="font-mono text-xs md:text-sm font-black text-primary uppercase tracking-wide leading-none">{coupon.code}</p>
-                            {coupon.artisan ? (
-                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                                {isAr ? `متجر: ${coupon.artisan.studioName}` : `Shop: ${coupon.artisan.studioName}`}
-                              </span>
-                            ) : (
-                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                                {isAr ? "تمويل المنصة" : "Platform Promo"}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[8px] md:text-[9px] text-charcoal/30 font-bold uppercase tracking-widest mt-1">
-                            {new Date(coupon.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
+      {/* Coupon List Table & Mobile Cards */}
+      <div className="bg-white rounded-2xl sm:rounded-[1.5rem] md:rounded-[2.5rem] border border-primary/5 shadow-2xl shadow-primary/5 p-4 sm:p-6 lg:p-0 overflow-hidden">
+        {coupons.length === 0 ? (
+          <div className="py-12 text-center text-charcoal/40 font-bold text-sm">
+            {labels.noCoupons}
+          </div>
+        ) : (
+          <>
+            {/* Mobile Cards View */}
+            <div className="block lg:hidden space-y-3">
+              {coupons.map((coupon) => (
+                <div 
+                  key={coupon.id}
+                  className="p-4 bg-cream/15 rounded-2xl border border-primary/5 shadow-xs space-y-3 hover:border-primary/15 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0",
+                        coupon.isActive ? "bg-emerald-50 text-emerald-600" : "bg-primary/5 text-primary/30"
+                      )}>
+                        <Tag className="w-4 h-4" />
                       </div>
-                    </td>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-mono text-sm font-black text-primary uppercase tracking-wide leading-none">{coupon.code}</p>
+                          {coupon.artisan ? (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                              {isAr ? `متجر: ${coupon.artisan.studioName}` : `Shop: ${coupon.artisan.studioName}`}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                              {isAr ? "تمويل المنصة" : "Platform Promo"}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-charcoal/40 font-bold uppercase tracking-wider mt-1">
+                          {new Date(coupon.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
 
-                    {/* Type & Value */}
-                    <td className="px-6 md:px-8 py-4 md:py-6">
-                      <div className="flex items-center gap-1.5">
+                    <button 
+                      type="button"
+                      onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
+                      className={cn(
+                        "focus:outline-none transition-colors duration-300 rounded-full shrink-0 -my-1 cursor-pointer",
+                        coupon.isActive ? "text-emerald-500" : "text-primary/10"
+                      )}
+                      aria-label="Toggle active status"
+                    >
+                      {coupon.isActive ? (
+                        <ToggleRight className="w-10 h-10" />
+                      ) : (
+                        <ToggleLeft className="w-10 h-10" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-primary/5 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider">
+                        {labels.typeCol}
+                      </span>
+                      <div className="flex items-center gap-1 text-primary">
                         {coupon.discountType === "PERCENTAGE" ? (
-                          <div className="flex items-center gap-1 text-primary">
+                          <>
                             <Percent className="w-3.5 h-3.5 text-accent shrink-0" />
                             <span className="text-sm font-black">{coupon.discountValue}%</span>
                             <span className="text-[10px] text-charcoal/40 font-medium">({labels.percentage})</span>
-                          </div>
+                          </>
                         ) : (
-                          <div className="flex items-center gap-1 text-primary">
+                          <>
                             <span className="text-sm font-black">{dict.product.currency} {coupon.discountValue}</span>
                             <span className="text-[10px] text-charcoal/40 font-medium">({labels.fixed})</span>
-                          </div>
+                          </>
                         )}
                       </div>
-                    </td>
+                    </div>
 
                     {/* Rules */}
-                    <td className="px-6 md:px-8 py-4 md:py-6">
-                      <div className="space-y-1 text-xs text-charcoal/70 font-bold">
+                    <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-primary/5">
+                      <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider">
+                        {labels.rulesCol}
+                      </span>
+                      <div className="text-end space-y-0.5">
                         {coupon.minOrderAmount ? (
-                          <p className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                            <span>{labels.minOrder}:</span>
-                            <span className="text-primary font-black">{dict.product.currency} {coupon.minOrderAmount}</span>
+                          <p className="text-primary font-bold">
+                            {labels.minOrder}: <span className="font-black">{dict.product.currency} {coupon.minOrderAmount}</span>
                           </p>
                         ) : (
-                          <p className="text-charcoal/30 flex items-center gap-1 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-charcoal/20" />
-                            <span>{labels.minOrder}: {labels.any}</span>
-                          </p>
+                          <p className="text-charcoal/40">{labels.minOrder}: {labels.any}</p>
                         )}
                         {coupon.discountType === "PERCENTAGE" && coupon.maxDiscount && (
-                          <p className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                            <span>{labels.maxCap}:</span>
-                            <span className="text-primary font-black">{dict.product.currency} {coupon.maxDiscount}</span>
+                          <p className="text-primary font-bold">
+                            {labels.maxCap}: <span className="font-black">{dict.product.currency} {coupon.maxDiscount}</span>
                           </p>
                         )}
                       </div>
-                    </td>
+                    </div>
 
                     {/* Usage */}
-                    <td className="px-6 md:px-8 py-4 md:py-6">
+                    <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-primary/5">
+                      <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider">
+                        {labels.usedCol}
+                      </span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-black text-primary bg-primary/5 px-2.5 py-1 rounded-full">
+                        <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full">
                           {coupon.usedCount}
                         </span>
-                        <span className="text-[10px] text-charcoal/30 font-medium uppercase tracking-widest">
+                        <span className="text-[10px] text-charcoal/40 font-medium uppercase tracking-wider">
                           / {coupon.maxUses ? coupon.maxUses : labels.unlimited}
                         </span>
                       </div>
-                    </td>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                    {/* Active Toggle Switch */}
-                    <td className="px-6 md:px-8 py-4 md:py-6">
-                      <button 
-                        type="button"
-                        onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
-                        className={cn(
-                          "focus:outline-none transition-colors duration-300 rounded-full",
-                          coupon.isActive ? "text-emerald-500" : "text-primary/10"
-                        )}
-                      >
-                        {coupon.isActive ? (
-                          <ToggleRight className="w-12 h-12" />
-                        ) : (
-                          <ToggleLeft className="w-12 h-12" />
-                        )}
-                      </button>
-                    </td>
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className={cn("w-full min-w-full text-start", isAr ? "text-right" : "text-left" )}>
+                <thead>
+                  <tr className="bg-primary/5 border-b border-primary/5">
+                    <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.codeCol}</th>
+                    <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.typeCol}</th>
+                    <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.rulesCol}</th>
+                    <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.usedCol}</th>
+                    <th className="px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest">{labels.statusCol}</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-primary/5">
+                  {coupons.map((coupon) => (
+                    <tr key={coupon.id} className="hover:bg-cream/30 transition-colors">
+                      {/* Code */}
+                      <td className="px-6 md:px-8 py-4 md:py-6">
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0",
+                            coupon.isActive ? "bg-emerald-50 text-emerald-600" : "bg-primary/5 text-primary/30"
+                          )}>
+                            <Tag className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-mono text-xs md:text-sm font-black text-primary uppercase tracking-wide leading-none">{coupon.code}</p>
+                              {coupon.artisan ? (
+                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                                  {isAr ? `متجر: ${coupon.artisan.studioName}` : `Shop: ${coupon.artisan.studioName}`}
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                                  {isAr ? "تمويل المنصة" : "Platform Promo"}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[8px] md:text-[9px] text-charcoal/30 font-bold uppercase tracking-widest mt-1">
+                              {new Date(coupon.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Type & Value */}
+                      <td className="px-6 md:px-8 py-4 md:py-6">
+                        <div className="flex items-center gap-1.5">
+                          {coupon.discountType === "PERCENTAGE" ? (
+                            <div className="flex items-center gap-1 text-primary">
+                              <Percent className="w-3.5 h-3.5 text-accent shrink-0" />
+                              <span className="text-sm font-black">{coupon.discountValue}%</span>
+                              <span className="text-[10px] text-charcoal/40 font-medium">({labels.percentage})</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 text-primary">
+                              <span className="text-sm font-black">{dict.product.currency} {coupon.discountValue}</span>
+                              <span className="text-[10px] text-charcoal/40 font-medium">({labels.fixed})</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Rules */}
+                      <td className="px-6 md:px-8 py-4 md:py-6">
+                        <div className="space-y-1 text-xs text-charcoal/70 font-bold">
+                          {coupon.minOrderAmount ? (
+                            <p className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                              <span>{labels.minOrder}:</span>
+                              <span className="text-primary font-black">{dict.product.currency} {coupon.minOrderAmount}</span>
+                            </p>
+                          ) : (
+                            <p className="text-charcoal/30 flex items-center gap-1 font-medium">
+                              <span className="w-1.5 h-1.5 rounded-full bg-charcoal/20" />
+                              <span>{labels.minOrder}: {labels.any}</span>
+                            </p>
+                          )}
+                          {coupon.discountType === "PERCENTAGE" && coupon.maxDiscount && (
+                            <p className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                              <span>{labels.maxCap}:</span>
+                              <span className="text-primary font-black">{dict.product.currency} {coupon.maxDiscount}</span>
+                            </p>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Usage */}
+                      <td className="px-6 md:px-8 py-4 md:py-6">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-black text-primary bg-primary/5 px-2.5 py-1 rounded-full">
+                            {coupon.usedCount}
+                          </span>
+                          <span className="text-[10px] text-charcoal/30 font-medium uppercase tracking-widest">
+                            / {coupon.maxUses ? coupon.maxUses : labels.unlimited}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Active Toggle Switch */}
+                      <td className="px-6 md:px-8 py-4 md:py-6">
+                        <button 
+                          type="button"
+                          onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
+                          className={cn(
+                            "focus:outline-none transition-colors duration-300 rounded-full cursor-pointer",
+                            coupon.isActive ? "text-emerald-500" : "text-primary/10"
+                          )}
+                        >
+                          {coupon.isActive ? (
+                            <ToggleRight className="w-12 h-12" />
+                          ) : (
+                            <ToggleLeft className="w-12 h-12" />
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Create Coupon Modal Form */}
@@ -399,7 +512,7 @@ export function CouponsClient({ initialCoupons, stats: initialStats, dict, lang 
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[2rem] border border-primary/5 shadow-2xl p-6 md:p-8 overflow-hidden z-10"
+              className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-[2rem] border border-primary/5 shadow-2xl p-5 sm:p-8 max-h-[90vh] overflow-y-auto z-10"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl md:text-2xl font-heading font-black text-primary">

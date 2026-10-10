@@ -108,11 +108,11 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-primary flex items-center gap-3">
-            <RotateCcw className="w-8 h-8 text-accent" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-primary flex items-center gap-2.5 sm:gap-3">
+            <RotateCcw className="w-6 h-6 sm:w-8 sm:h-8 text-accent shrink-0" />
             <span>{isAr ? "طلبات الاسترجاع والنزاعات" : "Refunds & Claims Management"}</span>
           </h1>
-          <p className="text-sm text-charcoal/50 mt-1">
+          <p className="text-xs sm:text-sm text-charcoal/50 mt-1">
             {isAr 
               ? "مراجعة شكاوى المشترين، تقييم الأدلة والصور، والبت في الاسترداد أو استبدال القطع."
               : "Review buyer claims, inspect photographic evidence, and mediate refunds or replacements."}
@@ -120,8 +120,8 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
         </div>
 
         {/* Quick Count Badges */}
-        <div className="flex items-center gap-2">
-          <div className="px-4 py-2 bg-amber-50 text-amber-800 border border-amber-200 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="px-3.5 sm:px-4 py-2 bg-amber-50 text-amber-800 border border-amber-200 rounded-2xl text-xs font-bold flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
             <span>{claims.filter(c => c.status === 'PENDING').length} {isAr ? "قيد المراجعة" : "Pending Review"}</span>
           </div>
@@ -129,14 +129,14 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 bg-white rounded-2xl border border-primary/5 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+      <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-primary/5 shadow-sm flex flex-col md:flex-row gap-3 sm:gap-4 items-stretch md:items-center justify-between">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap pb-1 w-full md:w-auto">
           {['ALL', 'PENDING', 'APPROVED', 'REPLACEMENT_ISSUED', 'REJECTED'].map((st) => (
             <button
               key={st}
               onClick={() => setFilterStatus(st)}
               className={cn(
-                "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                "px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap",
                 filterStatus === st
                   ? "bg-primary text-white shadow-sm"
                   : "bg-cream/40 text-charcoal/60 hover:bg-cream hover:text-primary"
@@ -165,9 +165,9 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
 
       {/* Claims List */}
       {filteredClaims.length === 0 ? (
-        <div className="p-16 bg-white rounded-[2.5rem] border border-primary/5 text-center shadow-sm">
+        <div className="p-8 sm:p-16 bg-white rounded-2xl sm:rounded-[2.5rem] border border-primary/5 text-center shadow-sm">
           <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3 opacity-60" />
-          <h3 className="text-lg font-bold text-primary mb-1">
+          <h3 className="text-base sm:text-lg font-bold text-primary mb-1">
             {isAr ? "لا توجد طلبات استرجاع في هذا التصنيف" : "No refund claims found"}
           </h3>
           <p className="text-xs text-charcoal/40">
@@ -175,7 +175,7 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredClaims.map((claim) => {
             const product = claim.orderItem?.product || claim.order?.items?.[0]?.product;
             const artisan = product?.artisan;
@@ -183,15 +183,15 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
             return (
               <div 
                 key={claim.id}
-                className="p-6 bg-white rounded-[2rem] border border-primary/5 shadow-sm hover:shadow-md transition-shadow flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+                className="p-4 sm:p-6 bg-white rounded-2xl sm:rounded-[2rem] border border-primary/5 shadow-sm hover:shadow-md transition-shadow flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6"
               >
-                <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                   {product?.images?.[0] ? (
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-cream shrink-0 border border-primary/5">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden bg-cream shrink-0 border border-primary/5">
                       <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-cream flex items-center justify-center text-primary/30 shrink-0">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-cream flex items-center justify-center text-primary/30 shrink-0">
                       <Package className="w-6 h-6" />
                     </div>
                   )}
@@ -289,12 +289,12 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] p-6 md:p-8 shadow-2xl border border-primary/5 my-auto space-y-6 shrink-0"
+              className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-6 md:p-8 shadow-2xl border border-primary/5 my-auto space-y-5 sm:space-y-6 shrink-0 max-h-[90vh] overflow-y-auto"
             >
               <button
                 type="button"
                 onClick={() => setSelectedClaim(null)}
-                className="absolute top-6 end-6 w-9 h-9 rounded-full bg-cream hover:bg-primary/5 flex items-center justify-center text-charcoal/60 hover:text-primary transition-all cursor-pointer"
+                className="absolute top-5 end-5 sm:top-6 sm:end-6 w-9 h-9 rounded-full bg-cream hover:bg-primary/5 flex items-center justify-center text-charcoal/60 hover:text-primary transition-all cursor-pointer z-10"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -407,12 +407,12 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
               </div>
 
               {/* Resolution Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-primary/5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-primary/5">
                 <button
                   type="button"
                   disabled={isResolving}
                   onClick={() => handleResolve('APPROVE')}
-                  className="p-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className="h-11 sm:h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{isAr ? "موافقة واسترداد المبلغ" : "Approve Full Refund"}</span>
@@ -422,7 +422,7 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
                   type="button"
                   disabled={isResolving}
                   onClick={() => handleResolve('REPLACEMENT')}
-                  className="p-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className="h-11 sm:h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Truck className="w-4 h-4" />
                   <span>{isAr ? "إرسال قطعة بديلة" : "Issue Replacement"}</span>
@@ -432,7 +432,7 @@ export function AdminRefundsClient({ initialClaims, dict }: AdminRefundsClientPr
                   type="button"
                   disabled={isResolving}
                   onClick={() => handleResolve('REJECT')}
-                  className="p-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className="h-11 sm:h-12 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                   <span>{isAr ? "رفض الطلب" : "Decline Claim"}</span>

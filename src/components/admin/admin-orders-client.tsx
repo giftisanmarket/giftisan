@@ -170,20 +170,20 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
               />
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full lg:w-auto">
               {["ALL", "READY TO SHIP", "PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "REFUNDED", "CANCELLED"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={cn(
-                    "px-4 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2",
+                    "px-3.5 h-10 sm:h-12 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-1.5 shrink-0 whitespace-nowrap",
                     statusFilter === status 
                       ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
                       : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
                   )}
                 >
-                  {status === "READY TO SHIP" ? dict.admin.ready_to_ship : status === "REFUNDED" ? (isAr ? "مسترجع" : "Refunded") : status}
-                  <span className="opacity-40">
+                  <span>{status === "READY TO SHIP" ? dict.admin.ready_to_ship : status === "REFUNDED" ? (isAr ? "مسترجع" : "Refunded") : status}</span>
+                  <span className="opacity-50 text-[9px]">
                     ({status === "ALL" ? orders.length : status === "READY TO SHIP" ? orders.filter(o => ["PENDING", "PROCESSING"].includes(o.status) && (o.items?.length || 0) > 0 && o.items?.filter((i: any) => i.status === "PROCESSING" || i.status === "SHIPPED" || i.status === "DELIVERED").length === o.items?.length).length : orders.filter(o => o.status === status).length})
                   </span>
                 </button>
@@ -217,7 +217,175 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
             ))}
           </div>
 
-          <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
+          {/* =========================================================================
+              MOBILE VIEW: ADAPTIVE ORDER CARDS (Phone Screens < lg)
+             ========================================================================= */}
+          <div className="block lg:hidden space-y-4">
+            {filteredOrders.length === 0 ? (
+              <div className="bg-white rounded-2xl p-10 text-center text-charcoal/40 font-medium border border-primary/5 shadow-sm">
+                No orders found matching your criteria.
+              </div>
+            ) : (
+              filteredOrders.map((order: any) => {
+                const isVoided = order.status === "CANCELLED" || order.status === "REFUNDED";
+                const totalItems = order.items?.length || 0;
+                const prepared = order.items?.filter((i: any) => i.status === "PROCESSING" || i.status === "SHIPPED" || i.status === "DELIVERED").length || 0;
+                const isFullyPrepared = prepared === totalItems && totalItems > 0;
+
+                return (
+                  <div key={order.id} className="bg-white rounded-2xl p-4 sm:p-5 border border-primary/5 shadow-lg shadow-primary/5 space-y-3.5">
+                    {/* Top Row: Order ID, Gift/Dispute Badges, Date, Status */}
+                    <div className="flex items-start justify-between gap-2 border-b border-primary/5 pb-3">
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-mono text-xs font-bold text-primary">#{order.id.slice(0, 10)}...</span>
+                          {order.isGift && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-accent/10 text-accent rounded-full text-[8px] font-black uppercase">
+                              <Sparkles className="w-2.5 h-2.5" />
+                              {dict.checkout?.mark_as_gift || "GIFT"}
+                            </span>
+                          )}
+                          {order.refundRequests?.some((r: any) => r.status === "PENDING") && (
+                            <Link 
+                              href={`/${lang}/admin/refunds`}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[8px] font-black uppercase animate-pulse"
+                            >
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                              {isAr ? "نزاع معلق" : "Dispute"}
+                            </Link>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider mt-0.5">
+                          {new Date(order.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
+
+                      <span className={cn(
+                        "px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 flex items-center gap-1",
+                        order.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                        order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-200" :
+                        order.status === "PROCESSING" ? "bg-purple-50 text-purple-600 border-purple-200" :
+                        order.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                        order.status === "REFUNDED" ? "bg-rose-50 text-rose-700 border-rose-200" :
+                        "bg-green-50 text-green-700 border-green-200"
+                      )}>
+                        {order.status === "PENDING" && <Clock className="w-3 h-3" />}
+                        {order.status === "PROCESSING" && <RefreshCw className="w-3 h-3 animate-spin" />}
+                        {order.status === "CANCELLED" && <X className="w-3 h-3" />}
+                        {order.status === "SHIPPED" && <Truck className="w-3 h-3" />}
+                        {order.status === "REFUNDED" && <RotateCcw className="w-3 h-3" />}
+                        {order.status === "DELIVERED" && <CheckCircle2 className="w-3 h-3" />}
+                        {order.status}
+                      </span>
+                    </div>
+
+                    {/* Customer & Total Row */}
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
+                          <User className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-primary truncate">{order.user?.name || "Anonymous"}</p>
+                          <p className="text-[10px] text-charcoal/40 truncate">{order.user?.email || order.clientEmail || "N/A"}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-end shrink-0">
+                        <p className={cn(
+                          "text-base font-heading font-black",
+                          isVoided ? "text-charcoal/40 line-through" : "text-primary"
+                        )}>
+                          {dict.product?.currency || "EGP"} {order.totalAmount}
+                        </p>
+                        {order.discountApplied > 0 && !isVoided && (
+                          <span className="text-[9px] font-bold text-emerald-600 block">
+                            -{dict.product?.currency || "EGP"} {order.discountApplied}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Items Preview Strip */}
+                    <div className="bg-cream/40 p-2.5 rounded-xl border border-primary/5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-2">
+                          {order.items?.slice(0, 3).map((item: any, idx: number) => (
+                            <div key={idx} className="relative w-7 h-7 rounded-lg overflow-hidden border border-white shadow-sm shrink-0 bg-cream">
+                              {item.product?.images?.[0] && (
+                                <img src={item.product.images[0]} alt="" className="object-cover w-full h-full" />
+                              )}
+                            </div>
+                          ))}
+                          {(order.items?.length || 0) > 3 && (
+                            <div className="w-7 h-7 rounded-lg bg-cream border border-white shadow-sm flex items-center justify-center shrink-0">
+                              <span className="text-[8px] font-black text-primary">+{order.items.length - 3}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-bold text-primary">
+                          {totalItems} {totalItems === 1 ? (isAr ? "قطعة" : "item") : (isAr ? "قطع" : "items")}
+                        </span>
+                      </div>
+
+                      {isFullyPrepared && ["PENDING", "PROCESSING"].includes(order.status) ? (
+                        <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-purple-50 text-purple-700 border border-purple-200 uppercase animate-pulse">
+                          Ready to Ship
+                        </span>
+                      ) : prepared > 0 && order.status === "PENDING" ? (
+                        <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-orange-50 text-orange-700 border border-orange-200 uppercase">
+                          Crafting ({prepared}/{totalItems})
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-charcoal/50 font-semibold">
+                          {prepared}/{totalItems} prepared
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action Buttons Toolbar (Direct Touch Targets) */}
+                    <div className="pt-2 border-t border-primary/5 flex items-center gap-2 flex-wrap">
+                      <button
+                        onClick={() => handleOpenEdit(order)}
+                        className="flex-1 min-w-[120px] h-9 bg-primary text-white font-bold rounded-xl text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                        <span>{dict.admin?.update_state || (isAr ? "تعديل الحالة" : "Update Status")}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setSelectedOrderDetails(order)}
+                        className="h-9 px-3 bg-primary/5 hover:bg-primary/10 text-primary font-bold rounded-xl text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                        title="Details"
+                      >
+                        <BarChart3 className="w-3.5 h-3.5 text-accent" />
+                        <span>{isAr ? "تفاصيل" : "Details"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setOrderToPrint(order);
+                          setTimeout(() => {
+                            window.print();
+                            setOrderToPrint(null);
+                          }, 100);
+                        }}
+                        className="w-9 h-9 bg-cream hover:bg-cream/80 text-primary/70 rounded-xl flex items-center justify-center transition-all shrink-0"
+                        title="Print Slip"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* =========================================================================
+              DESKTOP VIEW: FULL TABLE (Screens >= lg)
+             ========================================================================= */}
+          <div className="hidden lg:block bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
             <div className="overflow-x-auto min-h-[280px]">
               <table className="w-full text-left min-w-[900px] lg:min-w-full">
                 <thead>
@@ -307,7 +475,7 @@ export function AdminOrdersClient({ orders: initialOrders, dict, lang }: AdminOr
                                           Ready to Ship
                                         </span>
                                       ) : prepared > 0 && order.status === "PENDING" ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-orange-50 text-orange-700 border border-orange-200 uppercase tracking-widest">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-orange-50 text-orange-700 border border-orange-200 uppercase">
                                           Crafting ({prepared}/{totalItems})
                                         </span>
                                       ) : null}

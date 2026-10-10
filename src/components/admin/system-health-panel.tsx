@@ -103,7 +103,7 @@ export function SystemHealthPanel({ dict, isAr }: SystemHealthPanelProps) {
         )}
       </h2>
 
-      <div className="bg-primary text-white p-8 rounded-[2rem] shadow-2xl shadow-primary/20 space-y-6 relative overflow-hidden group">
+      <div className="bg-primary text-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-2xl shadow-primary/20 space-y-5 sm:space-y-6 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-white/10" />
 
         {/* AUTH SERVICE */}

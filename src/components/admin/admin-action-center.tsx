@@ -92,7 +92,7 @@ export function AdminActionCenter({ stats, dict, isAr }: AdminActionCenterProps)
   ].filter(item => item.count > 0);
 
   return (
-    <div className="bg-gradient-to-r from-amber-500/10 via-primary/5 to-rose-500/10 border border-amber-500/20 p-6 rounded-[2.5rem] shadow-lg shadow-amber-500/5 space-y-4">
+    <div className="bg-gradient-to-r from-amber-500/10 via-primary/5 to-rose-500/10 border border-amber-500/20 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] shadow-lg shadow-amber-500/5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md animate-bounce">

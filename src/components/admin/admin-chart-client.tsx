@@ -76,11 +76,11 @@ export function AdminChartClient({ orders, dict, lang }: AdminChartClientProps) 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 space-y-6"
+      className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 space-y-5 sm:space-y-6"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-primary/5 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-primary/5 pb-5 sm:pb-6">
         <div>
-          <h3 className="text-lg md:text-xl font-heading font-bold text-primary flex items-center gap-2">
+          <h3 className="text-base sm:text-lg md:text-xl font-heading font-bold text-primary flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-accent" />
             {lang === "ar" ? "تحليلات الأداء والنمو" : "Platform Analytics & Growth"}
           </h3>
@@ -91,7 +91,7 @@ export function AdminChartClient({ orders, dict, lang }: AdminChartClientProps) 
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-start">
+        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-start flex-wrap">
           {/* Metric Selector Toggle */}
           <div className="bg-cream/40 p-1 rounded-xl flex border border-primary/5">
             <button

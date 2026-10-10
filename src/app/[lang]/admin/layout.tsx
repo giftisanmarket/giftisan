@@ -36,7 +36,7 @@ export default async function AdminLayout({
   const dict = await getDictionary(lang as any);
 
   return (
-    <div className="flex min-h-screen bg-cream font-sans pb-24 lg:pb-0">
+    <div className="flex min-h-screen bg-cream font-sans">
       <AdminNavClient dict={dict}>
         {children}
       </AdminNavClient>

@@ -232,17 +232,17 @@ export function PayoutsManagerClient({
   });
 
   return (
-    <div className="space-y-12 text-start" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="space-y-8 sm:space-y-12 text-start" dir={isRTL ? "rtl" : "ltr"}>
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-primary/5 pb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-primary/5 pb-6 sm:pb-8">
         <div>
-          <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-2">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-1.5 sm:mb-2">
             {isRTL ? "طلبات" : "Artisan"}{" "}
             <span className="serif italic text-accent font-normal">
               {isRTL ? "السحب" : "Payouts"}
             </span>
           </h1>
-          <p className="text-charcoal/40 font-medium text-sm md:text-base">
+          <p className="text-charcoal/40 font-medium text-xs sm:text-sm md:text-base">
             {isRTL 
               ? "مراجعة واعتماد طلبات السحب يدويًا وتسجيل التحويلات المالية بنجاح." 
               : "Review, coordinate transfer receipts, and manually process outstanding payout requests."}
@@ -251,7 +251,7 @@ export function PayoutsManagerClient({
         <button
           onClick={handleClearEscrow}
           disabled={isClearingEscrow}
-          className="px-6 h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-xs uppercase tracking-wider shrink-0 cursor-pointer disabled:opacity-50"
+          className="w-full sm:w-auto px-5 sm:px-6 h-11 sm:h-12 bg-primary hover:bg-primary-light text-white font-bold rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 text-xs uppercase tracking-wider shrink-0 cursor-pointer disabled:opacity-50"
         >
           <Clock className={cn("w-4 h-4", isClearingEscrow && "animate-spin")} />
           <span>{isClearingEscrow ? (isRTL ? "جاري التسوية..." : "Settling Escrow...") : (isRTL ? "تسوية حسابات الضمان" : "Run Escrow Settlement")}</span>
@@ -259,9 +259,9 @@ export function PayoutsManagerClient({
       </div>
 
       {/* Analytics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Outstanding Volume */}
-        <div className="bg-amber-50/50 rounded-3xl p-6 border border-amber-100 flex flex-col justify-between">
+        <div className="bg-amber-50/50 rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-amber-100 flex flex-col justify-between">
           <div className="space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-amber-700/60">
               {isRTL ? "إجمالي المبالغ المطلوبة" : "Pending Payout Volume"}
@@ -279,7 +279,7 @@ export function PayoutsManagerClient({
         </div>
 
         {/* Paid Volume */}
-        <div className="bg-emerald-50/50 rounded-3xl p-6 border border-emerald-100 flex flex-col justify-between">
+        <div className="bg-emerald-50/50 rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-emerald-100 flex flex-col justify-between">
           <div className="space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60">
               {isRTL ? "إجمالي المدفوعات التاريخية" : "Total Paid Out All-Time"}
@@ -295,7 +295,7 @@ export function PayoutsManagerClient({
         </div>
 
         {/* System Fee Card */}
-        <div className="bg-primary-light/5 rounded-3xl p-6 border border-primary/5 flex flex-col justify-between">
+        <div className="bg-primary-light/5 rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-primary/5 flex flex-col justify-between">
           <div className="space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
               {isRTL ? "رسوم عمولة المنصة الثابتة" : "Platform Settings"}
@@ -457,9 +457,9 @@ export function PayoutsManagerClient({
       </div>
 
       {/* Completed Payout History Ledger */}
-      <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-start space-y-6">
+      <div className="bg-white rounded-2xl sm:rounded-[2rem] md:rounded-[3rem] p-4 sm:p-6 md:p-12 border border-primary/5 shadow-2xl shadow-primary/5 text-start space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <h2 className="text-xl md:text-2xl font-heading font-black text-primary">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-heading font-black text-primary">
             {isRTL ? "أرشيف عمليات السحب المنفذة" : "Completed Payouts History"}
           </h2>
 
@@ -489,8 +489,8 @@ export function PayoutsManagerClient({
         </div>
 
         {/* Channel Filter Pills Bar */}
-        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-primary/5">
-          <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 me-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap pt-2 pb-1 border-t border-primary/5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-primary/40 me-1 shrink-0">
             {isRTL ? "وسيلة التحويل:" : "Payout Method:"}
           </span>
           {[
@@ -503,7 +503,7 @@ export function PayoutsManagerClient({
               key={tab.key}
               onClick={() => setChannelFilter(tab.key)}
               className={cn(
-                "px-3.5 h-8 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer",
+                "px-3.5 h-8 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer shrink-0 whitespace-nowrap",
                 channelFilter === tab.key
                   ? "bg-primary text-white border-primary shadow-sm"
                   : "bg-white text-primary/40 border-primary/5 hover:border-primary/20"
@@ -519,72 +519,147 @@ export function PayoutsManagerClient({
             {isRTL ? "لم يتم العثور على أي عمليات سحب مطابقة." : "No matching historical payouts found."}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-primary/5">
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "التاريخ" : "Date"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "العارض" : "Artisan"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "تفاصيل التحويل" : "Details"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الحالة" : "Status"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "المبلغ" : "Amount"}</th>
-                  <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "الإجراء" : "Action"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredHistory.map((tx: any) => {
-                  const isCompleted = tx.status === "COMPLETED";
-                  return (
-                    <tr key={tx.id} className="border-b border-primary/5 hover:bg-cream/10 transition-colors">
-                      <td className="py-5 text-xs text-charcoal/60 font-medium">
-                        {new Date(tx.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric"
-                        })}
-                      </td>
-                      <td className="py-5">
-                        <div className="text-xs font-bold text-primary">
+          <>
+            {/* Mobile Cards View */}
+            <div className="block lg:hidden space-y-3">
+              {filteredHistory.map((tx: any) => {
+                const isCompleted = tx.status === "COMPLETED";
+                return (
+                  <div 
+                    key={tx.id}
+                    className="p-4 sm:p-5 bg-cream/15 rounded-2xl border border-primary/5 shadow-xs space-y-3 hover:border-primary/15 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-primary text-sm truncate">
                           {tx.artisan?.studioName || tx.artisan?.user?.name || "Artisan"}
-                        </div>
-                        <div className="text-[10px] text-charcoal/40 font-semibold mt-0.5">
+                        </h4>
+                        <p className="text-[10px] text-charcoal/40 font-semibold truncate">
                           {tx.artisan?.user?.email}
-                        </div>
-                      </td>
-                      <td className="py-5 text-xs text-primary font-bold max-w-xs md:max-w-md">
-                        {tx.description}
-                      </td>
-                      <td className="py-5">
-                        <span className={cn(
-                          "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md inline-flex items-center gap-1",
-                          isCompleted
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        )}>
-                          {tx.status}
-                        </span>
-                      </td>
-                      <td className={cn(
-                        "py-5 text-sm font-bold text-end",
-                        isCompleted ? "text-green-600" : "text-red-500"
+                        </p>
+                      </div>
+                      <span className={cn(
+                        "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md shrink-0 inline-flex items-center gap-1",
+                        isCompleted
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                       )}>
-                        {Math.abs(tx.amount).toFixed(2)} EGP
-                      </td>
-                      <td className="py-5 text-end">
-                        <button
-                          onClick={() => setSelectedReceipt(tx)}
-                          className="px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent rounded-lg transition-all inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer border border-primary/5 shadow-sm"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>{isRTL ? "الإيصال" : "Receipt"}</span>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {tx.status}
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl border border-primary/5 space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider">
+                          {isRTL ? "المبلغ" : "Amount"}
+                        </span>
+                        <span className={cn(
+                          "font-heading font-black text-base",
+                          isCompleted ? "text-green-600" : "text-red-500"
+                        )}>
+                          {Math.abs(tx.amount).toFixed(2)} EGP
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-wider">
+                          {isRTL ? "التاريخ" : "Date"}
+                        </span>
+                        <span className="text-charcoal/60 font-medium">
+                          {new Date(tx.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric"
+                          })}
+                        </span>
+                      </div>
+                      {tx.description && (
+                        <div className="pt-2 border-t border-primary/5 text-[11px] text-primary/80 font-medium leading-relaxed">
+                          {tx.description}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReceipt(tx)}
+                      className="w-full h-10 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all text-xs uppercase tracking-wider cursor-pointer border border-primary/5 active:scale-95"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>{isRTL ? "عرض وتحميل الإيصال الرسمي" : "View & Print Receipt"}</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-primary/5">
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "التاريخ" : "Date"}</th>
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "العارض" : "Artisan"}</th>
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "تفاصيل التحويل" : "Details"}</th>
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-start">{isRTL ? "الحالة" : "Status"}</th>
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "المبلغ" : "Amount"}</th>
+                    <th className="py-4 text-xs font-black uppercase tracking-wider text-primary/40 text-end">{isRTL ? "الإجراء" : "Action"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistory.map((tx: any) => {
+                    const isCompleted = tx.status === "COMPLETED";
+                    return (
+                      <tr key={tx.id} className="border-b border-primary/5 hover:bg-cream/10 transition-colors">
+                        <td className="py-5 text-xs text-charcoal/60 font-medium">
+                          {new Date(tx.createdAt).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric"
+                          })}
+                        </td>
+                        <td className="py-5">
+                          <div className="text-xs font-bold text-primary">
+                            {tx.artisan?.studioName || tx.artisan?.user?.name || "Artisan"}
+                          </div>
+                          <div className="text-[10px] text-charcoal/40 font-semibold mt-0.5">
+                            {tx.artisan?.user?.email}
+                          </div>
+                        </td>
+                        <td className="py-5 text-xs text-primary font-bold max-w-xs md:max-w-md">
+                          {tx.description}
+                        </td>
+                        <td className="py-5">
+                          <span className={cn(
+                            "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md inline-flex items-center gap-1",
+                            isCompleted
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          )}>
+                            {tx.status}
+                          </span>
+                        </td>
+                        <td className={cn(
+                          "py-5 text-sm font-bold text-end",
+                          isCompleted ? "text-green-600" : "text-red-500"
+                        )}>
+                          {Math.abs(tx.amount).toFixed(2)} EGP
+                        </td>
+                        <td className="py-5 text-end">
+                          <button
+                            onClick={() => setSelectedReceipt(tx)}
+                            className="px-2.5 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary hover:text-accent rounded-lg transition-all inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer border border-primary/5 shadow-sm"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>{isRTL ? "الإيصال" : "Receipt"}</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

@@ -81,19 +81,19 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
   return (
     <div className="space-y-8 md:space-y-12" dir={isAr ? "rtl" : "ltr"}>
       {/* Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-primary/5 pb-8">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 border-b border-primary/5 pb-6 sm:pb-8">
         <div>
-          <h1 className="text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-black text-primary tracking-tighter mb-1.5 sm:mb-2">
             {dict.admin?.newsletter_title || "Newsletter"} <span className="serif italic text-accent font-normal">{dict.admin?.subscribers_accent || "Subscribers"}</span>
           </h1>
-          <p className="text-charcoal/40 text-sm font-medium mt-2">
+          <p className="text-charcoal/40 text-xs sm:text-sm font-medium">
             {dict.admin?.mailing_list_desc || "Manage platform subscribers, export mailing lists, and dispatch marketing announcements."}
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <ExportSubscribersButton subscribers={initialSubscribers} dict={dict} />
-          <div className="bg-white px-5 py-3 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-center min-w-[140px]">
+          <div className="bg-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-primary/5 shadow-sm flex flex-col justify-center min-w-[120px] sm:min-w-[140px]">
             <p className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase tracking-widest mb-0.5">
               {dict.admin?.total_interest || (isAr ? "إجمالي المشتركين" : "Total Interest")}
             </p>
@@ -103,8 +103,8 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
       </div>
 
       {/* Control Bar: Search & Sorting & Bulk Mail Actions */}
-      <div className="bg-white p-5 md:p-6 rounded-3xl border border-primary/5 shadow-xl shadow-primary/5 space-y-4">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-primary/5 shadow-xl shadow-primary/5 space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           {/* Search Input */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute start-4 top-1/2 -translate-y-1/2 text-primary/30" />
@@ -113,12 +113,12 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isAr ? "ابحث بالبريد الإلكتروني..." : "Search by email address..."}
-              className="w-full h-12 ps-11 pe-10 bg-cream/30 border border-primary/5 rounded-2xl text-xs font-bold text-primary placeholder:text-primary/30 focus:outline-none focus:border-accent focus:bg-white transition-all shadow-inner"
+              className="w-full h-11 sm:h-12 ps-11 pe-10 bg-cream/30 border border-primary/5 rounded-2xl text-xs font-bold text-primary placeholder:text-primary/30 focus:outline-none focus:border-accent focus:bg-white transition-all shadow-inner"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-primary/30 hover:text-primary transition-colors"
+                className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-primary/30 hover:text-primary transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -130,7 +130,7 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
             <button
               type="button"
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="h-12 px-5 bg-white border border-primary/10 hover:border-accent text-primary rounded-2xl flex items-center justify-between gap-3 font-bold text-xs shadow-sm hover:shadow transition-all cursor-pointer select-none"
+              className="w-full sm:w-auto h-11 sm:h-12 px-4 sm:px-5 bg-white border border-primary/10 hover:border-accent text-primary rounded-2xl flex items-center justify-between gap-3 font-bold text-xs shadow-sm hover:shadow transition-all cursor-pointer select-none"
             >
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="w-3.5 h-3.5 text-accent" />
@@ -173,13 +173,13 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
 
         {/* Bulk Actions Bar if items selected */}
         {selectedIds.length > 0 && (
-          <div className="flex items-center justify-between p-3 px-4 bg-accent/10 border border-accent/20 rounded-2xl animate-in fade-in duration-200">
-            <span className="text-xs font-bold text-accent">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 px-4 bg-accent/10 border border-accent/20 rounded-2xl animate-in fade-in duration-200">
+            <span className="text-xs font-bold text-accent text-center sm:text-start">
               {isAr ? `تم تحديد ${selectedIds.length} مشتركون` : `${selectedIds.length} subscriber(s) selected`}
             </span>
             <Link
               href={`/${lang}/admin/mail-sender?recipients=${encodeURIComponent(selectedEmails)}`}
-              className="px-4 py-2 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-accent/90 transition-all shadow-md active:scale-95"
+              className="px-4 py-2 bg-accent text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-accent/90 transition-all shadow-md active:scale-95"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isAr ? "إرسال حملة بريدية للمحددين" : "Send Broadcast to Selected"}</span>
@@ -188,105 +188,185 @@ export function AdminSubscribersClient({ initialSubscribers, dict, lang }: Admin
         )}
       </div>
 
-      {/* Main Table */}
-      <div className="bg-white rounded-[1.5rem] md:rounded-3xl border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-start border-collapse min-w-[600px] lg:min-w-full">
-            <thead>
-              <tr className="bg-primary/5 border-b border-primary/10">
-                <th className="w-12 px-4 py-4 text-center">
-                  <button
-                    onClick={toggleSelectAll}
-                    className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {selectedIds.length === filteredSubscribers.length && filteredSubscribers.length > 0 ? (
-                      <CheckSquare className="w-4 h-4 text-accent" />
-                    ) : (
-                      <Square className="w-4 h-4" />
+      {/* Main Table & Mobile Cards */}
+      <div className="bg-white rounded-2xl sm:rounded-[1.5rem] md:rounded-3xl border border-primary/10 shadow-xl shadow-primary/5 p-4 sm:p-6 lg:p-0 overflow-hidden">
+        {filteredSubscribers.length === 0 ? (
+          <div className="px-6 md:px-8 py-16 md:py-20 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                <Mail className="w-8 h-8 text-primary/20" />
+              </div>
+              <p className="text-primary/40 font-bold uppercase tracking-widest text-xs md:text-sm">
+                {searchQuery ? (isAr ? "لم يتم العثور على أي مشتركين يطابقون تصفيتك." : "No subscribers match your search.") : (dict.admin?.no_subscribers || "No subscribers yet.")}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Mobile Cards View */}
+            <div className="block lg:hidden space-y-3">
+              {/* Select All Row on Mobile */}
+              <div className="flex items-center justify-between p-3 bg-cream/20 rounded-xl border border-primary/5 text-xs font-bold text-primary">
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors cursor-pointer"
+                >
+                  {selectedIds.length === filteredSubscribers.length && filteredSubscribers.length > 0 ? (
+                    <CheckSquare className="w-4 h-4 text-accent" />
+                  ) : (
+                    <Square className="w-4 h-4" />
+                  )}
+                  <span>{isAr ? "تحديد الكل" : "Select All"}</span>
+                </button>
+                <span className="text-[10px] text-primary/40 uppercase tracking-widest">
+                  {filteredSubscribers.length} {isAr ? "مشترك" : "Subscribers"}
+                </span>
+              </div>
+
+              {filteredSubscribers.map((sub: any) => {
+                const isSelected = selectedIds.includes(sub.id);
+                return (
+                  <div 
+                    key={sub.id}
+                    className={cn(
+                      "p-4 bg-cream/15 rounded-2xl border transition-all space-y-3",
+                      isSelected ? "border-accent/40 bg-accent/5" : "border-primary/5 hover:border-primary/15"
                     )}
-                  </button>
-                </th>
-                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
-                  {dict.admin?.contact_email || (isAr ? "البريد الإلكتروني" : "Contact Email")}
-                </th>
-                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
-                  {dict.admin?.joined_date || (isAr ? "تاريخ الاشتراك" : "Joined Date")}
-                </th>
-                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
-                  {dict.admin?.status || (isAr ? "الحالة" : "Status")}
-                </th>
-                <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-end">
-                  {dict.admin?.actions || (isAr ? "الإجراءات" : "Actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-primary/5">
-              {filteredSubscribers.length > 0 ? (
-                filteredSubscribers.map((sub: any) => {
-                  const isSelected = selectedIds.includes(sub.id);
-                  return (
-                    <tr key={sub.id} className={cn("hover:bg-cream/30 transition-colors group", isSelected && "bg-accent/5")}>
-                      <td className="w-12 px-4 py-4 text-center">
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <button
+                          type="button"
                           onClick={() => toggleSelectOne(sub.id)}
-                          className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
+                          className="text-primary/40 hover:text-primary transition-colors cursor-pointer p-1 -m-1"
                         >
                           {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-accent" />
+                            <CheckSquare className="w-5 h-5 text-accent" />
                           ) : (
-                            <Square className="w-4 h-4" />
+                            <Square className="w-5 h-5" />
                           )}
                         </button>
-                      </td>
-                      <td className="px-6 md:px-8 py-4 md:py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors shrink-0">
-                            <Mail className="w-3.5 md:w-4 h-3.5 md:h-4 text-primary" />
+                        <div className="min-w-0">
+                          <p className="font-bold text-primary text-sm truncate">{sub.email}</p>
+                          <div className="flex items-center gap-1.5 text-primary/50 text-[10px] font-medium mt-0.5">
+                            <Clock className="w-3 h-3 opacity-60" />
+                            <span>
+                              {new Date(sub.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
                           </div>
-                          <span className="font-bold text-primary text-sm line-clamp-1">{sub.email}</span>
                         </div>
-                      </td>
-                      <td className="px-6 md:px-8 py-4 md:py-5">
-                        <div className="flex items-center gap-2 text-primary/60 font-medium text-[10px] md:text-xs">
-                          <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 opacity-40 shrink-0" />
-                          <span className="whitespace-nowrap">
-                            {new Date(sub.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 md:px-8 py-4 md:py-5">
-                        <span className="inline-flex items-center gap-1 px-2 md:px-3 py-1 rounded-full bg-green-100 text-green-700 text-[8px] md:text-[10px] font-black uppercase tracking-wider whitespace-nowrap">
-                          <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                          {dict.admin?.verified || (isAr ? "موثق ومفعل" : "Verified")}
-                        </span>
-                      </td>
-                      <td className="px-6 md:px-8 py-4 md:py-5 text-end">
-                        <DeleteSubscriberButton id={sub.id} email={sub.email} dict={dict} />
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 md:px-8 py-16 md:py-20 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
-                        <Mail className="w-8 h-8 text-primary/20" />
                       </div>
-                      <p className="text-primary/40 font-bold uppercase tracking-widest text-xs md:text-sm">
-                        {searchQuery ? (isAr ? "لم يتم العثور على أي مشتركين يطابقون تصفيتك." : "No subscribers match your search.") : (dict.admin?.no_subscribers || "No subscribers yet.")}
-                      </p>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-wider shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        {dict.admin?.verified || (isAr ? "موثق" : "Verified")}
+                      </span>
                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-primary/5">
+                      <Link
+                        href={`/${lang}/admin/mail-sender?recipients=${encodeURIComponent(sub.email)}`}
+                        className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>{isAr ? "إرسال رسالة" : "Send Mail"}</span>
+                      </Link>
+                      <DeleteSubscriberButton id={sub.id} email={sub.email} dict={dict} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-start border-collapse min-w-full">
+                <thead>
+                  <tr className="bg-primary/5 border-b border-primary/10">
+                    <th className="w-12 px-4 py-4 text-center">
+                      <button
+                        onClick={toggleSelectAll}
+                        className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
+                      >
+                        {selectedIds.length === filteredSubscribers.length && filteredSubscribers.length > 0 ? (
+                          <CheckSquare className="w-4 h-4 text-accent" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </button>
+                    </th>
+                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
+                      {dict.admin?.contact_email || (isAr ? "البريد الإلكتروني" : "Contact Email")}
+                    </th>
+                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
+                      {dict.admin?.joined_date || (isAr ? "تاريخ الاشتراك" : "Joined Date")}
+                    </th>
+                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-start">
+                      {dict.admin?.status || (isAr ? "الحالة" : "Status")}
+                    </th>
+                    <th className="px-6 md:px-8 py-4 md:py-5 text-[9px] md:text-xs font-black text-primary uppercase tracking-[0.2em] text-end">
+                      {dict.admin?.actions || (isAr ? "الإجراءات" : "Actions")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-primary/5">
+                  {filteredSubscribers.map((sub: any) => {
+                    const isSelected = selectedIds.includes(sub.id);
+                    return (
+                      <tr key={sub.id} className={cn("hover:bg-cream/30 transition-colors group", isSelected && "bg-accent/5")}>
+                        <td className="w-12 px-4 py-4 text-center">
+                          <button
+                            onClick={() => toggleSelectOne(sub.id)}
+                            className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
+                          >
+                            {isSelected ? (
+                              <CheckSquare className="w-4 h-4 text-accent" />
+                            ) : (
+                              <Square className="w-4 h-4" />
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-6 md:px-8 py-4 md:py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors shrink-0">
+                              <Mail className="w-3.5 md:w-4 h-3.5 md:h-4 text-primary" />
+                            </div>
+                            <span className="font-bold text-primary text-sm line-clamp-1">{sub.email}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 md:px-8 py-4 md:py-5">
+                          <div className="flex items-center gap-2 text-primary/60 font-medium text-[10px] md:text-xs">
+                            <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 opacity-40 shrink-0" />
+                            <span className="whitespace-nowrap">
+                              {new Date(sub.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 md:px-8 py-4 md:py-5">
+                          <span className="inline-flex items-center gap-1 px-2 md:px-3 py-1 rounded-full bg-green-100 text-green-700 text-[8px] md:text-[10px] font-black uppercase tracking-wider whitespace-nowrap">
+                            <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                            {dict.admin?.verified || (isAr ? "موثق ومفعل" : "Verified")}
+                          </span>
+                        </td>
+                        <td className="px-6 md:px-8 py-4 md:py-5 text-end">
+                          <DeleteSubscriberButton id={sub.id} email={sub.email} dict={dict} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       <p className="text-center text-primary/30 text-[10px] font-bold uppercase tracking-[0.3em]">

@@ -40,24 +40,24 @@ export default function DeleteSubscriberButton({ id, email, dict }: { id: string
             className="absolute inset-0" 
             onClick={() => !isDeleting && setIsOpen(false)} 
           />
-          <div className="relative bg-white w-full max-w-md rounded-[2rem] shadow-2xl border border-primary/5 p-8 md:p-10 animate-in zoom-in-95 duration-300">
+          <div className="relative bg-white w-full max-w-md rounded-2xl sm:rounded-[2rem] shadow-2xl border border-primary/5 p-6 sm:p-8 md:p-10 animate-in zoom-in-95 duration-300">
             <button 
               onClick={() => setIsOpen(false)}
               disabled={isDeleting}
-              className="absolute top-6 end-6 w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors disabled:opacity-50"
+              className="absolute top-5 end-5 sm:top-6 sm:end-6 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex flex-col items-center text-center space-y-6">
-              <div className="w-16 h-16 rounded-3xl bg-red-50 flex items-center justify-center text-red-500">
-                <AlertCircle className="w-8 h-8" />
+            <div className="flex flex-col items-center text-center space-y-5 sm:space-y-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-red-50 flex items-center justify-center text-red-500">
+                <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
               
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">{dict.admin.protocol_deletion || "Protocol: Deletion"}</p>
-                <h3 className="text-2xl font-heading font-black text-primary tracking-tight">Remove Subscriber?</h3>
-                <p className="text-charcoal/40 text-sm font-medium leading-relaxed">
+                <h3 className="text-xl sm:text-2xl font-heading font-black text-primary tracking-tight">Remove Subscriber?</h3>
+                <p className="text-charcoal/40 text-xs sm:text-sm font-medium leading-relaxed">
                   Are you sure you want to remove <span className="text-primary font-bold">{email}</span> from the mailing list?
                 </p>
               </div>
@@ -66,14 +66,14 @@ export default function DeleteSubscriberButton({ id, email, dict }: { id: string
                 <button
                   onClick={() => setIsOpen(false)}
                   disabled={isDeleting}
-                  className="w-full h-14 rounded-2xl border border-primary/10 text-primary font-bold hover:bg-primary/5 transition-all text-sm disabled:opacity-50"
+                  className="w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl border border-primary/10 text-primary font-bold hover:bg-primary/5 transition-all text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full h-14 rounded-2xl bg-red-500 text-white font-black uppercase tracking-widest text-xs hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-red-500 text-white font-black uppercase tracking-widest text-xs hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isDeleting ? "Removing..." : "Confirm Removal"}
                 </button>

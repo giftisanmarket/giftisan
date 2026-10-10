@@ -518,7 +518,7 @@ export function AdminExpensesClient({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-2">
           {(Object.keys(categoryLabels) as ExpenseCategoryType[]).map((catKey) => {
             const catInfo = categoryLabels[catKey];
             const amount = analytics.categoryTotals?.[catKey] || 0;
@@ -707,8 +707,94 @@ export function AdminExpensesClient({
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] border border-primary/5 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        <>
+          {/* Mobile View: Adaptive Expense Cards (<lg) */}
+          <div className="block lg:hidden space-y-3.5">
+            {filteredExpenses.map((exp) => {
+              const catInfo = categoryLabels[exp.category as ExpenseCategoryType] || categoryLabels.OTHER;
+              const Icon = catInfo.icon;
+
+              return (
+                <div 
+                  key={exp.id} 
+                  className="bg-white rounded-2xl p-4 border border-primary/5 shadow-md shadow-primary/5 space-y-3.5"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[9px] font-bold border mb-1.5",
+                        catInfo.bg,
+                        catInfo.color
+                      )}>
+                        <Icon className="w-3 h-3" />
+                        <span>{catInfo[isAr ? "ar" : "en"]}</span>
+                      </span>
+                      <h4 className="font-bold text-primary text-sm line-clamp-1">{exp.title}</h4>
+                      {exp.notes && (
+                        <p className="text-[11px] text-charcoal/50 line-clamp-2 mt-0.5">{exp.notes}</p>
+                      )}
+                    </div>
+
+                    <div className="text-end shrink-0">
+                      <p className="font-black text-primary text-base">
+                        EGP {exp.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10px] text-charcoal/40 font-medium mt-0.5">
+                        {new Date(exp.date).toLocaleDateString(isAr ? "ar-EG" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Details strip: Paid by & Receipt */}
+                  <div className="bg-cream/40 p-2.5 rounded-xl border border-primary/5 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-3.5 h-3.5 text-accent opacity-70" />
+                      <div>
+                        <span className="font-bold text-primary block leading-none">{exp.paidBy || "-"}</span>
+                        <span className="text-[9px] uppercase tracking-wider text-charcoal/40 font-semibold">{exp.paymentMethod || "CARD"}</span>
+                      </div>
+                    </div>
+
+                    {exp.receiptUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setPreviewImage(exp.receiptUrl)}
+                        className="flex items-center gap-1.5 px-2 py-1 bg-white border border-primary/10 rounded-lg text-[10px] font-bold text-primary hover:bg-cream transition-all shadow-sm"
+                      >
+                        <FileText className="w-3 h-3 text-accent" />
+                        <span>{isAr ? "الإيصال" : "Receipt"}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="pt-2 border-t border-primary/5 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(exp)}
+                      className="px-3 py-1.5 bg-primary/5 hover:bg-primary/10 text-primary font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>{isAr ? "تعديل" : "Edit"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDeletingId(exp.id)}
+                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isAr ? "حذف" : "Delete"}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop View: Full Table (>=lg) */}
+          <div className="hidden lg:block bg-white rounded-[2rem] border border-primary/5 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-start text-xs">
               <thead className="bg-cream/40 border-b border-primary/5 text-[10px] font-black uppercase tracking-wider text-charcoal/60">
                 <tr>
@@ -830,6 +916,7 @@ export function AdminExpensesClient({
             </span>
           </div>
         </div>
+        </>
       )}
 
       {/* Add / Edit Expense Modal */}

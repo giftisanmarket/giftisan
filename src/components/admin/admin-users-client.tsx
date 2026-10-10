@@ -319,8 +319,133 @@ export function AdminUsersClient({ initialUsers, dict, lang }: AdminUsersClientP
         </div>
       </div>
 
-      {/* Main Users Table */}
-      <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
+      {/* Mobile View: High-Performance User Cards (<lg) */}
+      <div className="block lg:hidden space-y-3.5">
+        {filteredUsers.length === 0 ? (
+          <div className="bg-white rounded-2xl p-10 text-center text-charcoal/40 font-medium border border-primary/5 shadow-sm">
+            <Search className="w-10 h-10 mx-auto text-primary/20 mb-3" />
+            <p className="text-sm font-bold text-primary mb-3">
+              {isAr ? "لم يتم العثور على أي مستخدمين يطابقون تصفيتك." : "No users matched your search or filters."}
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setRoleFilter("ALL");
+                setStudioStatusFilter("ALL");
+              }}
+              className="px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary font-bold rounded-xl text-xs uppercase tracking-wider"
+            >
+              {isAr ? "إعادة ضبط التصفية" : "Reset Filters"}
+            </button>
+          </div>
+        ) : (
+          filteredUsers.map((user: any) => (
+            <div 
+              key={user.id} 
+              className="bg-white rounded-2xl p-4 sm:p-5 border border-primary/5 shadow-md shadow-primary/5 space-y-4"
+            >
+              {/* Header: Avatar, Name, Email, Role Selector */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary/5 shadow-sm bg-cream shrink-0">
+                    <Image 
+                      src={user.artisanProfile?.avatar || user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                      alt={user.name} 
+                      fill 
+                      className="object-cover" 
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-primary text-sm line-clamp-1">{user.name}</p>
+                    <p className="text-[11px] text-charcoal/40 truncate">{user.email}</p>
+                    {user.artisanProfile?.phoneNumber && (
+                      <a 
+                        href={`tel:${user.artisanProfile.phoneNumber}`}
+                        className="text-[11px] font-bold text-accent mt-0.5 inline-flex items-center gap-1 hover:underline"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                        {user.artisanProfile.phoneNumber}
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div className="shrink-0">
+                  <RoleManager userId={user.id} currentRole={user.role} dict={dict} />
+                </div>
+              </div>
+
+              {/* Artisan Studio Section (If Artisan) */}
+              {user.artisanProfile && (
+                <div className="p-3.5 bg-cream/40 rounded-xl border border-primary/5 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                        <Store className="w-3.5 h-3.5 text-accent" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-primary text-xs truncate">
+                          {user.artisanProfile.studioName || `${user.name}'s Shop`}
+                        </p>
+                        <p className="text-[10px] text-charcoal/40 truncate">
+                          {user.artisanProfile.location || dict.admin?.global_studio || "Global Shop"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link 
+                      href={`/studio?artisanUserId=${user.id}`}
+                      className="h-7 px-2.5 bg-primary text-white rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-primary-light transition-all active:scale-95 shrink-0"
+                    >
+                      {dict.admin?.preview_studio || "Preview"}
+                    </Link>
+                  </div>
+
+                  {/* Commission Row */}
+                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-primary/5">
+                    <span className="text-[10px] font-black text-primary/40 uppercase">Commission:</span>
+                    <CommissionManager 
+                      artisanId={user.artisanProfile.id} 
+                      currentRate={user.artisanProfile.commissionRate || 0} 
+                      dict={dict} 
+                    />
+                  </div>
+
+                  {/* Studio Approval & Verification Controls (Full width, responsive) */}
+                  <div className="pt-2.5 border-t border-primary/5">
+                    <VerifyArtisanButton 
+                      artisanId={user.artisanProfile.id} 
+                      currentStatus={user.artisanProfile.isVerified} 
+                      status={user.artisanProfile.status}
+                      dict={dict}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Footer: Date, Orders, Delete Button */}
+              <div className="pt-2 border-t border-primary/5 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-3 text-charcoal/50 text-[11px] font-semibold">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 opacity-60" />
+                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center gap-1 font-bold text-primary">
+                    <ShoppingBag className="w-3 h-3 text-accent" />
+                    <span>{user.orders?.length || 0} {isAr ? "طلب" : "orders"}</span>
+                  </div>
+                </div>
+
+                <DeleteUserButton userId={user.id} userName={user.name} dict={dict} />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Main Users Table (Desktop >= lg) */}
+      <div className="hidden lg:block bg-white rounded-[1.5rem] md:rounded-[3rem] border border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
         <div className="overflow-x-auto min-h-[280px]">
           <table className="w-full text-start min-w-[800px] lg:min-w-full">
             <thead>

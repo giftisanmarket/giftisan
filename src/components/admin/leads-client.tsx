@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { updateAbandonedCheckoutLead } from "@/lib/actions";
@@ -108,82 +108,87 @@ function LeadRow({ lead: initialLead, isAr }: { lead: Lead; isAr: boolean }) {
       )}
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 md:p-5">
-        <button
-          onClick={toggleContacted}
-          disabled={isPending}
-          className="shrink-0 mt-0.5 transition-transform hover:scale-110 active:scale-95"
-          title={lead.isContacted ? "Mark as not contacted" : "Mark as contacted"}
-        >
-          {lead.isContacted ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-          ) : (
-            <Circle className="w-5 h-5 text-primary/20 hover:text-emerald-400" />
-          )}
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <p className="font-bold text-primary text-sm truncate">{lead.customerName}</p>
-            <span
-              className={cn(
-                "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border shrink-0",
-                STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-600 border-gray-200"
-              )}
-            >
-              {STATUS_LABELS[lead.status] || lead.status}
-            </span>
-            {lead.isContacted && (
-              <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">
-                Contacted
-              </span>
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <button
+            onClick={toggleContacted}
+            disabled={isPending}
+            className="shrink-0 mt-0.5 transition-transform hover:scale-110 active:scale-95 cursor-pointer p-0.5"
+            title={lead.isContacted ? "Mark as not contacted" : "Mark as contacted"}
+          >
+            {lead.isContacted ? (
+              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            ) : (
+              <Circle className="w-5 h-5 text-primary/20 hover:text-emerald-400" />
             )}
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <button
-              onClick={() => copyText(lead.customerEmail, "Email")}
-              className="flex items-center gap-1 text-[11px] text-charcoal/60 hover:text-accent transition-colors"
-            >
-              <Mail className="w-3 h-3 shrink-0" />
-              <span className="truncate max-w-[200px]">{lead.customerEmail}</span>
-            </button>
-            {lead.customerPhone && (
-              <button
-                onClick={() => copyText(lead.customerPhone, "Phone")}
-                className="flex items-center gap-1 text-[11px] text-charcoal/60 hover:text-accent transition-colors"
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+              <p className="font-bold text-primary text-sm truncate">{lead.customerName}</p>
+              <span
+                className={cn(
+                  "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border shrink-0",
+                  STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-600 border-gray-200"
+                )}
               >
-                <Phone className="w-3 h-3 shrink-0" />
-                <span>{lead.customerPhone}</span>
-              </button>
-            )}
-            {lead.shippingCity && (
-              <span className="flex items-center gap-1 text-[11px] text-charcoal/50">
-                <MapPin className="w-3 h-3 shrink-0" />
-                {lead.shippingCity}
+                {STATUS_LABELS[lead.status] || lead.status}
               </span>
-            )}
+              {lead.isContacted && (
+                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">
+                  Contacted
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1">
+              <button
+                onClick={() => copyText(lead.customerEmail, "Email")}
+                className="flex items-center gap-1 text-[11px] text-charcoal/60 hover:text-accent transition-colors cursor-pointer"
+              >
+                <Mail className="w-3 h-3 shrink-0" />
+                <span className="truncate max-w-[180px] sm:max-w-[200px]">{lead.customerEmail}</span>
+              </button>
+              {lead.customerPhone && (
+                <button
+                  onClick={() => copyText(lead.customerPhone, "Phone")}
+                  className="flex items-center gap-1 text-[11px] text-charcoal/60 hover:text-accent transition-colors cursor-pointer"
+                >
+                  <Phone className="w-3 h-3 shrink-0" />
+                  <span>{lead.customerPhone}</span>
+                </button>
+              )}
+              {lead.shippingCity && (
+                <span className="flex items-center gap-1 text-[11px] text-charcoal/50">
+                  <MapPin className="w-3 h-3 shrink-0" />
+                  {lead.shippingCity}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1 shrink-0">
-          <p className="text-base font-bold text-accent font-heading">
-            EGP {Number(lead.totalAmount).toLocaleString()}
-          </p>
-          <p className="text-[10px] text-charcoal/40 font-medium flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {formattedDate}
-          </p>
-        </div>
+        <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2 sm:gap-1 pt-2 sm:pt-0 border-t sm:border-t-0 border-primary/5 shrink-0">
+          <div className="flex sm:flex-col items-baseline sm:items-end gap-2 sm:gap-0">
+            <p className="text-base font-bold text-accent font-heading">
+              EGP {Number(lead.totalAmount).toLocaleString()}
+            </p>
+            <p className="text-[10px] text-charcoal/40 font-medium flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {formattedDate}
+            </p>
+          </div>
 
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-cream transition-colors"
-        >
-          {expanded ? (
-            <ChevronUp className="w-4 h-4 text-primary/40" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-primary/40" />
-          )}
-        </button>
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-cream transition-colors cursor-pointer"
+            aria-label="Toggle details"
+          >
+            {expanded ? (
+              <ChevronUp className="w-4 h-4 text-primary/40" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-primary/40" />
+            )}
+          </button>
+        </div>
       </div>
 
       {expanded && (
@@ -387,13 +392,13 @@ export function LeadsClient({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap pb-1">
         {filters.map((f) => (
           <button
             key={f.value}
             onClick={() => setStatusFilter(f.value)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border",
+              "flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 whitespace-nowrap cursor-pointer",
               statusFilter === f.value
                 ? "bg-primary text-white border-primary shadow-lg"
                 : "bg-white text-primary/50 border-primary/10 hover:border-primary/20 hover:text-primary"

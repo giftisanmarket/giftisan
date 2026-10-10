@@ -622,158 +622,209 @@ export function StudioClient({ artisan, sales, reviews, coupons, isAdminPreview 
         <AnimatePresence>
           {selectedItem && (
             <>
-              <div className="no-print fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div className="no-print fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setSelectedItem(null)}
-                  className="absolute inset-0 bg-primary/20 backdrop-blur-xl"
+                  className="absolute inset-0 bg-primary/25 backdrop-blur-md"
                 />
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="relative w-full max-w-[calc(100vw-2rem)] sm:max-w-2xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[90vh] flex flex-col"
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  className="relative w-full max-w-full sm:max-w-xl md:max-w-2xl bg-white rounded-2xl sm:rounded-[2.5rem] md:rounded-[3rem] shadow-2xl overflow-hidden no-print max-h-[92vh] flex flex-col"
                 >
-                  <div className="overflow-y-auto custom-scrollbar">
-                    <div className="p-5 md:p-16 space-y-6 md:space-y-10">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4 break-all">
-                            {dict.studio.sale_receipt} #{selectedItem.orderId}
+                  {/* Modal Header */}
+                  <div className="p-4 sm:p-6 md:p-8 pb-3 sm:pb-4 border-b border-primary/5 flex items-center justify-between gap-3 shrink-0">
+                    <div className="min-w-0">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] sm:text-[10px] font-black uppercase tracking-wider mb-1 max-w-full truncate">
+                        {dict.studio.sale_receipt} #{selectedItem.orderId ? (selectedItem.orderId.length > 10 ? `${selectedItem.orderId.slice(0, 6)}...${selectedItem.orderId.slice(-4)}` : selectedItem.orderId) : ""}
+                      </div>
+                      <h2 className="text-lg sm:text-2xl md:text-3xl font-heading font-bold text-primary truncate">
+                        {dict.studio.order_details_title} <span className="serif italic text-accent font-normal">{dict.studio.order_details_accent}</span>
+                      </h2>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => window.print()}
+                        className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/5 transition-all"
+                        title={lang === "ar" ? "طباعة إشعار التجهيز" : "Print Packing Slip"}
+                      >
+                        <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedItem(null)}
+                        className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-primary/10 flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/5 transition-all"
+                      >
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable Modal Content */}
+                  <div className="overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 flex-1">
+                    <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                      {/* Item Information Card */}
+                      <div className="p-3.5 sm:p-5 bg-cream/20 rounded-2xl border border-primary/5 space-y-3">
+                        <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.item_info}</h3>
+                        
+                        <div className="flex gap-3 sm:gap-4 items-start">
+                          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white border border-primary/10 shadow-xs shrink-0">
+                            <BespokeImage src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
                           </div>
-                          <h2 className="text-2xl md:text-4xl font-heading font-bold text-primary">{dict.studio.order_details_title} <span className="serif italic">{dict.studio.order_details_accent}</span></h2>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <div
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/20 cursor-not-allowed select-none opacity-40"
-                            title={lang === "ar" ? "الطباعة مُدارة من قِبَل جيفتيزان" : "Printing is managed by Giftisan"}
-                          >
-                            <Printer className="w-5 h-5 md:w-6 md:h-6" />
+                          
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-primary text-sm sm:text-base leading-snug line-clamp-2">{selectedItem.product.name}</p>
+                            <p className="text-[11px] sm:text-xs text-charcoal/50 font-medium mt-0.5">
+                              {dict.studio.qty_label}: {selectedItem.quantity} • {dict.product.currency} {selectedItem.price}
+                            </p>
+                            {selectedItem.variant && (
+                              <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-white rounded-md border border-primary/5 text-[10px] font-bold text-accent">
+                                <span>{dict.edit_product.variant_name}:</span>
+                                <span>{selectedItem.variant.name}</span>
+                              </div>
+                            )}
+                            <p className="text-base sm:text-lg font-heading font-black text-accent mt-1.5">
+                              {dict.product.currency} {(selectedItem.price * selectedItem.quantity).toFixed(2)}
+                            </p>
                           </div>
-                          <button
-                            onClick={() => setSelectedItem(null)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-primary/5 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
-                          >
-                            <X className="w-5 h-5 md:w-6 md:h-6" />
-                          </button>
                         </div>
+
+                        {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
+                          <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-200/60 text-blue-900">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-blue-500 mb-0.5">{dict.studio.shipment_tracking}</p>
+                            <p className="text-xs font-bold flex items-center gap-1.5">
+                              <Truck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{selectedItem.carrier}: {selectedItem.trackingNumber}</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="grid md:grid-cols-2 gap-8 md:gap-12 pt-0 md:pt-4">
-                        <div className="space-y-4 md:space-y-6 min-w-0">
-                          <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.item_info}</h3>
-                          <div className="flex gap-4">
-                            <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-cream border border-primary/5 shadow-sm shrink-0">
-                              <BespokeImage src={selectedItem.product.images[0]} alt="" fill className="object-cover" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-primary text-sm md:text-base leading-tight truncate md:whitespace-normal">{selectedItem.product.name}</p>
-                              <p className="text-[10px] md:text-xs text-charcoal/40 font-medium">{dict.studio.qty_label}: {selectedItem.quantity} • {dict.product.currency} {selectedItem.price}</p>
-                              {selectedItem.variant && (
-                                <p className="text-[10px] md:text-xs font-bold text-accent mt-1">
-                                  {dict.edit_product.variant_name}: {selectedItem.variant.name}
-                                </p>
-                              )}
-                              <p className="text-base md:text-lg font-heading font-bold mt-1 md:mt-2 text-accent">{dict.product.currency} {selectedItem.price.toFixed(2)}</p>
-                            </div>
-                          </div>
-                          {selectedItem.status === "SHIPPED" && selectedItem.trackingNumber && (
-                            <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/5">
-                              <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary/40 mb-1">{dict.studio.shipment_tracking}</p>
-                              <p className="text-xs font-bold text-primary flex items-center gap-2">
-                                <Truck className="w-3 h-3 text-accent" />
-                                {selectedItem.carrier}: {selectedItem.trackingNumber}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-4 md:space-y-6 min-w-0">
-                          <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.buyer_details}</h3>
-                          <div className="min-w-0">
-                            <p className="font-bold text-primary text-sm md:text-base">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary/60 mt-2">
-                              <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
+                      {/* Buyer Details Card */}
+                      <div className="p-3.5 sm:p-5 bg-primary/5 rounded-2xl border border-primary/5 space-y-3">
+                        <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.buyer_details}</h3>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <p className="font-bold text-primary text-sm sm:text-base">{lang === "ar" ? "عميل جيفتيزان" : "Giftisan Customer"}</p>
+                            <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/80 rounded-lg border border-primary/10 text-[10px] font-bold text-primary/60 mt-1">
+                              <Lock className="w-3 h-3 text-accent shrink-0" />
                               <span>{lang === "ar" ? "بيانات العميل محمية الخصوصية" : "Customer Details Protected"}</span>
                             </div>
-                            <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-primary/5 space-y-3">
-                              <div className="space-y-1.5">
-                                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">{dict.studio.shipping_to}</p>
-                                <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/5 rounded-xl border border-primary/10 text-xs font-bold text-primary">
-                                  <MapPin className="w-4 h-4 text-accent shrink-0" />
-                                  <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
-                                </div>
-                                <p className="text-[10px] font-medium text-charcoal/40 flex items-center gap-1.5 pt-0.5">
-                                  <Lock className="w-3 h-3 text-accent shrink-0" />
-                                  <span>{lang === "ar" ? "تتم التغطية بواسطة توصيل جيفتيزان (العنوان التفصيلي محمي)" : "Fulfilled by Giftisan Delivery (Street Address Protected)"}</span>
-                                </p>
-                              </div>
+                          </div>
 
-                              {/* Dedicated Payment Method Badge */}
-                              <div className="pt-2 border-t border-primary/5 space-y-1.5">
-                                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/30">
-                                  {lang === "ar" ? "طريقة الدفع" : "Payment Method"}
-                                </p>
-                                {selectedItem.order.orderNotes?.includes("[COD") ? (
-                                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-200/60 text-xs font-bold text-amber-900">
-                                    <Banknote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                    <span>{lang === "ar" ? "الدفع عند الاستلام (COD)" : "Cash on Delivery (COD)"}</span>
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200/60 text-xs font-bold text-emerald-900">
-                                    <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                    <span>{lang === "ar" ? "بطاقة / محفظة إلكترونية (مدفوع)" : "Paid Online (Cards / Wallets)"}</span>
-                                  </div>
-                                )}
+                          <div className="pt-2.5 border-t border-primary/10 space-y-2">
+                            <div>
+                              <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-primary/30 mb-1">{dict.studio.shipping_to}</p>
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-xl border border-primary/10 text-xs font-bold text-primary">
+                                <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
+                                <span>{lang === "ar" ? `الوجهة: ${selectedItem.order.shippingCity || "القاهرة"}` : `Destination: ${selectedItem.order.shippingCity || "Cairo"}`}</span>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {selectedItem.order.isGift && (
-                        <div className="p-4 md:p-6 bg-accent/5 rounded-2xl md:rounded-[2rem] border border-accent/10">
-                          <div className="flex items-center gap-2 mb-2 md:mb-3">
-                            <Sparkles className="w-4 h-4 text-accent" />
-                            <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</h3>
-                          </div>
-                          {selectedItem.order.giftMessage && (
-                            <p className="text-xs md:text-sm italic text-charcoal/60 leading-relaxed">
-                              "{selectedItem.order.giftMessage}"
+                            <p className="text-[10px] font-medium text-charcoal/40 flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5 text-accent shrink-0" />
+                              <span>{lang === "ar" ? "التوصيل عبر جيفتيزان (العنوان محمي)" : "Fulfilled by Giftisan Delivery (Address Protected)"}</span>
                             </p>
-                          )}
-                        </div>
-                      )}
+                          </div>
 
-
-                      {/* Artisan Internal Notes */}
-                      <div className="p-4 md:p-6 bg-primary/5 rounded-2xl md:rounded-[2rem] border border-primary/5">
-                        <div className="flex items-center gap-2 mb-2 md:mb-3">
-                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full" />
-                          <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.internal_notes}</h3>
+                          {/* Payment Method Badge */}
+                          <div className="pt-2 border-t border-primary/10 space-y-1">
+                            <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-primary/30">
+                              {lang === "ar" ? "طريقة الدفع" : "Payment Method"}
+                            </p>
+                            {selectedItem.order.orderNotes?.includes("[COD") ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 rounded-lg border border-amber-200/60 text-xs font-bold text-amber-900">
+                                <Banknote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <span>{lang === "ar" ? "الدفع عند الاستلام (COD)" : "Cash on Delivery (COD)"}</span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 rounded-lg border border-emerald-200/60 text-xs font-bold text-emerald-900">
+                                <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <span>{lang === "ar" ? "بطاقة / محفظة (مدفوع)" : "Paid Online (Cards / Wallets)"}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <textarea
-                          defaultValue={selectedItem.artisanNotes || ""}
-                          onBlur={async (e) => {
-                            const newNotes = e.target.value;
-                            if (newNotes === (selectedItem.artisanNotes || "")) return;
-                            const res = await updateOrderItemNotes(selectedItem.id, newNotes);
-                            if (res.success) {
-                              toast.success(dict.studio.notes_updated);
-                              router.refresh();
-                            } else {
-                              toast.error(dict.studio.notes_update_failed);
-                            }
-                          }}
-                          placeholder={dict.studio.internal_notes_placeholder}
-                          className="w-full bg-white/50 border border-primary/5 rounded-xl p-3 text-xs md:text-sm font-medium focus:border-primary/20 focus:bg-white outline-none min-h-[80px] resize-none transition-all"
-                        />
                       </div>
-
-
                     </div>
+
+                    {/* Gift Message (if any) */}
+                    {selectedItem.order.isGift && (
+                      <div className="p-3.5 sm:p-5 bg-accent/5 rounded-2xl border border-accent/15">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-accent" />
+                          <h3 className="text-[9px] font-black uppercase tracking-widest text-accent">{dict.checkout.mark_as_gift}</h3>
+                        </div>
+                        {selectedItem.order.giftMessage && (
+                          <p className="text-xs sm:text-sm italic text-charcoal/70 leading-relaxed bg-white/60 p-2.5 rounded-xl border border-accent/10">
+                            "{selectedItem.order.giftMessage}"
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Artisan Internal Notes (Private) */}
+                    <div className="p-3.5 sm:p-5 bg-primary/5 rounded-2xl border border-primary/5">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className="w-1.5 h-1.5 bg-primary/40 rounded-full" />
+                        <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/40">{dict.studio.internal_notes}</h3>
+                      </div>
+                      <textarea
+                        defaultValue={selectedItem.artisanNotes || ""}
+                        onBlur={async (e) => {
+                          const newNotes = e.target.value;
+                          if (newNotes === (selectedItem.artisanNotes || "")) return;
+                          const res = await updateOrderItemNotes(selectedItem.id, newNotes);
+                          if (res.success) {
+                            toast.success(dict.studio.notes_updated);
+                            router.refresh();
+                          } else {
+                            toast.error(dict.studio.notes_update_failed);
+                          }
+                        }}
+                        placeholder={dict.studio.internal_notes_placeholder}
+                        className="w-full bg-white border border-primary/10 rounded-xl p-3 text-xs sm:text-sm font-medium focus:border-accent focus:ring-1 focus:ring-accent outline-none min-h-[70px] sm:min-h-[80px] resize-none transition-all placeholder:text-charcoal/30"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sticky Bottom Actions Bar */}
+                  <div className="p-3.5 sm:p-5 bg-white border-t border-primary/10 flex items-center gap-2 sm:gap-3 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedItem(null)}
+                      className="px-4 sm:px-6 h-10 sm:h-11 rounded-xl border border-primary/15 text-primary text-xs font-bold hover:bg-primary/5 transition-all"
+                    >
+                      {dict.product?.close || dict.common?.close || (lang === "ar" ? "إغلاق" : "Close")}
+                    </button>
+
+                    {selectedItem.status === "PENDING" && (
+                      <button
+                        type="button"
+                        disabled={isUpdating === selectedItem.id}
+                        onClick={async () => {
+                          setIsUpdating(selectedItem.id);
+                          await updateOrderItemStatus(selectedItem.id, "PROCESSING");
+                          setSelectedItem(null);
+                          router.refresh();
+                          setIsUpdating(null);
+                        }}
+                        className="flex-1 h-10 sm:h-11 px-4 bg-accent text-white text-xs font-bold rounded-xl hover:bg-accent-light transition-all shadow-md shadow-accent/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isUpdating === selectedItem.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                        ) : (
+                          <Truck className="w-4 h-4 shrink-0" />
+                        )}
+                        <span>{lang === "ar" ? "تحديد كجاهز للشحن" : "Mark as Ready to Ship"}</span>
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               </div>
